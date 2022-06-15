@@ -1,3 +1,3 @@
 [submodule "api"]
 	path = api
-	url = git@github.com:arthur-trt/ft_transcendence_api.git
+	url = ../ft_transcendence_api.git
