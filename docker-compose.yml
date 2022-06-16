@@ -13,14 +13,8 @@ services:
     #networks:
     # - internal
     restart: on-failure
+    command: /api/entrypoint.sh
 
 #networks:
 #  internal:
 
-#volumes:
-#  api_vol:
-#    driver: local
-#    driver_opts:
-#      type: none
-#      device: ./api
-#      o: bind
