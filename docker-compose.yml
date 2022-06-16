@@ -10,11 +10,41 @@ services:
      - ./api:/api
     environment:
       NODE_ENV: development
-    #networks:
-    # - internal
+    networks:
+     - internal
     restart: on-failure
     command: /api/entrypoint.sh
+    secrets:
+      - db_password
 
-#networks:
-#  internal:
+  db:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+    networks:
+     - internal
+    volumes:
+      - ${DB_PATH}:/var/lib/postgresql/data
 
+##
+# DEBUG CONTAINERS
+##
+  adminer:
+    image: adminer
+    restart: always
+    networks:
+      - internal
+    ports:
+      - 3001:8080
+    profiles:
+      - debug
+
+networks:
+  internal:
+
+secrets:
+  db_password:
+    file: ./.db_password.secret
