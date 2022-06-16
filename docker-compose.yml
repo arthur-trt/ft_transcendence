@@ -8,6 +8,8 @@ services:
       - 3000:3000
     volumes:
      - ./api:/api
+    environment:
+      NODE_ENV: development
     #networks:
     # - internal
     restart: on-failure
