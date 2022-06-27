@@ -15,7 +15,7 @@ PGADMIN_PASS=password
 
 And give right to pgadmin :
 ```
-chown 5050:5050 ${HOME}/goinfre/pgadmin
+chown 5050:5050 (./private/pgadmin) (for 42Linux use: ${HOME}/goinfre/pgadmin)
 ```
 
 - A `.db_password.secret` file:
