@@ -8,13 +8,13 @@ services:
       - 3000:3000
     volumes:
      - ./api:/api
-    environment:
-      NODE_ENV: development
+    env_file:
+      - ./.env
     networks:
      - db_network
      - api_network
     restart: on-failure
-    command: /api/entrypoint.sh
+    #command: /api/entrypoint.sh
     secrets:
       - db_password
 
@@ -22,8 +22,8 @@ services:
     container_name: postgres
     image: postgres:14-alpine
     restart: always
-    environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    env_file:
+      - ./.env
     secrets:
       - db_password
     networks:
