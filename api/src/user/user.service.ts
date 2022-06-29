@@ -14,6 +14,11 @@ export class UserService {
 		@InjectRepository(Channel) private channelsRepo: Repository<Channel>) {
 	}
 
+	public defaultRoot()
+	{
+		return ("Super");
+	}
+
 
 	public async getUsers()
 	{
