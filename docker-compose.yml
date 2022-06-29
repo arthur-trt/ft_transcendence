@@ -7,7 +7,7 @@ services:
     ports:
       - 3000:3000
     volumes:
-     - ./api:/api
+     - ./api:/api:cached
     env_file:
       - ./.env
     networks:
@@ -24,7 +24,7 @@ services:
     networks:
      - db_network
     volumes:
-      - ${DB_PATH}:/var/lib/postgresql/data
+      - ${DB_PATH}:/var/lib/postgresql/data:cached
 
 ##
 # DEBUG CONTAINERS
@@ -38,7 +38,7 @@ services:
     networks:
       - db_network
     volumes:
-      - ${PGADMIN_PATH}:/var/lib/pgadmin
+      - ${PGADMIN_PATH}:/var/lib/pgadmin:cached
     ports:
       - "5050:80"
     profiles:
