@@ -7,16 +7,13 @@ services:
     ports:
       - 3000:3000
     volumes:
-     - ./api:/api
+     - ./api:/api:cached
     env_file:
       - ./.env
     networks:
      - db_network
      - api_network
     restart: on-failure
-    #command: /api/entrypoint.sh
-    secrets:
-      - db_password
 
   db:
     container_name: postgres
@@ -24,15 +21,13 @@ services:
     restart: always
     env_file:
       - ./.env
-    secrets:
-      - db_password
     networks:
      - db_network
     volumes:
-      - ${DB_PATH}:/var/lib/postgresql/data
+      - ${DB_PATH}:/var/lib/postgresql/data:cached
 
 ##
-# DEBUG CONTAINERS
+# DEBUG CONTAINERS --profile debug 
 ##
   pgadmin:
     container_name: pgadmin
@@ -44,7 +39,7 @@ services:
     networks:
       - db_network
     volumes:
-      - ${PGADMIN_PATH}:/var/lib/pgadmin
+      - ${PGADMIN_PATH}:/var/lib/pgadmin:cached
     ports:
       - "5050:80"
     profiles:
@@ -53,7 +48,3 @@ services:
 networks:
   db_network:
   api_network:
-
-secrets:
-  db_password:
-    file: ./.db_password.secret
