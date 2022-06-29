@@ -16,7 +16,9 @@ NODE_ENV=development
 
 # PGADMIN
 PGADMIN_PATH=(./private/pgadmin) (for 42Linux use: ${HOME}/goinfre/pgadmin)
+PGADMIN_DEFAULT_EMAIL=<mail>
 PGADMIN_MAIL=<mail>
+PGADMIN_DEFAULT_PASSWORD=<password>
 PGADMIN_PASS=<password>
 ```
 
