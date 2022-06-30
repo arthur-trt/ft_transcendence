@@ -7,8 +7,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/user.entity';
 import { Channel } from './channel/channel.entity';
 import { ChannelModule } from './channel/channel.module';
-import { privateMessage } from './message/message/privateMessage.entity';
-import { channelMessage } from './message/message/channelMessage.entity';
+import { privateMessage } from './message/privateMessage.entity';
+import { channelMessage } from './message/channelMessage.entity';
 
 @Module({
 
