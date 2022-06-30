@@ -1,6 +1,6 @@
 
-import { channelMessage } from "src/message/message/channelMessage.entity";
-import { privateMessage } from "src/message/message/privateMessage.entity";
+import { channelMessage } from "src/message/channelMessage.entity";
+import { privateMessage } from "src/message/privateMessage.entity";
 import { BaseEntity, Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Channel } from "../channel/channel.entity";
 
@@ -24,7 +24,7 @@ export class User extends BaseEntity {
 	@JoinTable()
 	channels: Channel[]
 
-	@ManyToMany(() => privateMessage) 
+	@ManyToMany(() => privateMessage)
 	@JoinTable()
 	privateMessages: privateMessage[];
 
