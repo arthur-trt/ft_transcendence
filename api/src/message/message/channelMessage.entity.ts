@@ -10,4 +10,5 @@ export class channelMessage extends AMessage {
 
 	@ManyToOne(() => Channel,  channel => channel.messages)
 	target: Channel;
+
 }

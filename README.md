@@ -4,6 +4,7 @@
 
 For the first startup, you need to set up :
 - An `.env` file:
+
 ```
 DB_PATH=<path> (./private/db) (for 42Linux use: ${HOME}/goinfre/db)
 POSTGRES_PASSWORD=<password>
@@ -33,6 +34,7 @@ docker-compose up --build
 ```
 
 You can build in debug, it will add some containers like pgadmin :
+
 ```
 docker-compose --profile debug up --build
 ```

@@ -19,27 +19,32 @@ export class MessageService {
 		@Inject(forwardRef(() => ChannelService)) private readonly chanService: ChannelService)
 	{ }
 
-	public async sendMessageToChannel()
-	{
+	public async sendMessageToChannel() {
+		console.log("HELLO")
 		const user: User = await this.userService.getUserByName("Arthur");
+		console.log(user);
 		const channel: Channel = await this.chanService.getChannelByName("Test1");
-		const message : channelMessage =
-		{
-			id : 9,
-			sender : user,
-			target : channel,
-			message: "Ceci est un test"
-		}
+		console.log(channel);
 
-		channel.messages = [...channel.messages, message]; /* if pb of is not iterable, it is because we did not get the realtions in the find one */
-		await channel.save();
-		return "lol";
+		console.log('ÏCI')
+		const newMessage = await this.chatRepo.save
+		(
+			{
+				id: 9,
+				sender: user,
+				message: "Ceci est un test"
+			}
+		)
+
+		channel.messages = [...channel.messages, newMessage]; /* if pb of is not iterable, it is because we did not get the
+		 ealtions in the find one */
+		return await channel.save();
 	}
 
 	public async getMessage(chanName: string)
 	{
 		const chan: Channel = await this.chanService.getChannelByName(chanName);
-		const msgs = await this.chanRepo.find({ where: { id: chan.id }, relations: ['messages']});
+		const msgs = this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanName }).leftJoinAndSelect("chan.messages", "messages").getMany();
 		return msgs;
 	}
 

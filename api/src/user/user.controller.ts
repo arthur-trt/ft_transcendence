@@ -15,17 +15,22 @@ export class UserController
 {
 	constructor(private userService: UserService) { }
 
+	// localhost:3000/user/getUsers
 	@Get('getUsers') /* Get decorator -> we can add subroutes in () */
 	async getUsers() : Promise<User[]> {
 		return await this.userService.getUsers();
 	}
 
+	// localhost:3000/user/Tonton
+	// localhost:3000/user/Elias
+	// localhost:3000/user/Claire
 	@Get(':name') /* Get decorator -> we can add subroutes in () */
 	async getCars(@Param('name') name: string): Promise<User> {
 		console.log('requested name : '+ name)
 		return await this.userService.getUserByName(name);
 	}
 
+	// localhost:3000/user/createUser
 	@Post('createUser')
 	@UsePipes(ValidationPipe)
 	public async postUser(@Body() user: UserDto) {
