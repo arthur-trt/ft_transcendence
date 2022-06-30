@@ -33,10 +33,6 @@ export class ChannelService {
 
 	public async getChannelByName(channelname : string) : Promise<Channel>
 	{
-		// return await this.channelsRepo.createQueryBuilder("Channel")
-		//  	.where("Channel.name = :channelname", { channelname: channelname })
-		// 	.getOne();
-
 		return await this.channelsRepo.findOne({ where: { name: channelname }, relations: ['messages'] });
 	}
 }

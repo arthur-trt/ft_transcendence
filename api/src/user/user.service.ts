@@ -40,13 +40,6 @@ export class UserService {
 
 	public async joinChannel(username: string, channelname: string)
 	{
-		// const user = await this.userRepo.createQueryBuilder('User')
-		// 	.relation(User, "channels")
-		// 	.of({ username: username })
-		// 	//.where("User.name = :username", { username: username })
-		// 	//.getOne();
-		// 	.loadOne();// adresse mail aparait pas avec cette syntaxe
-
 		console.log ("Username : " + username)
 		const user = await this.userRepo.findOne({ where: { name: username }, relations : ['channels'] }); /* Pay attention to load relations !!! */
 		if (!user) {

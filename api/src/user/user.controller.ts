@@ -25,13 +25,13 @@ export class UserController
 		return await this.userService.getUsers();
 	}
 
-
 	@Get(':name') /* Get decorator -> we can add subroutes in () */
 	async getCars(@Param('name') name: string): Promise<User> {
 		console.log('requested name : '+ name)
 		return await this.userService.getUserByName(name);
 	}
 
+	// localhost:3000/user/createUser
 	@Post('createUser')
 	@UsePipes(ValidationPipe)
 	public async postUser(@Body() user: UserDto) {

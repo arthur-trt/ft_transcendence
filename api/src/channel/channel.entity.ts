@@ -25,9 +25,8 @@ export class Channel extends BaseEntity {
 	users: User[]
 
 
-	/** Tous les messages du channel */
-	//@ManyToMany(() => User, user => user.channelMessages)
-	@OneToMany(() => channelMessage, channelMessage => channelMessage.target)
+	/** Tous les messages du channel : un message n'a qu'une target, un channel a plusieurs messages */
+	@OneToMany(() => channelMessage, (channelMessage) => channelMessage.target)
 	messages: channelMessage[];
 
 
