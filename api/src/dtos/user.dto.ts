@@ -1,8 +1,9 @@
-import { IsEmail, IsNotEmpty } from "class-validator";
+import { IsEmail, IsNotEmpty, IsEmpty } from "class-validator";
+import {v4 as uuidv4} from 'uuid';
 
 export class UserDto {
-	@IsNotEmpty()
-	readonly id: number;
+	@IsEmpty()
+	id: uuidv4;
 
 	@IsNotEmpty()
 	readonly name: string;
