@@ -6,19 +6,25 @@ import { User } from './user.entity';
 import { ParseIntPipe } from '@nestjs/common';
 import { Channel } from '../channel/channel.entity';
 import { joinChannelDto } from 'src/dtos/joinChannel.dto';
+import { ApiProperty, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 
 /** https://stackoverflow.com/questions/54958244/how-to-use-query-parameters-in-nest-js?answertab=trending#tab-top PARMAS AND TOUTES  */
+@ApiTags('user')
 @Controller('user')
-
 export class UserController
 {
 	constructor(private userService: UserService) { }
 
-	@Get('getUsers') /* Get decorator -> we can add subroutes in () */
+	@ApiOperation({
+		summary: "Get all users"
+	}
+	)
+	@Get('/') /* Get decorator -> we can add subroutes in () */
 	async getUsers() : Promise<User[]> {
 		return await this.userService.getUsers();
 	}
+
 
 	@Get(':name') /* Get decorator -> we can add subroutes in () */
 	async getCars(@Param('name') name: string): Promise<User> {
