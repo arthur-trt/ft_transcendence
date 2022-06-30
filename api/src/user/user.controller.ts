@@ -25,11 +25,19 @@ export class UserController
 		return await this.userService.getUsers();
 	}
 
-	@Get(':name') /* Get decorator -> we can add subroutes in () */
-	async getCars(@Param('name') name: string): Promise<User> {
-		console.log('requested name : '+ name)
-		return await this.userService.getUserByName(name);
+	@ApiOperation({
+		summary: "Get all info about a user identified by :uuid"
+	})
+	@Get(':uuid')
+	async getUser(@Param('uuid') uuid: string) : Promise<User> {
+		return await this.userService.getUserById(uuid);
 	}
+
+	//@Get(':name') /* Get decorator -> we can add subroutes in () */
+	//async getCars(@Param('name') name: string): Promise<User> {
+	//	console.log('requested name : '+ name)
+	//	return await this.userService.getUserByName(name);
+	//}
 
 	// localhost:3000/user/createUser
 	@Post('createUser')

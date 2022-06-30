@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Channel } from '../channel/channel.entity';
 import { ChannelService } from 'src/channel/channel.service';
+import {v4 as uuidv4} from 'uuid';
 import { userInfo } from 'os';
 
 @Injectable()
@@ -18,11 +19,14 @@ export class UserService {
 	{}
 
 
+	/**
+	 * Obtain a list of all user in system
+	 * @returns all user id, name and mail
+	 */
 	public async getUsers()
 	{
 		return await this.userRepo.createQueryBuilder('User')
-			.leftJoinAndSelect("User.channels", "Channel")
-			.leftJoinAndSelect("Channel.owner", "o")
+			.select(["User.id", "User.name", "User.mail"])
 			.getMany();
 	}
 
@@ -35,6 +39,19 @@ export class UserService {
 
 		const user = await this.userRepo.findOne({ where: { name: name }, relations: ['channels'] }); /* Pay attention to load relations !!! */
 		console.log ( "FOUND USER "  + user)
+		return user;
+	}
+
+	/**
+	 * 
+	 * @param uuid Uuid of the user
+	 * @returns user data
+	 */
+	public async getUserById(uuid: uuidv4) : Promise<User> {
+		const user = await this.userRepo.findOne({
+			where: {id: uuid},
+			relations: ['channels']
+		});
 		return user;
 	}
 
