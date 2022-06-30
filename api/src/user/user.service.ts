@@ -28,7 +28,6 @@ export class UserService {
 
 	public async createUser(user: UserDto)
 	{
-
 		return await this.userRepo.save(user);
 	}
 
