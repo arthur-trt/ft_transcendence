@@ -18,7 +18,8 @@ FROM	node:16.15-alpine3.15
 WORKDIR /cache/
 COPY	package*.json /cache/
 
-RUN		npm install && npm audit fix
+RUN		apk update && apk add tar && npm install && npm audit fix && \
+		tar -cf node_modules.tar node_modules/
 
 WORKDIR	/api/
 COPY	./entrypoint.sh ./entrypoint.sh
