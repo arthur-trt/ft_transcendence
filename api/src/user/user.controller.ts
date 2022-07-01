@@ -1,4 +1,4 @@
-import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Patch, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Get, Post, Body, Param, Query } from '@nestjs/common';
 import { UserDto } from '../dtos/user.dto';
 import { UserService } from './user.service';
@@ -6,7 +6,7 @@ import { User } from './user.entity';
 import { ParseIntPipe } from '@nestjs/common';
 import { Channel } from '../channel/channel.entity';
 import { joinChannelDto } from 'src/dtos/joinChannel.dto';
-import { ApiProperty, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiProperty, ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 
 
 /** https://stackoverflow.com/questions/54958244/how-to-use-query-parameters-in-nest-js?answertab=trending#tab-top PARMAS AND TOUTES  */
@@ -28,6 +28,14 @@ export class UserController
 	@ApiOperation({
 		summary: "Get all info about a user identified by :uuid"
 	})
+	@ApiResponse({
+		status: 200,
+		description: "User is returned normally"
+	})
+	@ApiResponse({
+		status: 404,
+		description: "User is not found"
+	})
 	@Get(':uuid')
 	async getUser(@Param('uuid') uuid: string) : Promise<User> {
 		return await this.userService.getUserById(uuid);
@@ -46,7 +54,6 @@ export class UserController
 		return this.userService.createUser(user);
 	}
 
-
 	@Post('joinChannel') /** query : ?param=value&param=342......etc */
 	@UsePipes(ValidationPipe)
 	public async joinChannel(@Body() joinRequest: joinChannelDto)
@@ -55,5 +62,11 @@ export class UserController
 		const channelname = joinRequest.chanName;
 		console.log(joinRequest);
 		return this.userService.joinChannel(username, channelname);
+	}
+
+	@Patch(':uuid/mail')
+	public async updatePhoto(@Param('uuid') uuid: string, @Body('mail') mail: string)
+	{
+		return this.userService.updateUserPhoto(uuid, mail);
 	}
 }

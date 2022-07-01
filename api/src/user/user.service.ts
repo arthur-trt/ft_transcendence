@@ -1,4 +1,4 @@
-import { forwardRef, HttpException, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { UserDto } from '../dtos/user.dto';
 import { UserRepository } from './user.repository';
 import { Repository } from 'typeorm';
@@ -43,7 +43,7 @@ export class UserService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param uuid Uuid of the user
 	 * @returns user data
 	 */
@@ -52,6 +52,20 @@ export class UserService {
 			where: {id: uuid},
 			relations: ['channels']
 		});
+		if (!user)
+			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+		return user;
+	}
+
+	public async updateUserPhoto(uuid: uuidv4, mail: string) : Promise<User> {
+		const user = await this.userRepo.findOne({
+			where: {id: uuid},
+			relations: ['channels']
+		});
+		if (!user)
+			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+		user.mail = mail;
+		this.userRepo.save(user);
 		return user;
 	}
 

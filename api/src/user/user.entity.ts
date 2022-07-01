@@ -3,7 +3,6 @@ import { channelMessage } from "src/message/channelMessage.entity";
 import { privateMessage } from "src/message/privateMessage.entity";
 import { BaseEntity, Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Channel } from "../channel/channel.entity";
-import {v4 as uuidv4} from 'uuid';
 
 @Entity('Users') /** table name */
 export class User extends BaseEntity {
