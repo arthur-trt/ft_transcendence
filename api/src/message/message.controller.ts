@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Query, UsePipes, ValidationPipe} from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Query, UsePipes, ValidationPipe} from '@nestjs/common';
 import { UUIDVersion } from 'class-validator';
 import { channel } from 'diagnostics_channel';
 import { Channel } from 'src/channel/channel.entity';
@@ -20,7 +20,7 @@ export class MessageController {
 */
 	@Post('channel/sendMsg/:identifier')
 	@UsePipes(ValidationPipe)
-	public async sendMessage(@Param('identifier') chanIdentifier : string, @Query() query : sendChannelMessageDto)
+	public async sendMessage(@Param('identifier') chanIdentifier : string, @Body() query : sendChannelMessageDto)
 	{
 		const sender = query.sender;
 		const msg = query.msg;
@@ -40,7 +40,7 @@ export class MessageController {
 
 	@Post('privateMessage/sendMsg')
 	@UsePipes(ValidationPipe)
-	public async privateMessage(@Query() query : sendPrivateMessageDto)
+	public async privateMessage(@Body() query : sendPrivateMessageDto)
 	{
 		const sender = query.sender;
 		const target = query.target;

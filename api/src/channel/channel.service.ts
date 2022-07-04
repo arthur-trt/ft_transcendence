@@ -1,9 +1,13 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UUIDVersion } from 'class-validator';
+import { channel } from 'diagnostics_channel';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Channel } from './channel.entity';
+import { validate as isValidUUID } from 'uuid';
+
 
 @Injectable()
 export class ChannelService {
@@ -36,7 +40,7 @@ export class ChannelService {
 	public async getChannelByIdentifier(channelIdentifier : string) : Promise<Channel>
 	{
 		let chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages'] });
-		if (!chan)
+		if (!chan && isValidUUID(channelIdentifier))
 			await this.channelsRepo.findOne({ where: { id: channelIdentifier }, relations: ['messages'] });
 		if (!chan)
 			throw new HttpException('Channel not found (id or name)', HttpStatus.NOT_FOUND);

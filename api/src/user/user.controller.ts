@@ -20,6 +20,7 @@ export class UserController
 		summary: "Get all users"
 	}
 	)
+		
 	@Get('/') /* Get decorator -> we can add subroutes in () */
 	async getUsers() : Promise<User[]> {
 		return await this.userService.getUsers();

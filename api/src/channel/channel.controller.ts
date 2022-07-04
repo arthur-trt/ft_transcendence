@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { Channel } from './channel.entity';
+import { newChannelDto } from 'src/dtos/newChannel.dto';
 
 @Controller('channel')
 export class ChannelController {
@@ -14,10 +15,11 @@ export class ChannelController {
 	}
 
 	@Post('newChannel') /** channel=lol,user=toto */
-	public async newChannel(@Query() query)
+	@UsePipes(ValidationPipe)
+	public async newChannel(@Body() query : newChannelDto)
 	{
-		const chanName: string = query.channel;
-		const creator: string = query.user;
+		const chanName: string = query.chanName;
+		const creator: string = query.userIdentifier;
 		return await this.chanService.createChannel(chanName, creator);
 	}
 

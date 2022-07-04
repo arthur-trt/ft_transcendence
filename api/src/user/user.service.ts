@@ -8,6 +8,8 @@ import { Channel } from '../channel/channel.entity';
 import { ChannelService } from 'src/channel/channel.service';
 import { v4 as uuidv4 } from 'uuid';
 import { userInfo } from 'os';
+import { validate as isValidUUID } from 'uuid';
+
 
 @Injectable()
 export class UserService {
@@ -42,13 +44,16 @@ export class UserService {
 	 * @returns user data
 	 */
 
-	public async getUserByIdentifier(uuid: string) : Promise<User> {
-		let user = await this.userRepo.findOne({
-			where: {id: uuid},
+	public async getUserByIdentifier(userIdentifier: string) : Promise<User> {
+
+		let user : User = await this.userRepo.findOne({ where: { name: userIdentifier }, relations: ['channels', 'privateMessages'] }); /* Pay attention to load relations !!! */
+
+		if (!user && isValidUUID(userIdentifier))
+			 user = await this.userRepo.findOne({
+			where: {id: userIdentifier},
 			relations: ['channels', 'privateMessages']
-		});
-		if (!user)
-		 	user = await this.userRepo.findOne({ where: { name: uuid }, relations: ['channels', 'privateMessages'] }); /* Pay attention to load relations !!! */
+			 });
+		
 		if (!user)
 			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 		return user;
