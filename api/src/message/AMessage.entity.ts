@@ -8,7 +8,7 @@ export abstract class AMessage  {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-    @Column('text',{nullable:true})
+    @Column(({ type: 'json'}))
 	sender: User;
 
     @Column()

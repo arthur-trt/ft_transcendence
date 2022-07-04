@@ -8,8 +8,8 @@ import { User } from "../user/user.entity";
 @Entity('Channels') /** table name */
 export class Channel extends BaseEntity {
 
-	@PrimaryGeneratedColumn()
-	id: number;
+	@PrimaryGeneratedColumn("uuid")
+	id: string;
 
 	@Column({
 		type: 'varchar',

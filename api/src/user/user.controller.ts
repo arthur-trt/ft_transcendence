@@ -38,7 +38,7 @@ export class UserController
 	})
 	@Get(':uuid')
 	async getUser(@Param('uuid') uuid: string) : Promise<User> {
-		return await this.userService.getUserById(uuid);
+		return await this.userService.getUserByIdentifier(uuid);
 	}
 
 	//@Get(':name') /* Get decorator -> we can add subroutes in () */

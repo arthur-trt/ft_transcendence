@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
@@ -17,7 +17,7 @@ export class ChannelService {
 	{
 		const chan: Channel = new Channel();
 		chan.name = name;
-		chan.owner = await this.userService.getUserByName(owner);
+		chan.owner = await this.userService.getUserByIdentifier(owner);
 		console.log(chan.owner)
 		await this.channelsRepo.save(chan);
 		return await this.userService.joinChannel(owner, name);;
@@ -31,8 +31,15 @@ export class ChannelService {
 		.getMany();
 	}
 
-	public async getChannelByName(channelname : string) : Promise<Channel>
+
+	/** Identifier = id ou  */
+	public async getChannelByIdentifier(channelIdentifier : string) : Promise<Channel>
 	{
-		return await this.channelsRepo.findOne({ where: { name: channelname }, relations: ['messages'] });
+		let chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages'] });
+		if (!chan)
+			await this.channelsRepo.findOne({ where: { id: channelIdentifier }, relations: ['messages'] });
+		if (!chan)
+			throw new HttpException('Channel not found (id or name)', HttpStatus.NOT_FOUND);
+		return chan;
 	}
 }

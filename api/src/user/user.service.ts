@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Channel } from '../channel/channel.entity';
 import { ChannelService } from 'src/channel/channel.service';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { userInfo } from 'os';
 
 @Injectable()
@@ -35,29 +35,27 @@ export class UserService {
 		return await this.userRepo.save(user);
 	}
 
-	public async getUserByName(name: string) : Promise<User> {
-
-		const user = await this.userRepo.findOne({ where: { name: name }, relations: ['channels'] }); /* Pay attention to load relations !!! */
-		console.log ( "FOUND USER "  + user)
-		return user;
-	}
 
 	/**
 	 *
 	 * @param uuid Uuid of the user
 	 * @returns user data
 	 */
-	public async getUserById(uuid: uuidv4) : Promise<User> {
-		const user = await this.userRepo.findOne({
+
+	public async getUserByIdentifier(uuid: string) : Promise<User> {
+		let user = await this.userRepo.findOne({
 			where: {id: uuid},
-			relations: ['channels']
+			relations: ['channels', 'privateMessages']
 		});
+		if (!user)
+		 	user = await this.userRepo.findOne({ where: { name: uuid }, relations: ['channels', 'privateMessages'] }); /* Pay attention to load relations !!! */
 		if (!user)
 			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 		return user;
 	}
 
-	public async updateUserPhoto(uuid: uuidv4, mail: string) : Promise<User> {
+	public async updateUserPhoto(uuid: string, mail: string) : Promise<User> {
+
 		const user = await this.userRepo.findOne({
 			where: {id: uuid},
 			relations: ['channels']
@@ -77,7 +75,7 @@ export class UserService {
 			throw new HttpException('User Not Found in JoinChannel', 404);
 		}
 		console.log("USER :" + user);
-		const channel = await this.chanService.getChannelByName(channelname);
+		const channel = await this.chanService.getChannelByIdentifier(channelname);
 
 		if (!channel)
 		{
