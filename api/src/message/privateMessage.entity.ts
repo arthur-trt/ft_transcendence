@@ -7,6 +7,11 @@ import { AMessage } from "./AMessage.entity";
 @Entity('privateMessage')
 export class privateMessage extends AMessage {
 
-    @ManyToOne(() => User, user => user.privateMessages)
-	target: User;
+	@Column()
+	sender: string; // uuid du sender
+	//@ManyToOne(() => User, user => user.privateMessages)
+
+	@Column()
+	target: string; //on stocke lúuid au lieu de relationner
+	//target: User;
 }

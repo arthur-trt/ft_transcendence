@@ -1,7 +1,7 @@
 
 import { channelMessage } from "src/message/channelMessage.entity";
 import { privateMessage } from "src/message/privateMessage.entity";
-import { BaseEntity, Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Channel } from "../channel/channel.entity";
 
 @Entity('Users') /** table name */
@@ -22,10 +22,7 @@ export class User extends BaseEntity {
 
 	@ManyToMany(() => Channel, channel => channel.users)
 	@JoinTable()
-	channels: Channel[]
-
-	@OneToMany(() => privateMessage, privateMessage => privateMessage.target)
-	privateMessages: privateMessage[];
+	channels: Channel[];
 
 	@OneToMany(() => channelMessage, channelMessage => channelMessage.message) // va faire l'historique des messages
 	channelMessages: channelMessage[]; // on store ses messages

@@ -5,7 +5,7 @@ import { ChannelService } from 'src/channel/channel.service';
 import { MessageDto } from 'src/dtos/message.dto';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { channelMessage } from './channelMessage.entity';
 import { privateMessage } from './privateMessage.entity';
 
@@ -43,33 +43,51 @@ export class MessageService {
 
 
 
-	public async sendPrivateMessage(sender : string, target : string, msg : string) {
 
-		console.log("HELLO");
-		const src : User = await this.userService.getUserByIdentifier(sender);
-		console.log(src);
-		const dest: User = await this.userService.getUserByIdentifier(target);
-		console.log(dest);
-
-		console.log('ÏCI')
-		const newMessage = await this.pmRepo.save
-		(
-			{
-				sender: src,
-				message: msg, // si j'inclus target ca va faire un pb...
-			}
-		)
-
-		//src.privateMessages = [...src.privateMessages, newMessage]; /* if pb of is not iterable, it is because we did not get the */
-		dest.privateMessages = [...src.privateMessages, newMessage];
-		await src.save();
-		return await dest.save();
-	}
 
 	public async getMessage(chanIdentifier: string)
 	{
 		let chan : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
 		const msgs = this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier }).leftJoinAndSelect("chan.messages", "messages").getMany();
+		return msgs;
+	}
+
+
+	/* Private */
+	public async sendPrivateMessage(sender: string, target: string, msg: string) {
+
+		console.log("HELLO");
+		const src: User = await this.userService.getUserByIdentifier(sender);
+		console.log(src);
+		const dest: User = await this.userService.getUserByIdentifier(target);
+		console.log(dest);
+
+		const newMessage: privateMessage = await this.pmRepo.save(
+		{
+			sender: src.id,
+			target: dest.id,
+			message : msg,
+
+		}
+		)
+		return await this.pmRepo.find();
+	}
+
+	public async getPrivateMessage(sender: string, target: string)
+	{
+		let user1: User = await this.userService.getUserByIdentifier(sender);
+		let user2: User = await this.userService.getUserByIdentifier(target);
+
+		const msgs = this.pmRepo.createQueryBuilder("PM")
+			.where(new Brackets(qb => {
+        		qb.where("PM.sender = :dst", { dst: user1.id })
+          		.orWhere("PM.sender = :dst1", { dst1: user2.id })
+    		}))
+			.andWhere(new Brackets(qb => {
+        		qb.where("PM.target = :dst", { dst: user1.id })
+          		.orWhere("PM.target = :dst1", { dst1: user2.id })
+			}))
+			.getMany();
 		return msgs;
 	}
 
