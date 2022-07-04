@@ -2,9 +2,10 @@ import { PassportStrategy } from "@nestjs/passport";
 import { Profile, Strategy } from "passport-42";
 import { Injectable } from "@nestjs/common";
 import { UserService } from "src/user/user.service";
+import { urlencoded } from "express";
 
 @Injectable()
-export class FortyTwoAuthSrategy extends PassportStrategy(Strategy)
+export class FortyTwoAuthStrategy extends PassportStrategy(Strategy)
 {
 	constructor (private readonly userService:UserService) {
 		super({
@@ -15,25 +16,21 @@ export class FortyTwoAuthSrategy extends PassportStrategy(Strategy)
 				'id': 'id',
 				'username': 'login',
 				'displayName': 'displayname',
-				'name.familyName': 'last_name',
-				'name.givenName': 'first_name',
-				'profileUrl': 'url',
-				'emails.0.value': 'email',
-				'phoneNumbers.0.value': 'phone',
-				'photos.0.value': 'image_url'
+				'email': 'email',
+				'image_url': 'image_url'
 			  }
 		});
 	}
 
 	async validate(accessToken: string, refreshToken: string, profile: Profile) {
-		//const json_profile = JSON.parse(profile);
-		console.log("START");
-		console.log(profile.id);
-		console.log("END");
 		//console.log(profile);
-		//let user = await this.usersService.findByLogin(username);
-		//if (!user)
-		//	user = await this.usersService.create(username);
-		//return user
+		const user = await this.userService.findOrCreateUser(
+			profile.id,
+			profile.displayName,
+			profile.username,
+			profile.image_url,
+			profile.email
+		)
+		return user;
 	}
 }

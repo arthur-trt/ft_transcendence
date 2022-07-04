@@ -5,17 +5,24 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
 import { UserModule } from 'src/user/user.module';
 import { UserRepository } from 'src/user/user.repository';
-import { FortyTwoAuthSrategy } from './auth.strategy';
+import { FortyTwoAuthStrategy } from './auth.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { UserService } from 'src/user/user.service';
+import { JwtModule } from '@nestjs/jwt';
+import { jwtConstants } from './jwt/jwt.constants';
+import { JwtStrategy } from './jwt/jwt.strategy';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
-    PassportModule,
-    forwardRef(() => UserModule)
+    PassportModule.register({ property: 'user' }),
+    forwardRef(() => UserModule),
+    JwtModule.register({
+      secret: jwtConstants.secret,
+      //signOptions: { expiresIn: '60m' }
+    })
   ],
-  providers: [AuthService, FortyTwoAuthSrategy],
+  providers: [AuthService, FortyTwoAuthStrategy, JwtStrategy],
   controllers: [FortyTwoAuthController],
 })
 export class AuthModule {}

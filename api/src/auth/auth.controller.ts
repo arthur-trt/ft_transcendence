@@ -1,12 +1,16 @@
 import { Controller, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Get, Query, Request, Res } from '@nestjs/common';
-import { AuthService } from './auth.service';
 import { FortyTwoAuthGuard } from './guards/42-auth.guard';
+import { AuthService } from './auth.service';
 
 @ApiTags('auth')
 @Controller('auth/42')
 export class FortyTwoAuthController {
+
+	constructor (
+		private authService: AuthService
+	) {}
 
 	@Get('login')
 	@UseGuards(FortyTwoAuthGuard)
@@ -16,9 +20,8 @@ export class FortyTwoAuthController {
 
 	@Get('callback')
 	@UseGuards(FortyTwoAuthGuard)
-	async	callback (@Request() req, @Res() res)
+	async	callback (@Request() req)
 	{
-		console.log(req);
-		console.log(res);
+		return this.authService.login(req.user);
 	}
 }
