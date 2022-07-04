@@ -76,12 +76,12 @@ export class UserService {
 	 */
 	public async getUserByIdentifier(userIdentifier: string) : Promise<User> {
 
-		let user : User = await this.userRepo.findOne({ where: { name: userIdentifier }, relations: ['channels', 'privateMessages'] }); /* Pay attention to load relations !!! */
+		let user : User = await this.userRepo.findOne({ where: { name: userIdentifier }, relations: ['channels'] }); /* Pay attention to load relations !!! */
 
 		if (!user && isValidUUID(userIdentifier))
 			 user = await this.userRepo.findOne({
 			where: {id: userIdentifier},
-			relations: ['channels', 'privateMessages']
+			relations: ['channels']
 			 });
 
 		if (!user)
