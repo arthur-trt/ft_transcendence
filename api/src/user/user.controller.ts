@@ -1,12 +1,11 @@
-import { Controller, Patch, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Req, ClassSerializerInterceptor, Controller, Patch, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Get, Post, Body, Param, Query } from '@nestjs/common';
-import { UserDto } from '../dtos/user.dto';
 import { UserService } from './user.service';
 import { User } from './user.entity';
-import { ParseIntPipe } from '@nestjs/common';
-import { Channel } from '../channel/channel.entity';
 import { joinChannelDto } from 'src/dtos/joinChannel.dto';
-import { ApiProperty, ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
+import { Request } from 'express';
+import { ApiProperty, ApiOperation, ApiTags, ApiResponse, ApiBearerAuth, ApiResponseProperty } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 
 /** https://stackoverflow.com/questions/54958244/how-to-use-query-parameters-in-nest-js?answertab=trending#tab-top PARMAS AND TOUTES  */
@@ -16,27 +15,15 @@ export class UserController
 {
 	constructor(private userService: UserService) { }
 
-	@ApiOperation({
-		summary: "Get all users"
-	}
-	)
-		
+	@ApiOperation({ summary: "Get all users" })
 	@Get('/') /* Get decorator -> we can add subroutes in () */
 	async getUsers() : Promise<User[]> {
 		return await this.userService.getUsers();
 	}
 
-	@ApiOperation({
-		summary: "Get all info about a user identified by :uuid"
-	})
-	@ApiResponse({
-		status: 200,
-		description: "User is returned normally"
-	})
-	@ApiResponse({
-		status: 404,
-		description: "User is not found"
-	})
+	@ApiOperation({ summary: "Get all info about a user identified by :uuid" })
+	@ApiResponse({ status: 200, description: "User is returned normally" })
+	@ApiResponse({ status: 404, description: "User is not found" })
 	@Get(':uuid')
 	async getUser(@Param('uuid') uuid: string) : Promise<User> {
 		return await this.userService.getUserByIdentifier(uuid);
@@ -49,11 +36,11 @@ export class UserController
 	//}
 
 	// localhost:3000/user/createUser
-	@Post('createUser')
-	@UsePipes(ValidationPipe)
-	public async postUser(@Body() user: UserDto) {
-		return this.userService.createUser(user);
-	}
+	//@Post('createUser')
+	//@UsePipes(ValidationPipe)
+	//public async postUser(@Body() user: UserDto) {
+	//	return this.userService.createUser(user);
+	//}
 
 	@Post('joinChannel') /** query : ?param=value&param=342......etc */
 	@UsePipes(ValidationPipe)
@@ -65,9 +52,14 @@ export class UserController
 		return this.userService.joinChannel(username, channelname);
 	}
 
-	@Patch(':uuid/mail')
-	public async updatePhoto(@Param('uuid') uuid: string, @Body('mail') mail: string)
+	@Patch('mail')
+	@ApiOperation({ summary: "Update mail on connected account" })
+	@ApiResponse({ status: 200, description: "Mail changed"})
+	@ApiResponse({ status: 403, description: "You're not logged in"})
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
+	public async updateMail(@Req() req: Request, @Body('mail') mail: string)
 	{
-		return this.userService.updateUserPhoto(uuid, mail);
+		return this.userService.updateUserMail(req, mail);
 	}
 }

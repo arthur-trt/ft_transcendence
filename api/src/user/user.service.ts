@@ -1,14 +1,12 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { UserDto } from '../dtos/user.dto';
-import { UserRepository } from './user.repository';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Channel } from '../channel/channel.entity';
 import { ChannelService } from 'src/channel/channel.service';
-import { v4 as uuidv4 } from 'uuid';
-import { userInfo } from 'os';
+import { Request } from 'express';
 import { validate as isValidUUID } from 'uuid';
+import { HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
 
 
 @Injectable()
@@ -20,6 +18,12 @@ export class UserService {
 		@Inject(forwardRef(() => ChannelService)) private chanService: ChannelService)
 	{}
 
+	private async getUserByRequest (req: Request) {
+		const user: User = await this.getUserByIdentifier(JSON.parse(JSON.stringify(req.user)).userId);
+		if (!user)
+			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+		return (user);
+	}
 
 	/**
 	 * Obtain a list of all user in system
@@ -32,18 +36,44 @@ export class UserService {
 			.getMany();
 	}
 
-	public async createUser(user: UserDto)
+	/**
+	 *
+	 * @param intra_id 42 intranet identifiant
+	 * @returns user if found, null otherwise
+	 */
+	public async getUserByIntraId (intra_id: number) : Promise<User>
 	{
-		return await this.userRepo.save(user);
+		const user :User = await this.userRepo.findOne({
+			where: {intra_id: intra_id}
+		});
+		return user;
 	}
 
+	public async findOrCreateUser(intra_id: number, fullname: string, username: string, avatar: string, mail: string)
+	{
+		let user = await this.getUserByIntraId(intra_id);
+		if (user)
+		{
+			return (user);
+		}
+		else
+		{
+			const	new_user = {
+				intra_id: intra_id,
+				name: username,
+				fullname: fullname,
+				avatar_url: avatar,
+				mail: mail
+			}
+			return await this.userRepo.save(new_user);
+		}
+	}
 
 	/**
 	 *
 	 * @param uuid Uuid of the user
 	 * @returns user data
 	 */
-
 	public async getUserByIdentifier(userIdentifier: string) : Promise<User> {
 
 		let user : User = await this.userRepo.findOne({ where: { name: userIdentifier }, relations: ['channels'] }); /* Pay attention to load relations !!! */
@@ -59,17 +89,10 @@ export class UserService {
 		return user;
 	}
 
-	public async updateUserPhoto(uuid: string, mail: string) : Promise<User> {
-
-		const user = await this.userRepo.findOne({
-			where: {id: uuid},
-			relations: ['channels']
-		});
-		if (!user)
-			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+	public async updateUserMail(req: Request, mail: string) : Promise<User> {
+		const user: User = await this.getUserByRequest(req);
 		user.mail = mail;
-		this.userRepo.save(user);
-		return user;
+		return this.userRepo.save(user);
 	}
 
 	public async joinChannel(username: string, channelname: string)

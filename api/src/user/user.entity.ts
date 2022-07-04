@@ -1,6 +1,7 @@
 
 import { channelMessage } from "src/message/channelMessage.entity";
 import { privateMessage } from "src/message/privateMessage.entity";
+import internal from "stream";
 import { BaseEntity, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Channel } from "../channel/channel.entity";
 
@@ -12,13 +13,30 @@ export class User extends BaseEntity {
 
 	@Column({
 		type: 'varchar',
+		unique: true,
 	})
 	name: string;
 
 	@Column({
 		type: 'varchar',
 	})
+	fullname: string;
+
+	@Column({
+		type: 'varchar',
+	})
 	mail: string;
+
+	@Column({
+		type: 'int',
+		unique: true
+	})
+	intra_id: number;
+
+	@Column({
+		type: 'varchar'
+	})
+	avatar_url: string;
 
 	@ManyToMany(() => Channel, channel => channel.users)
 	@JoinTable()

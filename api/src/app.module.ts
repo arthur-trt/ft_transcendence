@@ -9,6 +9,7 @@ import { Channel } from './channel/channel.entity';
 import { ChannelModule } from './channel/channel.module';
 import { privateMessage } from './message/privateMessage.entity';
 import { channelMessage } from './message/channelMessage.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
 
@@ -29,7 +30,8 @@ import { channelMessage } from './message/channelMessage.entity';
 	  //entities: [ './car/*.entity.{js,ts}'],
 		synchronize: true,
 		logging: true
-	})],
+	}),
+	  AuthModule],
 })
 
   export class AppModule { }
