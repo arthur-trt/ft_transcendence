@@ -1,5 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { deepStrictEqual } from 'assert';
+import { UUIDVersion } from 'class-validator';
 import { Channel } from 'src/channel/channel.entity';
 import { ChannelService } from 'src/channel/channel.service';
 import { MessageDto } from 'src/dtos/message.dto';
@@ -73,20 +75,32 @@ export class MessageService {
 		return await this.pmRepo.find();
 	}
 
+
 	public async getPrivateMessage(sender: string, target: string)
 	{
 		let user1: User = await this.userService.getUserByIdentifier(sender);
 		let user2: User = await this.userService.getUserByIdentifier(target);
 
+		let test: UUIDVersion | string = user1.id;
 		const msgs = this.pmRepo.createQueryBuilder("PM")
+			.leftJoinAndMapOne("PM.sender", User, 'users', 'users.id = PM.sender')
+			.leftJoinAndMapOne("PM.target", User, 'usert', 'usert.id = PM.target')
 			.where(new Brackets(qb => {
-        		qb.where("PM.sender = :dst", { dst: user1.id })
-          		.orWhere("PM.sender = :dst1", { dst1: user2.id })
-    		}))
-			.andWhere(new Brackets(qb => {
-        		qb.where("PM.target = :dst", { dst: user1.id })
-          		.orWhere("PM.target = :dst1", { dst1: user2.id })
+				qb.where("PM.sender = :dst", { dst: user1.id })
+					.orWhere("PM.sender = :dst1", { dst1: user2.id })
 			}))
+			.andWhere(new Brackets(qb => {
+				qb.where("PM.target = :dst", { dst: user1.id })
+					.orWhere("PM.target = :dst1", { dst1: user2.id })
+			}))
+			.select(['PM.message'])
+			.addSelect([
+				'PM.sender',
+				'PM.target',
+				'PM.message',
+				'users.name',
+				'usert.name', // ici quíl faudra ajouter les photos ! 
+			  ])
 			.getMany();
 		return msgs;
 	}
