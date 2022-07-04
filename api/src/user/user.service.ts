@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Channel } from '../channel/channel.entity';
 import { ChannelService } from 'src/channel/channel.service';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { userInfo } from 'os';
 
 @Injectable()
@@ -47,7 +47,7 @@ export class UserService {
 	 * @param uuid Uuid of the user
 	 * @returns user data
 	 */
-	public async getUserById(uuid: uuidv4) : Promise<User> {
+	public async getUserById(uuid: string) : Promise<User> {
 		const user = await this.userRepo.findOne({
 			where: {id: uuid},
 			relations: ['channels']
