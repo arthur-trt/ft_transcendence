@@ -45,5 +45,4 @@ export class User extends BaseEntity {
 	@OneToMany(() => channelMessage, channelMessage => channelMessage.message) // va faire l'historique des messages
 	channelMessages: channelMessage[]; // on store ses messages
 
-
 }
