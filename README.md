@@ -21,6 +21,10 @@ PGADMIN_DEFAULT_EMAIL=<mail>
 PGADMIN_MAIL=<mail>
 PGADMIN_DEFAULT_PASSWORD=<password>
 PGADMIN_PASS=<password>
+
+# JWT
+JWT_SECRET=ft_transcendenceCvraimentTropBien
+
 ```
 
 And give right to pgadmin :
