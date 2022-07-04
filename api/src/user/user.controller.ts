@@ -20,6 +20,7 @@ export class UserController
 		summary: "Get all users"
 	}
 	)
+		
 	@Get('/') /* Get decorator -> we can add subroutes in () */
 	async getUsers() : Promise<User[]> {
 		return await this.userService.getUsers();
@@ -38,7 +39,7 @@ export class UserController
 	})
 	@Get(':uuid')
 	async getUser(@Param('uuid') uuid: string) : Promise<User> {
-		return await this.userService.getUserById(uuid);
+		return await this.userService.getUserByIdentifier(uuid);
 	}
 
 	//@Get(':name') /* Get decorator -> we can add subroutes in () */

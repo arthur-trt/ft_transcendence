@@ -3,7 +3,7 @@ import {v4 as uuidv4} from 'uuid';
 
 export class UserDto {
 	@IsEmpty()
-	id: uuidv4;
+	id: string;
 
 	@IsNotEmpty()
 	readonly name: string;
