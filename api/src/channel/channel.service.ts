@@ -1,4 +1,4 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable, Req } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UUIDVersion } from 'class-validator';
 import { channel } from 'diagnostics_channel';
@@ -7,6 +7,7 @@ import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Channel } from './channel.entity';
 import { validate as isValidUUID } from 'uuid';
+import { Request } from 'express';
 
 
 @Injectable()
@@ -17,14 +18,15 @@ export class ChannelService {
 	{ }
 
 
-	public async createChannel(name: string, owner: string)
+	public async createChannel(name: string, @Req() req : Request)
 	{
+		console.log ("CREATE CHANNEL")
 		const chan: Channel = new Channel();
 		chan.name = name;
-		chan.owner = await this.userService.getUserByIdentifier(owner);
+		chan.owner = await this.userService.getUserByRequest(req);
 		console.log(chan.owner)
 		await this.channelsRepo.save(chan);
-		return await this.userService.joinChannel(owner, name);;
+		return await this.userService.joinChannel(req, name);
 	}
 
 	public async getUsersOfChannels() : Promise<Channel[]>
