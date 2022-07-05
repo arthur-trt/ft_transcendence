@@ -8,8 +8,6 @@ export abstract class AMessage  {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-
-
     @Column()
     message: string;
 }

@@ -44,12 +44,12 @@ export class UserController
 
 	@Post('joinChannel') /** query : ?param=value&param=342......etc */
 	@UsePipes(ValidationPipe)
-	public async joinChannel(@Body() joinRequest: joinChannelDto)
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
+	public async joinChannel(@Req() req: Request, @Body() joinRequest: joinChannelDto)
 	{
-		const username = joinRequest.username;
 		const channelname = joinRequest.chanName;
-		console.log(joinRequest);
-		return this.userService.joinChannel(username, channelname);
+		return this.userService.joinChannel(req, channelname);
 	}
 
 	@Patch('mail')

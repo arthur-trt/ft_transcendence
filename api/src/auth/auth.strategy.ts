@@ -4,11 +4,16 @@ import { Injectable } from "@nestjs/common";
 import { UserService } from "src/user/user.service";
 import { urlencoded } from "express";
 
+
+/*
+**	Strategy :
+*/
 @Injectable()
 export class FortyTwoAuthStrategy extends PassportStrategy(Strategy)
 {
 	constructor (private readonly userService:UserService) {
 		super({
+
 			clientID: process.env.API_42_UID,
 			clientSecret: process.env.API_42_SECRET,
 			callbackURL: process.env.API_42_CALLBACK,
@@ -23,7 +28,8 @@ export class FortyTwoAuthStrategy extends PassportStrategy(Strategy)
 	}
 
 	async validate(accessToken: string, refreshToken: string, profile: Profile) {
-		//console.log(profile);
+		console.log(profile);
+		console.log("VALIDATE");
 		const user = await this.userService.findOrCreateUser(
 			profile.id,
 			profile.displayName,

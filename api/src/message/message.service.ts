@@ -81,7 +81,6 @@ export class MessageService {
 		let user1: User = await this.userService.getUserByIdentifier(sender);
 		let user2: User = await this.userService.getUserByIdentifier(target);
 
-		let test: UUIDVersion | string = user1.id;
 		const msgs = this.pmRepo.createQueryBuilder("PM")
 			.leftJoinAndMapOne("PM.sender", User, 'users', 'users.id = PM.sender')
 			.leftJoinAndMapOne("PM.target", User, 'usert', 'usert.id = PM.target')
@@ -99,7 +98,9 @@ export class MessageService {
 				'PM.target',
 				'PM.message',
 				'users.name',
-				'usert.name', // ici quíl faudra ajouter les photos ! 
+				'users.avatar_url',
+				'usert.name', // ici quíl faudra ajouter les photos !
+				'usert.avatar_url'
 			  ])
 			.getMany();
 		return msgs;
