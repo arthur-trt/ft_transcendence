@@ -22,6 +22,11 @@ PGADMIN_MAIL=<mail>
 PGADMIN_DEFAULT_PASSWORD=<password>
 PGADMIN_PASS=<password>
 
+# OAuth2
+API_42_UID=<client_id>
+API_42_SECRET=<client_secret>
+API_42_CALLBACK=http://localhost:3000/auth/42/callback
+
 # JWT
 JWT_SECRET=ft_transcendenceCvraimentTropBien
 
