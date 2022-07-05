@@ -13,13 +13,8 @@
 #
 # Dev image
 #
-FROM	node:16.15-alpine3.15
+FROM	node:alpine
 
-# WORKDIR /api/
-# COPY	package*.json /cache/
-
-# RUN		npm install && npm audit fix
-# && tar -cf node_modules.tar node_modules/ apk update && apk add tar
 
 WORKDIR	/api/
 COPY	./entrypoint.sh ./entrypoint.sh
