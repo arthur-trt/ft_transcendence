@@ -94,7 +94,13 @@ export class UserService {
 		return this.userRepo.save(user);
 	}
 
-	public async joinChannel(req: Request, channelname: string)
+	/**
+	 *
+	 * @param req the request containing user id
+	 * @param channelname the channel name
+	 * @returns User object containing its newly inserted channel
+	 */
+	public async joinChannel(req: Request, channelname: string) : Promise<User>
 	{
 		const user = await this.getUserByRequest(req);
 		let channel: Channel;
