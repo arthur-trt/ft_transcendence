@@ -1,7 +1,11 @@
-import { Body, Controller, Get, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UsePipes, ValidationPipe, Req, UseGuards } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { Channel } from './channel.entity';
+import { Request } from 'express';
+
 import { newChannelDto } from 'src/dtos/newChannel.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('channel')
 export class ChannelController {
@@ -16,11 +20,12 @@ export class ChannelController {
 
 	@Post('newChannel') /** channel=lol,user=toto */
 	@UsePipes(ValidationPipe)
-	public async newChannel(@Body() query : newChannelDto)
+	@UseGuards(JwtAuthGuard)
+	public async newChannel(@Req() req : Request, @Body() query : newChannelDto)
 	{
 		const chanName: string = query.chanName;
-		const creator: string = query.userIdentifier;
-		return await this.chanService.createChannel(chanName, creator);
+		console.log(req)
+		return await this.chanService.createChannel(chanName, req);
 	}
 
 

@@ -11,6 +11,8 @@ import { UserService } from 'src/user/user.service';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './jwt/jwt.constants';
 import { JwtStrategy } from './jwt/jwt.strategy';
+import { CheatAuthController } from './auth.controller';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -20,9 +22,10 @@ import { JwtStrategy } from './jwt/jwt.strategy';
     JwtModule.register({
       secret: jwtConstants.secret,
       //signOptions: { expiresIn: '60m' }
-    })
+    }),
+    HttpModule
   ],
   providers: [AuthService, FortyTwoAuthStrategy, JwtStrategy],
-  controllers: [FortyTwoAuthController],
+  controllers: [FortyTwoAuthController, CheatAuthController],
 })
 export class AuthModule {}
