@@ -18,7 +18,7 @@ export class ChannelController {
 		return await this.chanService.getUsersOfChannels();
 	}
 
-	@Post('newChannel') /** channel=lol,user=toto */
+	@Post('newChannel')
 	@UsePipes(ValidationPipe)
 	@UseGuards(JwtAuthGuard)
 	public async newChannel(@Req() req : Request, @Body() query : newChannelDto)

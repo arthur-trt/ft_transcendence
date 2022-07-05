@@ -17,18 +17,25 @@ export class ChannelService {
 	@Inject(forwardRef(() => UserService)) private readonly userService: UserService)
 	{ }
 
-
+	/**
+	 * @brief Create channel
+	 * @param name the name of the channel
+	 * @param req the request containing user id
+	 * @returns
+	 */
 	public async createChannel(name: string, @Req() req : Request)
 	{
-		console.log ("CREATE CHANNEL")
 		const chan: Channel = new Channel();
 		chan.name = name;
 		chan.owner = await this.userService.getUserByRequest(req);
-		console.log(chan.owner)
 		await this.channelsRepo.save(chan);
 		return await this.userService.joinChannel(req, name);
 	}
 
+	/**
+	 * @brief Returns all users of all existing channels
+	 * @returns
+	 */
 	public async getUsersOfChannels() : Promise<Channel[]>
 	{
 		return await this.channelsRepo.createQueryBuilder('Channel')
@@ -37,8 +44,11 @@ export class ChannelService {
 		.getMany();
 	}
 
-
-	/** Identifier = id ou  */
+	/**
+	 * @brief Find a channel by its name or its id
+	 * @param channelIdentifier (id or name)
+	 * @returns Channel object corresponding
+	 */
 	public async getChannelByIdentifier(channelIdentifier : string) : Promise<Channel>
 	{
 		let chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages'] });

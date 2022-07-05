@@ -6,8 +6,6 @@ import { ManyToMany } from "typeorm";
 
 export class getPrivateMessageDto
 {
-	@IsNotEmpty()
-	sender : string;
 
 	@IsNotEmpty()
 	target : string;
