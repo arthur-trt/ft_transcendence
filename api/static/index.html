@@ -1,0 +1,51 @@
+<html>
+<head>
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+</head>
+<body> Testing </body>
+
+<div id ="v-app">
+<h1>{{ title }}</h1>
+<form>
+	<input v-model="text" type="text"/>
+	<button type="submit" @click.prevent="sendMessage()">send</button>
+</form>
+<p>
+	<li v-for="msg of messages"> {{ msg }} </li>
+</p>
+</div>
+<script>
+	var app = new Vue(
+		{
+			el: "#v-app", // va donner l'íd
+			data : {
+				title: 'Websockeets Tester',
+				text: "",
+				messages: ['Somme message', 'lol'],
+				socket: null,
+			},
+			methods : {
+				sendMessage() {
+					console.log("send " + this.text); // this.text = the payload 
+					this.socket.emit('msgToServer', this.text);
+					this.text = "";
+				},
+				receiveMessage(msg) {
+					console.log("recv " + msg);
+					this.messages.push(msg);
+
+				}
+			},
+			created : function() { // creatin hok
+					this.socket = io('http://localhost:3000');
+					this.socket.on('msgToClient', (msg) => {
+					this.receiveMessage(msg);
+				} // listener
+				)
+			}
+		});
+
+</script>
+</html>
+
