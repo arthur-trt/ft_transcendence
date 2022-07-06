@@ -553,3 +553,27 @@ Did not really understand why we could not be able to serve client, but anyway, 
 
 __d/ Namespace__ [video](https://www.youtube.com/watch?v=z12PXjMDzk8)
 It will be useful if we have several functionnality requiring WebSockets, not to pollute on namespace.
+
+First, we set the namespace :
+```@WebSocketGateway({ namespace: '/chat' })```
+
+Thus we are going to create multiple sockets :
+
+```socket: { chat: null, alerts: null },```
+
+... and in initialisation, specifiy the namespace as a path (yes, it is confusing), e.g. :
+```this.socket.chat = io('http://localhost:3000/chat'); // namespace```
+
+The data should reflect what we put in our gateway :
+
+``` js
+ @SubscribeMessage('chatToServer')
+ handleMessage(client: Socket, message: { sender: string, message: string }) {
+  return this.wss.emit('chatToClient', message);
+ }
+```
+
+So we create in the Vue app :
+
+```this.socket.chat.emit('chatToServer', { sender : this.username , message : this.text } );```
+
