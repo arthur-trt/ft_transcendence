@@ -18,7 +18,7 @@ export class UserService {
 		@Inject(forwardRef(() => ChannelService)) private chanService: ChannelService)
 	{}
 
-	private async getUserByRequest (req: Request) {
+	public async getUserByRequest (req: Request) {
 		const user: User = await this.getUserByIdentifier(JSON.parse(JSON.stringify(req.user)).userId);
 		if (!user)
 			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
@@ -92,6 +92,12 @@ export class UserService {
 	public async updateUserMail(req: Request, mail: string) : Promise<User> {
 		const user: User = await this.getUserByRequest(req);
 		user.mail = mail;
+		return this.userRepo.save(user);
+	}
+
+	public async setTwoFactorAuthenticationSecret (user: User, secret: string)
+	{
+		user.TwoFA_secret = secret;
 		return this.userRepo.save(user);
 	}
 

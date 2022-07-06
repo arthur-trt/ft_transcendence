@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { FortyTwoAuthController } from './auth.controller';
+import { FortyTwoAuthController, CheatAuthController, TwoFAAuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
 import { UserModule } from 'src/user/user.module';
@@ -11,7 +11,6 @@ import { UserService } from 'src/user/user.service';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './jwt/jwt.constants';
 import { JwtStrategy } from './jwt/jwt.strategy';
-import { CheatAuthController } from './auth.controller';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({
@@ -26,6 +25,6 @@ import { HttpModule } from '@nestjs/axios';
     HttpModule
   ],
   providers: [AuthService, FortyTwoAuthStrategy, JwtStrategy],
-  controllers: [FortyTwoAuthController, CheatAuthController],
+  controllers: [FortyTwoAuthController, CheatAuthController, TwoFAAuthController],
 })
 export class AuthModule {}

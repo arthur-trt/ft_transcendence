@@ -38,6 +38,11 @@ export class User extends BaseEntity {
 	})
 	avatar_url: string;
 
+	@Column({
+		nullable: true,
+	})
+	TwoFA_secret: string;
+
 	@ManyToMany(() => Channel, channel => channel.users)
 	@JoinTable()
 	channels: Channel[];
