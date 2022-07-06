@@ -10,6 +10,7 @@ import { ChannelModule } from './channel/channel.module';
 import { privateMessage } from './message/privateMessage.entity';
 import { channelMessage } from './message/channelMessage.entity';
 import { AuthModule } from './auth/auth.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
 
@@ -31,7 +32,8 @@ import { AuthModule } from './auth/auth.module';
 		synchronize: true,
 		logging: true
 	}),
-	  AuthModule],
+	  AuthModule,
+	  ChatModule],
 })
 
   export class AppModule { }
