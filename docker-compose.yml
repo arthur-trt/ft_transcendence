@@ -11,7 +11,7 @@ services:
     networks:
      - db_network
      - api_network
-    restart: on-failure
+    restart: on-failure:3
 
   frontend:
     build: ./frontend
@@ -22,7 +22,7 @@ services:
       - ./.env
     networks:
      - api_network
-    restart: on-failure
+    restart: on-failure:3
 
   caddy:
     image: caddy:alpine
@@ -34,7 +34,7 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
     networks:
       - api_network
-    restart: on-failure
+    restart: on-failure:3
 
   db:
     container_name: postgres
