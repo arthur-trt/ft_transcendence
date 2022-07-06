@@ -1,4 +1,4 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable, Req } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UUIDVersion } from 'class-validator';
 import { channel } from 'diagnostics_channel';
@@ -7,6 +7,7 @@ import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Channel } from './channel.entity';
 import { validate as isValidUUID } from 'uuid';
+import { Request } from 'express';
 
 
 @Injectable()
@@ -16,17 +17,25 @@ export class ChannelService {
 	@Inject(forwardRef(() => UserService)) private readonly userService: UserService)
 	{ }
 
-
-	public async createChannel(name: string, owner: string)
+	/**
+	 * @brief Create channel
+	 * @param name the name of the channel
+	 * @param req the request containing user id
+	 * @returns
+	 */
+	public async createChannel(name: string, @Req() req : Request)
 	{
 		const chan: Channel = new Channel();
 		chan.name = name;
-		chan.owner = await this.userService.getUserByIdentifier(owner);
-		console.log(chan.owner)
+		chan.owner = await this.userService.getUserByRequest(req);
 		await this.channelsRepo.save(chan);
-		return await this.userService.joinChannel(owner, name);;
+		return await this.userService.joinChannel(req, name);
 	}
 
+	/**
+	 * @brief Returns all users of all existing channels
+	 * @returns
+	 */
 	public async getUsersOfChannels() : Promise<Channel[]>
 	{
 		return await this.channelsRepo.createQueryBuilder('Channel')
@@ -35,8 +44,11 @@ export class ChannelService {
 		.getMany();
 	}
 
-
-	/** Identifier = id ou  */
+	/**
+	 * @brief Find a channel by its name or its id
+	 * @param channelIdentifier (id or name)
+	 * @returns Channel object corresponding
+	 */
 	public async getChannelByIdentifier(channelIdentifier : string) : Promise<Channel>
 	{
 		let chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages'] });

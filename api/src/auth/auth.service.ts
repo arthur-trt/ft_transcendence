@@ -20,6 +20,9 @@ export class AuthService {
 			sub: user.id,
 		}
 
+/*
+**	Token we will need to authenticate : 
+*/
 		return {
 			access_token: this.jwtService.sign(payload)
 		};

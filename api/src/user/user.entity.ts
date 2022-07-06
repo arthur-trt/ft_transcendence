@@ -43,6 +43,12 @@ export class User extends BaseEntity {
 	})
 	TwoFA_secret: string;
 
+	@Column({
+		type: 'boolean',
+		default: false
+	})
+	TwoFA_enable: boolean;
+
 	@ManyToMany(() => Channel, channel => channel.users)
 	@JoinTable()
 	channels: Channel[];

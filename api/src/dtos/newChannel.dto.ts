@@ -5,8 +5,5 @@ export class newChannelDto {
 	/* Channel Name */
 	@IsNotEmpty()
 	readonly chanName: string;
-
-	/* Future owner/creator name/id */
-	@IsNotEmpty()
-	readonly userIdentifier: string;
+	
 }

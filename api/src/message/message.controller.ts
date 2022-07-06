@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, Query, UsePipes, ValidationPipe} from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Query, UsePipes, ValidationPipe, Req, UseGuards} from '@nestjs/common';
 import { UUIDVersion } from 'class-validator';
 import { channel } from 'diagnostics_channel';
 import { Channel } from 'src/channel/channel.entity';
@@ -8,6 +8,8 @@ import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto';
 import { BaseEntity } from 'typeorm';
 import { channelMessage } from './channelMessage.entity';
 import { MessageService } from './message.service';
+import { Request } from 'express';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 
 @Controller('message')
@@ -16,16 +18,17 @@ export class MessageController {
 
 	constructor(private messageService: MessageService) { }
 
-/*
-** CHANNEL
-*/
+	/*
+	** CHANNEL
+	*/
+	
 	@Post('channel/sendMsg/:identifier')
 	@UsePipes(ValidationPipe)
-	public async sendMessage(@Param('identifier') chanIdentifier : string, @Body() query : sendChannelMessageDto)
+	@UseGuards(JwtAuthGuard)
+	public async sendMessage(@Param('identifier') chanIdentifier : string, @Req() req : Request, @Body() query : sendChannelMessageDto)
 	{
-		const sender = query.sender;
 		const msg = query.msg;
-		return await this.messageService.sendMessageToChannel(chanIdentifier, sender, msg);
+		return await this.messageService.sendMessageToChannel(chanIdentifier, req, msg);
 	}
 
 	@Get('channel/getMsg/:identifier') // can be string or uuid but all are type of string
@@ -35,27 +38,27 @@ export class MessageController {
 		return  messages;
 	}
 
-/*
-** PRIVATE
-*/
+	/*
+	** PRIVATE
+	*/
 
 	@Post('privateMessage/sendMsg')
 	@UsePipes(ValidationPipe)
-	public async privateMessage(@Body() query : sendPrivateMessageDto)
+	@UseGuards(JwtAuthGuard)
+	public async privateMessage(@Req() req : Request, @Body() query : sendPrivateMessageDto)
 	{
-		const sender = query.sender;
 		const target = query.target;
 		const msg = query.msg;
-		return await this.messageService.sendPrivateMessage(sender, target, msg);
+		return await this.messageService.sendPrivateMessage(req, target, msg);
 	}
 
 	@Get('privateMessage/')
 	@UsePipes(ValidationPipe)
-	public async getPrivateMessage(@Body() query : getPrivateMessageDto)
+	@UseGuards(JwtAuthGuard)
+	public async getPrivateMessage(@Req() req : Request, @Body() query : getPrivateMessageDto)
 	{
-		const sender = query.sender;
 		const target = query.target;
-		return await this.messageService.getPrivateMessage(sender, target);
+		return await this.messageService.getPrivateMessage(req, target);
 	}
 
 

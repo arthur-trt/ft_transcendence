@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { deepStrictEqual } from 'assert';
 import { UUIDVersion } from 'class-validator';
+import { Request } from 'express';
 import { Channel } from 'src/channel/channel.entity';
 import { ChannelService } from 'src/channel/channel.service';
 import { MessageDto } from 'src/dtos/message.dto';
@@ -21,50 +22,63 @@ export class MessageService {
 		@Inject(forwardRef(() => ChannelService)) private readonly chanService: ChannelService)
 	{ }
 
-	public async sendMessageToChannel(chanIdentifier : string, sender : string, msg : string) {
+	/*
+	**	CHANNEL MESSAGES
+	*/
 
-		console.log("HELLO")
-		const user: User = await this.userService.getUserByIdentifier(sender);
-		console.log(user);
-		const channel: Channel = await this.chanService.getChannelByIdentifier(chanIdentifier);
-		console.log(channel);
+	/**
+	 * @brief Send a message to channel
+	 * @param chanIdentifier
+	 * @param sender
+	 * @param msg
+	 * @returns the Channel object containing its new message in its messages relationship
+	 */
+	public async sendMessageToChannel(chanIdentifier : string, sender : Request, msg : string) : Promise<Channel>
+	{
 
-		console.log('')
+		const user : User = await this.userService.getUserByRequest(sender);
+		const channel : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier);
 		const newMessage = await this.chatRepo.save
 		(
 			{
 				sender: user,
-				message: msg, // si j'inclus target ca va faire un pb...
+				message: msg,
 			}
 		)
-
 		channel.messages = [...channel.messages, newMessage]; /* if pb of is not iterable, it is because we did not get the
 		 ealtions in the find one */
 		return await channel.save();
 	}
 
 
-
-
-
-	public async getMessage(chanIdentifier: string)
+	/**
+	 * @brief get messages from a specific channel
+	 * @param chanIdentifier
+	 * @returns the Channel with relation to its message
+	 */
+	public async getMessage(chanIdentifier: string) : Promise<Channel>
 	{
 		let chan : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
-		const msgs = this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier }).leftJoinAndSelect("chan.messages", "messages").getMany();
+		const msgs = this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier }).leftJoinAndSelect("chan.messages", "messages").getOne();
 		return msgs;
 	}
 
+	/*
+	**	PRIVATE MESSAGES
+	*/
 
-	/* Private */
-	public async sendPrivateMessage(sender: string, target: string, msg: string) {
+	/**
+	 * @brief send private message to a target
+	 * @param req the request containing user id
+	 * @param target
+	 * @param msg
+	 * @returns array of all private messages
+	 */
+	public async sendPrivateMessage(req: Request, target: string, msg: string) : Promise<privateMessage[]> {
 
-		console.log("HELLO");
-		const src: User = await this.userService.getUserByIdentifier(sender);
-		console.log(src);
-		const dest: User = await this.userService.getUserByIdentifier(target);
-		console.log(dest);
-
-		const newMessage: privateMessage = await this.pmRepo.save(
+		const src : User = await this.userService.getUserByRequest(req);
+		const dest : User = await this.userService.getUserByIdentifier(target);
+		const newMessage : privateMessage = await this.pmRepo.save(
 		{
 			sender: src.id,
 			target: dest.id,
@@ -76,12 +90,17 @@ export class MessageService {
 	}
 
 
-	public async getPrivateMessage(sender: string, target: string)
+	/**
+	 * @brief get Private messages between two users
+	 * @param req the request containing user id
+	 * @param target
+	 * @returns private messages between two users
+	 */
+	public async getPrivateMessage(req: Request, target: string) : Promise<privateMessage[]>
 	{
-		let user1: User = await this.userService.getUserByIdentifier(sender);
+		let user1: User = await this.userService.getUserByRequest(req);
 		let user2: User = await this.userService.getUserByIdentifier(target);
 
-		let test: UUIDVersion | string = user1.id;
 		const msgs = this.pmRepo.createQueryBuilder("PM")
 			.leftJoinAndMapOne("PM.sender", User, 'users', 'users.id = PM.sender')
 			.leftJoinAndMapOne("PM.target", User, 'usert', 'usert.id = PM.target')
@@ -99,11 +118,11 @@ export class MessageService {
 				'PM.target',
 				'PM.message',
 				'users.name',
-				'usert.name', // ici quíl faudra ajouter les photos ! 
+				'users.avatar_url',
+				'usert.name',
+				'usert.avatar_url'
 			  ])
 			.getMany();
 		return msgs;
 	}
-
-
 }

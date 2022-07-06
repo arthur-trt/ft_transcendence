@@ -82,8 +82,7 @@ export class UserService {
 			 user = await this.userRepo.findOne({
 			where: {id: userIdentifier},
 			relations: ['channels']
-			 });
-
+			});
 		if (!user)
 			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 		return user;
@@ -103,19 +102,16 @@ export class UserService {
 
 	public async joinChannel(username: string, channelname: string)
 	{
-		console.log ("Username : " + username)
-		const user = await this.userRepo.findOne({ where: { name: username }, relations : ['channels'] }); /* Pay attention to load relations !!! */
-		if (!user) {
-			throw new HttpException('User Not Found in JoinChannel', 404);
-		}
-		console.log("USER :" + user);
-		const channel = await this.chanService.getChannelByIdentifier(channelname);
-
-		if (!channel)
+		const user = await this.getUserByRequest(req);
+		let channel: Channel;
+		try
 		{
-			return this.chanService.createChannel(channelname, username);
+			channel = await this.chanService.getChannelByIdentifier(channelname);
 		}
-		console.log("CHANNEL :" + channel);
+		catch (err)
+		{
+			return await this.chanService.createChannel(channelname, req);
+		}
 		user.channels = [...user.channels, channel]; /* if pb of is not iterable, it is because we did not get the realtions in the find one */
 		return await user.save();
 	}

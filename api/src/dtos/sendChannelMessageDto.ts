@@ -12,9 +12,5 @@ import { ManyToMany } from "typeorm";
 export class sendChannelMessageDto
 {
 	@IsNotEmpty()
-	sender: string;
-
-	@IsNotEmpty()
 	msg: string;
-
 }
