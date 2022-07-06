@@ -24,8 +24,9 @@ services:
      - api_network
     restart: on-failure
 
-  reverse-proxy:
+  caddy:
     image: caddy:alpine
+    container_name: caddy
     ports:
       - 8080:8080
       - 4443:4443

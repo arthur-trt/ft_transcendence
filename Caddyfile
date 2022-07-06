@@ -3,13 +3,28 @@
 	http_port	8080
 	https_port	4443
 	auto_https	disable_redirects
+	servers :4443 {
+		protocol {
+			experimental_http3
+		}
+	}
+	servers :8080 {
+		protocol {
+			experimental_http3
+		}
+	}
 
 }
 
 http://localhost:8080, https://localhost:4443 {
-	handle_path /api* {
-		reverse_proxy	api:3000
+	handle_path /api {
+		reverse_proxy		api:3000
 	}
+
+	handle_path /api/* {
+		reverse_proxy		api:3000
+	}
+
 	reverse_proxy		frontend:3000
 }
 

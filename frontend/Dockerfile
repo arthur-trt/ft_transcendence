@@ -1,7 +1,7 @@
 FROM	node:alpine
 
 
-WORKDIR	/api/
+WORKDIR	/frontend/
 COPY	./entrypoint.sh ./entrypoint.sh
 
 CMD		["ash", "/api/entrypoint.sh"]
