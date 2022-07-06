@@ -4,8 +4,6 @@ services:
   api:
     build: ./api
     container_name: api
-    ports:
-      - 3000:3000
     volumes:
      - ./api:/api:cached
     env_file:
@@ -13,6 +11,28 @@ services:
     networks:
      - db_network
      - api_network
+    restart: on-failure
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    volumes:
+     - ./frontend:/frontend:cached
+    env_file:
+      - ./.env
+    networks:
+     - api_network
+    restart: on-failure
+
+  reverse-proxy:
+    image: caddy:alpine
+    ports:
+      - 8080:8080
+      - 4443:4443
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    networks:
+      - api_network
     restart: on-failure
 
   db:
