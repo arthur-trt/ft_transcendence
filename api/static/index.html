@@ -18,6 +18,16 @@
 		section.alerts{
 			grid-area: alerts;
 		}
+
+		.tab.row {
+			padding-top : 20px;
+		}
+
+		.tab-btn.active {
+			background: blue;
+			color: white;
+		}
+		
 	</style>
 </head>
 <body> Testing </body>
@@ -31,16 +41,22 @@
 	<section class="chat">
 
 
-
-
-
 <h1>TESTER</h1>
 <form>
 	<input v-model="text" type="text"/>
 	<button type="submit" @click.prevent="sendChatMessage()">send</button>
 </form>
+
+<div class="tab-row">
+	<button class="tab-btn" :class="{ active : activeRoom == 'general' } " @click="activeRoom = 'general'">General</button>
+	<button class="tab-btn" :class="{ active : activeRoom == 'random' } " @click="activeRoom = 'random'">Random</button>
+
+</div>
+<div class ="tab-row">
+	Status : {{ isMemberOfActiveRoom ? 'Joined' : 'NOT JOINED' }} <button @click="toggleRoomMembership()"> {{ isMemberOfActiveRoom ? 'Leave' : 'Join' }} </button>
+</div>
 <p>
-	<li v-for="msg of messages">
+	<li v-for="msg of messages[activeRoom]">
 		<strong> {{ msg.sender }} : </strong>  {{ msg.message }}
 	</li>
 </p>
@@ -54,23 +70,54 @@
 			data : {
 				username : "",
 				text: "",
-				messages: [],
+				messages: {
+					general: [],
+					random: []
+				},
+				rooms: {
+					general: false,
+					random: false,
+				},
 				socket: { chat: null, alerts: null },
-				alerts: []
+				alerts: [],
+				activeRoom: 'general'
 			},
 			methods : {
 				sendChatMessage() {
+					// Check if user is member
+					if (this.isMemberOfActiveRoom)
+					{
+						this.socket.chat.emit('chatToServer', { sender : this.username , message : this.text, room: this.activeRoom } );
+					}
+					else
+					{
+						alert("You must be member of the active room !! ")
+					}
 					console.log("send " + this.text); // this.text = the payload
-					this.socket.chat.emit('chatToServer', { sender : this.username , message : this.text } );
 					this.text = "";
 				},
 				receiveChatMessage(msg) {
 					console.log("recv " + msg);
-					this.messages.push(msg); // adding a message to chat
+					this.messages[msg.room].push(msg); // adding a message to chat
 				},
 				receiveAlertMessage(msg) {
 					console.log("recv " + msg);
 					this.alerts.push(msg); // adding an alert
+				},
+				toggleRoomMembership() {
+					if (this.isMemberOfActiveRoom)
+					{
+						this.socket.chat.emit('Leave Room', this.activeRoom)
+					}
+					else
+					{
+						this.socket.chat.emit('Join Room', this.activeRoom)
+					}
+				}
+			},
+			computed : {
+				isMemberOfActiveRoom() {
+					return this.rooms[this.activeRoom];
 				}
 			},
 			created : function() { // creatin hok
@@ -79,7 +126,20 @@
 					this.socket.alert = io('http://localhost:3000/alert'); // namespace
 					this.socket.chat.on('chatToClient', (msg) => {
 					this.receiveChatMessage(msg);
-				}) // listener
+				}) // listener that matche gateway emit event
+
+				this.socket.chat.on('init', () =>
+				{
+					this.toggleRoomMembership();
+				});
+				this.socket.chat.on('Joined Room', (room) =>
+				{
+					this.rooms[room] = true;
+				});
+				this.socket.chat.on('Left Room', (room) =>
+				{
+					this.rooms[room] = false;
+				});
 				this.socket.alert.on('alertToClient', (msg) => {
 					this.receiveAlertMessage(msg);
 				} // listener

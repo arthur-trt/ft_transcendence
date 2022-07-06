@@ -16,6 +16,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	handleConnection(client: Socket, ...args: any[]) {
+		client.emit('init'); // answer to client on "On"
 		this.logger.log(`connection ! ${client.id}`)
 	}
 
@@ -24,10 +25,23 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage('chatToServer')
-	handleMessage(client: Socket, message: { sender: string, message: string }) {
-		// return { event : 'msgToClient', data: "Recu " + text}
-		///	client.emit('msg to client', text); */
-		return this.wss.emit('chatToClient', message);
-		//return 'Hello world!'; */
+	handleMessage(client: Socket, message: { sender: string, room: string, message: string }) {
+		return this.wss.to(message.room).emit('chatToClient', message);
 	}
+
+	@SubscribeMessage('Join Room')
+	handleJoinRoom(client: Socket, room: string)
+	{
+		this.logger.log("HANDLE JOIN ROOM"+ room)
+		client.join(room);
+		client.emit('Joined Room', room); // answer to client on "On"
+	}
+
+	@SubscribeMessage('Leave Room')
+	handleLeaveRoom(client: Socket, room: string)
+	{
+		client.leave(room);
+		client.emit('Left Room', room);
+	}
+
 }
