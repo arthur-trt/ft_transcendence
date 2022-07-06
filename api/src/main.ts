@@ -9,7 +9,7 @@ import { join } from 'path'
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 	app.useStaticAssets(join(__dirname, '..', 'static'));
-  app.useGlobalPipes(new ValidationPipe());
+  	app.useGlobalPipes(new ValidationPipe());
   const config = new DocumentBuilder()
     .setTitle('API example')
     .setDescription('The API description')

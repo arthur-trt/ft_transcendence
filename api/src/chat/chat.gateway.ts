@@ -43,5 +43,4 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		client.leave(room);
 		client.emit('Left Room', room);
 	}
-
 }
