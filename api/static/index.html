@@ -1,7 +1,7 @@
 <html>
 <head>
 	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-	<script src="/socket.io/socket.io.js"></script>
+	<script src="http://localhost:3001/websockets/socket.io.js"></script>
 </head>
 <body> Testing </body>
 
@@ -27,7 +27,7 @@
 			},
 			methods : {
 				sendMessage() {
-					console.log("send " + this.text); // this.text = the payload 
+					console.log("send " + this.text); // this.text = the payload
 					this.socket.emit('msgToServer', this.text);
 					this.text = "";
 				},
@@ -38,7 +38,7 @@
 				}
 			},
 			created : function() { // creatin hok
-					this.socket = io('http://localhost:3000');
+					this.socket = io('http://localhost:3001', { path : '/websockets' } );
 					this.socket.on('msgToClient', (msg) => {
 					this.receiveMessage(msg);
 				} // listener

@@ -443,14 +443,11 @@ wher
 
 @nestjs/config
 
-
 See thew dotenv packet to load .env file into
 process.env
 
-
 Error : "TypeError : x is not iterable"
 => Make sure that you loaded reelations in findOne for example.
-
 
 #### Parameters
 
@@ -492,26 +489,67 @@ localhost:3000/te123st
 ##### SQL queries
 
 Create Query Builder tuto :
-https://orkhan.gitbook.io/typeorm/docs/select-query-builder
+<https://orkhan.gitbook.io/typeorm/docs/select-query-builder>
 
 ##### Websockets
 
-- Websockets :
+1. Introduction
 
-- Setting Nest gateways :  https://docs.nestjs.com/websockets/gateways
+Websockets :
 
+- Setting Nest gateways :  <https://docs.nestjs.com/websockets/gateways>
 
 - Sockets.io :
-https://socket.io/fr/docs/v4/ 
+<https://socket.io/fr/docs/v4/>
 
-- Good tutorial specifically for websockets : https://www.youtube.com/watch?v=odOKUGUhgPU
-Another good one : https://www.youtube.com/watch?v=eMc9EsD4uqI&list=PLVfq1luIZbSkICzoA8EuvTskPEROS68i9&index=8
-linked to github https://github.com/ThomasOliver545/real-time-chat-nestjs-angular/blob/726aa89bced98a1adcc9843b42d57945a51b63e0/api/src/chat/gateway/chat.gateway.ts
+- Good tutorial specifically for websockets : <https://www.youtube.com/watch?v=odOKUGUhgPU>
+Another good one : <https://www.youtube.com/watch?v=eMc9EsD4uqI&list=PLVfq1luIZbSkICzoA8EuvTskPEROS68i9&index=8>
+linked to github <https://github.com/ThomasOliver545/real-time-chat-nestjs-angular/blob/726aa89bced98a1adcc9843b42d57945a51b63e0/api/src/chat/gateway/chat.gateway.ts>
 
-Ideas : https://medium.com/@phatdev/build-a-real-time-chat-application-with-websocket-socket-io-redis-and-docker-in-nestjs-499c2513c18
+Ideas : <https://medium.com/@phatdev/build-a-real-time-chat-application-with-websocket-socket-io-redis-and-docker-in-nestjs-499c2513c18>
 
-3. Configuration options for WebSockets Gateway :
-- We can modify listener port.
+2. Configuration options for WebSockets Gateway :
+[The doc](https://socket.io/fr/docs/v4/server-options/)
+
+__a/ ``` PORT ``` We can modify listener port. In gateway file :__
+
+```@WebSocketGateway(3001, { cors: true})```
 
 Make sure :
-- You updated
+
+- You updated your socket.io script with the good port, eg:
+ ```<script src="http://localhost:3001/socket.io/socket.io.js"></script>```
+
+- You updated listener for socket in html :
+
+``` js
+   created : function() { // creatin hook in vue JS
+     this.socket = io('http://localhost:3001');
+     this.socket.on('msgToClient', (msg) => {
+     this.receiveMessage(msg);
+    }
+```
+
+If error because of CORS error on Firefox for ex, just put cors true :
+```@WebSocketGateway(3001, { cors: true})```
+
+__b/ ``` path ``` :__
+
+Changes the fefault path for /socket.io
+We change :
+```@WebSocketGateway(3001, { path: '/websockets', cors: true})```
+
+Initially, we had :
+```<script src="http://localhost:3001/socket.io/socket.io.js"></script>```
+
+now we will have
+```<script src="http://localhost:3001/websockets/socket.io.js"></script>```
+and
+```this.socket = io('http://localhost:3001',{ path : '/websockets' } );```
+to specify ( default value was indeed  /socket.io/ [see](https://socket.io/fr/docs/v4/server-options/#path))
+
+__c/ Serve client__
+Did not really understand why we could not be able to serve client, but anyway, this is possible.
+
+__d/ Namespace__ [video](https://www.youtube.com/watch?v=z12PXjMDzk8)
+It will be useful if we have several functionnality requiring WebSockets, not to pollute on namespace.

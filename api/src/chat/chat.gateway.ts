@@ -4,7 +4,7 @@ import { text } from "express";
 import {Server, Socket} from 'socket.io'
 
 
-@WebSocketGateway()
+@WebSocketGateway(3001, { path: '/websockets', cors: true})
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
 	@WebSocketServer() wss: Server;
