@@ -100,7 +100,7 @@ export class UserService {
 		return this.userRepo.save(user);
 	}
 
-	public async joinChannel(username: string, channelname: string)
+	public async joinChannel(req: Request, channelname: string)
 	{
 		const user = await this.getUserByRequest(req);
 		let channel: Channel;
