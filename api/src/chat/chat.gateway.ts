@@ -26,12 +26,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 		client.data.user =
 		{
-			userId: 'b7274199-3a5c-4c0d-8f5b-589b005025f4',
-			username: 'elisamuller'
+			userId: 'f2672880-47c8-480f-b1f5-ce7ba51793f2',
+			username: 'wisozkanais'
 
 		};
 
-		const user : User = await this.userService.getUserByIdentifier(client.data.user.username)
+		const user : User = await this.userService.getUserByIdentifier(client.data.user.userId)
 		client.data.user = user;
 		var util = require('util');
 
@@ -39,7 +39,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.logger.log({ handshake: client.handshake })
 		this.logger.log({ request: util.inspect(client.request) })
 
-		this.logger.log('connection !' + client.data.user)
+		this.logger.log('connection !' + JSON.stringify(client.data.user))
 	}
 
 	handleDisconnect(client: Socket) {
@@ -56,7 +56,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	handleJoinRoom(client: Socket, data : { room: string, user: string } )
 	{
 		this.logger.log("HANDLING " + data.user + " JOINING ROOM : " + data.room)
-		//this.userService.joinChannel(client.id, room);
+		this.userService.joinChannel(<User>client.data.user, data.room);
 		client.join(data.room);
 		this.logger.log(client.data);
 		client.emit('Joined Room', data.room); // answer to client on "On"

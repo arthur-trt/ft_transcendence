@@ -6,11 +6,13 @@ import { Request } from 'express';
 import { newChannelDto } from 'src/dtos/newChannel.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { UserService } from 'src/user/user.service';
+import { User } from 'src/user/user.entity';
 
 @Controller('channel')
 export class ChannelController {
 
-	constructor(private chanService: ChannelService) { }
+	constructor(private chanService: ChannelService, private userService: UserService) { }
 
 	@Get()
 	public async getChans() : Promise<Channel[]>
@@ -25,7 +27,8 @@ export class ChannelController {
 	{
 		const chanName: string = query.chanName;
 		console.log(req)
-		return await this.chanService.createChannel(chanName, req);
+		const user: User = await this.userService.getUserByRequest(req);
+		return await this.chanService.createChannel(chanName, user);
 	}
 
 

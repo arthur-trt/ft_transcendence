@@ -49,7 +49,8 @@ export class UserController
 	public async joinChannel(@Req() req: Request, @Body() joinRequest: joinChannelDto)
 	{
 		const channelname = joinRequest.chanName;
-		return this.userService.joinChannel(req, channelname);
+		const user: User = await this.userService.getUserByRequest(req);
+		return this.userService.joinChannel(user, channelname);
 	}
 
 	@Patch('mail')

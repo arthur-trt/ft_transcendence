@@ -22,7 +22,8 @@ services:
     networks:
      - db_network
     volumes:
-      - ${DB_PATH}:/var/lib/postgresql/data:cached
+      #- ${DB_PATH}:
+      - /var/lib/postgresql/data
 
 ##
 # DEBUG CONTAINERS --profile debug

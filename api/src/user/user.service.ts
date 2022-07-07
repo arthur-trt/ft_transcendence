@@ -95,15 +95,32 @@ export class UserService {
 		return this.userRepo.save(user);
 	}
 
-	/**
-	 *
-	 * @param req the request containing user id
-	 * @param channelname the channel name
-	 * @returns User object containing its newly inserted channel
-	 */
-	public async joinChannel(req : Request, channelname: string) : Promise<User>
+	// /**
+	//  *
+	//  * @param req the request containing user id
+	//  * @param channelname the channel name
+	//  * @returns User object containing its newly inserted channel
+	//  */
+	// public async joinChannel(req : Request, channelname: string) : Promise<User>
+	// {
+	// 	const user = await this.getUserByRequest(req);
+	// 	let channel: Channel;
+	// 	try
+	// 	{
+	// 		channel = await this.chanService.getChannelByIdentifier(channelname);
+	// 	}
+	// 	catch (err)
+	// 	{
+	// 		return await this.chanService.createChannel(channelname, req);
+	// 	}
+	// 	user.channels = [...user.channels, channel]; /* if pb of is not iterable, it is because we did not get the realtions in the find one */
+	// 	return await user.save();
+	// }
+
+	public async joinChannel(user : User, channelname: string) : Promise<User>
 	{
-		const user = await this.getUserByRequest(req);
+		//const user = await this.getUserByRequest(req);
+		console.log(user);
 		let channel: Channel;
 		try
 		{
@@ -111,7 +128,9 @@ export class UserService {
 		}
 		catch (err)
 		{
-			return await this.chanService.createChannel(channelname, req);
+			console.log("CREATING ROOM " + channelname + "FROM " + user.name);
+
+			return await this.chanService.createChannel(channelname, user);
 		}
 		user.channels = [...user.channels, channel]; /* if pb of is not iterable, it is because we did not get the realtions in the find one */
 		return await user.save();
