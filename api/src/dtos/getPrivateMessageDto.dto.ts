@@ -4,13 +4,8 @@ import { User } from "src/user/user.entity";
 import { ManyToMany } from "typeorm";
 
 
-//message/channel/sendMsg/:chanName
-//+ @Query sender=<user>&msg=<message>
-
-//privateMessages
-
-export class sendChannelMessageDto
+export class getPrivateMessageDto
 {
 	@IsNotEmpty()
-	msg: string;
+	target : string;
 }
