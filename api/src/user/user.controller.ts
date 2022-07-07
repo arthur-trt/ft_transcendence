@@ -9,49 +9,66 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 
 /** https://stackoverflow.com/questions/54958244/how-to-use-query-parameters-in-nest-js?answertab=trending#tab-top PARMAS AND TOUTES  */
-@ApiTags('user')
+@ApiTags('User')
 @Controller('user')
 export class UserController
 {
 	constructor(private userService: UserService) { }
 
+	/**
+	 *
+	 * Returns an array of all users in database
+	 * @returns an array of users
+	 */
+
 	@ApiOperation({ summary: "Get all users" })
-	@Get('/') /* Get decorator -> we can add subroutes in () */
+	@Get('/')
 	async getUsers() : Promise<User[]> {
 		return await this.userService.getUsers();
 	}
 
+	/**
+	 *
+	 * Get info about user identified by uuid (also works when providing
+	 * nickname)
+	 * @param uuid the id or nickname
+	 */
+
+	@Get(':uuid')
 	@ApiOperation({ summary: "Get all info about a user identified by :uuid" })
 	@ApiResponse({ status: 200, description: "User is returned normally" })
 	@ApiResponse({ status: 404, description: "User is not found" })
-	@Get(':uuid')
 	async getUser(@Param('uuid') uuid: string) : Promise<User> {
 		return await this.userService.getUserByIdentifier(uuid);
 	}
 
-	//@Get(':name') /* Get decorator -> we can add subroutes in () */
-	//async getCars(@Param('name') name: string): Promise<User> {
-	//	console.log('requested name : '+ name)
-	//	return await this.userService.getUserByName(name);
-	//}
+	/**
+	 *
+	 * Join channel from user.
+	 *
+	 * @param req the request containing user id
+	 * @param joinRequest the joinChannelDto containing the channel name
+	 */
 
-	// localhost:3000/user/createUser
-	//@Post('createUser')
-	//@UsePipes(ValidationPipe)
-	//public async postUser(@Body() user: UserDto) {
-	//	return this.userService.createUser(user);
-	//}
-
-	@Post('joinChannel') /** query : ?param=value&param=342......etc */
+	@Post('joinChannel')
 	@UsePipes(ValidationPipe)
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth()
+	@ApiOperation({ summary: "Join a channel" })
+	@ApiResponse({ status: 200, description: "User joined normally" })
+	@ApiResponse({ status: 404, description: "User is not found/channel not created" })
 	public async joinChannel(@Req() req: Request, @Body() joinRequest: joinChannelDto)
 	{
 		const channelname = joinRequest.chanName;
 		return this.userService.joinChannel(req, channelname);
 	}
 
+	/**
+	 * Update mail of the connected user.
+	 * @param req
+	 * @param mail
+	 * @returns
+	 */
 	@Patch('mail')
 	@ApiOperation({ summary: "Update mail on connected account" })
 	@ApiResponse({ status: 200, description: "Mail changed"})
