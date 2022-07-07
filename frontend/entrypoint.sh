@@ -1,5 +1,5 @@
 #!/bin/ash
 
-npm install && npm audit fix
+npm install
 
-exec npm run start:dev
+exec npm run start
