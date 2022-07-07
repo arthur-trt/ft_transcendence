@@ -58,4 +58,8 @@ export class ChannelService {
 			throw new HttpException('Channel not found (id or name)', HttpStatus.NOT_FOUND);
 		return chan;
 	}
+
+	public async addToChannel(clientName: string) {
+		
+	}
 }

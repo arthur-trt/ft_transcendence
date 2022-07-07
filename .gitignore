@@ -2,5 +2,5 @@
 .*.secret*
 private/
 .vscode/*
-docker-compose.yml
+frontend/
 

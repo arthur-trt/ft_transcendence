@@ -27,7 +27,7 @@
 			background: blue;
 			color: white;
 		}
-		
+
 	</style>
 </head>
 <body> Testing </body>
@@ -107,11 +107,11 @@
 				toggleRoomMembership() {
 					if (this.isMemberOfActiveRoom)
 					{
-						this.socket.chat.emit('Leave Room', this.activeRoom)
+						this.socket.chat.emit('Leave Room', { room : this.activeRoom, user: this.username } )
 					}
 					else
 					{
-						this.socket.chat.emit('Join Room', this.activeRoom)
+						this.socket.chat.emit('Join Room', { room : this.activeRoom, user : this.username } )
 					}
 				}
 			},

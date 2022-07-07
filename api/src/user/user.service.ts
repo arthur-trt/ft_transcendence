@@ -18,7 +18,8 @@ export class UserService {
 		@Inject(forwardRef(() => ChannelService)) private chanService: ChannelService)
 	{}
 
-	public async getUserByRequest (req: Request) {
+	public async getUserByRequest(req: Request) {
+		console.log({ REQ_USER : req.user })
 		const user: User = await this.getUserByIdentifier(JSON.parse(JSON.stringify(req.user)).userId);
 		if (!user)
 			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
@@ -100,7 +101,7 @@ export class UserService {
 	 * @param channelname the channel name
 	 * @returns User object containing its newly inserted channel
 	 */
-	public async joinChannel(req: Request, channelname: string) : Promise<User>
+	public async joinChannel(req : Request, channelname: string) : Promise<User>
 	{
 		const user = await this.getUserByRequest(req);
 		let channel: Channel;
