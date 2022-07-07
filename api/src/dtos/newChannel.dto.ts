@@ -1,10 +1,8 @@
-import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty } from "class-validator";
 
 export class newChannelDto {
 
-	/* Channel Name */
-	@ApiProperty()
+	/** Channel Name */
 	@IsNotEmpty()
 	readonly chanName: string;
 
