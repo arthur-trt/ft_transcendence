@@ -2,9 +2,9 @@ import { Controller, Post, Get, Body, Param, Query, UsePipes, ValidationPipe, Re
 import { UUIDVersion } from 'class-validator';
 import { channel } from 'diagnostics_channel';
 import { Channel } from 'src/channel/channel.entity';
-import { getPrivateMessageDto } from 'src/dtos/getPrivateMessageDto';
-import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto';
-import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto';
+import { getPrivateMessageDto } from 'src/dtos/getPrivateMessageDto.dto';
+import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto.dto';
+import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
 import { BaseEntity } from 'typeorm';
 import { channelMessage } from './channelMessage.entity';
 import { MessageService } from './message.service';
@@ -21,7 +21,7 @@ export class MessageController {
 	/*
 	** CHANNEL
 	*/
-	
+
 	@Post('channel/sendMsg/:identifier')
 	@UsePipes(ValidationPipe)
 	@UseGuards(JwtAuthGuard)
