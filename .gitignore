@@ -2,4 +2,3 @@
 .*.secret*
 private/
 .vscode/*
-docker-compose.yml

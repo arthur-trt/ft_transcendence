@@ -1,0 +1,70 @@
+version: "3"
+
+services:
+  api:
+    build: ./api
+    container_name: api
+    volumes:
+     - ./api:/api:cached
+    env_file:
+      - ./.env
+    networks:
+     - db_network
+     - api_network
+    restart: on-failure:3
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    volumes:
+     - ./frontend:/frontend:cached
+    env_file:
+      - ./.env
+    networks:
+     - api_network
+    restart: on-failure:3
+
+  caddy:
+    image: caddy:alpine
+    container_name: caddy
+    ports:
+      - 8080:8080
+      - 4443:4443
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    networks:
+      - api_network
+    restart: on-failure:3
+
+  db:
+    container_name: postgres
+    image: postgres:alpine
+    restart: always
+    env_file:
+      - ./.env
+    networks:
+     - db_network
+    volumes:
+      - ${DB_PATH}:/var/lib/postgresql/data:cached
+
+##
+# DEBUG CONTAINERS --profile debug
+##
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    env_file:
+      - ./.env
+    networks:
+      - db_network
+    volumes:
+      - ${PGADMIN_PATH}:/var/lib/pgadmin:cached
+    ports:
+      - "5050:80"
+    profiles:
+      - debug
+
+networks:
+  db_network:
+  api_network:
