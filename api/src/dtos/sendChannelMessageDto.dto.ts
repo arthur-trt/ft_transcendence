@@ -4,9 +4,9 @@ import { User } from "src/user/user.entity";
 import { ManyToMany } from "typeorm";
 
 
-export class getPrivateMessageDto
-{
 
+export class sendChannelMessageDto
+{
 	@IsNotEmpty()
-	target : string;
+	msg: string;
 }

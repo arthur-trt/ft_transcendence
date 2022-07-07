@@ -6,7 +6,9 @@ import { Request } from 'express';
 import { newChannelDto } from 'src/dtos/newChannel.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('channel')
 @Controller('channel')
 export class ChannelController {
 

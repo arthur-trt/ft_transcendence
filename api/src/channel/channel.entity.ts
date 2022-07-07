@@ -19,7 +19,7 @@ export class Channel extends BaseEntity {
 	@ManyToOne(() => User) // on link aps, est ce que ca va marcher ?
 	owner: User; // slt son nom ou tout lúser ? a discuter
 
-	/** Tous les users */
+	/** Tous les users du channel */
 	@ManyToMany(() => User, user => user.channels)
 	@JoinTable()		/* owner is channels */
 	users: User[]
