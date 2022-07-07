@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { SwaggerModule, DocumentBuilder, SwaggerDocumentOptions } from '@nestjs/swagger';
 import * as passport from 'passport';
 
 async function bootstrap() {
@@ -12,8 +12,12 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('api')
     .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
+	.build();
+
+	const options: SwaggerDocumentOptions = {
+		deepScanRoutes: true
+	};
+  const document = SwaggerModule.createDocument(app, config, options);
   SwaggerModule.setup('docs', app, document);
 
   await app.listen(3000);
