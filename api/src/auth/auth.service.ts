@@ -5,7 +5,7 @@ import { authenticator } from 'otplib';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Request, Response } from 'express';
-import { toFileStream } from 'qrcode';
+import { toFileStream, toDataURL } from 'qrcode';
 
 @Injectable()
 export class AuthService {
@@ -14,25 +14,35 @@ export class AuthService {
 		private jwtService: JwtService
 	) {}
 
-	public login (user: User) {
+	public login (user: User, res: Response) {
 		const payload = {
 			username: user.name,
 			sub: user.id,
 		}
 
-/*
-**	Token we will need to authenticate : 
-*/
-		return {
+		if (user.TwoFA_enable)
+		{
+			res.redirect('/authenticate')
+		}
+
+		res.json({
 			access_token: this.jwtService.sign(payload)
-		};
+		})
 	}
 
 	public async generateTwoFactorAuthtificationSecret (req: Request) {
-		const user			= await this.userService.getUserByRequest(req);
-		const secret		= authenticator.generateSecret();
-		const optAuthUrl	= authenticator.keyuri(
-			user.mail,
+		const	user		= await this.userService.getUserByRequest(req);
+		let		secret;
+		if (user.TwoFA_secret != null)
+		{
+			secret			= user.TwoFA_secret;
+		}
+		else
+		{
+			secret			= authenticator.generateSecret();
+		}
+		const	optAuthUrl	= authenticator.keyuri(
+			user.name,
 			process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME,
 			secret
 		);
@@ -47,5 +57,19 @@ export class AuthService {
 	public async pipeQrCodeStream (stream: Response, optAuthUrl: string)
 	{
 		return toFileStream(stream, optAuthUrl);
+	}
+
+	public async pipeQrCodeURL (text: string)
+	{
+		return toDataURL(text);
+	}
+
+	public async isTwoFactorCodeValid (code: string, req: Request)
+	{
+		const user	= await this.userService.getUserByRequest(req);
+		return (authenticator.verify({
+			token: code,
+			secret: user.TwoFA_secret,
+		}));
 	}
 }

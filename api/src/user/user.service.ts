@@ -100,6 +100,13 @@ export class UserService {
 		return this.userRepo.save(user);
 	}
 
+	public async turnOnTwoFactorAuthentication (req: Request)
+	{
+		const user = await this.getUserByRequest(req);
+		user.TwoFA_enable = true;
+		return this.userRepo.save(user);
+	}
+
 	public async joinChannel(req: Request, channelname: string)
 	{
 		const user = await this.getUserByRequest(req);

@@ -1,14 +1,15 @@
-import { Controller, Post, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { Get, Query, Req, Res } from '@nestjs/common';
+import { Controller, Post, UseGuards, Body, HttpStatus, HttpException, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiHideProperty, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Get, Req, Res } from '@nestjs/common';
 import { FortyTwoAuthGuard } from './guards/42-auth.guard';
 import { AuthService } from './auth.service';
-import { User } from 'src/user/user.entity';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { UserService } from 'src/user/user.service';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { twoFaDto } from 'src/dtos/twofa_token.dto';
+import cors from 'cors';
 
 
 @ApiTags('auth')
@@ -27,9 +28,9 @@ export class FortyTwoAuthController {
 
 	@Get('callback')
 	@UseGuards(FortyTwoAuthGuard)
-	async	callback (@Req() req)
+	async	callback (@Req() req, @Res() res)
 	{
-		return this.authService.login(req.user);
+		return this.authService.login(req.user, res);
 	}
 }
 
@@ -43,7 +44,7 @@ export class CheatAuthController {
 	) {}
 
 	@Get('login')
-	async login  () {
+	async login  (@Res() res) {
 		const { data } = await firstValueFrom(this.httpService.get("https://api.namefake.com/"));
 		const fake = JSON.parse(JSON.stringify(data));
 
@@ -55,7 +56,7 @@ export class CheatAuthController {
 			fake.email_u + "@" + fake.email_d
 		)
 
-		return this.authServie.login(user);
+		return this.authServie.login(user, res);
 	}
 
 }
@@ -68,13 +69,55 @@ export class TwoFAAuthController {
 		private authService: AuthService,
 	) {}
 
-	@Post('generate')
+	/**
+	 * Generate a secret key for user
+	 * @param req Request sent by nav containing user object
+	 * @returns secret and base64 encoded qrcode
+	 */
+	@Get('generate')
+	@ApiOperation({ summary: "Generate a QRCode use by application for turn-on 2fa" })
+	@ApiResponse({
+		status: 200,
+		description: "QRCode have been generated",
+		content: {
+			'application/json': {
+			  example: {
+				"qrcode": "<base64_qrcode>",
+				"secret": "<string_secret>"
+			  }
+			},
+		  },
+	})
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	async generate (@Req() req: Request, @Res() res: Response) {
-		const { optAuthUrl } = await this.authService.generateTwoFactorAuthtificationSecret(
+	async generate (@Req() req: Request) {
+		const { secret, optAuthUrl } = await this.authService.generateTwoFactorAuthtificationSecret(
 			req
 		);
+		const qrcode = await this.authService.pipeQrCodeURL(optAuthUrl);
 
-		return this.authService.pipeQrCodeStream(res, optAuthUrl);
+		return {
+			qrcode,
+			secret
+		};
+	}
+
+	@Post('turn-on')
+	@ApiOperation({ summary: "Turn On TwoFA for the connected user if validation code is correct" })
+	@ApiResponse({ status: 201, description: "TwoFA have been enable on user account" })
+	@ApiResponse({ status: 401, description: "Unvalid token sent" })
+	@ApiResponse({ status: 403, description: "User is not logged in" })
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	async turnOnTwoFA (@Req() req: Request, @Body() twofa_token : twoFaDto) {
+		console.log("here");
+		const isValidCode = await this.authService.isTwoFactorCodeValid(
+			twofa_token.token,
+			req
+		);
+		if (!isValidCode)
+			throw new HttpException('Wrong 2FA', HttpStatus.UNAUTHORIZED);
+		await this.userService.turnOnTwoFactorAuthentication(req);
 	}
 }
