@@ -1,0 +1,37 @@
+.header {
+  width: 100%;
+  background-color: black;
+  color: white;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+}
+
+.header h1 {
+  margin-left: 5%;
+}
+
+.auth {
+  margin-top: 5%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth button {
+  border: solid 2px black;
+  border-radius: 5px;
+  color: black;
+  padding: 15px 15px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.auth button:hover{
+  background-color: black;
+  color: white;
+}
