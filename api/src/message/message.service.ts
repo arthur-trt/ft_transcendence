@@ -33,10 +33,8 @@ export class MessageService {
 	 * @param msg
 	 * @returns the Channel object containing its new message in its messages relationship
 	 */
-	public async sendMessageToChannel(chanIdentifier : string, sender : Request, msg : string) : Promise<Channel>
+	public async sendMessageToChannel(chanIdentifier : string, user : User, msg : string) : Promise<Channel>
 	{
-
-		const user : User = await this.userService.getUserByRequest(sender);
 		const channel : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier);
 		const newMessage = await this.chatRepo.save
 		(
@@ -74,16 +72,14 @@ export class MessageService {
 	 * @param msg
 	 * @returns array of all private messages
 	 */
-	public async sendPrivateMessage(req: Request, target: string, msg: string) : Promise<privateMessage[]> {
+	public async sendPrivateMessage(src: User, target: string, msg: string) : Promise<privateMessage[]> {
 
-		const src : User = await this.userService.getUserByRequest(req);
 		const dest : User = await this.userService.getUserByIdentifier(target);
 		const newMessage : privateMessage = await this.pmRepo.save(
 		{
 			sender: src.id,
 			target: dest.id,
 			message : msg,
-
 		}
 		)
 		return await this.pmRepo.find();
@@ -96,9 +92,8 @@ export class MessageService {
 	 * @param target
 	 * @returns private messages between two users
 	 */
-	public async getPrivateMessage(req: Request, target: string) : Promise<privateMessage[]>
+	public async getPrivateMessage(user1: User, target: string) : Promise<privateMessage[]>
 	{
-		let user1: User = await this.userService.getUserByRequest(req);
 		let user2: User = await this.userService.getUserByIdentifier(target);
 
 		const msgs = this.pmRepo.createQueryBuilder("PM")

@@ -23,13 +23,13 @@ export class ChannelService {
 	 * @param req the request containing user id
 	 * @returns
 	 */
-	public async createChannel(name: string, @Req() req : Request)
+	public async createChannel(name: string, user : User)
 	{
 		const chan: Channel = new Channel();
 		chan.name = name;
-		chan.owner = await this.userService.getUserByRequest(req);
+		chan.owner = user;
 		await this.channelsRepo.save(chan);
-		return await this.userService.joinChannel(req, name);
+		return await this.userService.joinChannel(user, name);
 	}
 
 	/**

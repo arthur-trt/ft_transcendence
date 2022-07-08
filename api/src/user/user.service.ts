@@ -102,7 +102,6 @@ export class UserService {
 
 	public async joinChannel(req: Request, channelname: string)
 	{
-		const user = await this.getUserByRequest(req);
 		let channel: Channel;
 		try
 		{
@@ -110,7 +109,7 @@ export class UserService {
 		}
 		catch (err)
 		{
-			return await this.chanService.createChannel(channelname, req);
+			return await this.chanService.createChannel(channelname, user);
 		}
 		user.channels = [...user.channels, channel]; /* if pb of is not iterable, it is because we did not get the realtions in the find one */
 		return await user.save();
