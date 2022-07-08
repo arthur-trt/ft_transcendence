@@ -32,7 +32,7 @@ export class UserService {
 	public async getUsers()
 	{
 		return await this.userRepo.createQueryBuilder('User')
-			.select(["User.id", "User.name", "User.mail"])
+			.select(["User.id", "User.name", "User.mail", "User.avatar_url"])
 			.getMany();
 	}
 
