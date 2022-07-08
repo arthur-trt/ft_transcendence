@@ -7,12 +7,14 @@ import { newChannelDto } from 'src/dtos/newChannel.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UserService } from 'src/user/user.service';
+import { User } from 'src/user/user.entity';
 
 @ApiTags('Channel')
 @Controller('channel')
 export class ChannelController {
 
-	constructor(private chanService: ChannelService) { }
+	constructor(private chanService: ChannelService, private userService: UserService) { }
 
 	/**
 	 * Get all users of all channels.
@@ -42,7 +44,7 @@ export class ChannelController {
 	public async newChannel(@Req() req : Request, @Body() query : newChannelDto)
 	{
 		const chanName: string = query.chanName;
-		console.log(req)
-		return await this.chanService.createChannel(chanName, req);
+		const user: User = await this.userService.getUserByRequest(req);
+		return await this.chanService.createChannel(chanName, user);
 	}
 }
