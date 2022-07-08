@@ -1,7 +1,7 @@
 {
-	http_port	8080
-	https_port	4443
-	auto_https	disable_redirects
+	http_port    8080
+	https_port    4443
+	auto_https    disable_redirects
 	servers :4443 {
 		protocol {
 			experimental_http3
@@ -15,15 +15,40 @@
 
 }
 
+(cors) {
+	@origin{args.0} header Origin {args.0}
+	header @origin{args.0} Access-Control-Allow-Origin "{args.0}"
+	header @origin{args.0} Vary Origin
+}
+
 http://localhost:8080, https://localhost:4443 {
+	import cors https://signin.intra.42.fr
+	import cors https://api.intra.42.fr
+	log {
+		output			stdout
+		level			debug
+		format			console
+	}
+
 	handle /api {
-		reverse_proxy		api:3000
+		reverse_proxy		api:3000 {
+			header_up		+Access-Control-Allow-Origin "*"
+			header_down		+Access-Control-Allow-Origin "*"
+		}
 	}
 
 	handle /api/* {
-		reverse_proxy		api:3000
+
+		reverse_proxy		api:3000 {
+			header_up		+Access-Control-Allow-Origin "*"
+			header_down		+Access-Control-Allow-Origin "*"
+		}
 	}
 
-	reverse_proxy		frontend:3000
+	handle {
+		reverse_proxy		frontend:3000 {
+			header_up		+Access-Control-Allow-Origin "*"
+			header_down		+Access-Control-Allow-Origin "*"
+		}
+	}
 }
-

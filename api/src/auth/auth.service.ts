@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Res } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { access } from 'fs';
 import { authenticator } from 'otplib';
@@ -14,18 +14,23 @@ export class AuthService {
 		private jwtService: JwtService
 	) {}
 
-	public login (user: User) {
+	public login (user: User, @Res() res: Response) {
 		const payload = {
 			username: user.name,
 			sub: user.id,
 		}
 
 /*
-**	Token we will need to authenticate : 
+**	Token we will need to authenticate :
 */
-		return {
-			access_token: this.jwtService.sign(payload)
-		};
+		//res.json({
+			//access_token: this.jwtService.sign(payload)
+		//})
+		res.header("Authorization",  "Bearer " + this.jwtService.sign(payload));
+		res.redirect('/');
+		//return {
+		//	access_token: this.jwtService.sign(payload)
+		//};
 	}
 
 	public async generateTwoFactorAuthtificationSecret (req: Request) {

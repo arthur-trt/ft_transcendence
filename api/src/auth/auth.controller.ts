@@ -22,14 +22,16 @@ export class FortyTwoAuthController {
 	@Get('login')
 	@UseGuards(FortyTwoAuthGuard)
 	async	login() {
+		console.log('super');
 		return ;
 	}
 
 	@Get('callback')
 	@UseGuards(FortyTwoAuthGuard)
-	async	callback (@Req() req)
+	async	callback (@Req() req, @Res() res)
 	{
-		return this.authService.login(req.user);
+		console.log(req);
+		return this.authService.login(req.user, res);
 	}
 }
 
@@ -43,7 +45,7 @@ export class CheatAuthController {
 	) {}
 
 	@Get('login')
-	async login  () {
+	async login  (@Res() res) {
 		const { data } = await firstValueFrom(this.httpService.get("https://api.namefake.com/"));
 		const fake = JSON.parse(JSON.stringify(data));
 
@@ -55,7 +57,7 @@ export class CheatAuthController {
 			fake.email_u + "@" + fake.email_d
 		)
 
-		return this.authServie.login(user);
+		return this.authServie.login(user, res);
 	}
 
 }

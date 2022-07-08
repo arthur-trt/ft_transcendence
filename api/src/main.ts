@@ -12,6 +12,22 @@ async function bootstrap() {
 
   app.setGlobalPrefix('/api/');
 
+  const cors_options = {
+    origin: [
+      "http://localhost:8080/",
+      "https://signin.intra.42.fr/",
+      "https://localhost:3000/",
+      "https://localhost:3001/",
+      "https://api.intra.42.fr/"
+    ],
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    credentials: true
+  };
+
+  app.enableCors(cors_options);
+
   const config = new DocumentBuilder()
     .setTitle('API example')
     .setDescription('The API description')
