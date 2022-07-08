@@ -1,11 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Res } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { access } from 'fs';
 import { authenticator } from 'otplib';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Request, Response } from 'express';
-import { toFileStream, toDataURL } from 'qrcode';
+import { toFileStream } from 'qrcode';
+import { jwtConstants } from './jwt/jwt.constants';
 
 @Injectable()
 export class AuthService {
@@ -14,20 +15,24 @@ export class AuthService {
 		private jwtService: JwtService
 	) {}
 
-	public login (user: User, res: Response) {
+	public login (user: User, @Res() res: Response) {
 		const payload = {
 			username: user.name,
 			sub: user.id,
 		}
+
 
 		if (user.TwoFA_enable)
 		{
 			res.redirect('/authenticate')
 		}
 
-		res.json({
-			access_token: this.jwtService.sign(payload)
-		})
+		const token = this.jwtService.sign(payload);
+		const cookie = `Authentication=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire_time}`;
+
+		res.header('Set-Cookie', cookie);
+		res.redirect('/home');
+
 	}
 
 	public async generateTwoFactorAuthtificationSecret (req: Request) {

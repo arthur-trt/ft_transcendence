@@ -20,7 +20,7 @@ import { HttpModule } from '@nestjs/axios';
     forwardRef(() => UserModule),
     JwtModule.register({
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '30s' }
+      signOptions: { expiresIn: jwtConstants.expire_time }
     }),
     HttpModule
   ],
