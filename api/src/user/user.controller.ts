@@ -4,7 +4,7 @@ import { UserService } from './user.service';
 import { User } from './user.entity';
 import { joinChannelDto } from 'src/dtos/joinChannel.dto';
 import { Request } from 'express';
-import { ApiProperty, ApiOperation, ApiTags, ApiResponse, ApiBearerAuth, ApiResponseProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiOperation, ApiTags, ApiResponse, ApiCookieAuth, ApiResponseProperty } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 
@@ -23,6 +23,7 @@ export class UserController
 
 	@ApiOperation({ summary: "Get all users" })
 	@Get('/')
+	@UseGuards(JwtAuthGuard)
 	async getUsers() : Promise<User[]> {
 		return await this.userService.getUsers();
 	}
@@ -53,7 +54,7 @@ export class UserController
 	@Post('joinChannel')
 	@UsePipes(ValidationPipe)
 	@UseGuards(JwtAuthGuard)
-	@ApiBearerAuth()
+	@ApiCookieAuth()
 	@ApiOperation({ summary: "Join a channel" })
 	@ApiResponse({ status: 200, description: "User joined normally" })
 	@ApiResponse({ status: 404, description: "User is not found/channel not created" })
@@ -75,7 +76,7 @@ export class UserController
 	@ApiResponse({ status: 200, description: "Mail changed"})
 	@ApiResponse({ status: 403, description: "You're not logged in"})
 	@UseGuards(JwtAuthGuard)
-	@ApiBearerAuth()
+	@ApiCookieAuth()
 	public async updateMail(@Req() req: Request, @Body('mail') mail: string)
 	{
 		return this.userService.updateUserMail(req, mail);

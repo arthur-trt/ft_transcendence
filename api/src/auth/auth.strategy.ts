@@ -28,8 +28,6 @@ export class FortyTwoAuthStrategy extends PassportStrategy(Strategy)
 	}
 
 	async validate(accessToken: string, refreshToken: string, profile: Profile) {
-		console.log(profile);
-		console.log("VALIDATE");
 		const user = await this.userService.findOrCreateUser(
 			profile.id,
 			profile.displayName,
