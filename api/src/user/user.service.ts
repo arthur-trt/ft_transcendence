@@ -120,6 +120,7 @@ export class UserService {
 	public async joinChannel(user : User, channelname: string) : Promise<User>
 	{
 		//const user = await this.getUserByRequest(req);
+		console.log ("JOIN CHANNEL")
 		console.log(user);
 		let channel: Channel;
 		try
@@ -132,6 +133,8 @@ export class UserService {
 
 			return await this.chanService.createChannel(channelname, user);
 		}
+		if (!user)
+			return;
 		user.channels = [...user.channels, channel]; /* if pb of is not iterable, it is because we did not get the realtions in the find one */
 		return await user.save();
 	}

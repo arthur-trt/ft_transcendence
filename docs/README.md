@@ -577,3 +577,5 @@ So we create in the Vue app :
 
 ```this.socket.chat.emit('chatToServer', { sender : this.username , message : this.text } );```
 
+Handle guards and auoorisaton :: 
+https://github.com/nestjs/nest/issues/882

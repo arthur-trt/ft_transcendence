@@ -1,152 +1,205 @@
 <html>
-<head>
-	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-	<script src="/socket.io/socket.io.js"></script>
-	<link href="https://unpkg.com/vue-simple-notify/dist/vue-simple-notify.min.css" rel="stylesheet">
-	<script src="https://unpkg.com/vue-simple-notify/dist/vue-simple-notify.min.js"></script>
-	<style>
-		main {
-			display : grid;
-			grid-template-columns: 1fr 1fr;
-			grid-template-areas: "chat alert";
-		}
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link
+      href="https://unpkg.com/vue-simple-notify/dist/vue-simple-notify.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/vue-simple-notify/dist/vue-simple-notify.min.js"></script>
+    <style>
+      main {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas: 'chat alert';
+      }
 
-		section.chat {
-			grid-area: chat;
-		}
+      section.chat {
+        grid-area: chat;
+      }
 
-		section.alerts{
-			grid-area: alerts;
-		}
+      section.alerts {
+        grid-area: alerts;
+      }
 
-		.tab.row {
-			padding-top : 20px;
-		}
+      .tab.row {
+        padding-top: 20px;
+      }
 
-		.tab-btn.active {
-			background: blue;
-			color: white;
-		}
+      .tab-btn.active {
+        background: blue;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    Testing
+  </body>
 
-	</style>
-</head>
-<body> Testing </body>
+  <main id="v-app">
+    <section class="alerts">
+      <alerts-component :items="alerts"></alerts-component>
+    </section>
 
-<main id ="v-app">
-	<section class = "alerts">
-		<alerts-component :items="alerts"></alerts-component>
-	</section>
+    <section class="chat">
+      <h1>TESTER</h1>
+      <form>
+        <input v-model="text" type="text" />
+        <button type="submit" @click.prevent="sendChatMessage()">send</button>
+      </form>
+
+      <div class="tab-row">
+        <button
+          class="tab-btn"
+          :class="{ active : activeRoom == 'general' } "
+          @click="activeRoom = 'general'"
+        >
+          General
+        </button>
+        <button
+          class="tab-btn"
+          :class="{ active : activeRoom == 'random' } "
+          @click="activeRoom = 'random'"
+        >
+          Random
+        </button>
 
 
-	<section class="chat">
+      <li v-for="channel of channels">
+        <button class="tab-btn" :class="{ active : activeRoom == channel.name } " @click="setactive(channel.name)" >{{ channel.name }}</button>
+      </li>
+	</div>
+      <div class="tab-row">
+        Status : {{ isMemberOfActiveRoom ? 'Joined' : 'NOT JOINED' }}
+        <button @click="toggleRoomMembership()">
+          {{ isMemberOfActiveRoom ? 'Leave' : 'Join' }}
+        </button>
+      </div>
+      <p>
+        <li v-for="msg of messages[activeRoom]">
+          <strong> {{ msg.sender }} : </strong> {{ msg.message }}
+        </li>
+      </p>
+    </section>
+  </main>
+  <script>
+    Vue.component('alerts-component', VueSimpleNotify.VueSimpleNotify);
+    var app = new Vue({
+      el: '#v-app', // va donner l'íd
+      data: {
+        username: '',
+        text: '',
+        messages: {
+          general: [],
+          random: [],
+        },
+        rooms: {
+          general: false,
+          random: false,
+		  TESTHTML: false,
+		  nouveau: false,
+        },
+        channels: [],
+        socket: { chat: null, alerts: null },
+        alerts: [],
+        activeRoom: 'general',
+      },
+      methods: {
+		setactive (channame) {
+			console.log("triggerd" + channame)
+			this.activeRoom = channame;
+		},
+        sendChatMessage() {
+          // Check if user is member
+          if (this.isMemberOfActiveRoom) {
+            this.socket.chat.emit('chatToServer', {
+              sender: this.username,
+              message: this.text,
+              room: this.activeRoom,
+            });
+          } else {
+            alert('You must be member of the active room !! ');
+          }
+          console.log('send ' + this.text); // this.text = the payload
+          this.text = '';
+        },
+        receiveChatMessage(msg) {
+          console.log('recv ' + msg);
+          this.messages[msg.room].push(msg); // adding a message to chat
+        },
+        receiveAlertMessage(msg) {
+          console.log('recv ' + msg);
+          this.alerts.push(msg); // adding an alert
+        },
+        toggleRoomMembership() {
+          if (this.isMemberOfActiveRoom) {
+            this.socket.chat.emit('Leave Room', {
+              room: this.activeRoom,
+              user: this.username,
+            });
+          } else {
+            this.socket.chat.emit('Join Room', {
+              room: this.activeRoom,
+              user: this.username,
+            });
+          }
+        },
+        getChannels() {
+          //return await this.$http.get("http://localhost:3000/channel".data);
 
+		  fetch( 'http://localhost:3000/channel' )
+            .then( function( response ){
+                if( response.status != 200 ){
+                    throw response.status;
+                }else{
+                    return response.json();
+                }
+            }.bind(this))
+            .then( function( data ){
+                this.channels = data;
+            }.bind(this))
+            .catch( function( error ){
+                this.fetchError = error;
+            }.bind(this));
+      },
+	},
+      computed: {
+        isMemberOfActiveRoom() {
+          return this.rooms[this.activeRoom];
+        },
+      },
+      created: function () {
+        // creatin hok
+        this.username = prompt('Enter your name : ');
+        this.socket.chat = io('http://localhost:3000'); // namespace
+        this.socket.alert = io('http://localhost:3000/alert'); // namespace
+        this.socket.chat.on('chatToClient', (msg) => {
+          this.receiveChatMessage(msg);
+        }); // listener that matche gateway emit event
 
-<h1>TESTER</h1>
-<form>
-	<input v-model="text" type="text"/>
-	<button type="submit" @click.prevent="sendChatMessage()">send</button>
-</form>
+        this.socket.chat.on('init', async () => {
+          this.getChannels();
+          console.log('HELLO ' + JSON.stringify(this.channels));
+          this.toggleRoomMembership();
+		  console.log('HELLO ' + JSON.stringify(this.channels));
 
-<div class="tab-row">
-	<button class="tab-btn" :class="{ active : activeRoom == 'general' } " @click="activeRoom = 'general'">General</button>
-	<button class="tab-btn" :class="{ active : activeRoom == 'random' } " @click="activeRoom = 'random'">Random</button>
+        });
+        this.socket.chat.on('Joined Room', (room) => {
+			console.log('HELLO ' + JSON.stringify(this.channels));
 
-</div>
-<div class ="tab-row">
-	Status : {{ isMemberOfActiveRoom ? 'Joined' : 'NOT JOINED' }} <button @click="toggleRoomMembership()"> {{ isMemberOfActiveRoom ? 'Leave' : 'Join' }} </button>
-</div>
-<p>
-	<li v-for="msg of messages[activeRoom]">
-		<strong> {{ msg.sender }} : </strong>  {{ msg.message }}
-	</li>
-</p>
-</section>
-</main>
-<script>
-	Vue.component('alerts-component', VueSimpleNotify.VueSimpleNotify)
-	var app = new Vue(
-		{
-			el: "#v-app", // va donner l'íd
-			data : {
-				username : "",
-				text: "",
-				messages: {
-					general: [],
-					random: []
-				},
-				rooms: {
-					general: false,
-					random: false,
-				},
-				socket: { chat: null, alerts: null },
-				alerts: [],
-				activeRoom: 'general'
-			},
-			methods : {
-				sendChatMessage() {
-					// Check if user is member
-					if (this.isMemberOfActiveRoom)
-					{
-						this.socket.chat.emit('chatToServer', { sender : this.username , message : this.text, room: this.activeRoom } );
-					}
-					else
-					{
-						alert("You must be member of the active room !! ")
-					}
-					console.log("send " + this.text); // this.text = the payload
-					this.text = "";
-				},
-				receiveChatMessage(msg) {
-					console.log("recv " + msg);
-					this.messages[msg.room].push(msg); // adding a message to chat
-				},
-				receiveAlertMessage(msg) {
-					console.log("recv " + msg);
-					this.alerts.push(msg); // adding an alert
-				},
-				toggleRoomMembership() {
-					if (this.isMemberOfActiveRoom)
-					{
-						this.socket.chat.emit('Leave Room', { room : this.activeRoom, user: this.username } )
-					}
-					else
-					{
-						this.socket.chat.emit('Join Room', { room : this.activeRoom, user : this.username } )
-					}
-				}
-			},
-			computed : {
-				isMemberOfActiveRoom() {
-					return this.rooms[this.activeRoom];
-				}
-			},
-			created : function() { // creatin hok
-					this.username = prompt("Enter your name : ");
-					this.socket.chat = io('http://localhost:3000/chat'); // namespace
-					this.socket.alert = io('http://localhost:3000/alert'); // namespace
-					this.socket.chat.on('chatToClient', (msg) => {
-					this.receiveChatMessage(msg);
-				}) // listener that matche gateway emit event
-
-				this.socket.chat.on('init', () =>
-				{
-					this.toggleRoomMembership();
-				});
-				this.socket.chat.on('Joined Room', (room) =>
-				{
-					this.rooms[room] = true;
-				});
-				this.socket.chat.on('Left Room', (room) =>
-				{
-					this.rooms[room] = false;
-				});
-				this.socket.alert.on('alertToClient', (msg) => {
-					this.receiveAlertMessage(msg);
-				} // listener
-				)
-			}
-		});
-
-</script>
+          this.rooms[room] = true;
+        });
+        this.socket.chat.on('Left Room', (room) => {
+          console.log('bisous');
+          this.rooms[room] = false;
+        });
+        this.socket.alert.on(
+          'alertToClient',
+          (msg) => {
+            this.receiveAlertMessage(msg);
+          }, // listener
+        );
+      },
+    });
+  </script>
 </html>
-
