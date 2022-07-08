@@ -11,12 +11,15 @@ import { MessageService } from './message.service';
 import { Request } from 'express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { UserService } from 'src/user/user.service';
+import { User } from 'src/user/user.entity';
 
 
 @Controller('message')
 export class MessageController {
 
-	constructor(private messageService: MessageService) { }
+	constructor(private messageService: MessageService,
+	private userService : UserService) { }
 
 	/*
 	** CHANNEL
@@ -39,7 +42,8 @@ export class MessageController {
 	public async sendMessage(@Param('identifier') chanIdentifier : string, @Req() req : Request, @Body() msg : sendChannelMessageDto)
 	{
 		const message = msg.msg;
-		return await this.messageService.sendMessageToChannel(chanIdentifier, req, message);
+		const sender: User = await this.userService.getUserByRequest(req);
+		return await this.messageService.sendMessageToChannel(chanIdentifier, sender, message);
 	}
 
 	/**
@@ -80,7 +84,8 @@ export class MessageController {
 	{
 		const target = message.target;
 		const msg = message.msg;
-		return await this.messageService.sendPrivateMessage(req, target, msg);
+		const sender = await this.userService.getUserByRequest(req);
+		return await this.messageService.sendPrivateMessage(sender, target, msg);
 	}
 
 	/**
@@ -99,7 +104,8 @@ export class MessageController {
 	public async getPrivateMessage(@Req() req : Request, @Body() query : getPrivateMessageDto)
 	{
 		const target = query.target;
-		return await this.messageService.getPrivateMessage(req, target);
+		const user: User = await this.userService.getUserByRequest(req);
+		return await this.messageService.getPrivateMessage(user, target);
 	}
 
 }
