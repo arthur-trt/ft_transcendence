@@ -22,7 +22,6 @@ export class FortyTwoAuthController {
 	@Get('login')
 	@UseGuards(FortyTwoAuthGuard)
 	async	login() {
-		console.log('super');
 		return ;
 	}
 
@@ -32,6 +31,12 @@ export class FortyTwoAuthController {
 	{
 		console.log(req);
 		return this.authService.login(req.user, res);
+	}
+
+	@Get('test')
+	async test(@Req() req)
+	{
+		console.log(req);
 	}
 }
 

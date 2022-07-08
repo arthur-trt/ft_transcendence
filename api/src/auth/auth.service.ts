@@ -6,6 +6,7 @@ import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Request, Response } from 'express';
 import { toFileStream } from 'qrcode';
+import { jwtConstants } from './jwt/jwt.constants';
 
 @Injectable()
 export class AuthService {
@@ -20,17 +21,11 @@ export class AuthService {
 			sub: user.id,
 		}
 
-/*
-**	Token we will need to authenticate :
-*/
-		//res.json({
-			//access_token: this.jwtService.sign(payload)
-		//})
-		res.header("Authorization",  "Bearer " + this.jwtService.sign(payload));
-		res.redirect('/');
-		//return {
-		//	access_token: this.jwtService.sign(payload)
-		//};
+		const token = this.jwtService.sign(payload);
+		const cookie = `Authentication=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire_time}`;
+
+		res.header('Set-Cookie', cookie);
+		res.redirect('/home');
 	}
 
 	public async generateTwoFactorAuthtificationSecret (req: Request) {

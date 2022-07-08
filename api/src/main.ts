@@ -5,12 +5,13 @@ import {
   DocumentBuilder,
   SwaggerDocumentOptions,
 } from '@nestjs/swagger';
-import * as passport from 'passport';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('/api/');
+  app.use(cookieParser());
 
   const cors_options = {
     origin: [
@@ -33,7 +34,7 @@ async function bootstrap() {
     .setDescription('The API description')
     .setVersion('1.0')
     .addTag('api')
-    .addBearerAuth()
+    .addCookieAuth('Authentication')
     .build();
 
   const options: SwaggerDocumentOptions = {
