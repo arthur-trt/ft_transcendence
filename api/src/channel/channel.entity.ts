@@ -20,7 +20,7 @@ export class Channel extends BaseEntity {
 	owner: User;
 
 	/** Tous les users du channel */
-	@ManyToMany(() => User, user => user.channels)
+	@ManyToMany(() => User, user => user.channels, { cascade: true, onDelete: 'CASCADE' })
 	@JoinTable()		/* owner is channels */
 	users: User[]
 
