@@ -53,7 +53,7 @@ export class User extends BaseEntity {
 	@JoinTable()
 	channels: Channel[];
 
-	@OneToMany(() => channelMessage, channelMessage => channelMessage.message) // va faire l'historique des messages
+	@OneToMany(() => channelMessage, channelMessage => channelMessage.message) // // devrait etre channel Message.user et many to one dabs channel message 
 	channelMessages: channelMessage[]; // on store ses messages
 
 }
