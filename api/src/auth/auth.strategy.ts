@@ -21,11 +21,12 @@ export class FortyTwoAuthStrategy extends PassportStrategy(Strategy)
 				'displayName': 'displayname',
 				'email': 'email',
 				'image_url': 'image_url'
-			  }
+			  },
+			//passReqToCallback: true,
 		});
 	}
 
-	
+
 	async validate(accessToken: string, refreshToken: string, profile: Profile) {
 		const user = await this.userService.findOrCreateUser(
 			profile.id,

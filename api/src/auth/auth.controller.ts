@@ -1,6 +1,6 @@
-import { Controller, Post, UseGuards, Body, HttpStatus, HttpException, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiHideProperty, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Get, Req, Res } from '@nestjs/common';
+import { Controller, UseGuards, HttpStatus, HttpException, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ApiBearerAuth, ApiCookieAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Get, Req, Res, Post, Body } from '@nestjs/common';
 import { FortyTwoAuthGuard } from './guards/42-auth.guard';
 import { AuthService } from './auth.service';
 import { HttpService } from '@nestjs/axios';
@@ -9,7 +9,8 @@ import { UserService } from 'src/user/user.service';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { twoFaDto } from 'src/dtos/twofa_token.dto';
-import cors from 'cors';
+import { AuthGuard } from '@nestjs/passport';
+
 
 
 @ApiTags('auth')
@@ -125,10 +126,10 @@ export class TwoFAAuthController {
 	@ApiResponse({ status: 201, description: "TwoFa token is valid" })
 	@ApiResponse({ status: 401, description: "Unvalid token sent" })
 	@ApiResponse({ status: 403, description: "User is not logged in" })
-	@ApiBearerAuth()
+	@ApiCookieAuth()
 	@UseGuards(JwtAuthGuard)
 	@UsePipes(ValidationPipe)
-	async validateTwoFa(@Req() req: Request, @Res() res: Response, @Body() twofa_token: twoFaDto) {
+	async validateTwoFa(@Req() req, @Res() res: Response, @Body() twofa_token: twoFaDto) {
 		const isValidCode = await this.authService.isTwoFactorCodeValid(
 			twofa_token.token,
 			req
@@ -158,5 +159,6 @@ export class AuthController {
 	async logout(@Req() req: Request, @Res() res: Response) {
 		const cookie = `Authentication=deleted; HttpOnly; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
 		res.setHeader('Set-Cookie', cookie);
+		res.send()
 	}
 }

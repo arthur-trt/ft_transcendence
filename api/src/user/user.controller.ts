@@ -37,8 +37,6 @@ export class UserController
 	@UseGuards(JwtAuthGuard)
 	async getMe(@Req() req: Request) : Promise<User>
 	{
-		console.log(req);
-
 		const user: User = await this.userService.getUserByRequest(req);
 		return this.userService.getUserByIdentifier(user.id);
 	}
@@ -55,9 +53,6 @@ export class UserController
 	@ApiResponse({ status: 200, description: "User is returned normally" })
 	@ApiResponse({ status: 404, description: "User is not found" })
 	async getUser(@Param() uuid: uuidDto) : Promise<User> {
-		console.log('wtf');
-		console.log(uuid.uuid);
-		console.log(uuid);
 		return await this.userService.getUserByIdentifier(uuid.uuid);
 	}
 

@@ -7,6 +7,7 @@ import { UserService } from 'src/user/user.service';
 import { Request, Response } from 'express';
 import { toDataURL } from 'qrcode';
 import { jwtConstants } from './jwt/jwt.constants';
+import { TransformStreamDefaultController } from 'stream/web';
 
 @Injectable()
 export class AuthService {
@@ -15,35 +16,31 @@ export class AuthService {
 		private jwtService: JwtService
 	) {}
 
-	public login (user: User, @Res() res: Response) {
+	private	generateCookie(user: User, isSecondFactorAuthenticated:boolean = false)
+	{
 		const payload = {
-			username: user.name,
 			sub: user.id,
-		}
-
-		if (user.TwoFA_enable)
-		{
-			res.redirect('/2fa')
-			return ;
+			isSecondFactorAuthenticated
 		}
 		const token = this.jwtService.sign(payload);
 		const cookie = `Authentication=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire_time}`;
+		return cookie;
+	}
 
-		res.header('Set-Cookie', cookie);
-		res.redirect('/home');
+	public login (user: User, @Res() res: Response) {
+		res.header('Set-Cookie', this.generateCookie(user));
+		if (user.TwoFA_enable)
+		{
+			return res.redirect('/2fa');
+		}
+		return res.redirect('/home');
 	}
 
 	public twofa_login (user: User, @Res() res: Response) {
-		const payload = {
-			username: user.name,
-			sub: user.id,
-		}
-
-		const token = this.jwtService.sign(payload);
-		const cookie = `Authentication=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire_time}`;
-
-		res.header('Set-Cookie', cookie);
-		res.redirect('/home');
+		res.header('Set-Cookie', this.generateCookie(user, true));
+		return res.json(JSON.stringify({
+			connection: "ok"
+		}));
 	}
 
 	public async generateTwoFactorAuthtificationSecret (req: Request) {
