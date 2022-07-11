@@ -11,3 +11,106 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.auth-header {
+  width: 100%;
+  background-color: black;
+  color: white;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+}
+
+.auth-header h1 {
+  margin-left: 35px;
+}
+
+
+.auth-link {
+  margin-top: 5%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-link button {
+  border: solid 2px black;
+  border-radius: 5px;
+  color: black;
+  padding: 15px 15px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.auth-link button:hover{
+  background-color: black;
+  color: white;
+}
+
+.header {
+  width: 100%;
+  background-color: black;
+  color: white;
+  display: flex;
+}
+
+.title {
+  width: 50%;
+}
+
+.title h1 {
+  margin-left: 35px;
+}
+
+.info {
+  width: 50%;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+}
+
+.info h1 {
+  font-size: 15px;
+  margin-right: 15px;
+}
+
+.info img {
+  max-height: 100%;
+  max-width: 100%;
+  width: 64px;
+  height: 64px;
+  border: 2px solid white ;
+  margin-right: 15px;
+}
+
+.info i {
+  margin-right: 15px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.settings-box {
+  background-color: #161b22;
+  right: 15px;
+  top: 55px;
+  position:absolute;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100px;
+  border: 1px solid grey;
+}
+
+.settings-box .button {
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 13px;
+}
+
+.settings-box .button:hover {
+  background-color: #2585f4;
+}
