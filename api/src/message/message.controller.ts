@@ -63,6 +63,25 @@ export class MessageController {
 		return messages;
 	}
 
+
+	/**
+	 *
+	 * Get all messages from a channel FOR A PARTICULAR USER
+	 *
+	 * @param chanIdentifier
+	 * @returns all messages from a channel
+	 */
+
+	@ApiTags('Channel messages')
+	@ApiOperation({ summary: "Get all messages from a channel for a particular user" })
+	@Get('channel/getMsgFromUser/:identifier')
+	@UseGuards(JwtAuthGuard)
+	public async getChannelMessagesOfUser(@Param('identifier') chanIdentifier : string, @Req() req : Request)
+	{
+		const sender: User = await this.userService.getUserByRequest(req);
+		const messages = await this.messageService.getChannelMessagesOfUser(chanIdentifier, sender);
+		return messages;
+	}
 	/*
 	** PRIVATE
 	*/

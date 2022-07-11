@@ -1,5 +1,5 @@
 import { User } from "src/user/user.entity";
-import { BaseEntity, Column, PrimaryGeneratedColumn } from "typeorm"
+import { BaseEntity, Column, CreateDateColumn, PrimaryGeneratedColumn } from "typeorm"
 
 
 
@@ -9,5 +9,8 @@ export abstract class AMessage  {
 	id: number;
 
     @Column()
-    message: string;
+	message: string;
+
+	@CreateDateColumn({ nullable : true, type: "timestamp"})
+	sent_at: Date;
 }
