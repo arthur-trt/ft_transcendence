@@ -7,6 +7,7 @@ import { Request } from 'express';
 import { ApiOperation, ApiTags, ApiResponse, ApiCookieAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { uuidDto } from 'src/dtos/uuid.dto';
+import { ModifyUserDto } from 'src/dtos/user.dto';
 
 /** https://stackoverflow.com/questions/54958244/how-to-use-query-parameters-in-nest-js?answertab=trending#tab-top PARMAS AND TOUTES  */
 @ApiTags('User')
@@ -53,7 +54,6 @@ export class UserController
 	@ApiOperation({ summary: "Get all info about a user identified by :uuid" })
 	@ApiResponse({ status: 200, description: "User is returned normally" })
 	@ApiResponse({ status: 404, description: "User is not found" })
-	@UsePipes(ValidationPipe)
 	async getUser(@Param() uuid: uuidDto) : Promise<User> {
 		console.log('wtf');
 		console.log(uuid.uuid);
@@ -71,7 +71,6 @@ export class UserController
 	 */
 
 	@Post('joinChannel')
-	@UsePipes(ValidationPipe)
 	@UseGuards(JwtAuthGuard)
 	@ApiCookieAuth()
 	@ApiOperation({ summary: "Join a channel" })
@@ -85,19 +84,22 @@ export class UserController
 	}
 
 	/**
-	 * Update mail of the connected user.
+	 * Update profile of the connected user.
 	 * @param req
 	 * @param mail
 	 * @returns
 	 */
-	@Patch('mail')
-	@ApiOperation({ summary: "Update mail on connected account" })
-	@ApiResponse({ status: 200, description: "Mail changed"})
+	@Patch('userSettings')
+	@ApiOperation({ summary: "Update user settings on connected account" })
+	@ApiResponse({ status: 200, description: "Profile updated"})
 	@ApiResponse({ status: 403, description: "You're not logged in"})
 	@UseGuards(JwtAuthGuard)
 	@ApiCookieAuth()
-	public async updateMail(@Req() req: Request, @Body('mail') mail: string)
+	public async updateUser(@Req() req: Request, @Body() changes: ModifyUserDto) : Promise<User>
 	{
-		return this.userService.updateUserMail(req, mail);
+		const user : User = await this.userService.getUserByRequest(req);
+		return this.userService.updateUser(user, changes);
 	}
+
+
 }

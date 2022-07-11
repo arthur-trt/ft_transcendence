@@ -6,12 +6,14 @@ import {
   SwaggerDocumentOptions,
 } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('/api/');
-  app.use(cookieParser());
+	app.use(cookieParser());
+	app.useGlobalPipes(new ValidationPipe());
 
   const cors_options = {
     origin: [
