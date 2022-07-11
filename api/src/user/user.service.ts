@@ -26,6 +26,18 @@ export class UserService {
 		return (user);
 	}
 
+	public async getTwoFASecret (req: Request)
+	{
+		const	user_id = JSON.parse(JSON.stringify(req.user)).userId;
+		const	user = await this.userRepo.createQueryBuilder('User')
+							.select(["User.TwoFA_secret"])
+							.where({ "id": user_id})
+							.getOne();
+		if (!user)
+			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+		return user.TwoFA_secret;
+	}
+
 	/**
 	 * Obtain a list of all user in system
 	 * @returns all user id, name and mail
