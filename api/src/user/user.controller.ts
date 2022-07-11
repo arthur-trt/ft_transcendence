@@ -30,7 +30,7 @@ export class UserController
 
 	@Get('me')
 	@ApiOperation({ summary: "Get information about current user with cookie" })
-	@ApiResponse({ status: 200, description: "User is returned normally"})
+	@ApiResponse({ status: 200, description: "User is returned normally", type: User})
 	@ApiResponse({ status: 403, description: "User is not logged in" })
 	@ApiCookieAuth()
 	@UseGuards(JwtAuthGuard)

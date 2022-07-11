@@ -5,7 +5,7 @@ import { authenticator } from 'otplib';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Request, Response } from 'express';
-import { toFileStream } from 'qrcode';
+import { toDataURL } from 'qrcode';
 import { jwtConstants } from './jwt/jwt.constants';
 
 @Injectable()
@@ -21,10 +21,22 @@ export class AuthService {
 			sub: user.id,
 		}
 
-
 		if (user.TwoFA_enable)
 		{
-			res.redirect('/authenticate')
+			res.redirect('/2fa')
+			return ;
+		}
+		const token = this.jwtService.sign(payload);
+		const cookie = `Authentication=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire_time}`;
+
+		res.header('Set-Cookie', cookie);
+		res.redirect('/home');
+	}
+
+	public twofa_login (user: User, @Res() res: Response) {
+		const payload = {
+			username: user.name,
+			sub: user.id,
 		}
 
 		const token = this.jwtService.sign(payload);
@@ -32,7 +44,6 @@ export class AuthService {
 
 		res.header('Set-Cookie', cookie);
 		res.redirect('/home');
-
 	}
 
 	public async generateTwoFactorAuthtificationSecret (req: Request) {
@@ -57,11 +68,6 @@ export class AuthService {
 			secret,
 			optAuthUrl
 		};
-	}
-
-	public async pipeQrCodeStream (stream: Response, optAuthUrl: string)
-	{
-		return toFileStream(stream, optAuthUrl);
 	}
 
 	public async pipeQrCodeURL (text: string)

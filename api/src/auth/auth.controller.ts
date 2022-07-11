@@ -111,7 +111,6 @@ export class TwoFAAuthController {
 	@UseGuards(JwtAuthGuard)
 	@UsePipes(ValidationPipe)
 	async turnOnTwoFA (@Req() req: Request, @Body() twofa_token : twoFaDto) {
-		console.log("here");
 		const isValidCode = await this.authService.isTwoFactorCodeValid(
 			twofa_token.token,
 			req
@@ -119,5 +118,45 @@ export class TwoFAAuthController {
 		if (!isValidCode)
 			throw new HttpException('Wrong 2FA', HttpStatus.UNAUTHORIZED);
 		await this.userService.turnOnTwoFactorAuthentication(req);
+	}
+
+	@Post('validate')
+	@ApiOperation({ summary: "Validate twoFa code" })
+	@ApiResponse({ status: 201, description: "TwoFa token is valid" })
+	@ApiResponse({ status: 401, description: "Unvalid token sent" })
+	@ApiResponse({ status: 403, description: "User is not logged in" })
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	async validateTwoFa(@Req() req: Request, @Res() res: Response, @Body() twofa_token: twoFaDto) {
+		const isValidCode = await this.authService.isTwoFactorCodeValid(
+			twofa_token.token,
+			req
+		);
+		if (!isValidCode)
+			throw new HttpException('Wrong 2FA', HttpStatus.UNAUTHORIZED);
+		this.authService.twofa_login(
+			await this.userService.getUserByRequest(req),
+			res
+		);
+	}
+}
+
+@ApiTags('auth')
+@Controller('auth')
+export class AuthController {
+	constructor (
+		private authService: AuthService
+	) {}
+
+	@Get('logout')
+	@ApiOperation({ summary: "Disconnect user by deleting cookie"})
+	@ApiResponse({ status: 200, description: "User succesfully disconnected" })
+	@ApiResponse({ status: 403, description: "User is not logged in" })
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	async logout(@Req() req: Request, @Res() res: Response) {
+		const cookie = `Authentication=deleted; HttpOnly; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+		res.setHeader('Set-Cookie', cookie);
 	}
 }
