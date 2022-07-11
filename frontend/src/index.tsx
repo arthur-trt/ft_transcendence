@@ -5,7 +5,7 @@ import reportWebVitals from './reportWebVitals';
 import Auth from './components/Auth';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Header } from './components/Header';
-import {TwoFactor} from './components/TwoFactor';
+import TwoFactor from './components/TwoFactor';
 import Profile from './components/Profile';
 
 const root = ReactDOM.createRoot(

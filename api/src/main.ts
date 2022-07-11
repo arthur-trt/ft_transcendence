@@ -24,7 +24,7 @@ async function bootstrap() {
       "https://api.intra.42.fr/"
     ],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-    preflightContinue: false,
+    preflightContinue: true,
     optionsSuccessStatus: 204,
     credentials: true
   };
@@ -44,6 +44,7 @@ async function bootstrap() {
   };
   const document = SwaggerModule.createDocument(app, config, options);
   SwaggerModule.setup('/api/', app, document);
+
 
   await app.listen(3000);
 }

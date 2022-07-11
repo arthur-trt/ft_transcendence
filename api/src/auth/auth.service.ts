@@ -5,8 +5,9 @@ import { authenticator } from 'otplib';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Request, Response } from 'express';
-import { toFileStream } from 'qrcode';
+import { toDataURL } from 'qrcode';
 import { jwtConstants } from './jwt/jwt.constants';
+import { TransformStreamDefaultController } from 'stream/web';
 
 @Injectable()
 export class AuthService {
@@ -15,24 +16,46 @@ export class AuthService {
 		private jwtService: JwtService
 	) {}
 
-	public login (user: User, @Res() res: Response) {
+	private	generateCookie(user: User, isSecondFactorAuthenticated:boolean = false)
+	{
 		const payload = {
-			username: user.name,
 			sub: user.id,
+			isSecondFactorAuthenticated
 		}
-
 		const token = this.jwtService.sign(payload);
 		const cookie = `Authentication=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire_time}`;
+		return cookie;
+	}
 
-		res.header('Set-Cookie', cookie);
-		res.redirect('/home');
+	public login (user: User, @Res() res: Response) {
+		res.header('Set-Cookie', this.generateCookie(user));
+		if (user.TwoFA_enable)
+		{
+			return res.redirect('/2fa');
+		}
+		return res.redirect('/home');
+	}
+
+	public twofa_login (user: User, @Res() res: Response) {
+		res.header('Set-Cookie', this.generateCookie(user, true));
+		return res.json(JSON.stringify({
+			connection: "ok"
+		}));
 	}
 
 	public async generateTwoFactorAuthtificationSecret (req: Request) {
-		const user			= await this.userService.getUserByRequest(req);
-		const secret		= authenticator.generateSecret();
-		const optAuthUrl	= authenticator.keyuri(
-			user.mail,
+		const	user		= await this.userService.getUserByRequest(req);
+		let		secret;
+		if (user.TwoFA_secret != null)
+		{
+			secret			= user.TwoFA_secret;
+		}
+		else
+		{
+			secret			= authenticator.generateSecret();
+		}
+		const	optAuthUrl	= authenticator.keyuri(
+			user.name,
 			process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME,
 			secret
 		);
@@ -44,8 +67,17 @@ export class AuthService {
 		};
 	}
 
-	public async pipeQrCodeStream (stream: Response, optAuthUrl: string)
+	public async pipeQrCodeURL (text: string)
 	{
-		return toFileStream(stream, optAuthUrl);
+		return toDataURL(text);
+	}
+
+	public async isTwoFactorCodeValid (code: string, req: Request)
+	{
+		const user	= await this.userService.getUserByRequest(req);
+		return (authenticator.verify({
+			token: code,
+			secret: user.TwoFA_secret,
+		}));
 	}
 }

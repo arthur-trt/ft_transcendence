@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { FortyTwoAuthController, CheatAuthController, TwoFAAuthController } from './auth.controller';
+import { FortyTwoAuthController, CheatAuthController, TwoFAAuthController, AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
 import { UserModule } from 'src/user/user.module';
@@ -25,6 +25,6 @@ import { HttpModule } from '@nestjs/axios';
     HttpModule
   ],
   providers: [AuthService, FortyTwoAuthStrategy, JwtStrategy],
-  controllers: [FortyTwoAuthController, CheatAuthController, TwoFAAuthController],
+  controllers: [FortyTwoAuthController, CheatAuthController, TwoFAAuthController, AuthController],
 })
 export class AuthModule {}
