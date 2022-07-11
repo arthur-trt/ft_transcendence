@@ -18,6 +18,7 @@ export class MessageService {
 	constructor(@InjectRepository(privateMessage) private pmRepo: Repository<privateMessage>,
 		@InjectRepository(channelMessage) private chatRepo: Repository<channelMessage>,
 		@InjectRepository(Channel) private chanRepo: Repository<Channel>,
+		@InjectRepository(User) private userRepo: Repository<User>,
 		@Inject(forwardRef(() => UserService)) private readonly userService: UserService,
 		@Inject(forwardRef(() => ChannelService)) private readonly chanService: ChannelService)
 	{ }
@@ -57,8 +58,26 @@ export class MessageService {
 	public async getMessage(chanIdentifier: string) : Promise<Channel>
 	{
 		let chan : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
-		const msgs = this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier }).leftJoinAndSelect("chan.messages", "messages").getOne();
+		const msgs = this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
+			.leftJoinAndSelect("chan.messages", "messages")
+			.leftJoinAndSelect("messages.sender", "sender").getOne();
 		return msgs;
+	}
+
+	/**
+	 * @brief get messages from a specific channel
+	 * @param chanIdentifier
+	 * @param user the user we wanr to see messages of
+	 * @returns the Channel with relation to its message
+	 */
+	public async 	getChannelMessagesOfUser(chanIdentifier: string, user : User) //: Promise<User>
+	{
+		let chan : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
+		const msgs = this.chatRepo.createQueryBuilder("msg")
+			.where("msg.sender = :sendername", { sendername: user.id })
+			.leftJoinAndSelect("msg.sender", "sender")
+			.getMany();
+			return msgs;
 	}
 
 	/*
