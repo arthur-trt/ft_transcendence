@@ -74,10 +74,10 @@ export class AuthService {
 
 	public async isTwoFactorCodeValid (code: string, req: Request)
 	{
-		const user	= await this.userService.getUserByRequest(req);
+		const user_secret	= await this.userService.getTwoFASecret(req);
 		return (authenticator.verify({
 			token: code,
-			secret: user.TwoFA_secret,
+			secret: user_secret,
 		}));
 	}
 }

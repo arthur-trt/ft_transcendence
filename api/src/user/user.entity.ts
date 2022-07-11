@@ -52,8 +52,7 @@ export class User extends BaseEntity {
 
 	@Column({
 		type: 'boolean',
-		default: false,
-		select: false
+		default: false
 	})
 	TwoFA_enable: boolean;
 
