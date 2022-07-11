@@ -39,6 +39,12 @@ export class User extends BaseEntity {
 	avatar_url: string;
 
 	@Column({
+		type: 'int',
+		default: 0
+	})
+	wonMatches: number;
+
+	@Column({
 		nullable: true,
 		select: false
 	})
@@ -57,5 +63,6 @@ export class User extends BaseEntity {
 
 	@OneToMany(() => channelMessage, channelMessage => channelMessage.sender)
 	channelMessages: channelMessage[];
+
 
 }

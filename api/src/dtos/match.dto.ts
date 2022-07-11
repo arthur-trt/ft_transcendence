@@ -1,24 +1,24 @@
 import { IsEmail, IsNotEmpty } from "class-validator";
 import { User } from "src/user/user.entity";
+import { uuidDto } from "./uuid.dto";
 
-export class MatchDto {
-
-	@IsNotEmpty()
-	readonly scoreUser1: number;
+export class CreateMatchDto {
 
 	@IsNotEmpty()
-	readonly scoreUser2: number;
+	readonly user1?: string;
 
 	@IsNotEmpty()
-	readonly startTime: Date;
+	readonly user2?: string;
+}
+
+export class endMatchDto {
 
 	@IsNotEmpty()
-	readonly time: Date;
+	id : string;
 
 	@IsNotEmpty()
-	readonly user1: User;
+	scoreUser1: number;
 
 	@IsNotEmpty()
-	readonly user2: User;
-
+	scoreUser2: number;
 }
