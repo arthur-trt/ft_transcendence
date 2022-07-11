@@ -45,7 +45,8 @@ services:
     networks:
      - db_network
     volumes:
-      - ${DB_PATH}:/var/lib/postgresql/data:cached
+     #- ${DB_PATH}:
+     - /var/lib/postgresql/data
 
 ##
 # DEBUG CONTAINERS --profile debug
@@ -59,7 +60,7 @@ services:
     networks:
       - db_network
     volumes:
-      - ${PGADMIN_PATH}:/var/lib/pgadmin:cached
+      - ${PGADMIN_PATH}:/var/lib/pgadmin
     ports:
       - "5050:80"
     profiles:

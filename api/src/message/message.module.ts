@@ -10,7 +10,8 @@ import { MessageService } from './message.service';
 import { privateMessage } from './privateMessage.entity';
 
 @Module({
-  controllers: [MessageController],
+	controllers: [MessageController],
+	exports : [MessageService],
 	providers: [MessageService],
 	imports: [TypeOrmModule.forFeature([privateMessage, channelMessage, Channel, User]), forwardRef(() => ChannelModule) , forwardRef(() => UserModule)],
 })
