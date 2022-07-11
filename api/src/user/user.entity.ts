@@ -40,12 +40,14 @@ export class User extends BaseEntity {
 
 	@Column({
 		nullable: true,
+		select: false
 	})
 	TwoFA_secret: string;
 
 	@Column({
 		type: 'boolean',
-		default: false
+		default: false,
+		select: false
 	})
 	TwoFA_enable: boolean;
 
@@ -53,7 +55,7 @@ export class User extends BaseEntity {
 	@JoinTable()
 	channels: Channel[];
 
-	@OneToMany(() => channelMessage, channelMessage => channelMessage.sender) // va faire l'historique des messages
-	channelMessages: channelMessage[]; // on store ses messages
+	@OneToMany(() => channelMessage, channelMessage => channelMessage.sender)
+	channelMessages: channelMessage[];
 
 }

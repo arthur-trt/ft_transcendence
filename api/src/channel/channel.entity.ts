@@ -16,11 +16,11 @@ export class Channel extends BaseEntity {
 	})
 	name: string;
 
-	@ManyToOne(() => User) // on link aps, est ce que ca va marcher ?
-	owner: User; // slt son nom ou tout lúser ? a discuter
+	@ManyToOne(() => User)
+	owner: User;
 
 	/** Tous les users du channel */
-	@ManyToMany(() => User, user => user.channels)
+	@ManyToMany(() => User, user => user.channels, { cascade: true, onDelete: 'CASCADE' })
 	@JoinTable()		/* owner is channels */
 	users: User[]
 
