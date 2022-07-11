@@ -55,7 +55,7 @@ export class User extends BaseEntity {
 	@JoinTable()
 	channels: Channel[];
 
-	@OneToMany(() => channelMessage, channelMessage => channelMessage.sender) 
+	@OneToMany(() => channelMessage, channelMessage => channelMessage.sender)
 	channelMessages: channelMessage[];
 
 }
