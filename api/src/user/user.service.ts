@@ -7,6 +7,7 @@ import { ChannelService } from 'src/channel/channel.service';
 import { Request } from 'express';
 import { validate as isValidUUID } from 'uuid';
 import { HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
+import { ModifyUserDto } from 'src/dtos/user.dto';
 
 
 @Injectable()
@@ -88,9 +89,18 @@ export class UserService {
 		return user;
 	}
 
-	public async updateUserMail(req: Request, mail: string) : Promise<User> {
-		const user: User = await this.getUserByRequest(req);
-		user.mail = mail;
+	/**
+	 * Update user profile
+	 * @param user the user we want to update
+	 * @param changes containing potential modified fields : mail, name, fullname and avatar
+	 * @returns the updated user
+	 */
+	public async updateUser(user: User, changes: ModifyUserDto) : Promise<User> {
+
+		user.mail = changes.mail;
+		user.name = changes.name;
+		user.avatar_url = changes.avatar_url;
+		user.fullname = changes.fullname;
 		return this.userRepo.save(user);
 	}
 

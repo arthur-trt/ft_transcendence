@@ -37,7 +37,6 @@ export class MessageController {
 	@ApiTags('Channel messages')
 	@ApiOperation({ summary: "Send a message to a channel" })
 	@Post('channel/sendMsg/:identifier')
-	@UsePipes(ValidationPipe)
 	@UseGuards(JwtAuthGuard)
 	public async sendMessage(@Param('identifier') chanIdentifier : string, @Req() req : Request, @Body() msg : sendChannelMessageDto)
 	{
@@ -97,7 +96,6 @@ export class MessageController {
 	@ApiTags('Private Messages')
 	@Post('privateMessage/sendMsg')
 	@ApiOperation({ summary: "Send private message to another user" })
-	@UsePipes(ValidationPipe)
 	@UseGuards(JwtAuthGuard)
 	public async privateMessage(@Req() req : Request, @Body() message : sendPrivateMessageDto)
 	{
@@ -118,7 +116,6 @@ export class MessageController {
 	@ApiTags('Private Messages')
 	@Get('privateMessage/')
 	@ApiOperation({ summary: "Get private messages between two users" })
-	@UsePipes(ValidationPipe)
 	@UseGuards(JwtAuthGuard)
 	public async getPrivateMessage(@Req() req : Request, @Body() query : getPrivateMessageDto)
 	{
