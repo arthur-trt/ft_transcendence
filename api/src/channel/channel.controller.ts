@@ -39,7 +39,6 @@ export class ChannelController {
 
 	@Post('new')
 	@ApiOperation({ summary: "Create a new Channel" })
-	@UsePipes(ValidationPipe)
 	@UseGuards(JwtAuthGuard)
 	public async newChannel(@Req() req : Request, @Body() query : newChannelDto)
 	{
