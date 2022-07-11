@@ -26,16 +26,11 @@ http://localhost:8080, https://localhost:4443 {
 	import cors https://api.intra.42.fr
 	log {
 		output			stdout
-		level			debug
+		level			error
 		format			console
 	}
 
-	handle /api {
-		reverse_proxy		api:3000 {
-
-		}
-	}
-
+	rewrite /api /api/
 	handle /api/* {
 
 		reverse_proxy		api:3000 {

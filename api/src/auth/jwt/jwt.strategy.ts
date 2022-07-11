@@ -3,21 +3,33 @@ import { PassportStrategy } from "@nestjs/passport";
 import { Injectable } from "@nestjs/common";
 import { jwtConstants } from "./jwt.constants";
 import { Request } from "express";
+import { UserService } from "src/user/user.service";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy)
 {
-	constructor() {
+	constructor(
+		private readonly userService: UserService
+	) {
 		super({
 			jwtFromRequest: ExtractJwt.fromExtractors([(request: Request) => {
 				return request?.cookies?.Authentication
 			}]),
 			ignoreExpiration: false,
 			secretOrKey: jwtConstants.secret,
+			passReqToCallback: true,
 		});
 	}
 
-	async validate(payload: any) {
-		return { userId: payload.sub, username: payload.username };
+	async validate(request: Request, payload: any) {
+		const	user = await this.userService.getUserByIdentifier(payload.sub);
+		if (!user.TwoFA_enable)
+			//return user
+			return { userId: payload.sub };
+		if (payload.isSecondFactorAuthenticated || request.url == "/api/auth/2fa/validate")
+		{
+			//return user;
+			return { userId: payload.sub };
+		}
 	}
 }

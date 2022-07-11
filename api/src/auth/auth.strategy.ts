@@ -2,8 +2,6 @@ import { PassportStrategy } from "@nestjs/passport";
 import { Profile, Strategy } from "passport-42";
 import { Injectable } from "@nestjs/common";
 import { UserService } from "src/user/user.service";
-import { urlencoded } from "express";
-
 
 /*
 **	Strategy :
@@ -23,9 +21,11 @@ export class FortyTwoAuthStrategy extends PassportStrategy(Strategy)
 				'displayName': 'displayname',
 				'email': 'email',
 				'image_url': 'image_url'
-			  }
+			  },
+			//passReqToCallback: true,
 		});
 	}
+
 
 	async validate(accessToken: string, refreshToken: string, profile: Profile) {
 		const user = await this.userService.findOrCreateUser(
