@@ -1,15 +1,28 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import Auth from './components/Auth';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { Header } from './components/Header';
+import {TwoFactor} from './components/TwoFactor';
+import Profile from './components/Profile';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <Router>
+      <Routes>
+
+      <Route path="/" element={<Auth />} />
+      <Route path="/home" element={<Header />} />
+      <Route path="/2fa" element={<><Header/><TwoFactor/></>} />
+      <Route path="/profile" element={<><Header/><Profile/></>} />
+
+      </Routes>
+    </Router>
   </React.StrictMode>
 );
 
