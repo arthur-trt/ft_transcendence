@@ -68,9 +68,9 @@ export class ChannelController {
 		return await this.chanService.updateChannelSettings(user, changes);
 	}
 
-
-	@UseGuards(JwtAuthGuard)
 	@Delete('delete')
+	@UseGuards(JwtAuthGuard)
+	@ApiOperation({ summary: "Delete channel" })
 	public async deleteChannel(@Req() req: Request, @Body() channelToDelete: newChannelDto)
 	{
 		const user: User = await this.userService.getUserByRequest(req);
@@ -80,6 +80,7 @@ export class ChannelController {
 
 	@Delete('deleteUser')
 	@UseGuards(JwtAuthGuard)
+	@ApiOperation({ summary: "Delete user from channel" })
 	public async deleteUserFromChannel(@Req() req: Request, @Body() deleteUser: deleteFromChannelDto)
 	{
 		const user: User = await this.userService.getUserByRequest(req);
