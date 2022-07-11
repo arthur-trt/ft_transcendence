@@ -11,5 +11,5 @@ export class privateMessage extends AMessage {
 	sender: string;
 
 	@Column("uuid")
-	target: string; // UUID
+	target: string;
 }
