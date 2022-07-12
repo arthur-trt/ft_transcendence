@@ -3,7 +3,7 @@ export default function Auth() {
     return (
             <div>
         <div className="auth-header">
-            <h1>42-PONG</h1>
+            <h1>BABY-PONG</h1>
         </div>
 
         <div className="auth-link">

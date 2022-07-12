@@ -3,10 +3,12 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import Auth from './components/Auth';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header } from './components/Header';
 import TwoFactor from './components/TwoFactor';
 import Profile from './components/Profile';
+import Channels from './components/Channels-add';
+import { ChannelsDisplayer } from './components/ChannelsDisplayer';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -20,6 +22,7 @@ root.render(
       <Route path="/home" element={<Header />} />
       <Route path="/2fa" element={<><Header/><TwoFactor/></>} />
       <Route path="/profile" element={<><Header/><Profile/></>} />
+      <Route path="/chat" element={<><Header/><Channels/><ChannelsDisplayer/></>} />
 
       </Routes>
     </Router>

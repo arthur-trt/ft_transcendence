@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import 'font-awesome/css/font-awesome.min.css';
-import Settings from './Settings';
 import { Link } from 'react-router-dom';
 
 export const Header = () => {
@@ -18,31 +17,28 @@ export const Header = () => {
     getData()
     }, [])
 
-    const [isShown, setIsShown] = useState(false);
-
-    const handleClick = () => {
-    setIsShown(current => !current);
-
-    };
-
 
     return (
         <div>
 
         <div className="header">
-            <div className="title"><h1><Link to="/home" style={{ textDecoration: 'none', color: 'white' }}>
-                42-PONG</Link></h1>
+            <div className="title"><h1><Link to="/home" style={{ textDecoration: 'none', color: 'black' }}>
+                BABY-PONG</Link></h1>
+            </div>
+            <div className="onglets">
+                <h3><Link to="/chat" style={{ textDecoration: 'none', color: 'black' }}>CHAT</Link></h3>
+                <h3>LADDER</h3>
             </div>
             <div className="info">
                 <img src={data.avatar_url}></img>
                 <h1>{data.name}</h1>
-                <i onClick={handleClick} className="fa fa-solid fa-gear"></i>
+                <Link to="/profile" style={{ textDecoration: 'none', color: 'black' }}>
+                <i className="fa fa-solid fa-user"></i>
+
+                </Link>
             </div>
         </div>
         
-        <div>
-            {isShown && <Settings />}
-        </div>
         </div>
 
     )
