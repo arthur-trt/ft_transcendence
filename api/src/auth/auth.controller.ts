@@ -161,4 +161,11 @@ export class AuthController {
 		res.setHeader('Set-Cookie', cookie);
 		res.send()
 	}
+
+	@Post('test')
+	@ApiOperation({ summary: "Super tet"})
+	@ApiResponse({ status: 418, description:'This is a test'})
+	async test() {
+		return;
+	}
 }

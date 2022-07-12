@@ -34,7 +34,7 @@ import { GameModule } from './game/game.module';
 	  entities: [User, Channel, privateMessage, channelMessage, MatchHistory], /* Create tables according to prototype in entities */
 	  //entities: [ './car/*.entity.{js,ts}'],
 		synchronize: true,
-		logging: true
+		logging: false
 	}),
 	  AuthModule],
 })
