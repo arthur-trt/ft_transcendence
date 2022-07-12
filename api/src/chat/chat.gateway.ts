@@ -33,6 +33,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	private async	validateConnection(client: Socket) : Promise<User> {
 		try {
 			const authCookie: string = client.handshake.headers.cookie;
+			console.log(authCookie);
 			const authToken = authCookie.substring(15, authCookie.length);
 			const jwtOptions: JwtVerifyOptions = {
 				secret: jwtConstants.secret
@@ -51,19 +52,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	 * @param client the Socket returned by chat Service
 	 */
 	@UseGuards(WsJwtAuthGuard)
-	async handleConnection(client: Socket) {
-
-		/**
-		 * Cheat way of connection waiting for header implementation
-		 * We just store the first user of db
-		 */
-		const user = await this.validateConnection(client)
+	async handleConnection(client: Socket)
+	{
+		const user = await this.validateConnection(client);
 		if (!(user))
 			return this.handleDisconnect(client);
 
 		client.data.user = user;
 		this.logger.log('connection !' + JSON.stringify(client.data.user))
-		client.emit('init');
+
+		this.wss.to(client.id).emit('rooms', await this.channelService.getUsersOfChannels());
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -107,8 +105,18 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     	return 'Hello world!';
 	}
 
+
+	// //@UseGuards(WsJwtAuthGuard)
+	// @SubscribeMessage('test')
+  	// test(client: any, payload: any)
+	// {
+    // 	this.logger.log("TEST OK");
+	// }
+
 	handleDisconnect(client: Socket) {
 		client.disconnect();
+		this.logger.log("DISCONNEECT ");
+		//this.wss.to(client.id).emit('connect_error'); // to handle in ChatService in front
 		return "Goodbye";
 	}
 
