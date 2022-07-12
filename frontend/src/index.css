@@ -14,11 +14,11 @@ code {
 
 .auth-header {
   width: 100%;
-  background-color: black;
-  color: white;
+  color: black;
   display: flex;
   justify-content: left;
   align-items: center;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
 .auth-header h1 {
@@ -53,21 +53,30 @@ code {
 
 .header {
   width: 100%;
-  background-color: black;
-  color: white;
+  /* background-color: black; */
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  /* color: white; */
+  color: black;
   display: flex;
 }
 
 .title {
-  width: 50%;
+  width: 30%;
 }
 
 .title h1 {
   margin-left: 35px;
 }
 
+.onglets {
+  display: flex;
+  justify-content:space-evenly;
+  align-items: center;
+  width: 40%;
+}
+
 .info {
-  width: 50%;
+  width: 30%;
   display: flex;
   justify-content: right;
   align-items: center;
@@ -88,29 +97,39 @@ code {
 }
 
 .info i {
-  margin-right: 15px;
-  font-size: 20px;
+  margin-right: 35px;
+  font-size: 30px;
   cursor: pointer;
 }
 
-.settings-box {
-  background-color: #161b22;
-  right: 15px;
-  top: 55px;
-  position:absolute;
+/* --------------CHANNELS-------------- */
+
+.chan-add {
+  margin-left: 20px;
+  margin-top: 20px;
+}
+
+.everychan {
+  margin-left: 20px;
+  height: 400px;
+  max-height: 400px;
+  overflow-y: scroll;
+  width: 185px;
+  margin-top: 15px;
   border-radius: 5px;
-  cursor: pointer;
-  width: 100px;
-  border: 1px solid grey;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
-.settings-box .button {
-  color: white;
+.everychan::-webkit-scrollbar {
+  display: none;
+}
+
+.uniquechan {
+  margin: 5px;
+  width: 165px;
   padding: 5px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  text-align: center;
+  text-transform: uppercase;
   border-radius: 5px;
-  font-size: 13px;
-}
-
-.settings-box .button:hover {
-  background-color: #2585f4;
 }

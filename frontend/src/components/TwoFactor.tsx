@@ -7,16 +7,27 @@ function TwoFactor() {
   let handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
+<<<<<<< HEAD
       let res = await fetch("/api/auth/2fa/validate", {
         method: "POST",
         body: JSON.stringify({
           token: name,
+=======
+      let res = await fetch("/api/user/joinChannel", {
+        method: "POST",
+        body: JSON.stringify({
+          chanName: name,
+>>>>>>> main
         }),
         headers: {
             "Content-Type": "application/json",
         },
       });
+<<<<<<< HEAD
       let resJson = await res.json();
+=======
+      // let resJson = await res.json();
+>>>>>>> main
       if (res.status === 201) {
         setName("");
         setMessage("2FA created successfully");
