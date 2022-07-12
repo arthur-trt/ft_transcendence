@@ -7,9 +7,10 @@ import { Channel } from '../channel/channel.entity';
 import { ChannelModule } from 'src/channel/channel.module';
 import { privateMessage } from 'src/message/privateMessage.entity';
 import { MessageModule } from 'src/message/message.module';
+import { UserActivity } from './user_activity.entity';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([User, Channel, privateMessage]),  forwardRef(() => MessageModule) , forwardRef(() => ChannelModule)],
+	imports: [TypeOrmModule.forFeature([User, Channel, privateMessage, UserActivity]),  forwardRef(() => MessageModule) , forwardRef(() => ChannelModule)],
 	providers: [UserService],
 	controllers: [UserController],
 	exports: [UserService]

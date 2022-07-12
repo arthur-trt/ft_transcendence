@@ -13,6 +13,7 @@ import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
 import { MatchHistory } from './game/game.entity';
 import { GameModule } from './game/game.module';
+import { UserActivity } from './user/user_activity.entity';
 
 @Module({
 
@@ -31,7 +32,7 @@ import { GameModule } from './game/game.module';
 	  username: process.env.POSTGRES_USER,
 	  password: process.env.POSTGRES_PASSWORD,
 	  database: process.env.POSTGRES_DB,
-	  entities: [User, Channel, privateMessage, channelMessage, MatchHistory], /* Create tables according to prototype in entities */
+	  entities: [User, Channel, privateMessage, channelMessage, MatchHistory, UserActivity], /* Create tables according to prototype in entities */
 	  //entities: [ './car/*.entity.{js,ts}'],
 		synchronize: true,
 		logging: false
