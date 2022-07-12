@@ -32,9 +32,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	private async	validateConnection(client: Socket) : Promise<User> {
 		try {
-			const authCookie: string = client.handshake.headers.cookie;
-			console.log(authCookie);
-			const authToken = authCookie.substring(15, authCookie.length);
+			const authCookies: string[] = client.handshake.headers.cookie.split('; ');
+			const authCookie: string[] = authCookies.filter(s => s.includes('Authentication='));
+			const authToken = authCookie[0].substring(15, authCookie[0].length);
 			const jwtOptions: JwtVerifyOptions = {
 				secret: jwtConstants.secret
 			}
@@ -46,6 +46,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			console.log(err.message);
 		}
 	}
+
 
 	/**
 	 *
