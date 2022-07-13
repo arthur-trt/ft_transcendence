@@ -70,8 +70,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		{
 			users.push({
 				userID: id,
-				username: client.data.user.name,
-				photo: client.data.user.avatar_url
+				username: socket.data.user.name,
+				photo: socket.data.user.avatar_url
 			})
 		};
 		for (let user of users)
