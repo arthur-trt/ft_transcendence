@@ -61,52 +61,123 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			return this.handleDisconnect(client);
 
 		client.data.user = user;
+		this.logger.log(client.data.user);
 		this.logger.log('connection !' + JSON.stringify(client.data.user))
-		this.wss.to(client.id).emit('rooms', await this.channelService.getUsersOfChannels());
+		this.wss.to(client.id).emit('rooms', "init co !", await this.channelService.getUsersOfChannels());
+
+		const users = [];
+		for (let [id, socket] of this.wss.of("/").sockets)
+		{
+			users.push({
+				userID: id,
+				username: client.data.user.name,
+				photo: client.data.user.avatar_url
+			})
+		};
+		for (let user of users)
+			this.logger.log(user);
+
+		this.wss.emit('users', "List of users", users);
+
 	}
 
+	/**
+	 *
+	 * @param client
+	 * @param channel
+	 * @returns
+	 */
 	@UseGuards(WsJwtAuthGuard)
-	@SubscribeMessage('joinRoom') /** Join ROom parce que ca le creera aussi */
+	@SubscribeMessage('createRoom') /** Join ROom parce que ca le creera aussi */
 	async onCreateRoom(client: Socket, channel: string) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
 		await this.userService.joinChannel(client.data.user, channel);
 		client.join(channel);
-		return this.wss.to(channel).emit('joinedRoom', client.data.user.username + " joined the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+		return this.wss.emit('rooms', client.data.user.username + " created the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 	}
 
+	/**
+	 *
+	 * @param client
+	 * @param channel
+	 * @returns
+	 */
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('joinRoom') /** Join ROom parce que ca le creera aussi */
+	async onJoinRoom(client: Socket, channel: string) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
+	{
+		await this.userService.joinChannel(client.data.user, channel);
+		client.join(channel);
+		return this.wss.emit('rooms', client.data.user.username + " joined the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+	}
+
+
+	/**
+	 *
+	 * @param client
+	 * @param channel
+	 * @returns
+	 */
+	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('deleteRoom')
 	async onDeletedRoom(client: Socket, channel: string)
 	{
 		await this.channelService.deleteChannel(client.data.user, await this.channelService.getChannelByIdentifier(channel));
-		return this.wss.emit('rooms', await this.channelService.getUsersOfChannels()); // on emet a tt le monde que le chan a ete supp
+		return this.wss.emit('rooms', channel + "has been deleted", await this.channelService.getUsersOfChannels()); // on emet a tt le monde que le chan a ete supp
 	}
 
+	/**
+	 *
+	 * @param client
+	 * @param channel
+	 * @returns
+	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('leaveRoom') /** Join ROom parce que ca le creera aussi */
 	async onLeaveRoom(client: Socket, channel: string) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
 		await this.userService.leaveChannel(client.data.user, channel);
 		client.leave(channel);
-		return this.wss.to(channel).emit('leftRoom', client.data.user.username + " left the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+		return this.wss.to(channel).emit('rooms', client.data.user.username + " left the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 	}
 
 
+	/**
+	 *
+	 * @param client
+	 * @param msg
+	 * @returns
+	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('privateMessage')
 	async onPrivateMessage(client: Socket, msg : sendPrivateMessageDto )
 	{
-
-		//this.wss.to(target.socketId).emit('privateMessage', msg);
-		return await this.messageService.sendPrivateMessage(client.data.user, msg.target, msg.msg);
+		this.wss.to(msg.socketId).to(client.id).emit('privateMessage', client.data.user.name + " sent a message to " + msg.username + msg.socketId, msg.msg);
+		return await this.messageService.sendPrivateMessage(client.data.user, msg.username, msg.msg);
 	}
 
+	/**
+	 *
+	 * @param client
+	 * @param user2
+	 * @returns
+	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getPrivateMessage')
-	async onGetPrivateMessage(client: Socket, user2 : string )// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
+	async onGetPrivateMessage(client: Socket, user2 : string )
 	{
-		return await this.messageService.getPrivateMessage(client.data.user, user2);
+		const msg = await this.messageService.getPrivateMessage(client.data.user, user2);
+
+		this.wss.to(client.id).emit('privateMessage', client.data.user.name + " get messages with " + user2, msg);
+		return
 	}
 
+	/**
+	 *
+	 * @param client
+	 * @param channelName
+	 * @returns
+	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getChannelMessages')
 	async onGetChannelMessages(client: Socket, channelName : string )// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
