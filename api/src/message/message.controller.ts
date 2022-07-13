@@ -99,10 +99,10 @@ export class MessageController {
 	@UseGuards(JwtAuthGuard)
 	public async privateMessage(@Req() req : Request, @Body() message : sendPrivateMessageDto)
 	{
-		const target = message.target;
+		//const target = message.target;
 		const msg = message.msg;
 		const sender = await this.userService.getUserByRequest(req);
-		return await this.messageService.sendPrivateMessage(sender, target, msg);
+	//	return await this.messageService.sendPrivateMessage(sender, target, msg);
 	}
 
 	/**
