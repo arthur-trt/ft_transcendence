@@ -86,8 +86,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	async onLeaveRoom(client: Socket, channel: string) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
 		await this.userService.leaveChannel(client.data.user, channel);
-		client.join(channel);
-		return this.wss.to(channel).emit('joinedRoom', client.data.user.username + " joined the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+		client.leave(channel);
+		return this.wss.to(channel).emit('leftRoom', client.data.user.username + " left the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 	}
 
 
