@@ -16,8 +16,9 @@ export class WsJwtAuthGuard implements CanActivate {
 
 		try {
 			const client: Socket = context.switchToWs().getClient<Socket>();
-			const authCookie: string = client.handshake.headers.cookie;
-			const authToken = authCookie.substring(15, authCookie.length);
+			const authCookies: string[] = client.handshake.headers.cookie.split('; ');
+			const authCookie: string[] = authCookies.filter(s => s.includes('Authentication='));
+			const authToken = authCookie[0].substring(15, authCookie[0].length);
 			const jwtOptions: JwtVerifyOptions = {
 				secret: jwtConstants.secret
 			}
