@@ -71,15 +71,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		{
 			users.push({
 				userID: id,
-				username: socket.data.user.name,
+				username: JSON.stringify(socket.data.user.name),
 				photo: socket.data.user.avatar_url
 			})
 		};
 		for (let user of users)
-			this.logger.log(user);
+			this.logger.log(" CHECKING" + user);
 
 		this.wss.emit('users', "List of users", users);
-
 
 	}
 
