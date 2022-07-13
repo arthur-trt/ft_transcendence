@@ -8,6 +8,7 @@ import { ApiOperation, ApiTags, ApiResponse, ApiCookieAuth } from '@nestjs/swagg
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { uuidDto } from 'src/dtos/uuid.dto';
 import { ModifyUserDto } from 'src/dtos/user.dto';
+import { Channel } from 'src/channel/channel.entity';
 
 /** https://stackoverflow.com/questions/54958244/how-to-use-query-parameters-in-nest-js?answertab=trending#tab-top PARMAS AND TOUTES  */
 @ApiTags('User')
@@ -94,6 +95,16 @@ export class UserController
 	{
 		const user : User = await this.userService.getUserByRequest(req);
 		return this.userService.updateUser(user, changes);
+	}
+
+	@Post('leaveChannel')
+	@ApiOperation({ summary: "leave a channel" })
+	@UseGuards(JwtAuthGuard)
+	@ApiCookieAuth()
+	public async leaveChannel(@Req() req: Request, @Body() chanName : joinChannelDto) //: Promise<User>
+	{
+		const user: User = await this.userService.getUserByRequest(req);
+		return await this.userService.leaveChannel(user, chanName.chanName);
 	}
 
 

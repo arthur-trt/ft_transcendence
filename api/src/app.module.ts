@@ -35,7 +35,7 @@ import { UserActivity } from './user/user_activity.entity';
 	  entities: [User, Channel, privateMessage, channelMessage, MatchHistory, UserActivity], /* Create tables according to prototype in entities */
 	  //entities: [ './car/*.entity.{js,ts}'],
 		synchronize: true,
-		logging: false
+		logging: true
 	}),
 	  AuthModule],
 })

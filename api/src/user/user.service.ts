@@ -147,6 +147,35 @@ export class UserService {
 		return await user.save();
 	}
 
+
+	public async leaveChannel(user: User, channel: string)
+	{
+		const chan: Channel = await this.chanService.getChannelByIdentifier(channel);
+
+		await this.channelsRepo
+			.createQueryBuilder()
+			.relation(Channel, "users")
+			.of(user)
+			.remove(chan);
+
+		const ownership : Channel = await this.channelsRepo.findOne({
+			where: {
+				owner: { id: user.id },
+				name: channel
+			}
+		});
+
+		if (ownership)
+		{
+			await this.channelsRepo
+				.createQueryBuilder()
+				.relation(Channel, "owner")
+				.of(chan)
+				.set(null);
+		}
+	
+		return await this.chanService.getUsersOfChannels();
+}
 	public async	setUserActive (user: User) {
 		const options: UpsertOptions<UserActivity> = {
 			conflictPaths: ['user'],
@@ -160,6 +189,7 @@ export class UserService {
 			where : {
 				user: { id: user.id } }});
 		this.userActivityRepo.delete(found.id);
+
 	}
 }
 
