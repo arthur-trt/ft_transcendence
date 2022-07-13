@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 
-export const ChannelsDisplayer = () => {
+export default function Channels() {
 
     const [data, setData] = useState<any>([]);
 
     useEffect(() => {
-    async function getData() {
+    const getData = async () => {
         const response = await fetch(
-            `/api/channel`
-        )
+            `/api/user`
+        );
         let actualData = await response.json();
         setData(actualData);
     }
-    getData();
+    getData()
     }, [])
 
     function display() {
@@ -20,10 +20,13 @@ export const ChannelsDisplayer = () => {
         let i = 0;
         while(i < data.length)
         {
-            indents.push(<div className="uniquechan" key={i}>
-                <h4>
+            indents.push(<div className="uniquefriend" key={i}>
+                <div>
+                    <img src={data[i]?.avatar_url}></img>
+                </div>
+                <div className="friends-name">
                 {data[i]?.name}
-                </h4>
+                </div>
                 </div>);
             i++;
         }
@@ -31,8 +34,9 @@ export const ChannelsDisplayer = () => {
     }
 
     return (
-        <div className="everychan">
+        <div className="friends-box">
             {display()}
         </div>
     )
+
 }

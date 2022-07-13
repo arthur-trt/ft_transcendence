@@ -8,13 +8,12 @@ import { Header } from './components/Header';
 import TwoFactor from './components/TwoFactor';
 import Profile from './components/Profile';
 import Channels from './components/Channels-add';
-import { ChannelsDisplayer } from './components/ChannelsDisplayer';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <Router>
       <Routes>
 
@@ -22,11 +21,11 @@ root.render(
       <Route path="/home" element={<Header />} />
       <Route path="/2fa" element={<><Header/><TwoFactor/></>} />
       <Route path="/profile" element={<><Header/><Profile/></>} />
-      <Route path="/chat" element={<><Header/><Channels/><ChannelsDisplayer/></>} />
+      <Route path="/chat" element={<><Header/><Channels/></>} />
 
       </Routes>
     </Router>
-  </React.StrictMode>
+  // </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
