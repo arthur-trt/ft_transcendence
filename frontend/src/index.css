@@ -194,6 +194,17 @@ code {
   color: black; 
 }
 
+.uniquechan .plus {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  border-radius: 50px;
+  cursor: pointer;
+  color: black; 
+}
+
 /* ---------FRIENDS----------- */
 
 .uniquefriend {

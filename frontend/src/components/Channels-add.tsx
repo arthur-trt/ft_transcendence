@@ -5,6 +5,7 @@ import Friends from './Friends';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons'
 import { faArrowAltCircleRight } from '@fortawesome/free-regular-svg-icons'
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
 
 export default function Channels() {
 
@@ -19,9 +20,14 @@ export default function Channels() {
       const socket = io('http://localhost:8080');
       setSocket(socket);
       socket.on('rooms', (msg:any, tab:any) => {
-        console.log(msg);
+        // console.log(msg);
         setData(tab);
       });
+      // socket.on('users', (msg:any, tab:any) => {
+      //   console.log(msg);
+      //   console.log(tab);
+      // });
+
   }, []);
 
   useEffect(() => {
@@ -36,12 +42,14 @@ export default function Channels() {
     }, [])
 
   
-  let handleJoin = (e: any) => {
-      e.preventDefault();
-      
+  let handleCreate = (e: any) => {
       socket.emit('joinRoom', name);
       
       setName("");  
+  }
+
+  let handleJoin = (e:any) => {
+    socket.emit('createRoom', e.currentTarget.id);
   }
 
   let handleDelete = (e:any) => {
@@ -74,6 +82,7 @@ export default function Channels() {
             </h5>
             <FontAwesomeIcon icon={faCircleXmark} className="circlexmark" id={data[i]?.name} onClick={handleDelete} />
             <FontAwesomeIcon icon={faArrowAltCircleRight} className="arrow" id={data[i]?.name} onClick={handleLeave} />
+            <FontAwesomeIcon icon={faPlus} className="plus" id={data[i]?.name} onClick={handleJoin} />
             </div>);
         i++;
         BgColor = 'white';
@@ -87,7 +96,7 @@ export default function Channels() {
 
       <div className='chan-add'>
         <h3>CHANNELS</h3>
-        <form onSubmit={handleJoin}>
+        <form onSubmit={handleCreate}>
           <input
             type="text"
             value={name}
