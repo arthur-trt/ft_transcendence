@@ -23,10 +23,10 @@ export default function Channels() {
         // console.log(msg);
         setData(tab);
       });
-      // socket.on('users', (msg:any, tab:any) => {
-      //   console.log(msg);
-      //   console.log(tab);
-      // });
+      socket.on('users', (msg:any, tab:any) => {
+        console.log(msg);
+        console.log(tab);
+      });
 
   }, []);
 
@@ -43,13 +43,13 @@ export default function Channels() {
 
   
   let handleCreate = (e: any) => {
-      socket.emit('joinRoom', name);
+      socket.emit('createRoom', name);
       
       setName("");  
   }
 
   let handleJoin = (e:any) => {
-    socket.emit('createRoom', e.currentTarget.id);
+    socket.emit('joinRoom', e.currentTarget.id);
   }
 
   let handleDelete = (e:any) => {
