@@ -63,6 +63,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		client.data.user = user;
 		this.logger.log(client.data.user);
 		this.logger.log('connection !' + JSON.stringify(client.data.user))
+
 		this.wss.to(client.id).emit('rooms', "init co !", await this.channelService.getUsersOfChannels());
 
 		const users = [];
@@ -79,6 +80,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 		this.wss.emit('users', "List of users", users);
 
+
 	}
 
 	/**
@@ -93,7 +95,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	{
 		await this.userService.joinChannel(client.data.user, channel);
 		client.join(channel);
-		return this.wss.emit('rooms', client.data.user.username + " created the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+
+		return this.wss.emit('rooms', client.data.user.name + " created the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+
 	}
 
 	/**
@@ -138,7 +142,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	{
 		await this.userService.leaveChannel(client.data.user, channel);
 		client.leave(channel);
-		return this.wss.to(channel).emit('rooms', client.data.user.username + " left the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+
+		return this.wss.emit('rooms', client.data.user.username + " left the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+
 	}
 
 

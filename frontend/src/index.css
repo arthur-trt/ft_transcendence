@@ -53,9 +53,7 @@ code {
 
 .header {
   width: 100%;
-  /* background-color: black; */
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-  /* color: white; */
   color: black;
   display: flex;
 }
@@ -94,6 +92,7 @@ code {
   height: 64px;
   border: 2px solid white ;
   margin-right: 15px;
+  border-radius: 50px;
 }
 
 .info i {
@@ -104,20 +103,49 @@ code {
 
 /* --------------CHANNELS-------------- */
 
+.chan-container {
+  width: 96%;
+  display: flex;
+  margin-top: 20px;
+  padding-bottom: 20px;
+  margin-right: 2%;
+  margin-left: 2%;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 10px;
+}
+
 .chan-add {
   margin-left: 20px;
-  margin-top: 20px;
+  /* margin-top: 20px; */
+  /* background-color: brown; */
+  width: 30%;
+}
+
+.chan-add h3 {
+  text-align: center;
+}
+
+.chat {
+  width: 40%;
+  /* background-color: aquamarine; */
+  text-align: center;
+}
+
+.friends {
+  width: 30%;
+  /* background-color: blueviolet; */
+  margin-right: 20px;
+  text-align: center;
 }
 
 .everychan {
-  margin-left: 20px;
   height: 400px;
   max-height: 400px;
   overflow-y: scroll;
   width: 185px;
   margin-top: 15px;
-  border-radius: 5px;
-  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  /* border-radius: 5px; */
+  /* box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; */
 }
 
 .everychan::-webkit-scrollbar {
@@ -132,4 +160,99 @@ code {
   text-align: center;
   text-transform: uppercase;
   border-radius: 5px;
+  position: relative;
+}
+
+/* .uniquechan:hover {
+  background-color: cornflowerblue;
+} */
+
+.circlexmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin-left: 5px;
+  margin-top: 5px;
+  border-radius: 50px;
+  cursor: pointer;
+  color: black;
+}
+
+.uniquechan .circlexmark:hover, .arrow:hover {
+  background-color:tomato ;
+  transition: all 0.5s ease-out;
+}
+
+.uniquechan .arrow {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  margin-left: 5px;
+  margin-bottom: 5px;
+  border-radius: 50px;
+  cursor: pointer;
+  color: black; 
+}
+
+.uniquechan .plus {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  border-radius: 50px;
+  cursor: pointer;
+  color: black; 
+}
+
+/* ---------FRIENDS----------- */
+
+.uniquefriend {
+  display: flex;
+}
+
+.uniquefriend img {
+  max-height: 100%;
+  max-width: 100%;
+  width: 30px;
+  height: 30px;
+  border: 2px solid white ;
+  margin-right: 15px;
+  border-radius: 50px;
+}
+
+.friends-name {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ---------PROFILE---------- */
+
+.setpro-container {
+  /* background-color: aqua; */
+  display: flex;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.setpro-container .settings {
+  /* background-color: blueviolet; */
+  width: 50%;
+  text-align: center;
+  border-right: 1px solid black;
+}
+
+.setpro-container .profile {
+  /* background-color: brown; */
+  width: 50%;
+  border-left: 1px solid black;
+}
+
+.setpro-container .profile h3 {
+  text-align: center;
+}
+
+.setpro-container .profile h5 {
+  margin-left: 10px;
 }
