@@ -1,20 +1,23 @@
-import { HttpCode, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConsoleLogger, HttpCode, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateMatchDto, endMatchDto } from 'src/dtos/match.dto';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Brackets, Repository } from 'typeorm';
 import { MatchHistory } from './game.entity';
+import { Socket, Server } from 'socket.io'
+
 
 @Injectable()
 export class GameService {
 
-	constructor(@InjectRepository(MatchHistory) private MatchRepo: Repository<MatchHistory>,
-	@InjectRepository(User) private UserRepo: Repository<User>,
-	private userService: UserService) { }
+	constructor(
+		@InjectRepository(MatchHistory) private MatchRepo: Repository<MatchHistory>,
+		@InjectRepository(User) private UserRepo: Repository<User>,
+		private userService: UserService
+	) { }
 
-	public async getCompleteMatchHistory(): Promise<MatchHistory[]>
-	{
+	async getCompleteMatchHistory(): Promise<MatchHistory[]> {
 		return this.MatchRepo.createQueryBuilder("Match")
 			.leftJoinAndMapOne("Match.user1", User, 'users', 'users.id = Match.user1')
 			.leftJoinAndMapOne("Match.user2", User, 'usert', 'usert.id = Match.user2')
@@ -30,9 +33,8 @@ export class GameService {
 			.getMany();
 	}
 
-	public async createMatch(user1: User, user2: User) : Promise<MatchHistory>
-	{
-		const newMatch : MatchHistory = await this.MatchRepo.save(
+	async createMatch(user1: User, user2: User): Promise<MatchHistory> {
+		const newMatch: MatchHistory = await this.MatchRepo.save(
 			{
 				user1: user1.id,
 				user2: user2.id
@@ -49,13 +51,13 @@ export class GameService {
 	 * @param match
 	 * @returns
 	 */
-	public async endMatch(match : endMatchDto) : Promise<any> // en vrai c'est MatchHistory[]
+	async endMatch(match: endMatchDto): Promise<any> // en vrai c'est MatchHistory[]
 	{
-		const endedMatch : MatchHistory = await this.findMatchById(match.id);
+		const endedMatch: MatchHistory = await this.findMatchById(match.id);
 		if (!endedMatch)
 			throw new HttpException('Match not found', HttpStatus.NOT_FOUND);
 		if (endedMatch.finished == true)
-			return ({ "msg": "Match is already finished man!", "match" : endedMatch } );
+			return ({ "msg": "Match is already finished man!", "match": endedMatch });
 		endedMatch.scoreUser1 = match.scoreUser1;
 		endedMatch.scoreUser2 = match.scoreUser2;
 		endedMatch.stopTime = new Date();
@@ -67,12 +69,34 @@ export class GameService {
 		return await this.getCompleteMatchHistory();
 	}
 
-	public async findMatchById(matchId: string)
-	{
-		const match : MatchHistory = await this.MatchRepo.findOne({
-			where: {id: matchId}
+	async findMatchById(matchId: string) {
+		const match: MatchHistory = await this.MatchRepo.findOne({
+			where: { id: matchId }
 		});
 		return match;
+	}
+
+	/**
+	 * Return a JSON object with all active user. With or without the user who made the request
+	 * regardind of `withCurrentUser` parameters
+	 * @param client user who made the request
+	 * @param active_user map of active user
+	 * @param withCurrentUser if true user who made the request will be included
+	 * @returns
+	 */
+	listConnectedUser(client: Socket, active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
+		let data = {};
+
+		for (let user of active_user.keys()) {
+			if (client.data.user.id == user.id && withCurrentUser) {
+				data[user.name] = user;
+			}
+			else if (client.data.user.id != user.id) {
+				data[user.name] = user;
+			}
+		}
+		console.log(data);
+		return (data);
 	}
 
 }
