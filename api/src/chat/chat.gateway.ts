@@ -62,7 +62,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 		client.data.user = user;
 		this.logger.log('connection !' + JSON.stringify(client.data.user))
-		this.wss.to(client.id).emit('rooms', await this.channelService.getUsersOfChannels());
+		this.wss.to(client.id).emit('rooms', "init connection" ,await this.channelService.getUsersOfChannels());
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -71,14 +71,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	{
 		await this.userService.joinChannel(client.data.user, channel);
 		client.join(channel);
-		return this.wss.to(channel).emit('joinedRoom', client.data.user.username + " joined the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+		return this.wss.emit('rooms', client.data.user.username + " joined the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+		//return this.wss.emit('oooooooooo', { "msg" : "coucou" , "data" : await this.channelService.getUsersOfChannels()} ); // on emet a tt le monde que le chan a ete supp
+		
 	}
 
 	@SubscribeMessage('deleteRoom')
 	async onDeletedRoom(client: Socket, channel: string)
 	{
 		await this.channelService.deleteChannel(client.data.user, await this.channelService.getChannelByIdentifier(channel));
-		return this.wss.emit('rooms', await this.channelService.getUsersOfChannels()); // on emet a tt le monde que le chan a ete supp
+		return this.wss.emit('rooms', "This room has been deleted" ,await this.channelService.getUsersOfChannels()); // on emet a tt le monde que le chan a ete supp
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -87,7 +89,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	{
 		await this.userService.leaveChannel(client.data.user, channel);
 		client.leave(channel);
-		return this.wss.to(channel).emit('leftRoom', client.data.user.username + " left the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+		return this.wss.emit('rooms', client.data.user.username + " left the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 	}
 
 
