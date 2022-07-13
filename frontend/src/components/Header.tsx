@@ -26,6 +26,7 @@ export const Header = () => {
             </div>
             <div className="onglets">
                 <h3><Link to="/chat" style={{ textDecoration: 'none', color: 'black' }}>CHAT</Link></h3>
+                <h3><Link to="/game" style={{ textDecoration: 'none', color: 'black' }}>GAME</Link></h3>
                 <h3>LADDER</h3>
             </div>
             <div className="info">
@@ -37,7 +38,7 @@ export const Header = () => {
                 </Link>
             </div>
         </div>
-        
+
         </div>
 
     )
