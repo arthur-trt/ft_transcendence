@@ -6,8 +6,9 @@ import { Channel } from '../channel/channel.entity';
 import { ChannelService } from 'src/channel/channel.service';
 import { Request } from 'express';
 import { validate as isValidUUID } from 'uuid';
-import { HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
 import { ModifyUserDto } from 'src/dtos/user.dto';
+import { UserActivity } from './user_activity.entity';
+import { UpsertOptions } from 'typeorm/repository/UpsertOptions';
 
 
 @Injectable()
@@ -15,6 +16,7 @@ export class UserService {
 
 	constructor(
 		@InjectRepository(User) private userRepo: Repository<User>,
+		@InjectRepository(UserActivity) private userActivityRepo: Repository<UserActivity>,
 		@InjectRepository(Channel) private channelsRepo: Repository<Channel>,
 		@Inject(forwardRef(() => ChannelService)) private chanService: ChannelService)
 	{}
@@ -173,6 +175,21 @@ export class UserService {
 		}
 	
 		return await this.chanService.getUsersOfChannels();
+}
+	public async	setUserActive (user: User) {
+		const options: UpsertOptions<UserActivity> = {
+			conflictPaths: ['user'],
+			skipUpdateIfNoValuesChanged: true,
+		}
+		await this.userActivityRepo.upsert({ user: user }, options);
+	}
+
+	public async	unsetUserActive (user: User) {
+		const found : UserActivity = await this.userActivityRepo.findOneOrFail({
+			where : {
+				user: { id: user.id } }});
+		this.userActivityRepo.delete(found.id);
+
 	}
 }
 
