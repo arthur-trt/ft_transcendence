@@ -61,21 +61,42 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			return this.handleDisconnect(client);
 
 		client.data.user = user;
+		this.logger.log(client.data.user);
 		this.logger.log('connection !' + JSON.stringify(client.data.user))
-		this.wss.to(client.id).emit('rooms', "init connection" ,await this.channelService.getUsersOfChannels());
+
+		this.wss.to(client.id).emit('rooms', "init co !", await this.channelService.getUsersOfChannels());
 
 		const users = [];
-		// for (let [id, socket] of this.wss.of("/").sockets)
-		// {
-		// 	users.push({
-		// 		userID: id,
-		// 		username: socket.data.user,
-		// 		photo: socket.data.user.avatar_url
-		// 	})
-		// 	this.logger.log("POUET " + users);
-		// };
-		// this.logger.log("USERS" + users)
-		// this.wss.emit('users', "List of users", users);
+		for (let [id, socket] of this.wss.of("/").sockets)
+		{
+			users.push({
+				userID: id,
+				username: client.data.user.name,
+				photo: client.data.user.avatar_url
+			})
+		};
+		for (let user of users)
+			this.logger.log(user);
+
+		this.wss.emit('users', "List of users", users);
+
+
+	}
+
+	/**
+	 *
+	 * @param client
+	 * @param channel
+	 * @returns
+	 */
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('createRoom') /** Join ROom parce que ca le creera aussi */
+	async onCreateRoom(client: Socket, channel: string) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
+	{
+		await this.userService.joinChannel(client.data.user, channel);
+		client.join(channel);
+
+		return this.wss.emit('rooms', client.data.user.name + " created the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 
 	}
 
@@ -87,14 +108,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('joinRoom') /** Join ROom parce que ca le creera aussi */
-	async onCreateRoom(client: Socket, channel: string) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
+	async onJoinRoom(client: Socket, channel: string) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
 		await this.userService.joinChannel(client.data.user, channel);
 		client.join(channel);
-		return this.wss.emit('rooms', client.data.user.name + " joined the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
-		//return this.wss.emit('oooooooooo', { "msg" : "coucou" , "data" : await this.channelService.getUsersOfChannels()} ); // on emet a tt le monde que le chan a ete supp
-		
+		return this.wss.emit('rooms', client.data.user.username + " joined the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 	}
+
 
 	/**
 	 *
@@ -122,7 +142,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	{
 		await this.userService.leaveChannel(client.data.user, channel);
 		client.leave(channel);
+
 		return this.wss.emit('rooms', client.data.user.username + " left the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+
 	}
 
 
@@ -148,7 +170,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getPrivateMessage')
-	async onGetPrivateMessage(client: Socket, socketIdu2 : string )
+	async onGetPrivateMessage(client: Socket, user2 : string )
 	{
 		const msg = await this.messageService.getPrivateMessage(client.data.user, socketIdu2);
 
