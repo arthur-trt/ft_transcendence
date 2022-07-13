@@ -8,6 +8,7 @@ import { UserService } from "src/user/user.service";
 import { JwtVerifyOptions, JwtService } from "@nestjs/jwt";
 import { jwtConstants } from "src/auth/jwt/jwt.constants";
 import { User } from "src/user/user.entity";
+import { sendPrivateMessageDto } from "src/dtos/sendPrivateMessageDto.dto";
 
 @Injectable()
 @WebSocketGateway({ cors: { origin: 'https://hoppscotch.io' } })
@@ -33,7 +34,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	private async	validateConnection(client: Socket) : Promise<User> {
 		try {
 			const authCookie: string = client.handshake.headers.cookie;
-			console.log(authCookie);
 			const authToken = authCookie.substring(15, authCookie.length);
 			const jwtOptions: JwtVerifyOptions = {
 				secret: jwtConstants.secret
@@ -60,7 +60,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 		client.data.user = user;
 		this.logger.log('connection !' + JSON.stringify(client.data.user))
-
 		this.wss.to(client.id).emit('rooms', await this.channelService.getUsersOfChannels());
 	}
 
@@ -73,16 +72,30 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		return this.wss.to(channel).emit('joinedRoom', client.data.user.username + " joined the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 	}
 
+	@SubscribeMessage('deleteRoom')
+	async onDeletedRoom(client: Socket, channel: string)
+	{
+		await this.channelService.deleteChannel(client.data.user, await this.channelService.getChannelByIdentifier(channel));
+		return this.wss.emit('rooms', await this.channelService.getUsersOfChannels()); // on emet a tt le monde que le chan a ete supp
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('leaveRoom') /** Join ROom parce que ca le creera aussi */
+	async onLeaveRoom(client: Socket, channel: string) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
+	{
+		await this.userService.leaveChannel(client.data.user, channel);
+		client.join(channel);
+		return this.wss.to(channel).emit('joinedRoom', client.data.user.username + " joined the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+	}
+
+
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('privateMessage')
-	async onPrivateMessage(client: Socket, msg )// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
+	async onPrivateMessage(client: Socket, msg : sendPrivateMessageDto )
 	{
-		const mess = JSON.parse(msg); // Pour hacker hoppscotch ce gros nul, et avoir plusieur argumet
-		//this.logger.log(mess);
 
-		// recuperer aussi le socket de l'autres
-		this.wss.to(client.id).emit('messageAdded', msg); // to handle in ChatService in front
-		return await this.messageService.sendPrivateMessage(client.data.user, mess.target, mess.message);
+		//this.wss.to(target.socketId).emit('privateMessage', msg);
+		return await this.messageService.sendPrivateMessage(client.data.user, msg.target, msg.msg);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -106,12 +119,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 
-	// //@UseGuards(WsJwtAuthGuard)
-	// @SubscribeMessage('test')
-  	// test(client: any, payload: any)
-	// {
-    // 	this.logger.log("TEST OK");
-	// }
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('test')
+  	test(client: any, payload: any)
+	{
+    	this.logger.log("TEST OK");
+	}
 
 	handleDisconnect(client: Socket) {
 		client.disconnect();

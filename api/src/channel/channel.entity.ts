@@ -16,11 +16,11 @@ export class Channel extends BaseEntity {
 	})
 	name: string;
 
-	@ManyToOne(() => User)
+	@ManyToOne(() => User, { nullable: true, cascade: true, onDelete: 'CASCADE', orphanedRowAction: 'delete'})
 	owner: User;
 
 	/** Tous les users du channel */
-	@ManyToMany(() => User, user => user.channels, { cascade: true, onDelete: 'CASCADE' })
+	@ManyToMany(() => User, user => user.channels, { cascade: true, onDelete: 'CASCADE', orphanedRowAction: 'delete'})
 	@JoinTable()		/* owner is channels */
 	users: User[]
 

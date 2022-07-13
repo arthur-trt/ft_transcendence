@@ -144,6 +144,36 @@ export class UserService {
 		user.channels = [...user.channels, channel]; /* if pb of is not iterable, it is because we did not get the realtions in the find one */
 		return await user.save();
 	}
+
+
+	public async leaveChannel(user: User, channel: string)
+	{
+		const chan: Channel = await this.chanService.getChannelByIdentifier(channel);
+
+		await this.channelsRepo
+			.createQueryBuilder()
+			.relation(Channel, "users")
+			.of(user)
+			.remove(chan);
+
+		const ownership : Channel = await this.channelsRepo.findOne({
+			where: {
+				owner: { id: user.id },
+				name: channel
+			}
+		});
+
+		if (ownership)
+		{
+			await this.channelsRepo
+				.createQueryBuilder()
+				.relation(Channel, "owner")
+				.of(chan)
+				.set(null);
+		}
+	
+		return await this.chanService.getUsersOfChannels();
+	}
 }
 
 
