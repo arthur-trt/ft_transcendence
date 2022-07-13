@@ -59,6 +59,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			return this.handleDisconnect(client);
 
 		client.data.user = user;
+
 		this.logger.log('connection !' + JSON.stringify(client.data.user))
 		this.wss.to(client.id).emit('rooms', await this.channelService.getUsersOfChannels());
 	}
@@ -93,9 +94,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage('privateMessage')
 	async onPrivateMessage(client: Socket, msg : sendPrivateMessageDto )
 	{
-
-		//this.wss.to(target.socketId).emit('privateMessage', msg);
-		return await this.messageService.sendPrivateMessage(client.data.user, msg.target, msg.msg);
+		this.wss.to(msg.targetSocketId).to(client.id).emit('privateMessage', msg); // on rajoute le denier
+		return await this.messageService.sendPrivateMessage(client.data.user, msg.targetUsernameOrId, msg.msg);
 	}
 
 	@UseGuards(WsJwtAuthGuard)

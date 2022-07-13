@@ -1,3 +1,4 @@
+import { SocketAddress } from 'net';
 import React, { useState } from 'react';
 import io from 'socket.io-client';
 
@@ -16,10 +17,15 @@ export default function Channels() {
     socket.on('joinedRoom', (msg, data) => {
       console.log(msg);
       console.log(data);
-    });
-    
-    window.location.reload();
-    setName("");  
+	});
+
+	socket.on('connect_error', () => {
+		socket.connect();
+		socket.emit('test');
+	});
+
+    //window.location.reload();
+    setName("");
 
     }
 
