@@ -4,7 +4,10 @@ import { IsNotEmpty } from "class-validator";
 export class sendPrivateMessageDto
 {
 	@IsNotEmpty()
-	target : string;
+	username: string;
+
+	@IsNotEmpty()
+	socketId : string;
 
 	@IsNotEmpty()
 	msg : string;
