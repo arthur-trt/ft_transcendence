@@ -172,9 +172,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage('getPrivateMessage')
 	async onGetPrivateMessage(client: Socket, user2 : string )
 	{
-		const msg = await this.messageService.getPrivateMessage(client.data.user, socketIdu2);
+		const msg = await this.messageService.getPrivateMessage(client.data.user, user2);
 
-		this.wss.to(client.id).emit('privateMessage', client.data.user.name + " get messages with " + socketIdu2, msg);
+		this.wss.to(client.id).emit('privateMessage', client.data.user.name + " get messages with " + user2, msg);
 		return
 	}
 
