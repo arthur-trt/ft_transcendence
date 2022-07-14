@@ -26,6 +26,10 @@ export default function Channels() {
       socket.on('users', (msg:any, tab:any) => {
         console.log(msg);
         console.log(tab);
+	  });
+	  socket.on('channelMessage', (msg:any, tab:any) => {
+        console.log(msg);
+        console.log(tab);
       });
 
   }, []);
@@ -41,15 +45,16 @@ export default function Channels() {
     getData()
     }, [])
 
-  
+
   let handleCreate = (e: any) => {
       socket.emit('createRoom', name);
-      
-      setName("");  
+
+      setName("");
   }
 
   let handleJoin = (e:any) => {
-    socket.emit('joinRoom', e.currentTarget.id);
+	  socket.emit('joinRoom', e.currentTarget.id);
+	  handleHello(e);
   }
 
   let handleDelete = (e:any) => {
@@ -58,6 +63,10 @@ export default function Channels() {
 
   let handleLeave = (e:any) => {
     socket.emit('leaveRoom', e.currentTarget.id);
+  }
+
+  let handleHello = (e:any) => {
+    socket.emit('sendChannelMessage',  e.currentTarget.id);
   }
 
 
@@ -82,14 +91,14 @@ export default function Channels() {
             </h5>
             <FontAwesomeIcon icon={faCircleXmark} className="circlexmark" id={data[i]?.name} onClick={handleDelete} />
             <FontAwesomeIcon icon={faArrowAltCircleRight} className="arrow" id={data[i]?.name} onClick={handleLeave} />
-            <FontAwesomeIcon icon={faPlus} className="plus" id={data[i]?.name} onClick={handleJoin} />
+			<FontAwesomeIcon icon={faPlus} className="plus" id={data[i]?.name} onClick={handleJoin} />
             </div>);
         i++;
         BgColor = 'white';
     }
     return indents;
   }
-    
+
     return (
 
       <div className='chan-container'>

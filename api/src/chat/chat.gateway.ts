@@ -9,6 +9,7 @@ import { JwtVerifyOptions, JwtService } from "@nestjs/jwt";
 import { jwtConstants } from "src/auth/jwt/jwt.constants";
 import { User } from "src/user/user.entity";
 import { sendPrivateMessageDto } from "src/dtos/sendPrivateMessageDto.dto";
+import { channel } from "diagnostics_channel";
 
 @Injectable()
 @WebSocketGateway({ cors: { origin: 'https://hoppscotch.io' } })
@@ -71,15 +72,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		{
 			users.push({
 				userID: id,
-				username: JSON.stringify(socket.data.user.name),
+				username: socket.data.user.name,
 				photo: socket.data.user.avatar_url
 			})
 		};
 		for (let user of users)
 			this.logger.log(" CHECKING" + user);
-
 		this.wss.emit('users', "List of users", users);
-
 	}
 
 	/**
@@ -141,7 +140,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	{
 		await this.userService.leaveChannel(client.data.user, channel);
 		client.leave(channel);
-
 		return this.wss.emit('rooms', client.data.user.username + " left the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 
 	}
@@ -188,6 +186,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	async onGetChannelMessages(client: Socket, channelName : string )// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
 		return await this.messageService.getMessage(channelName);
+	}
+
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('sendChannelMessage')
+	async onSendChannelMessages(client: Socket, channelName: string )// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
+	{
+		this.logger.log("EMITTING HEELLO WORLD to " + channelName);
+		this.wss.to(channelName).emit('channelMessage', "Hello world", { "lol" : "Hello"});
+		//return await this.messageService.getMessage(channelName);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
