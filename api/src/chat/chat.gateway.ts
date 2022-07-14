@@ -71,15 +71,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		{
 			users.push({
 				userID: id,
-				username: client.data.user.name,
-				photo: client.data.user.avatar_url
+				username: socket.data.user.name,
+				photo: socket.data.user.avatar_url
 			})
 		};
 		for (let user of users)
-			this.logger.log(user);
+			this.logger.log(" CHECKING" + user);
 
 		this.wss.emit('users', "List of users", users);
-
 
 	}
 
@@ -188,7 +187,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage('getChannelMessages')
 	async onGetChannelMessages(client: Socket, channelName : string )// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
-		return await this.messageService.getMessage(channelName);
+
+		this.wss.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName));
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('sendChannelMessages')
+	async onSendChannelMessages(client: Socket, channelName : string, msg : string)// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
+	{
+		this.wss.to(channelName).emit('channelMessage', msg);
+		return await this.messageService.sendMessageToChannel(channelName, client.data.user, msg);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
