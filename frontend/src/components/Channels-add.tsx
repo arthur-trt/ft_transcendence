@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons'
 import { faArrowAltCircleRight } from '@fortawesome/free-regular-svg-icons'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faPaperPlane } from '@fortawesome/free-regular-svg-icons'
 
 export default function Channels() {
 
@@ -23,14 +24,15 @@ export default function Channels() {
       const socket = io('http://localhost:8080');
       setSocket(socket);
       socket.on('rooms', (msg:any, tab:any) => {
-        console.log(msg);
+        // console.log(msg);
         setData(tab);
       });
       socket.on('users', (msg:any, tab:any) => {
-        console.log(msg);
-        console.log(tab);
+        // console.log(msg);
+        // console.log(tab);
         setDatausers(tab);
       });
+      return () => {console.log("coucou")};
   }, []);
 
   // FETCHING API TO GET INFO FROM THE MAIN USER (NAME TO COMPARE WITH CHANNELS USERS)
@@ -83,6 +85,7 @@ export default function Channels() {
             <FontAwesomeIcon icon={faCircleXmark} className="circlexmark" id={data[i]?.name} onClick={handleDelete} />
             <FontAwesomeIcon icon={faArrowAltCircleRight} className="arrow" id={data[i]?.name} onClick={handleLeave} />
             <FontAwesomeIcon icon={faPlus} className="plus" id={data[i]?.name} onClick={handleJoin} />
+            <FontAwesomeIcon icon={faPaperPlane} className="paperplane" id={data[i]?.name} onClick={display_chat} />
             </div>);
         i++;
         BgColor = 'white';
@@ -110,6 +113,13 @@ export default function Channels() {
     }
     return indents;
   }
+
+  function display_chat() {
+    // console.log("send message");
+    return (
+      <div>Coucou</div>
+    )
+  }
     
     return (
 
@@ -133,6 +143,7 @@ export default function Channels() {
 
       <div className='chat'>
         <h3>CHAT</h3>
+        {display_chat()}
       </div>
 
       <div className='connected-users'>

@@ -123,10 +123,6 @@ code {
   text-align: center;
 }
 
-.chat {
-  width: 40%;
-  text-align: center;
-}
 
 .chan-add form {
   text-align: center;
@@ -282,6 +278,22 @@ code {
   border: 2px solid springgreen;
 }
 
+.chat {
+  width: 40%;
+  text-align: center;
+  background-color: blue;
+}
+
+.uniquechan .paperplane {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin-right: 5px;
+  margin-top: 5px;
+  border-radius: 50px;
+  cursor: pointer;
+  color: black;
+}
 /* ---------PROFILE---------- */
 
 .setpro-container {
