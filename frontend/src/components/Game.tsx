@@ -14,11 +14,6 @@ export default function Game() {
 
     socket.emit(name, args);
 
-    //socket.on('joinedRoom', (msg, data) => {
-    //  console.log(msg);
-    //  console.log(data);
-    //});
-
     socket.onAny((event, ...args) => {
       console.log(event, args);
     });

@@ -68,7 +68,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage('getUsers')
 	async getUsers(client: Socket)
 	{
-		this.server.to(client.id).emit('listUsers', this.gameService.listConnectedUser(client, this.active_users, false));
+		this.server.to(client.id).emit('listUsers', await this.gameService.listConnectedUser(client, this.active_users, false));
 	}
 
 
@@ -80,6 +80,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		try {
 			this.logger.log("User: " + client.data.user.name + " disconnected");
 			this.active_users.delete(client.data.user);
+			console.log(this.active_users);
 		}
 		catch(err) {
 			console.log("Don't know what append");

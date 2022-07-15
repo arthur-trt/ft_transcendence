@@ -84,7 +84,7 @@ export class GameService {
 	 * @param withCurrentUser if true user who made the request will be included
 	 * @returns
 	 */
-	listConnectedUser(client: Socket, active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
+	async listConnectedUser(client: Socket, active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
 		let data = {};
 
 		for (let user of active_user.keys()) {

@@ -9,7 +9,6 @@ import TwoFactor from './components/TwoFactor';
 import Profile from './components/Profile';
 import Channels from './components/Channels-add';
 import Game from './components/Game';
-import { ChannelsDisplayer } from './components/ChannelsDisplayer';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
