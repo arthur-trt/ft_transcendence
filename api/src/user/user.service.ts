@@ -173,9 +173,20 @@ export class UserService {
 				.of(chan)
 				.set(null);
 		}
-	
+
 		return await this.chanService.getUsersOfChannels();
-}
+	}
+
+	public async getChannelsForUser(user: User) :  Promise<Channel[]>
+	{
+		const chans : Channel[] = await this.channelsRepo.find({
+			where: {
+				users: { id: user.id },
+			}
+		});
+		return chans;
+	}
+
 	public async	setUserActive (user: User) {
 		const options: UpsertOptions<UserActivity> = {
 			conflictPaths: ['user'],
