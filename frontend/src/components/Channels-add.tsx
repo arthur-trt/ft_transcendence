@@ -41,11 +41,11 @@ export default function Channels() {
     getData()
     }, [])
 
-  
+
   let handleCreate = (e: any) => {
       socket.emit('createRoom', name);
-      
-      setName("");  
+
+      setName("");
   }
 
   let handleJoin = (e:any) => {
@@ -89,7 +89,7 @@ export default function Channels() {
     }
     return indents;
   }
-    
+
     return (
 
       <div className='chan-container'>
@@ -97,11 +97,11 @@ export default function Channels() {
       <div className='chan-add'>
         <h3>CHANNELS</h3>
         <form onSubmit={handleCreate}>
-          <input
-            type="text"
-            value={name}
-            placeholder="channel name..."
-            onChange={(e) => setName(e.target.value)}
+			<input
+			type="text"
+			value={name}
+			placeholder="channel name..."
+			onChange={(e) => setName(e.target.value)}
           />
           <button type="submit">Add</button>
         </form>
