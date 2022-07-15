@@ -108,4 +108,7 @@ export class ChannelService {
 
 		return this.getUsersOfChannels();	 // image id
 	 }
+
+	
+
 }

@@ -9,7 +9,24 @@ import { JwtVerifyOptions, JwtService } from "@nestjs/jwt";
 import { jwtConstants } from "src/auth/jwt/jwt.constants";
 import { User } from "src/user/user.entity";
 import { sendPrivateMessageDto } from "src/dtos/sendPrivateMessageDto.dto";
+import { channelMessage } from "src/message/channelMessage.entity";
+import { Channel } from "src/channel/channel.entity";
 
+
+
+/**
+ * Receives all request performed by chat.
+ * Usage :
+ * - All functions takes two arguments. Always the client (automatically sent)
+ * - All functions return three args : the event name, an explicatiove sentence, and data
+ * ex :
+ * Client side
+ * socket.emit('eventName', "Hello")
+ * socket.emit('eeventName', {"msg" : "string", "user" : "username"})
+ *
+ * Server side
+ * this.wss.emit('backEventName', "",)
+ */
 @Injectable()
 @WebSocketGateway({ cors: { origin: 'https://hoppscotch.io' } })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -71,16 +88,21 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		{
 			users.push({
 				userID: id,
-				username: client.data.user.name,
-				photo: client.data.user.avatar_url
+				username: socket.data.user.name,
+				photo: socket.data.user.avatar_url
 			})
 		};
 		for (let user of users)
-			this.logger.log(user);
+			this.logger.log(" CHECKING" + user.username);
 
+		let chan : Channel[] = await this.userService.getChannelsForUser(user);
+		this.logger.log(" CHANS" + chan);
+
+		for (let c of chan) {
+			client.join(c.name);
+			this.logger.log(user.name + " : Client joining" + c.name)
+		}
 		this.wss.emit('users', "List of users", users);
-
-
 	}
 
 	/**
@@ -95,7 +117,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	{
 		await this.userService.joinChannel(client.data.user, channel);
 		client.join(channel);
-
 		return this.wss.emit('rooms', client.data.user.name + " created the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 
 	}
@@ -140,13 +161,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage('leaveRoom') /** Join ROom parce que ca le creera aussi */
 	async onLeaveRoom(client: Socket, channel: string) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
+		this.logger.log(client.data.user.name + " LEFT ROOM")
 		await this.userService.leaveChannel(client.data.user, channel);
+		this.wss.emit('rooms', client.data.user.username + " left the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 		client.leave(channel);
-
-		return this.wss.emit('rooms', client.data.user.username + " left the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
-
 	}
-
 
 	/**
 	 *
@@ -158,6 +177,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage('privateMessage')
 	async onPrivateMessage(client: Socket, msg : sendPrivateMessageDto )
 	{
+		// sending message to both users : sender (client.id) and msg.socketId
 		this.wss.to(msg.socketId).to(client.id).emit('privateMessage', client.data.user.name + " sent a message to " + msg.username + msg.socketId, msg.msg);
 		return await this.messageService.sendPrivateMessage(client.data.user, msg.username, msg.msg);
 	}
@@ -188,7 +208,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage('getChannelMessages')
 	async onGetChannelMessages(client: Socket, channelName : string )// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
-		return await this.messageService.getMessage(channelName);
+		this.wss.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName));
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('sendChannelMessages')
+	async onSendChannelMessages(client: Socket, data : any)// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
+	{
+		this.logger.log("MSG " + data.msg + " to " + data.chan + " from " + client.data.user.name)
+		this.wss.to(data.chan).emit('channelMessage', data.msg);
+		return await this.messageService.sendMessageToChannel(data.chan, client.data.user, data.msg);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -208,6 +237,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	handleDisconnect(client: Socket) {
 		client.disconnect();
 		this.logger.log("DISCONNEECT ");
+
 		//this.wss.to(client.id).emit('connect_error'); // to handle in ChatService in front
 		return "Goodbye";
 	}
