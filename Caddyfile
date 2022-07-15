@@ -32,7 +32,6 @@ http://localhost:8080, https://localhost:4443 {
 
 	rewrite /api /api/
 	handle /api/* {
-
 		reverse_proxy		api:3000 {
 			header_up		+Access-Control-Allow-Origin "*"
 			header_down		+Access-Control-Allow-Origin "*"
@@ -40,10 +39,10 @@ http://localhost:8080, https://localhost:4443 {
 	}
 
 	handle /socket.io/* {
-    	reverse_proxy api:3000 {
+		reverse_proxy api:3000 {
 			header_up		+Access-Control-Allow-Origin "https://hoppscotch.io"
 		}
-  	}
+	}
 
 	handle {
 		reverse_proxy		frontend:3000 {

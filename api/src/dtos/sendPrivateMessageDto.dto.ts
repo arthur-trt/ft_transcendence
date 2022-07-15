@@ -4,6 +4,9 @@ import { IsNotEmpty } from "class-validator";
 export class sendPrivateMessageDto
 {
 	@IsNotEmpty()
+	from: string;
+	
+	@IsNotEmpty()
 	username: string;
 
 	@IsNotEmpty()
