@@ -271,6 +271,4 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.wss.emit('users', "List of users", users);
 		return "Goodbye";
 	}
-
-
 }
