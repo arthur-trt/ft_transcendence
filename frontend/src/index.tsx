@@ -8,6 +8,7 @@ import { Header } from './components/Header';
 import TwoFactor from './components/TwoFactor';
 import Profile from './components/Profile';
 import Channels from './components/Channels-add';
+import Game from './components/Game';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -22,6 +23,7 @@ root.render(
       <Route path="/2fa" element={<><Header/><TwoFactor/></>} />
       <Route path="/profile" element={<><Header/><Profile/></>} />
       <Route path="/chat" element={<><Header/><Channels/></>} />
+      <Route path="/game" element={<><Header/><Game/></>} />
 
       </Routes>
     </Router>
