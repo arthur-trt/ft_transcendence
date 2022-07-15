@@ -56,9 +56,11 @@ export class MessageController {
 	@ApiTags('Channel messages')
 	@ApiOperation({ summary: "Get all messages from a channel" })
 	@Get('channel/getMsg/:identifier')
-	public async getMessages(@Param('identifier') chanIdentifier : string)
+	@UseGuards(JwtAuthGuard)
+	public async getMessages(@Req() req : Request, @Param('identifier') chanIdentifier : string)
 	{
-		const messages = await this.messageService.getMessage(chanIdentifier)
+		const user : User = await this.userService.getUserByRequest(req);
+		const messages = await this.messageService.getMessage(chanIdentifier, user)
 		return messages;
 	}
 

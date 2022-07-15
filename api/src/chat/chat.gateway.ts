@@ -202,7 +202,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage('getChannelMessages')
 	async onGetChannelMessages(client: Socket, channelName : string )// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
-		this.wss.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName));
+		this.wss.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName, client.data.user));
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -252,6 +252,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this.users.splice(index, 1);
 		this.wss.emit('users', "List of users", this.users);
 		this.logger.log("removing " + JSON.stringify(this.users));
-		return "Goodbye";
+
 	}
 }

@@ -47,7 +47,7 @@ export class UserService {
 	public async getUsers()
 	{
 		return await this.userRepo.createQueryBuilder('User')
-			.select(["User.id", "User.name", "User.mail", "User.avatar_url"])
+			.select(["User.id", "User.name", "User.mail", "User.avatar_url", "User.blocked"])
 			.getMany();
 	}
 
@@ -185,6 +185,14 @@ export class UserService {
 			}
 		});
 		return chans;
+	}
+
+	public async block(user: User, toBan: User) :  Promise<User>
+	{
+		user.blocked = [];
+		user.blocked.push(toBan.id);
+		user.save();
+		return user;
 	}
 
 	public async	setUserActive (user: User) {

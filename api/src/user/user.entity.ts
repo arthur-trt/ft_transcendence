@@ -60,8 +60,11 @@ export class User extends BaseEntity {
 	@JoinTable()
 	channels: Channel[];
 
-	@OneToMany(() => channelMessage, channelMessage => channelMessage.sender)
+	@OneToMany(() => channelMessage, channelMessage => channelMessage.sender) // peut etre zapper ca et mettre juste l'id des senders
 	channelMessages: channelMessage[];
+
+	@Column('varchar', { array: true, nullable : true})
+	blocked: string[]; // tableau d'id pour les bloques
 
 
 }
