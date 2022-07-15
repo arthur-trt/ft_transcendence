@@ -11,7 +11,9 @@ import { User } from "src/user/user.entity";
 import { sendPrivateMessageDto } from "src/dtos/sendPrivateMessageDto.dto";
 import { channelMessage } from "src/message/channelMessage.entity";
 import { Channel } from "src/channel/channel.entity";
-
+import { stringify } from "querystring";
+import { SocketAddress } from "net";
+import { IoAdapter } from "@nestjs/platform-socket.io";
 
 
 /**
@@ -28,21 +30,23 @@ import { Channel } from "src/channel/channel.entity";
  * this.wss.emit('backEventName', "",)
  */
 @Injectable()
-@WebSocketGateway({ cors: { origin: 'https://hoppscotch.io' }, namespace: 'chat' })
+@WebSocketGateway({ namespace: '/chat' })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
 
-	@WebSocketServer() wss: Server;
+	@WebSocketServer()
+	wss: Server;
+
+	private users = [];
 
 	constructor(
 		private userService: UserService,
 		private readonly jwtService: JwtService,
 		@Inject(MessageService) private messageService: MessageService,
-		private channelService : ChannelService
-	) { }
+		private channelService: ChannelService,
+	) {}
 
 	private logger: Logger = new Logger("Chat gateway")
-	private util = require('util');
 
 	afterInit(server: Server) {
 		this.logger.log('init')
@@ -83,24 +87,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 		this.wss.to(client.id).emit('rooms', "init co !", await this.channelService.getUsersOfChannels());
 
-		const users = [];
-		for (let [id, socket] of this.wss.of("/chat").sockets)
-		{
-			users.push({
-				userID: id,
-				username: socket.data.user.name,
-				photo: socket.data.user.avatar_url
-			})
-		};
-		for (let user of users)
-			this.logger.log(" CHECKING" + user.username);
-		let chan : Channel[] = await this.userService.getChannelsForUser(user);
-		this.logger.log(" CHANS" + chan);
-		for (let c of chan) {
-			client.join(c.name);
-			this.logger.log(user.name + " : Client joining" + c.name)
-		}
-		this.wss.emit('users', "List of users", users);
+		var util = require('util')
+
+		this.users.push({
+			userID: client.id,
+			username: client.data.user.name,
+			photo: client.data.user.avatar_url
+		});
+		this.wss.emit('users', "List of users", this.users);
 	}
 
 	/**
@@ -235,40 +229,29 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@UseGuards(WsJwtAuthGuard)
-	@SubscribeMessage('disconnect')
+	@SubscribeMessage('disconnectUser')
   	onDisconnect(client: Socket, payload: any)
 	{
 		client.disconnect();
 		this.logger.log("Disconnecting");
-		const users = [];
-		for (let [id, socket] of this.wss.of("/chat").sockets)
-		{
-			users.push({
-				userID: id,
-				username: socket.data.user.name,
-				photo: socket.data.user.avatar_url
-			})
-		};
-		for (let user of users)
-			this.logger.log(" CHECKING" + user.username);
-		this.wss.emit('users', "List of users", users);
+		var index = this.users.findIndex(function (o) {
+			return o.userID === client.id;
+		});
+		if (index !== -1)
+			this.users.splice(index, 1);
+		this.wss.emit('users', "List of users", this.users);
 	}
 
 	handleDisconnect(client: Socket) {
 		client.disconnect();
 		this.logger.log("Disconnecting");
-		const users = [];
-		for (let [id, socket] of this.wss.of("/chat").sockets)
-		{
-			users.push({
-				userID: id,
-				username: socket.data.user.name,
-				photo: socket.data.user.avatar_url
-			})
-		};
-		for (let user of users)
-			this.logger.log(" CHECKING" + user.username);
-		this.wss.emit('users', "List of users", users);
+		var index = this.users.findIndex(function (o) {
+			return o.userID === client.id;
+		});
+		if (index !== -1)
+			this.users.splice(index, 1);
+		this.wss.emit('users', "List of users", this.users);
+		this.logger.log("removing " + JSON.stringify(this.users));
 		return "Goodbye";
 	}
 }
