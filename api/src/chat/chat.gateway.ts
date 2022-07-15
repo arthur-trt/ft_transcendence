@@ -28,7 +28,7 @@ import { Channel } from "src/channel/channel.entity";
  * this.wss.emit('backEventName', "",)
  */
 @Injectable()
-@WebSocketGateway({ cors: { origin: 'https://hoppscotch.io' } })
+@WebSocketGateway({ cors: { origin: 'https://hoppscotch.io' }, namespace: 'chat' })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
 
@@ -84,7 +84,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.wss.to(client.id).emit('rooms', "init co !", await this.channelService.getUsersOfChannels());
 
 		const users = [];
-		for (let [id, socket] of this.wss.of("/").sockets)
+		for (let [id, socket] of this.wss.of("/chat").sockets)
 		{
 			users.push({
 				userID: id,
@@ -94,10 +94,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		};
 		for (let user of users)
 			this.logger.log(" CHECKING" + user.username);
-
 		let chan : Channel[] = await this.userService.getChannelsForUser(user);
 		this.logger.log(" CHANS" + chan);
-
 		for (let c of chan) {
 			client.join(c.name);
 			this.logger.log(user.name + " : Client joining" + c.name)
@@ -168,17 +166,19 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	/**
+	 * Each time someone want to emit/receive a private message, this function is called
 	 *
+	 * @brief emit the PM to both the sender and emitter
 	 * @param client
 	 * @param msg
 	 * @returns
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('privateMessage')
-	async onPrivateMessage(client: Socket, msg : sendPrivateMessageDto )
+	async onPrivateMessage(client: Socket, msg : sendPrivateMessageDto)
 	{
 		// sending message to both users : sender (client.id) and msg.socketId
-		this.wss.to(msg.socketId).to(client.id).emit('privateMessage', client.data.user.name + " sent a message to " + msg.username + msg.socketId, msg.msg);
+		this.wss.to(msg.socketId).to(client.id).emit('privateMessage', client.data.user.name + " sent a message to " + msg.username + msg.socketId, msg);
 		return await this.messageService.sendPrivateMessage(client.data.user, msg.username, msg.msg);
 	}
 
@@ -190,7 +190,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getPrivateMessage')
-	async onGetPrivateMessage(client: Socket, user2 : string )
+	async onGetPrivateMessage(client: Socket, user2 : string)
 	{
 		const msg = await this.messageService.getPrivateMessage(client.data.user, user2);
 
@@ -234,11 +234,41 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     	this.logger.log("TEST OK");
 	}
 
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('disconnect')
+  	onDisconnect(client: Socket, payload: any)
+	{
+		client.disconnect();
+		this.logger.log("Disconnecting");
+		const users = [];
+		for (let [id, socket] of this.wss.of("/chat").sockets)
+		{
+			users.push({
+				userID: id,
+				username: socket.data.user.name,
+				photo: socket.data.user.avatar_url
+			})
+		};
+		for (let user of users)
+			this.logger.log(" CHECKING" + user.username);
+		this.wss.emit('users', "List of users", users);
+	}
+
 	handleDisconnect(client: Socket) {
 		client.disconnect();
-		this.logger.log("DISCONNEECT ");
-
-		//this.wss.to(client.id).emit('connect_error'); // to handle in ChatService in front
+		this.logger.log("Disconnecting");
+		const users = [];
+		for (let [id, socket] of this.wss.of("/chat").sockets)
+		{
+			users.push({
+				userID: id,
+				username: socket.data.user.name,
+				photo: socket.data.user.avatar_url
+			})
+		};
+		for (let user of users)
+			this.logger.log(" CHECKING" + user.username);
+		this.wss.emit('users', "List of users", users);
 		return "Goodbye";
 	}
 
