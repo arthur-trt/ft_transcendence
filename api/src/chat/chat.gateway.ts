@@ -94,10 +94,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		};
 		for (let user of users)
 			this.logger.log(" CHECKING" + user.username);
-
 		let chan : Channel[] = await this.userService.getChannelsForUser(user);
 		this.logger.log(" CHANS" + chan);
-
 		for (let c of chan) {
 			client.join(c.name);
 			this.logger.log(user.name + " : Client joining" + c.name)
@@ -241,13 +239,36 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   	onDisconnect(client: Socket, payload: any)
 	{
 		client.disconnect();
-    	this.logger.log("Disconnecting");
+		this.logger.log("Disconnecting");
+		const users = [];
+		for (let [id, socket] of this.wss.of("/chat").sockets)
+		{
+			users.push({
+				userID: id,
+				username: socket.data.user.name,
+				photo: socket.data.user.avatar_url
+			})
+		};
+		for (let user of users)
+			this.logger.log(" CHECKING" + user.username);
+		this.wss.emit('users', "List of users", users);
 	}
 
 	handleDisconnect(client: Socket) {
 		client.disconnect();
-		this.logger.log("DISCONNEECT ");
-		//this.wss.to(client.id).emit('connect_error'); // to handle in ChatService in front
+		this.logger.log("Disconnecting");
+		const users = [];
+		for (let [id, socket] of this.wss.of("/chat").sockets)
+		{
+			users.push({
+				userID: id,
+				username: socket.data.user.name,
+				photo: socket.data.user.avatar_url
+			})
+		};
+		for (let user of users)
+			this.logger.log(" CHECKING" + user.username);
+		this.wss.emit('users', "List of users", users);
 		return "Goodbye";
 	}
 
