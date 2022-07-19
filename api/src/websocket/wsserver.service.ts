@@ -35,6 +35,17 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	protected active_users = new Map<User, Socket>();
 	protected users = [];
 
+
+	/*
+	**
+	** 	 ██████  ██████  ███    ██ ███    ██ ███████  ██████ ████████
+	** 	██      ██    ██ ████   ██ ████   ██ ██      ██         ██
+	** 	██      ██    ██ ██ ██  ██ ██ ██  ██ █████   ██         ██
+	** 	██      ██    ██ ██  ██ ██ ██  ██ ██ ██      ██         ██
+	** 	 ██████  ██████  ██   ████ ██   ████ ███████  ██████    ██
+	**
+	*/
+
 	protected async validateConnection(client: Socket): Promise<User> {
 		try {
 			const authCookies: string[] = client.handshake.headers.cookie.split('; ');
@@ -111,7 +122,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 			}
 		}
 		catch (err) {
-			console.log("Don't know what append");
+			console.log("Don't know what happened");
 		}
 		this.active_users.forEach((socket: Socket, user: User) => {
 			this.server.to(socket.id).emit(
@@ -125,7 +136,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	/**
 	 * Return a JSON object with all active user. With or without the user who made the request
-	 * regardind of `withCurrentUser` parameters
+	 * regarding of `withCurrentUser` parameters
 	 * @param client user who made the request
 	 * @param active_user map of active user
 	 * @param withCurrentUser if true user who made the request will be included
@@ -162,19 +173,32 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	}
 
 
-	//	_____ _    _       _______    _____       _______ ________          __ __     __
-	//	/ ____| |  | |   /\|__   __|  / ____|   /\|__   __|  ____\ \        / /\\ \   / /
-	// | |    | |__| |  /  \  | |    | |  __   /  \  | |  | |__   \ \  /\  / /  \\ \_/ /
-	// | |    |  __  | / /\ \ | |    | | |_ | / /\ \ | |  |  __|   \ \/  \/ / /\ \\   /
-	// | |____| |  | |/ ____ \| |    | |__| |/ ____ \| |  | |____   \  /\  / ____ \| |
-	//	\_____|_|  |_/_/    \_\_|     \_____/_/    \_\_|  |______|   \/  \/_/    \_\_|
+	/*
+	** 		_____ _    _       _______    _____       _______ ________          __ __     __
+	** 	  / ____| |  | |   /\|__   __|  / ____|   /\|__   __|  ____\ \        / /\\ \   / /
+	** 	 | |    | |__| |  /  \  | |    | |  __   /  \  | |  | |__   \ \  /\  / /  \\ \_/ /
+	** 	 | |    |  __  | / /\ \ | |    | | |_ | / /\ \ | |  |  __|   \ \/  \/ / /\ \\   /
+	** 	 | |____| |  | |/ ____ \| |    | |__| |/ ____ \| |  | |____   \  /\  / ____ \| |
+	** 	  \_____|_|  |_/_/    \_\_|     \_____/_/    \_\_|  |______|   \/  \/_/    \_\_|
+	**
+	*/
+
+	/*
+	**
+	** ██████   ██████   ██████  ███    ███ ███████
+	** ██   ██ ██    ██ ██    ██ ████  ████ ██
+	** ██████  ██    ██ ██    ██ ██ ████ ██ ███████
+	** ██   ██ ██    ██ ██    ██ ██  ██  ██      ██
+	** ██   ██  ██████   ██████  ██      ██ ███████
+	**
+	*/
 
 	/**
-		 *
-		 * @param client
-		 * @param channel
-		 * @returns
-		 */
+	 *
+	 * @param client
+	 * @param channel
+	 * @returns
+	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('createRoom') /** Join ROom parce que ca le creera aussi */
 	async onCreateRoom(client: Socket, channel: string) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
@@ -184,8 +208,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		return this.server.emit('rooms', client.data.user.name + " created the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 
 	}
-
-
 
 	/**
 	 *
@@ -214,7 +236,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		client.join(channel);
 		return this.server.emit('rooms', client.data.user.username + " joined the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 	}
-
 
 	/**
 	 *
@@ -245,6 +266,18 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		client.leave(channel);
 	}
 
+
+	/*
+	**
+	** ███    ███ ███████  ██████  ███████
+	** ████  ████ ██      ██       ██
+	** ██ ████ ██ ███████ ██   ███ ███████
+	** ██  ██  ██      ██ ██    ██      ██
+	** ██      ██ ███████  ██████  ███████
+	**
+	*/
+
+
 	/**
 	 * Each time someone want to emit/receive a private message, this function is called
 	 *
@@ -262,7 +295,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	}
 
 	/**
-	 *
+	 * @brief Get Private Messages between two users
 	 * @param client
 	 * @param user2
 	 * @returns
@@ -277,7 +310,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	}
 
 	/**
-	 *
+	 * @brief get Channel Messages
 	 * @param client
 	 * @param channelName
 	 * @returns
@@ -289,6 +322,11 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		this.server.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName, client.data.user));
 	}
 
+	/**
+	 * @brief Send Channel Messages
+	 * @param client
+	 * @param data an object containung msg and chan
+	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('sendChannelMessages')
 	async onSendChannelMessages(client: Socket, data: any)
@@ -298,6 +336,12 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		this.server.to(data.chan).emit('channelMessage', await this.messageService.getMessage(data.chan, client.data.user));
 	}
 
+
+	/**
+	 * @brief get all users
+	 * @param client
+	 * @param data
+	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getUsers')
 	async get_users_list(client: Socket, data: any)
@@ -307,6 +351,16 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 			this.listConnectedUser(client, this.all_users, this.active_users, false)
 		);
 	}
+
+	/*
+	**
+	** ███████ ██████  ██ ███████ ███    ██ ██████  ███████
+	** ██      ██   ██ ██ ██      ████   ██ ██   ██ ██
+	** █████   ██████  ██ █████   ██ ██  ██ ██   ██ ███████
+	** ██      ██   ██ ██ ██      ██  ██ ██ ██   ██      ██
+	** ██      ██   ██ ██ ███████ ██   ████ ██████  ███████
+	**
+	*/
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('addFriend')
@@ -320,38 +374,48 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async acceptFriendRequest(client: Socket, friend: User)
 	{
 		await this.friendService.acceptFriendRequest(client.data.user, friend);
-		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers);
+		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+	}
+
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('removeFriend')
+	async removeFriend(client: Socket, friend: User)
+	{
+		await this.friendService.removeFriend(client.data.user, friend);
+		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getFriends')
 	async getFriends(client: Socket, friend: User)
 	{
-		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers);
+		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
 	}
 
+	/*
+	**
+	** ██████  ██       ██████   ██████ ██   ██
+	** ██   ██ ██      ██    ██ ██      ██  ██
+	** ██████  ██      ██    ██ ██      █████
+	** ██   ██ ██      ██    ██ ██      ██  ██
+	** ██████  ███████  ██████   ██████ ██   ██
+	**
+	*/
 
 	@UseGuards(WsJwtAuthGuard)
-	@SubscribeMessage('message')
-	handleMessage(client: any, payload: any): string {
-		return 'Hello world!';
+	@SubscribeMessage('block')
+	async block(client: Socket, toBlock: User)
+	{
+		this.userService.block(client.data.user, toBlock);
+		this.server.to(client.id).emit('blocked', toBlock.name + " has been blocked");
 	}
-
 
 	@UseGuards(WsJwtAuthGuard)
-	@SubscribeMessage('test')
-	test(client: any, payload: any) {
-		this.logger.log("TEST OK");
+	@SubscribeMessage('unblock')
+	async unblock(client: Socket, toUnBlock: User)
+	{
+		this.userService.unblock(client.data.user, toUnBlock);
+		this.server.to(client.id).emit('unblocked', toUnBlock.name + " has been unblocked");
 	}
-
-
-
-	//@UseGuards(WsJwtAuthGuard)
-	//@SubscribeMessage('getUsers')
-	//getActiveUsers (client: Socket) {
-	//	this.server.to(client.id).emit(
-	//		'listUsers',
-	//		this.listConnectedUser(client, this.active_users, false)
-	//	);
-	//}
 }
