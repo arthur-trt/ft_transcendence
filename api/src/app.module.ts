@@ -14,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
 import { MatchHistory } from './game/game.entity';
 import { GameModule } from './game/game.module';
 import { UserActivity } from './user/user_activity.entity';
+import { FriendshipsModule } from './friendships/friendships.module';
 import { WSServerModule } from './websocket/wsserver.module'
 
 @Module({
@@ -36,9 +37,10 @@ import { WSServerModule } from './websocket/wsserver.module'
 	  entities: [User, Channel, privateMessage, channelMessage, MatchHistory, UserActivity], /* Create tables according to prototype in entities */
 	  //entities: [ './car/*.entity.{js,ts}'],
 		synchronize: true,
-		logging: false
+		logging: true
 	}),
-	  AuthModule],
+	  AuthModule,
+	  FriendshipsModule],
 })
 
   export class AppModule { }
