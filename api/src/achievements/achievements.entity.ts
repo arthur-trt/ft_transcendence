@@ -8,19 +8,17 @@ export enum Achievements_types {
 	TOP10 = "Top 10",
 	WINNER = "Winner - Won all matches",
 	LOSER = "Loser - Lost all matches",
-	ROW3 = "Won three times in a row",
-	ROW5 = "Won five times in a row",
-	CHANNELLEADER = "Is owner of at least three channels",
-	HALFHALF = "Fifty fity",
-	NOBODYLOVESYOU = "Banned from a channel"
+	ROW3 = "Row 3 - Won three times in a row",
+	ROW5 = "Row 5 - Won five times in a row",
+	CHANNELLEADER = "Channel Leader - Is owner of at least three channels",
+	HALFHALF = "50/50 : Perfeect balance between loss and successds",
+	NOBODYLOVESYOU = "Nobody Loves You - Banned from a channel"
 }
 
 
-
-@Entity('Achievements') /** table name */
+@Entity('Achievements')
 export class Achievements extends BaseEntity
 {
-
 	@PrimaryGeneratedColumn()
 	id: string;
 
@@ -30,8 +28,6 @@ export class Achievements extends BaseEntity
 
 	@Column({
 		type: 'text',
-       // enum: Achievements_types,
 	})
 	achievement_name: Achievements_types;
-
 }
