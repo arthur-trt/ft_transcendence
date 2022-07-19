@@ -59,4 +59,19 @@ export class FriendshipsService {
 			.getMany();
 	}
 
+	async removeFriend(user1 : User, user2 : User)
+	{
+		return await this.friendRepo.createQueryBuilder('friend')
+			.delete()
+			.from(Friendships)
+			.where(new Brackets(qb => {
+				qb.where("friend.sender = :sender", { sender: user1.id })
+					.orWhere("friend.sender = :sender2", { sender2: user2.id })
+			}))
+			.andWhere(new Brackets(qb => {
+				qb.where("friend.target = :dst", { dst: user1.id })
+					.orWhere("friend.target = :dst1", { dst1: user2.id })
+			}))
+			.execute();
+	}
 }
