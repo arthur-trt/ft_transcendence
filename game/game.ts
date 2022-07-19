@@ -1,6 +1,3 @@
-import {socketo } from './index';
-const socket = socketo;
-
 // select canvas element
 var canvas = document.getElementById("pong");
 var start = document.getElementById("start");
@@ -8,19 +5,6 @@ var start = document.getElementById("start");
 canvas.width = window.innerWidth * 0.7;
 
 canvas.height = canvas.width * 0.6;
-
-const canvas_size = {
-    width = canvas.width;
-    height = canvas.height;
-}
-
-socket.emit('game_settings', canvas_size);
-
-document.addEventListener('resize', () => {
-    canvas_size.width = canvas.width;
-    canvas_size.height = canvas.height;
-    socket.emit('game_settings', canvas_size);
-});
 
 // getContext of canvas = methods and properties to draw and do a lot of thing to the canvas
 const ctx = canvas.getContext('2d');
@@ -88,33 +72,22 @@ document.addEventListener('keydown', (e) => {
     
     if (keyPressed['w'] == true)
     {
-        // if (user.y - 20 <= 0)
-        //     user.y = 0;
-        // else
-        //     user.y -= 20;
-        socket.emit('game_movUp', true);
+        if (user.y - 20 <= 0)
+            user.y = 0;
+        else
+            user.y -= 20;
     }
     if (keyPressed['s'] == true)
     {
-        // if (user.y + 20 >= canvas.height - user.height)
-        //     user.y = canvas.height - user.height;
-        // else
-        //     user.y += 20;
-        socket.emit('game_movDown', true);
+        if (user.y + 20 >= canvas.height - user.height)
+            user.y = canvas.height - user.height;
+        else
+            user.y += 20;
     }
 });
 
 document.addEventListener('keyup', (e) => {
-    if (e.key == 'w')
-    {
-        socket.emit('game_movUp', false);
-        delete keyPressed[e.key];
-    }
-    if (e.key == 's')
-    {
-        socket.emit('game_movDown', false);
-        delete keyPressed[e.key];
-    }
+    delete keyPressed[e.key];
 });
 
 // when COM or USER scores, we reset the ball
@@ -192,8 +165,11 @@ function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// let framePerSecond = 60;
-// let loop;
+var client = {};
+client.socket = io.connect();
+
+let framePerSecond = 60;
+let loop;
 
 async function game_start()
 {
@@ -217,6 +193,6 @@ async function game_start()
     //loop = setInterval(game,1000/framePerSecond);
 }
 
-socket.on('game_countdownStart', game_start());
+client.socket.on('game_countdownStart', game_start());
 
 //game_start();
