@@ -41,6 +41,7 @@ http://localhost:8080, https://localhost:4443 {
 	handle /socket.io/* {
 		reverse_proxy api:3000 {
 			header_up		+Access-Control-Allow-Origin "https://hoppscotch.io"
+			header_down		+Access-Control-Allow-Origin "https://hoppscotch.io"
 		}
 	}
 
