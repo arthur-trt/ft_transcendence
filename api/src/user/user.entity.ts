@@ -56,6 +56,14 @@ export class User extends BaseEntity {
 	})
 	TwoFA_enable: boolean;
 
+	@Column({
+		nullable: true,
+		default: true,
+		select: false,
+		type: 'varchar'
+	})
+	status: string;
+
 	@ManyToMany(() => Channel, channel => channel.users)
 	@JoinTable()
 	channels: Channel[];
