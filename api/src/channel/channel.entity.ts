@@ -26,7 +26,7 @@ export class Channel extends BaseEntity {
 
 
 	/** Tous les messages du channel : un message n'a qu'une target, un channel a plusieurs messages */
-	@OneToMany(() => channelMessage, (channelMessage) => channelMessage.target)
+	@OneToMany(() => channelMessage, (channelMessage) => channelMessage.target,  { cascade: true, onDelete: 'CASCADE', orphanedRowAction: 'delete'})
 	messages: channelMessage[];
 
 
