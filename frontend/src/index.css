@@ -56,6 +56,7 @@ code {
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   color: black;
   display: flex;
+  background-color: white;
 }
 
 .title {
@@ -101,9 +102,11 @@ code {
   cursor: pointer;
 }
 
-/* --------------CHANNELS-------------- */
+/* ------------------------------------- */
+/* --------------COMMUNITY-------------- */
+/* ------------------------------------- */
 
-.chan-container {
+.community-container {
   width: 96%;
   display: flex;
   margin-top: 20px;
@@ -112,31 +115,32 @@ code {
   margin-left: 2%;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   border-radius: 10px;
+  background-color: white;
 }
 
-.chan-add {
+/* --------------CHANNELS-------------- */
+
+.channels-container {
   margin-left: 20px;
   width: 30%;
 }
 
-.chan-add h3 {
+.channels-container h3 {
   text-align: center;
 }
 
-
-.chan-add form {
+.channels-container form {
   text-align: center;
 }
 
-
-.chan-add input {
+.channels-container input {
   padding: 5px;
   border-radius: 3px;
   border: 2px solid black;
   text-decoration: none;
 }
 
-.chan-add button {
+.channels-container button {
   margin-left: 5px;
   padding: 5px;
   border-radius: 3px;
@@ -145,27 +149,24 @@ code {
   cursor: pointer;
 }
 
-.chan-add button:hover {
+.channels-container button:hover {
   background-color: springgreen;
   transition: all 0.5s ease-out;
 }
 
-.everychan {
+.channels-list {
   height: 400px;
   max-height: 400px;
   overflow-y: scroll;
   width: 185px;
-  /* margin-top: 15px; */
-  /* border-radius: 5px; */
-  /* box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; */
   margin: auto;
 }
 
-.everychan::-webkit-scrollbar {
+.channels-list::-webkit-scrollbar {
   display: none;
 }
 
-.uniquechan {
+.channels-single {
   margin: 5px;
   width: 165px;
   padding: 5px;
@@ -176,11 +177,7 @@ code {
   position: relative;
 }
 
-/* .uniquechan:hover {
-  background-color: cornflowerblue;
-} */
-
-.circlexmark {
+.channels-single .circlexmark {
   position: absolute;
   top: 0;
   left: 0;
@@ -191,12 +188,7 @@ code {
   color: black;
 }
 
-.uniquechan .circlexmark:hover, .arrow:hover {
-  background-color:tomato ;
-  transition: all 0.5s ease-out;
-}
-
-.uniquechan .arrow {
+.channels-single .arrow {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -207,7 +199,12 @@ code {
   color: black; 
 }
 
-.uniquechan .plus {
+.channels-single .circlexmark:hover, .arrow:hover {
+  background-color:tomato ;
+  transition: all 0.5s ease-out;
+}
+
+.channels-single .plus {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -218,7 +215,20 @@ code {
   color: black; 
 }
 
-.connected-users {
+.channels-single .paperplane {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin-right: 5px;
+  margin-top: 5px;
+  border-radius: 50px;
+  cursor: pointer;
+  color: black;
+}
+
+/* --------------USERS-------------- */
+
+.users-container {
   width: 30%;
   margin-right: 20px;
   text-align: center;
@@ -236,7 +246,7 @@ code {
   display: none;
 }
 
-.one-user {
+.users-single {
   margin: 5px;
   width: 230px;
   padding: 5px;
@@ -249,27 +259,14 @@ code {
   align-items: center;
 }
 
-.one-user-img {
+.users-single-img {
   width: 30%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.one-user-info {
-  width: 70%;
-}
-
-.one-user-info h5 {
-  margin: 0;
-}
-
-.one-user-info p {
-  margin: 0;
-  font-size: 10px;
-}
-
-.one-user-img img {
+.users-single-img img {
   max-height: 100%;
   max-width: 100%;
   width: 40px;
@@ -278,23 +275,96 @@ code {
   border: 2px solid springgreen;
 }
 
-.chat {
-  width: 40%;
-  text-align: center;
-  background-color: blue;
+.users-single-info {
+  width: 70%;
 }
 
-.uniquechan .paperplane {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin-right: 5px;
-  margin-top: 5px;
-  border-radius: 50px;
-  cursor: pointer;
-  color: black;
+.users-single-info h5 {
+  margin: 0;
 }
-/* ---------PROFILE---------- */
+
+.users-single-info p {
+  margin: 0;
+  font-size: 10px;
+}
+
+/* --------------CHAT-------------- */
+
+.chat-container {
+  width: 40%;
+  text-align: center;
+}
+
+.chat-wrapper {
+  width: 400px;
+  margin: auto;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.chat-title {
+  text-align: left;
+  padding: 5px;
+  border-bottom: 1px solid black;
+}
+
+.chat-box {
+  height: 300px;
+  max-height: 300px;
+  width: 400px;
+  margin: auto;
+  /* important 3 lines for displaying chat */
+  display: flex;
+  flex-direction: column-reverse;
+  overflow-y: auto;
+}
+
+.chat-box::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-message {
+  text-align: left;
+  margin-left: 7px;
+  margin-right: 7px;
+  margin-top: 5px;
+  margin-bottom: 7px;
+}
+
+.chat-message h5 {
+  margin: 0;
+}
+
+.chat-message span {
+  font-size: 8px;
+}
+
+.chat-message p {
+  margin: 0;
+  font-size: 12px;
+  width: fit-content;
+  padding: 4px;
+  border-radius: 5px;
+}
+
+.chat-container input {
+  margin-top: 7px;
+  width: 250px;
+  padding: 7px;
+  border-radius: 50px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  text-decoration: none;
+  border: none;
+}
+
+textarea:focus, input:focus{
+  outline: none;
+}
+
+/* ------------------------------------- */
+/* --------------PROFILE---------------- */
+/* ------------------------------------- */
 
 .setpro-container {
   /* background-color: aqua; */
