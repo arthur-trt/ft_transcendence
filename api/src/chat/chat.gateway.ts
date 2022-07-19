@@ -64,7 +64,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			const user: any = await this.userService.getUserByIdentifier(jwtPayload.sub);
 
 			return user;
-		} catch (err) {
+		}
+		catch (err)
+		{
 			console.log(err.message);
 		}
 	}
