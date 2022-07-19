@@ -133,14 +133,12 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 				i++;
 			}
 		}
-		console.log(data);
 		if (all_users)
 		{
 			for (let user of all_users)
 			{
 				if (!data.find(element => element.id == user.id) && client.data.user.id != user.id)
 				{
-					console.log(user.id + ": " + data.find(element => element.id == user.id));
 					user.status = "offline";
 					data[i] = user;
 					i++;
