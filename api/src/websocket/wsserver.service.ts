@@ -156,6 +156,21 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	}
 
+
+
+	/**
+	 *
+	 * @param client
+	 * @param channel
+	 * @returns
+	 */
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('getRooms') /** Join ROom parce que ca le creera aussi */
+	async onGetRooms(client: Socket, channel: string)
+	{
+		return this.server.to(client.id).emit('rooms', client.data.user.username + " receive rooms ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+	}
+
 	/**
 	 *
 	 * @param client
@@ -242,7 +257,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('getChannelMessages')
 	async onGetChannelMessages(client: Socket, channelName: string)// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
-		this.server.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName));
+		this.server.to(client.id).emit('channelMessage', await this.messageService.getMessage(channelName));
 	}
 
 	@UseGuards(WsJwtAuthGuard)
