@@ -10,11 +10,13 @@ import Profile from './components/Profile';
 import Channels from './components/Channels-add';
 import Game from './components/Game';
 
+// import io from 'socket.io-client';
+// export const socketo = io('http://localhost:8080');
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  // <React.StrictMode>
     <Router>
       <Routes>
 
@@ -27,7 +29,6 @@ root.render(
 
       </Routes>
     </Router>
-  // </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
