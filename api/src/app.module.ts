@@ -10,10 +10,11 @@ import { ChannelModule } from './channel/channel.module';
 import { privateMessage } from './message/privateMessage.entity';
 import { channelMessage } from './message/channelMessage.entity';
 import { AuthModule } from './auth/auth.module';
-import { ChatModule } from './chat/chat.module';
+// import { ChatModule } from './websocket/chat.module';
 import { MatchHistory } from './game/game.entity';
 import { GameModule } from './game/game.module';
 import { UserActivity } from './user/user_activity.entity';
+import { WSServerModule } from './websocket/wsserver.module'
 
 @Module({
 
@@ -23,7 +24,7 @@ import { UserActivity } from './user/user_activity.entity';
 		}),
 	  UserModule,
 		ChannelModule,
-		ChatModule,
+		WSServerModule,
 		GameModule,
 	  TypeOrmModule.forRoot({
 	  type: 'postgres',
