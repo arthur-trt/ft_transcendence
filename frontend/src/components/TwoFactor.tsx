@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function TwoFactor() {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
+  let navigate = useNavigate(); //redirection
 
   let handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -20,8 +22,10 @@ function TwoFactor() {
       if (res.status === 201) {
         setName("");
         setMessage("2FA created successfully");
+        return (navigate("/home")); //redirection to home if success
       } else {
         setMessage("Some error occured");
+
       }
     } catch (err) {
       console.log(err);
