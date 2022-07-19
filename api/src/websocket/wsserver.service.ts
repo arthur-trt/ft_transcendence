@@ -28,6 +28,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	) { }
 
 	protected logger: Logger = new Logger('WebSocketServer');
+	protected all_users: User[];
 	protected active_users = new Map<User, Socket>();
 	protected users = [];
 
@@ -40,10 +41,11 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 				secret: jwtConstants.secret
 			}
 			const jwtPayload = await this.jwtService.verify(authToken, jwtOptions);
-			const user: any = await this.userService.getUserByIdentifier(jwtPayload.sub);
+			const user: any = await this.userService.getUserByIdentifierLight(jwtPayload.sub);
 
 			return user;
 		} catch (err) {
+			console.log("Guard error :");
 			console.log(err.message);
 		}
 	}
@@ -61,6 +63,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 		client.data.user = user;
 		this.logger.log("New connection: " + user.name);
+		this.all_users = await this.userService.getUsers();
 		if (!this.active_users.has(user))
 			this.active_users.set(user, client);
 		this.logger.log(client.id);
@@ -68,7 +71,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		this.active_users.forEach((socket: Socket, user: User) => {
 			this.server.to(socket.id).emit(
 				'listUsers',
-				this.listConnectedUser(socket, this.active_users, false)
+				this.listConnectedUser(socket, this.all_users, this.active_users, false)
 			);
 		});
 
@@ -100,7 +103,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		}
 		this.server.emit(
 			'listUsers',
-			this.listConnectedUser(client, this.active_users, false)
+			this.listConnectedUser(client, this.all_users, this.active_users, false)
 		);
 		client.emit('bye');
 		client.disconnect(true);
@@ -114,7 +117,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @param withCurrentUser if true user who made the request will be included
 	 * @returns
 	 */
-	protected listConnectedUser(client: Socket, active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
+	protected listConnectedUser(client: Socket, all_users: User[] ,active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
 		let data = [];
 		let i = 0;
 
@@ -127,6 +130,18 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 			else if (client.data.user.id != user.id) {
 				data[i] = user;
 				i++;
+			}
+		}
+		if (all_users)
+		{
+			for (let user of all_users)
+			{
+				user.status = "offline";
+				if (!active_user.has(user))
+				{
+					data[i] = user;
+					i++;
+				}
 			}
 		}
 		return (data);
@@ -267,6 +282,16 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		this.logger.log("MSG " + data.msg + " to " + data.chan + " from " + client.data.user.name)
 		await this.messageService.sendMessageToChannel(data.chan, client.data.user, data.msg);
 		this.server.to(data.chan).emit('channelMessage', await this.messageService.getMessage(data.chan));
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('getUsers')
+	async get_users_list(client: Socket, data: any)
+	{
+		this.server.to(client.id).emit(
+			'listUsers',
+			this.listConnectedUser(client, this.all_users, this.active_users, false)
+		);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
