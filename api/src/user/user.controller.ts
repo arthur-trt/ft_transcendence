@@ -107,5 +107,19 @@ export class UserController
 		return await this.userService.leaveChannel(user, chanName.chanName);
 	}
 
+	@Post('blockUser')
+	@ApiOperation({ summary: "Block a user" })
+	@UseGuards(JwtAuthGuard)
+	@ApiCookieAuth()
+	public async blockUser(@Req() req: Request, @Body() toBeBlocked : any) //: Promise<User>
+	{
+		console.log(toBeBlocked)
+		const user: User = await this.userService.getUserByRequest(req);
+		const toBlock: User = await this.userService.getUserByIdentifier(toBeBlocked.username);
+		console.log(toBlock)
+
+		return await this.userService.block(user, toBlock);
+	}
+
 
 }
