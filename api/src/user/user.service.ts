@@ -51,6 +51,18 @@ export class UserService {
 			.getMany();
 	}
 
+	public async getUserByIdentifierLight(user_id: string)
+	{
+		//const user_id = JSON.parse(JSON.stringify(req.user)).userId;
+		const user: User = await this.userRepo.createQueryBuilder('User')
+			.select(["User.id", "User.name", "User.mail", "User.avatar_url"])
+			.where({ id: user_id })
+			.getOne();
+		if (!user)
+			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+		return (user);
+	}
+
 	/**
 	 *
 	 * @param intra_id 42 intranet identifiant
