@@ -40,6 +40,7 @@ export class ChannelService {
 	public async getUsersOfChannels() : Promise<Channel[]>
 	{
 		return await this.channelsRepo.createQueryBuilder('Channel')
+			.orderBy("Channel.name")
 			.leftJoinAndSelect("Channel.users", "Users")
 			.leftJoinAndSelect("Channel.owner", "o")
 		.getMany();
@@ -109,6 +110,6 @@ export class ChannelService {
 		return this.getUsersOfChannels();	 // image id
 	 }
 
-	
+
 
 }

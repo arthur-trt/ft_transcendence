@@ -257,7 +257,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('getChannelMessages')
 	async onGetChannelMessages(client: Socket, channelName: string)// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
-		this.server.to(client.id).emit('channelMessage', await this.messageService.getMessage(channelName));
+		this.server.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName));
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -265,8 +265,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async onSendChannelMessages(client: Socket, data: any)// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
 		this.logger.log("MSG " + data.msg + " to " + data.chan + " from " + client.data.user.name)
+		await this.messageService.sendMessageToChannel(data.chan, client.data.user, data.msg);
 		this.server.to(data.chan).emit('channelMessage', await this.messageService.getMessage(data.chan));
-		return await this.messageService.sendMessageToChannel(data.chan, client.data.user, data.msg);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
