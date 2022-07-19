@@ -13,6 +13,7 @@ import { MessageService } from 'src/message/message.service';
 import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
 import { Channel } from 'src/channel/channel.entity';
 import { UserModule } from 'src/user/user.module';
+import { FriendshipsService } from 'src/friendships/friendships.service';
 
 @Injectable()
 @WebSocketGateway()
@@ -25,7 +26,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly jwtService: JwtService,
 		protected readonly userService: UserService,
 		protected readonly channelService: ChannelService,
-		protected readonly messageService: MessageService
+		protected readonly messageService: MessageService,
+		protected readonly friendService: FriendshipsService
 	) { }
 
 	protected logger: Logger = new Logger('WebSocketServer');
@@ -271,18 +273,18 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getChannelMessages')
-	async onGetChannelMessages(client: Socket, channelName: string)// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
+	async onGetChannelMessages(client: Socket, channelName: string)
 	{
-		this.server.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName));
+		this.server.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName, client.data.user));
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('sendChannelMessages')
-	async onSendChannelMessages(client: Socket, data: any)// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
+	async onSendChannelMessages(client: Socket, data: any)
 	{
 		this.logger.log("MSG " + data.msg + " to " + data.chan + " from " + client.data.user.name)
 		await this.messageService.sendMessageToChannel(data.chan, client.data.user, data.msg);
-		this.server.to(data.chan).emit('channelMessage', await this.messageService.getMessage(data.chan));
+		this.server.to(data.chan).emit('channelMessage', await this.messageService.getMessage(data.chan, client.data.user));
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -294,6 +296,29 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 			this.listConnectedUser(client, this.all_users, this.active_users, false)
 		);
 	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('addFriend')
+	async addFriend(client: Socket, friend: User)
+	{
+		await this.friendService.sendFriendRequest(client.data.user, friend);
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('acceptFriend')
+	async acceptFriendRequest(client: Socket, friend: User)
+	{
+		await this.friendService.acceptFriendRequest(client.data.user, friend);
+		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers);
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('getFriends')
+	async getFriends(client: Socket, friend: User)
+	{
+		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers);
+	}
+
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('message')
