@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import '../index.css';
 
 // FONT AWESOME SINGLE IMPORT
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -45,14 +46,15 @@ export default function Channels() {
       const socket = socketo;
       // const socket = io('http://localhost:8080');
       setSocket(socket);
+      socket.emit('getRooms');
+      socket.emit('getUsers');
       socket.on('rooms', (msg:any, tab:any) => {
         setData(tab);
       });
-      socket.on('users', (msg:any, tab:any) => {
+      socket.on('listUsers', (tab:any) => {
         setDatausers(tab);
       });
       socket.on('channelMessage', (msg:any) => {
-        // console.log(msg);
           setMessages(msg);
       });
 
@@ -94,19 +96,19 @@ export default function Channels() {
         let j = 0;
         while (j < data[i]?.users.length)
         {
-          if (datame.name == data[i].users[j]?.name) {BgColor = 'springgreen';}
+          if (datame.name == data[i].users[j]?.name) {BgColor = '#1dd1a1';}
           j++;
         }
 
         // push every chan div in the array "indents"
-        indents.push(<div style={{'backgroundColor': BgColor}} className="channels-single" key={i}>
+        indents.push(<div style={{'backgroundColor': BgColor}} className="channels-single" key={i} id={data[i]?.name} onClick={handleOpen}>
             <h5>
             {data[i]?.name}
             </h5>
             <FontAwesomeIcon icon={faCircleXmark} className="circlexmark" id={data[i]?.name} onClick={handleDelete} />
             <FontAwesomeIcon icon={faArrowAltCircleRight} className="arrow" id={data[i]?.name} onClick={handleLeave} />
             <FontAwesomeIcon icon={faPlus} className="plus" id={data[i]?.name} onClick={handleJoin} />
-            <FontAwesomeIcon icon={faPaperPlane} className="paperplane" id={data[i]?.name} onClick={handleOpen} />
+            {/* <FontAwesomeIcon icon={faPaperPlane} className="paperplane" id={data[i]?.name} onClick={handleOpen} /> */}
             </div>);
         i++;
         BgColor = 'white';
@@ -123,11 +125,11 @@ export default function Channels() {
     {
       indents.push(<div className="users-single" key={i}>
           <div className='users-single-img'>
-            <img src={datausers[i]?.photo}></img>
+            <img src={datausers[i]?.avatar_url}></img>
           </div>
           <div className='users-single-info'>
-            <h5>{datausers[i]?.username}</h5>
-            <p>{datausers[i]?.userID}</p>
+            <h5>{datausers[i]?.name}</h5>
+            <p>{datausers[i]?.id}</p>
           </div>
       </div>);
       i++; 
@@ -166,7 +168,7 @@ export default function Channels() {
           msgColor = 'lightskyblue';
         
         indents.push(<div className='chat-message' key={i + datame.id}>
-          <h5>{tmp.messages[i]?.sender.name} <span>{tmp.messages[i]?.sent_at}</span></h5>
+          <h5>{tmp.messages[i]?.sender.name} <span>{tmp.messages[i]?.sent_at.substr(0, 10)}</span></h5>
           <p style={{'backgroundColor': msgColor}}>{tmp.messages[i]?.message}</p>
         </div>);
         i--;
@@ -226,10 +228,9 @@ export default function Channels() {
             <input
               type="text"
               value={name}
-              placeholder="Channel name..."
+              placeholder="Create channel..."
               onChange={(e) => setName(e.target.value)}
             />
-            <button type="submit">Create</button>
           </form>
           <div className="channels-list">
               {display_chan()}
