@@ -290,8 +290,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('privateMessage')
 	async onPrivateMessage(client: Socket, msg: sendPrivateMessageDto) {
 		// sending message to both users : sender (client.id) and msg.socketId
-		this.server.to(msg.socketId).to(client.id).emit('privateMessage', client.data.user.name + " sent a message to " + msg.username + msg.socketId, msg);
-		return await this.messageService.sendPrivateMessage(client.data.user, msg.username, msg.msg);
+		this.server.to(this.active_users.get(msg.to).id).to(client.id).emit('privateMessage', client.data.user.name + " sent a message to " + msg.to.name, msg);
+		return await this.messageService.sendPrivateMessage(client.data.user, msg.to.name, msg.msg);
 	}
 
 	/**
@@ -303,10 +303,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getPrivateMessage')
 	async onGetPrivateMessage(client: Socket, user2: string) {
-		const msg = await this.messageService.getPrivateMessage(client.data.user, user2);
 
+		const msg = await this.messageService.getPrivateMessage(client.data.user, user2);
 		this.server.to(client.id).emit('privateMessage', client.data.user.name + " get messages with " + user2, msg);
-		return
 	}
 
 	/**
@@ -367,6 +366,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async addFriend(client: Socket, friend: User)
 	{
 		await this.friendService.sendFriendRequest(client.data.user, friend);
+		this.server.to(this.active_users.get(friend).id).emit('newFriendRequest', "You have a new friend request", client.data.user)
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -374,7 +374,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async acceptFriendRequest(client: Socket, friend: User)
 	{
 		await this.friendService.acceptFriendRequest(client.data.user, friend);
-		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+		this.server.to(this.active_users.get(friend).id).to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
 	}
 
 

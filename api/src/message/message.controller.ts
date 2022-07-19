@@ -99,10 +99,10 @@ export class MessageController {
 	@Post('privateMessage/sendMsg')
 	@ApiOperation({ summary: "Send private message to another user" })
 	@UseGuards(JwtAuthGuard)
-	public async privateMessage(@Req() req : Request, @Body() message : sendPrivateMessageDto)
+	public async privateMessage(@Req() req : Request, @Body() message : any)
 	{
 
-		const target = message.username;
+		const target = message.to;
 
 		const msg = message.msg;
 		const sender = await this.userService.getUserByRequest(req);
