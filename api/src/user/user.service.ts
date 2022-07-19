@@ -201,8 +201,18 @@ export class UserService {
 
 	public async block(user: User, toBan: User) :  Promise<User>
 	{
-		user.blocked = [];
+		if (user.blocked == null)
+			user.blocked = [];
 		user.blocked.push(toBan.id);
+		user.save();
+		return user;
+	}
+
+	public async unblock(user: User, toUnBan: User): Promise<User> {
+		const index = user.blocked.indexOf(toUnBan.id);
+		if (index > -1) {
+			user.blocked.splice(index, 1); 
+		}
 		user.save();
 		return user;
 	}
