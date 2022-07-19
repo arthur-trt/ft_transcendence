@@ -84,18 +84,20 @@ export class GameService {
 	 * @param withCurrentUser if true user who made the request will be included
 	 * @returns
 	 */
-	async listConnectedUser(client: Socket, active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
-		let data = {};
+	listConnectedUser(client: Socket, active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
+		let data	= [];
+		let i		= 0;
 
 		for (let user of active_user.keys()) {
 			if (client.data.user.id == user.id && withCurrentUser) {
-				data[user.name] = user;
+				data[i] = user;
+				i++;
 			}
 			else if (client.data.user.id != user.id) {
-				data[user.name] = user;
+				data[i] = user;
+				i++;
 			}
 		}
-		console.log(data);
 		return (data);
 	}
 
