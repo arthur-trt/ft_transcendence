@@ -11,10 +11,12 @@ import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
 import { ChannelService } from 'src/channel/channel.service';
 import { MessageService } from 'src/message/message.service';
 import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
+import { Channel } from 'src/channel/channel.entity';
 
 @Injectable()
 @WebSocketGateway()
 export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+
 	@WebSocketServer()
 	protected server: Server;
 
@@ -69,6 +71,15 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 				this.listConnectedUser(socket, this.active_users, false)
 			);
 		});
+
+		let chan : Channel[] = await this.userService.getChannelsForUser(user);
+		this.logger.log(" CHANS" + chan);
+
+		for (let c of chan) {
+			client.join(c.name);
+			this.logger.log(user.name + " : Client joining" + c.name)
+		}
+
 	}
 
 	afterInit(server: Server) {
@@ -239,7 +250,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async onSendChannelMessages(client: Socket, data: any)// : { target : string, message : string}) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
 		this.logger.log("MSG " + data.msg + " to " + data.chan + " from " + client.data.user.name)
-		this.server.to(data.chan).emit('channelMessage', data.msg);
+		this.server.to(data.chan).emit('channelMessage', await this.messageService.getMessage(data.chan));
 		return await this.messageService.sendMessageToChannel(data.chan, client.data.user, data.msg);
 	}
 
