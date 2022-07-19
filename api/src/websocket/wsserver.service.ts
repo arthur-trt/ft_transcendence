@@ -12,6 +12,7 @@ import { ChannelService } from 'src/channel/channel.service';
 import { MessageService } from 'src/message/message.service';
 import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
 import { Channel } from 'src/channel/channel.entity';
+import { UserModule } from 'src/user/user.module';
 import { FriendshipsService } from 'src/friendships/friendships.service';
 
 @Injectable()
@@ -131,7 +132,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @returns
 	 */
 	protected listConnectedUser(client: Socket, all_users: User[] ,active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
-		let data = [];
+		let data: User[] = [];
 		let i = 0;
 
 		for (let user of active_user.keys()) {
@@ -149,9 +150,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		{
 			for (let user of all_users)
 			{
-				user.status = "offline";
-				if (!active_user.has(user))
+				if (!data.find(element => element.id == user.id) && client.data.user.id != user.id)
 				{
+					user.status = "offline";
 					data[i] = user;
 					i++;
 				}
