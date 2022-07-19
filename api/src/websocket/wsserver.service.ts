@@ -79,7 +79,10 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		this.logger.log("New connection: " + user.name);
 		this.all_users = await this.userService.getUsers();
 		if (!this.active_users.has(user))
+		{
+			console.log("Add : " + user.name);
 			this.active_users.set(user, client);
+		}
 		this.logger.log(client.id);
 
 		this.active_users.forEach((socket: Socket, user: User) => {
@@ -90,7 +93,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		});
 
 		let chan : Channel[] = await this.userService.getChannelsForUser(user);
-		this.logger.log(" CHANS" + chan);
+		this.logger.log("CHANS" + chan);
 
 		for (let c of chan) {
 			client.join(c.name);
@@ -109,16 +112,24 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	async handleDisconnect(client: Socket) {
 		try {
-			this.logger.log("User: " + client.data.user.name + " disconnected");
-			this.active_users.delete(client.data.user);
+			for (let [entries, socket] of this.active_users.entries())
+			{
+				if (entries.id == client.data.user.id)
+				{
+					this.active_users.delete(entries);
+					break;
+				}
+			}
 		}
 		catch (err) {
 			console.log("Don't know what happened");
 		}
-		this.server.emit(
-			'listUsers',
-			this.listConnectedUser(client, this.all_users, this.active_users, false)
-		);
+		this.active_users.forEach((socket: Socket, user: User) => {
+			this.server.to(socket.id).emit(
+				'listUsers',
+				this.listConnectedUser(socket, this.all_users, this.active_users, false)
+			);
+		});
 		client.emit('bye');
 		client.disconnect(true);
 	}
