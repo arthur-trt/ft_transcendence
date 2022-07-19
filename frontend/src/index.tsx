@@ -10,8 +10,8 @@ import Profile from './components/Profile';
 import Channels from './components/Channels-add';
 import Game from './components/Game';
 
-// import io from 'socket.io-client';
-// export const socketo = io('http://localhost:8080');
+import io from 'socket.io-client';
+export const socketo = io();
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

@@ -8,8 +8,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { faPaperPlane } from '@fortawesome/free-regular-svg-icons'
 
 // IMPORT THE SOCKET
-import io from 'socket.io-client';
-// import {socketo} from '../index';
+import {socketo} from '../index';
 
 let tmp:any[any];
 var indents:any = [];
@@ -43,8 +42,8 @@ export default function Channels() {
   // REACT HOOK TO SET UP SOCKET CONNECTION AND LISTENING
   useEffect(
     () => {
-      // const socket = socketo;
-      const socket = io('http://localhost:8080');
+      const socket = socketo;
+      // const socket = io('http://localhost:8080');
       setSocket(socket);
       socket.on('rooms', (msg:any, tab:any) => {
         setData(tab);
