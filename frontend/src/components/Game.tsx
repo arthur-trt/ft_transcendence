@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import io from 'socket.io-client';
 
 const socket = io('http://localhost:8080/game');
+// import {socketo } from '../index'
 
 export default function Game() {
 
+  // const socket = socketo;
   socket.on('init', () => { });
 
   const [name, setName] = useState("");

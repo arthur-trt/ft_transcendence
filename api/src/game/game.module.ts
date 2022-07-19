@@ -5,12 +5,12 @@ import { User } from 'src/user/user.entity';
 import { UserModule } from 'src/user/user.module';
 import { GameController } from './game.controller';
 import { MatchHistory } from './game.entity';
-import { GameGateway } from './game.gateway';
+//import { GameGateway } from './game.gateway';
 import { GameService } from './game.service';
 
 @Module({
   	controllers: [GameController],
-	providers: [GameService, GameGateway],
+	providers: [GameService],
 	imports: [UserModule, TypeOrmModule.forFeature([MatchHistory, User]), JwtModule,
 	]
 })

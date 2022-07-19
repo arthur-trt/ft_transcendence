@@ -56,15 +56,22 @@ export class User extends BaseEntity {
 	})
 	TwoFA_enable: boolean;
 
+	@Column({
+		nullable: true,
+		default: true,
+		select: false,
+		type: 'varchar'
+	})
+	status: string;
+
 	@ManyToMany(() => Channel, channel => channel.users)
 	@JoinTable()
 	channels: Channel[];
 
-	@OneToMany(() => channelMessage, channelMessage => channelMessage.sender) // peut etre zapper ca et mettre juste l'id des senders
+	@OneToMany(() => channelMessage, channelMessage => channelMessage.sender)
 	channelMessages: channelMessage[];
 
 	@Column('varchar', { array: true, nullable : true})
-	blocked: string[]; // tableau d'id pour les bloques
-
+	blocked: string[];
 
 }
