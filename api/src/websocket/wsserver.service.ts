@@ -174,6 +174,16 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		return (data);
 	}
 
+	async findSocketId(user: User) : Promise<Socket>
+	{
+		for (let [allUsers, socket] of this.active_users.entries())
+		{
+  			if (allUsers.id == user.id)
+  			{
+    			return socket;
+  			}
+		}
+	}
 
 	/*
 	** 		_____ _    _       _______    _____       _______ ________          __ __     __
@@ -384,16 +394,22 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('addFriend')
 	async addFriend(client: Socket, friend: User)
 	{
+		const friendSocket: Socket = await this.findSocketId(friend)
 		await this.friendService.sendFriendRequest(client.data.user, friend);
-		this.server.to(this.active_users.get(friend).id).emit('newFriendRequest', "You have a new friend request", client.data.user)
+		if (friendSocket)
+			this.server.to(friendSocket.id).emit('newFriendRequest', "You have a new friend request", client.data.user)
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('acceptFriend')
 	async acceptFriendRequest(client: Socket, friend: User)
 	{
+		const friendSocket: Socket = await this.findSocketId(friend)
 		await this.friendService.acceptFriendRequest(client.data.user, friend);
-		this.server.to(this.active_users.get(friend).id).to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+		if (friendSocket)
+			this.server.to(friendSocket.id).to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+		else
+			this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
 	}
 
 
@@ -401,15 +417,26 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('removeFriend')
 	async removeFriend(client: Socket, friend: User)
 	{
+		const friendSocket: Socket = await this.findSocketId(friend);
 		await this.friendService.removeFriend(client.data.user, friend);
-		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+		if (friendSocket)
+			this.server.to(friendSocket.id).to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+		else
+			this.server.to(friendSocket.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getFriends')
-	async getFriends(client: Socket, friend: User)
+	async getFriends(client: Socket)
 	{
 		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('getFriendRequests')
+	async getFriendRequests(client: Socket)
+	{
+		this.server.to(client.id).emit('friendList', "Friend requests list : you are target of", await this.friendService.getFriendsRequests(client.data.user));
 	}
 
 	/*
