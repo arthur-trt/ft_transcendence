@@ -10,6 +10,7 @@ import Channels from './components/Channels-add';
 import Game from './components/Game';
 
 import io from 'socket.io-client';
+import Debug from './components/Debug';
 export const socketo = io();
 
 const root = ReactDOM.createRoot(
@@ -24,6 +25,7 @@ root.render(
       <Route path="/2fa" element={<><Header/><TwoFactor/></>} />
       <Route path="/profile" element={<><Header/><Profile/></>} />
       <Route path="/chat" element={<><Header/><Channels/></>} />
+      <Route path="/debug" element={<><Header/><Debug/></>} />
       <Route path="/game" element={<><Game/></>} />
 
       </Routes>

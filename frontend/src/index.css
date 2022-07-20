@@ -198,7 +198,7 @@ code {
   margin-bottom: 5px;
   border-radius: 50px;
   cursor: pointer;
-  color: black; 
+  color: black;
 }
 
 .channels-single .circlexmark:hover, .arrow:hover {
@@ -214,7 +214,7 @@ code {
   margin-bottom: 5px;
   border-radius: 50px;
   cursor: pointer;
-  color: black; 
+  color: black;
 }
 
 /* --------------USERS-------------- */
@@ -392,6 +392,39 @@ textarea:focus, input:focus{
   align-items: center;
 }
 
+.setpro-container .profile h5 {
+  margin-left: 10px;
+}
+
+/*
+** DEBUG
+*/
+
+.debug pre {
+  /*display: flex;*/
+  background-color: white;
+  /*width: 50%;*/
+  /*align-self: center;*/
+  outline: 1px solid #ccc;
+  padding: 5px;
+  margin: 15px;
+}
+
+.debug .string {
+  color: green;
+}
+.debug .number {
+  color: darkorange;
+}
+.debug .boolean {
+  color: blue;
+}
+.debug .null {
+  color: magenta;
+}
+.debug .key {
+  color: red;
+}
 .profile-name .pen {
   cursor: pointer;
   margin-left: 5px;

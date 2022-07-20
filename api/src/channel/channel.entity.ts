@@ -16,6 +16,20 @@ export class Channel extends BaseEntity {
 	})
 	name: string;
 
+	@Column({
+		type: 'boolean',
+		default: false,
+	})
+	password_protected: boolean
+
+	@Column({
+		type: 'varchar',
+		default: null,
+		nullable: true,
+		select: false
+	})
+	password: string
+
 	@ManyToOne(() => User, { nullable: true, cascade: true, onDelete: 'CASCADE', orphanedRowAction: 'delete'})
 	owner: User;
 
