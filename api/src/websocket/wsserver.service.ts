@@ -14,6 +14,8 @@ import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
 import { Channel } from 'src/channel/channel.entity';
 import { UserModule } from 'src/user/user.module';
 import { FriendshipsService } from 'src/friendships/friendships.service';
+import { AfterRecover } from 'typeorm';
+import { isArray, isObject } from 'class-validator';
 
 @Injectable()
 @WebSocketGateway()
@@ -219,7 +221,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('getRooms') /** Join ROom parce que ca le creera aussi */
 	async onGetRooms(client: Socket, channel: string)
 	{
-		return this.server.to(client.id).emit('rooms', client.data.user.username + " receive rooms ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+		return this.server.to(client.id).emit('rooms', client.data.user.name + " receive rooms ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 	}
 
 	/**
@@ -230,11 +232,28 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('joinRoom') /** Join ROom parce que ca le creera aussi */
-	async onJoinRoom(client: Socket, channel: string) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
+	async onJoinRoom(client: Socket, user_args: any) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
-		await this.userService.joinChannel(client.data.user, channel);
-		client.join(channel);
-		return this.server.emit('rooms', client.data.user.username + " joined the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+		let channel: string
+		let password: string
+
+		if (isArray(user_args))
+		{
+			channel = user_args[0];
+			password = user_args[1];
+		}
+		else
+		{
+			channel = user_args;
+			password = null;
+		}
+		if (await this.userService.joinChannel(client.data.user, channel, password)) {
+			client.join(channel);
+			return this.server.emit('rooms', client.data.user.name + " joined the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+		}
+		else {
+			return this.server.emit('rooms', 'incorect password');
+		}
 	}
 
 	/**
@@ -262,7 +281,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	{
 		this.logger.log(client.data.user.name + " LEFT ROOM")
 		await this.userService.leaveChannel(client.data.user, channel);
-		this.server.emit('rooms', client.data.user.username + " left the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+		this.server.emit('rooms', client.data.user.name + " left the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 		client.leave(channel);
 	}
 
