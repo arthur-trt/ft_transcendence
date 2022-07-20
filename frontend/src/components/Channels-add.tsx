@@ -13,7 +13,8 @@ import {socketo} from '../index';
 let tmp:any[any];
 var indents:any = [];
 let indexFriends = 0;
-let u_or_f = "USERS";
+let u_or_f = "SHOW USERS";
+var frequest:any = [];
 
 export default function Channels() {
 
@@ -33,6 +34,7 @@ export default function Channels() {
   // DISPLAY FRIENDS LIST
   const [switching, setSwitching] = useState(0);
   const [friends, setFriends] = useState<any>([]);
+  const [friendsrequest, setFriendsRequest] = useState<any>([]);
 
   useEffect(() => {
     const getData = async () => {
@@ -63,10 +65,17 @@ export default function Channels() {
       socket.on('channelMessage', (msg:any) => {
           setMessages(msg);
       });
-      socket.on('Friend list', (tab:any) => {
+      socket.on('friendList', (msg:any, tab:any) => {
+        console.log(msg);
         console.log(tab);
         setFriends(tab);
     });
+    socket.on('newFriendRequest', (msg:any, tab:any) => {
+      console.log(msg);
+      console.log(tab);
+      frequest.push(tab);
+      setFriendsRequest(frequest);
+  });
 
       // return () => {
       //   socket.emit('disconnectUser', name);
@@ -93,6 +102,9 @@ export default function Channels() {
       return(0);
     socket.emit('getChannelMessages', e.currentTarget.id);
     setChanName(e.currentTarget.id);
+  }
+  let handleAddFriend = (e:any) => {
+    socket.emit('addFriend', datausers[parseInt(e.currentTarget.id)]);
   }
 
   // DISPLAY CHANNELS
@@ -141,13 +153,14 @@ export default function Channels() {
           borderStatus = 'orange';
         else if (datausers[i]?.status === 'offline')
           borderStatus = 'red';
-  
+        
         indents.push(<div className="users-single" key={i}>
             <div className='users-single-img'>
               <img style={{'borderColor': borderStatus}} src={datausers[i]?.avatar_url}></img>
             </div>
             <div className='users-single-info'>
               <h5>{datausers[i]?.name}</h5>
+              <button id={i.toString()} onClick={handleAddFriend}>Add as friend</button>
             </div>
         </div>);
         i++;
@@ -156,7 +169,10 @@ export default function Channels() {
     }
     if (switching % 2 === 1)
     {
-      indents.push(<div>Coucou Chatou</div>);
+      console.log(friendsrequest);
+      indents.push(<div key={1}>
+        {/* {friendsrequest.name} */}
+      </div>);
     }
 
     return indents;
@@ -244,10 +260,10 @@ export default function Channels() {
   }
 
   function handleFriends() {
-    if (u_or_f == "FRIENDS")
-      u_or_f = "USERS";
-    else if (u_or_f == "USERS")
-      u_or_f = "FRIENDS";
+    if (u_or_f == "SHOW FRIENDS")
+      u_or_f = "SHOW USERS";
+    else if (u_or_f == "SHOW USERS")
+      u_or_f = "SHOW FRIENDS";
     indexFriends++;
     setSwitching(indexFriends);
   }

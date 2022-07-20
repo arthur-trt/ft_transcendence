@@ -357,30 +357,48 @@ textarea:focus, input:focus{
 /* --------------PROFILE---------------- */
 /* ------------------------------------- */
 
-.setpro-container {
-  /* background-color: aqua; */
-  display: flex;
-  width: 100%;
+.profile-container {
+  background-color: white;
+  width: 50%;
+  margin: auto;
+  text-align: center;
   margin-top: 20px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 10px;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 
-.setpro-container .settings {
-  /* background-color: blueviolet; */
-  width: 50%;
-  text-align: center;
-  border-right: 1px solid black;
+.profile-container img {
+  max-height: 100%;
+  max-width: 100%;
+  width: 150px;
+  height: 150px;
+  margin-right: 15px;
+  border-radius: 150px;
+  border: 5px solid #1dd1a1;
 }
 
-.setpro-container .profile {
-  /* background-color: brown; */
-  width: 50%;
-  border-left: 1px solid black;
+.profile-info {
+  text-align: left;
 }
 
-.setpro-container .profile h3 {
-  text-align: center;
+.profile-info h5 {
+  margin-left: 5px;
 }
 
-.setpro-container .profile h5 {
-  margin-left: 10px;
+.profile-name {
+  display: flex;
+  align-items: center;
+}
+
+.profile-name .pen {
+  cursor: pointer;
+  margin-left: 5px;
+  border-radius: 50px;
+}
+
+.profile-name .pen:hover {
+  color: #1dd1a1;
+  transition: all 0.5s ease-out;
 }
