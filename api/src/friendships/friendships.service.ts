@@ -20,7 +20,9 @@ export class FriendshipsService {
 
 	public async acceptFriendRequest(user1: User, user2: User) : Promise<Friendships>
 	{
-		const friendship = await this.friendRepo
+		console.log('USER 1' + user1.id)
+		console.log ( 'USER 2'+  user2.id)
+		const friendship : Friendships = await this.friendRepo
 			.createQueryBuilder('friend')
 			.leftJoinAndMapOne("friend.sender", User, 'users', 'users.id = friend.sender')
 			.leftJoinAndMapOne("friend.target", User, 'usert', 'usert.id = friend.target')
@@ -33,6 +35,8 @@ export class FriendshipsService {
 					.orWhere("friend.target = :dst1", { dst1: user2.id })
 			}))
 			.getOne();
+
+		console.log(friendship);
 
 		friendship.status = "accepted";
 		return await this.friendRepo.save(friendship);
@@ -51,8 +55,10 @@ export class FriendshipsService {
 			'friend.target',
 			'friend.status',
 			'users.name',
+			'users.id',
 			'users.avatar_url',
 			'usert.name',
+			'usert.id',
 			'usert.avatar_url'
 		  ])
 		.getMany();

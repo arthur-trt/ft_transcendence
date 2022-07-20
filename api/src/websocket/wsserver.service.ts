@@ -404,6 +404,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('acceptFriend')
 	async acceptFriendRequest(client: Socket, friend: User)
 	{
+		console.log("FRIEND IS " + JSON.stringify(friend))
 		const friendSocket: Socket = await this.findSocketId(friend)
 		await this.friendService.acceptFriendRequest(client.data.user, friend);
 		this.server.to(client.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(client.data.user))
