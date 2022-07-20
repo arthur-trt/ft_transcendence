@@ -9,6 +9,7 @@ import { Channel } from './channel.entity';
 import { validate as isValidUUID } from 'uuid';
 import { Request } from 'express';
 import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
+import * as bcrypt from 'bcrypt';
 
 
 @Injectable()
@@ -24,13 +25,18 @@ export class ChannelService {
 	 * @param req the request containing user id
 	 * @returns
 	 */
-	public async createChannel(name: string, user : User)
+	public async createChannel(name: string, user : User, password: string = null)
 	{
 		const chan: Channel = new Channel();
 		chan.name = name;
 		chan.owner = user;
+		if (password)
+		{
+			chan.password_protected = true;
+			chan.password = await bcrypt.hash(password, 10);
+		}
 		await this.channelsRepo.save(chan);
-		return await this.userService.joinChannel(user, name);
+		return await this.userService.joinChannel(user, name, password);
 	}
 
 	/**
@@ -60,6 +66,15 @@ export class ChannelService {
 		if (!chan)
 			throw new HttpException('Channel not found (id or name)', HttpStatus.NOT_FOUND);
 		return chan;
+	}
+
+	async	getChannelPasswordHash(channelId: string): Promise<string> {
+		const chan: Channel = await this.channelsRepo.createQueryBuilder('Channel')
+		.select(["Channel.password"])
+		.where({ "id": channelId})
+		.getOne();
+
+		return chan.password;
 	}
 
 	/**

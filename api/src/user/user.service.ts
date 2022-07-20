@@ -9,7 +9,7 @@ import { validate as isValidUUID } from 'uuid';
 import { ModifyUserDto } from 'src/dtos/user.dto';
 import { UserActivity } from './user_activity.entity';
 import { UpsertOptions } from 'typeorm/repository/UpsertOptions';
-
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -144,7 +144,7 @@ export class UserService {
 	}
 
 
-	public async joinChannel(user: User, channelname: string)
+	public async joinChannel(user: User, channelname: string, password: string = null): Promise<boolean>
 	{
 		let channel: Channel;
 		try
@@ -153,10 +153,20 @@ export class UserService {
 		}
 		catch (err)
 		{
-			return await this.chanService.createChannel(channelname, user);
+			return await this.chanService.createChannel(channelname, user, password);
+		}
+		if (channel.password_protected)
+		{
+			if (password == null)
+				return (false)
+			if (!await bcrypt.compare(password, await this.chanService.getChannelPasswordHash(channel.id)))
+			{
+				return (false);
+			}
 		}
 		user.channels = [...user.channels, channel]; /* if pb of is not iterable, it is because we did not get the realtions in the find one */
-		return await user.save();
+		await user.save();
+		return (true);
 	}
 
 
@@ -211,7 +221,7 @@ export class UserService {
 	public async unblock(user: User, toUnBan: User): Promise<User> {
 		const index = user.blocked.indexOf(toUnBan.id);
 		if (index > -1) {
-			user.blocked.splice(index, 1); 
+			user.blocked.splice(index, 1);
 		}
 		user.save();
 		return user;
