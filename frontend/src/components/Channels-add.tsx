@@ -13,7 +13,7 @@ import {socketo} from '../index';
 let tmp:any[any];
 var indents:any = [];
 let indexFriends = 0;
-let u_or_f = "SHOW USERS";
+let u_or_f = "SHOW FRIENDS";
 var frequest:any = [];
 
 export default function Channels() {
@@ -56,6 +56,7 @@ export default function Channels() {
       socket.emit('getRooms');
       socket.emit('getUsers');
       socket.emit('getFriends');
+      socket.emit('getFriendRequests');
       socket.on('rooms', (msg:any, tab:any) => {
         setData(tab);
       });
@@ -66,15 +67,12 @@ export default function Channels() {
           setMessages(msg);
       });
       socket.on('friendList', (msg:any, tab:any) => {
-        console.log(msg);
-        console.log(tab);
         setFriends(tab);
     });
     socket.on('newFriendRequest', (msg:any, tab:any) => {
-      console.log(msg);
+      // frequest.push(tab);
       console.log(tab);
-      frequest.push(tab);
-      setFriendsRequest(frequest);
+      setFriendsRequest(tab);
   });
 
       // return () => {
@@ -105,6 +103,9 @@ export default function Channels() {
   }
   let handleAddFriend = (e:any) => {
     socket.emit('addFriend', datausers[parseInt(e.currentTarget.id)]);
+  }
+  let handleAcceptFriend = (e:any) => {
+    socket.emit('acceptFriend', friendsrequest[parseInt(e.currentTarget.id)]);
   }
 
   // DISPLAY CHANNELS
@@ -169,10 +170,16 @@ export default function Channels() {
     }
     if (switching % 2 === 1)
     {
-      console.log(friendsrequest);
-      indents.push(<div key={1}>
-        {/* {friendsrequest.name} */}
-      </div>);
+      while (i < friendsrequest?.length)
+      {
+        indents.push(<div key={i}>
+          <div>
+            {friendsrequest[i]?.sender.name}
+            <button id={i.toString()} onClick={handleAcceptFriend}>Accept</button>
+          </div>
+        </div>);
+        i++;
+      }
     }
 
     return indents;
