@@ -118,14 +118,14 @@ document.addEventListener('keyup', (e) => {
 });
 
 // when COM or USER scores, we reset the ball
-function resetBall(){
-    ball.x = canvas.width/2;
-    ball.y = canvas.height/2;
-    //ball.velocityX = -ball.velocityX;
-    ball.velocityX = 5;
-    ball.velocityY = 5;
-    ball.speed = 7;
-}
+// function resetBall(){
+//     ball.x = canvas.width/2;
+//     ball.y = canvas.height/2;
+//     //ball.velocityX = -ball.velocityX;
+//     ball.velocityX = 5;
+//     ball.velocityY = 5;
+//     ball.speed = 7;
+// }
 
 // draw the net
 function drawNet(){
@@ -160,7 +160,7 @@ function end_game(winner)
 }
 
 // render function, the function that does al the drawing
-function render(){
+function render(data){
     
     // clear the canvas
     drawRect(0, 0, canvas.width, canvas.height, "WHITE");
@@ -179,21 +179,18 @@ function render(){
     drawNet();
     
     // draw the user's paddle
-    drawRect(user.x, user.y, user.width, user.height, user.color);
+    drawRect(data.player1_paddle_x, data.player1_paddle_y, user.width, user.height, user.color);
     
     // draw the COM's paddle
-    drawRect(com.x, com.y, com.width, com.height, com.color);
+    drawRect(data.player2_paddle_x, data.player2_paddle_y, user.width, user.height, user.color);
     
     // draw the ball
-    drawArc(ball.x, ball.y, ball.radius, ball.color);
+    drawArc(data.ball_x, data.ball_y, ball.radius, ball.color);
 }
 
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
-// let framePerSecond = 60;
-// let loop;
 
 async function game_start()
 {
@@ -219,4 +216,11 @@ async function game_start()
 
 socket.on('game_countdownStart', game_start());
 
-//game_start();
+socket.on('game_position', render(data));
+
+socket.on('game_score', function(scores){
+    user.score = scores.player1;
+    com.score = scores.player2;
+});
+
+socket.on('game_winner', end_game(winner));
