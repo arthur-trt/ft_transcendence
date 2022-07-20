@@ -23,7 +23,7 @@ export class AuthService {
 			isSecondFactorAuthenticated
 		}
 		const token = this.jwtService.sign(payload);
-		const cookie = `Authentication=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire_time}`;
+		const cookie = `Authentication=${token}; Path=/; Max-Age=${jwtConstants.expire_time}`;
 		return cookie;
 	}
 
