@@ -376,7 +376,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async addFriend(client: Socket, friend: User)
 	{
 		await this.friendService.sendFriendRequest(client.data.user, friend);
-
 		this.server.to((await this.findSocketId(friend)).id).emit('newFriendRequest', "You have a new friend request", client.data.user)
 	}
 
