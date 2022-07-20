@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import '../index.css';
 
 // FONT AWESOME SINGLE IMPORT
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons'
 import { faArrowAltCircleRight } from '@fortawesome/free-regular-svg-icons'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
-import { faPaperPlane } from '@fortawesome/free-regular-svg-icons'
 
 // IMPORT THE SOCKET
-import io from 'socket.io-client';
-// import {socketo} from '../index';
+import {socketo} from '../index';
 
 let tmp:any[any];
 var indents:any = [];
+let indexFriends = 0;
+let u_or_f = "USERS";
 
 export default function Channels() {
 
@@ -29,6 +30,10 @@ export default function Channels() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any>([]);
 
+  // DISPLAY FRIENDS LIST
+  const [switching, setSwitching] = useState(0);
+  const [friends, setFriends] = useState<any>([]);
+
   useEffect(() => {
     const getData = async () => {
         const response = await fetch(
@@ -43,18 +48,25 @@ export default function Channels() {
   // REACT HOOK TO SET UP SOCKET CONNECTION AND LISTENING
   useEffect(
     () => {
-      // const socket = socketo;
-      const socket = io('http://localhost:8080');
+      const socket = socketo;
+      // const socket = io('http://localhost:8080');
       setSocket(socket);
+      socket.emit('getRooms');
+      socket.emit('getUsers');
+      socket.emit('getFriends');
       socket.on('rooms', (msg:any, tab:any) => {
         setData(tab);
       });
-      socket.on('users', (msg:any, tab:any) => {
+      socket.on('listUsers', (tab:any) => {
         setDatausers(tab);
       });
       socket.on('channelMessage', (msg:any) => {
           setMessages(msg);
       });
+      socket.on('Friend list', (tab:any) => {
+        console.log(tab);
+        setFriends(tab);
+    });
 
       // return () => {
       //   socket.emit('disconnectUser', name);
@@ -94,19 +106,18 @@ export default function Channels() {
         let j = 0;
         while (j < data[i]?.users.length)
         {
-          if (datame.name == data[i].users[j]?.name) {BgColor = 'springgreen';}
+          if (datame.name == data[i].users[j]?.name) {BgColor = '#1dd1a1';}
           j++;
         }
 
         // push every chan div in the array "indents"
-        indents.push(<div style={{'backgroundColor': BgColor}} className="channels-single" key={i}>
+        indents.push(<div style={{'backgroundColor': BgColor}} className="channels-single" key={i} id={data[i]?.name} onClick={handleOpen}>
             <h5>
             {data[i]?.name}
             </h5>
             <FontAwesomeIcon icon={faCircleXmark} className="circlexmark" id={data[i]?.name} onClick={handleDelete} />
             <FontAwesomeIcon icon={faArrowAltCircleRight} className="arrow" id={data[i]?.name} onClick={handleLeave} />
             <FontAwesomeIcon icon={faPlus} className="plus" id={data[i]?.name} onClick={handleJoin} />
-            <FontAwesomeIcon icon={faPaperPlane} className="paperplane" id={data[i]?.name} onClick={handleOpen} />
             </div>);
         i++;
         BgColor = 'white';
@@ -118,20 +129,36 @@ export default function Channels() {
   function display_users() {
     var indents = [];
     let i = 0;
+    let borderStatus = 'white';
 
-    while (i < datausers?.length)
+    if (switching % 2 === 0)
     {
-      indents.push(<div className="users-single" key={i}>
-          <div className='users-single-img'>
-            <img src={datausers[i]?.photo}></img>
-          </div>
-          <div className='users-single-info'>
-            <h5>{datausers[i]?.username}</h5>
-            <p>{datausers[i]?.userID}</p>
-          </div>
-      </div>);
-      i++; 
+      while (i < datausers?.length)
+      {
+        if (datausers[i]?.status === 'online')
+          borderStatus = 'springgreen';
+        else if (datausers[i]?.status === 'ingame')
+          borderStatus = 'orange';
+        else if (datausers[i]?.status === 'offline')
+          borderStatus = 'red';
+  
+        indents.push(<div className="users-single" key={i}>
+            <div className='users-single-img'>
+              <img style={{'borderColor': borderStatus}} src={datausers[i]?.avatar_url}></img>
+            </div>
+            <div className='users-single-info'>
+              <h5>{datausers[i]?.name}</h5>
+            </div>
+        </div>);
+        i++;
+        borderStatus = 'white';
+      }
     }
+    if (switching % 2 === 1)
+    {
+      indents.push(<div>Coucou Chatou</div>);
+    }
+
     return indents;
   }
 
@@ -148,13 +175,14 @@ export default function Channels() {
   // need to reverse printing the array of messages because of
   // chat box displaying from bottom to top
   function display_msg() {
-    let i = messages.messages?.length -1;
+    let i;
+    if (messages)
+      i = messages.messages?.length -1;
     let msgColor = 'bisque';
     
-    if (chanName == messages.name)
-    {
-      tmp = messages;
-    }
+    if (messages)
+      if (chanName == messages.name)
+        tmp = messages;
     
     if (tmp)
     {
@@ -166,7 +194,7 @@ export default function Channels() {
           msgColor = 'lightskyblue';
         
         indents.push(<div className='chat-message' key={i + datame.id}>
-          <h5>{tmp.messages[i]?.sender.name} <span>{tmp.messages[i]?.sent_at}</span></h5>
+          <h5>{tmp.messages[i]?.sender.name} <span>{tmp.messages[i]?.sent_at.substr(0, 10)}</span></h5>
           <p style={{'backgroundColor': msgColor}}>{tmp.messages[i]?.message}</p>
         </div>);
         i--;
@@ -214,6 +242,15 @@ export default function Channels() {
     </div> 
     )
   }
+
+  function handleFriends() {
+    if (u_or_f == "FRIENDS")
+      u_or_f = "USERS";
+    else if (u_or_f == "USERS")
+      u_or_f = "FRIENDS";
+    indexFriends++;
+    setSwitching(indexFriends);
+  }
     
     // PAGE RENDER
     return (
@@ -226,10 +263,9 @@ export default function Channels() {
             <input
               type="text"
               value={name}
-              placeholder="Channel name..."
+              placeholder="Create channel..."
               onChange={(e) => setName(e.target.value)}
             />
-            <button type="submit">Create</button>
           </form>
           <div className="channels-list">
               {display_chan()}
@@ -243,6 +279,7 @@ export default function Channels() {
 
         <div className='users-container'>
           <h3>USERS</h3>
+          <button onClick={handleFriends}>{u_or_f}</button>
           <div className='users-list'>
               {display_users()}
           </div>

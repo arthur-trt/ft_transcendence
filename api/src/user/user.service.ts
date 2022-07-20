@@ -47,8 +47,20 @@ export class UserService {
 	public async getUsers()
 	{
 		return await this.userRepo.createQueryBuilder('User')
-			.select(["User.id", "User.name", "User.mail", "User.avatar_url"])
+			.select(["User.id", "User.name", "User.mail", "User.avatar_url", "User.blocked"])
 			.getMany();
+	}
+
+	public async getUserByIdentifierLight(user_id: string)
+	{
+		//const user_id = JSON.parse(JSON.stringify(req.user)).userId;
+		const user: User = await this.userRepo.createQueryBuilder('User')
+			.select(["User.id", "User.name", "User.mail", "User.avatar_url"])
+			.where({ id: user_id })
+			.getOne();
+		if (!user)
+			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+		return (user);
 	}
 
 	/**
@@ -185,6 +197,24 @@ export class UserService {
 			}
 		});
 		return chans;
+	}
+
+	public async block(user: User, toBan: User) :  Promise<User>
+	{
+		if (user.blocked == null)
+			user.blocked = [];
+		user.blocked.push(toBan.id);
+		user.save();
+		return user;
+	}
+
+	public async unblock(user: User, toUnBan: User): Promise<User> {
+		const index = user.blocked.indexOf(toUnBan.id);
+		if (index > -1) {
+			user.blocked.splice(index, 1); 
+		}
+		user.save();
+		return user;
 	}
 
 	public async	setUserActive (user: User) {

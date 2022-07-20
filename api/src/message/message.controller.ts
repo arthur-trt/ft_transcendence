@@ -56,9 +56,11 @@ export class MessageController {
 	@ApiTags('Channel messages')
 	@ApiOperation({ summary: "Get all messages from a channel" })
 	@Get('channel/getMsg/:identifier')
-	public async getMessages(@Param('identifier') chanIdentifier : string)
+	@UseGuards(JwtAuthGuard)
+	public async getMessages(@Req() req : Request, @Param('identifier') chanIdentifier : string)
 	{
-		const messages = await this.messageService.getMessage(chanIdentifier)
+		const user : User = await this.userService.getUserByRequest(req);
+		const messages = await this.messageService.getMessage(chanIdentifier, user)
 		return messages;
 	}
 
@@ -97,10 +99,10 @@ export class MessageController {
 	@Post('privateMessage/sendMsg')
 	@ApiOperation({ summary: "Send private message to another user" })
 	@UseGuards(JwtAuthGuard)
-	public async privateMessage(@Req() req : Request, @Body() message : sendPrivateMessageDto)
+	public async privateMessage(@Req() req : Request, @Body() message : any)
 	{
 
-		const target = message.username;
+		const target = message.to;
 
 		const msg = message.msg;
 		const sender = await this.userService.getUserByRequest(req);

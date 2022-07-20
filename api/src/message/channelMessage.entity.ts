@@ -12,7 +12,7 @@ export class channelMessage extends AMessage {
 	@JoinColumn()
 	sender: User;
 
-	@ManyToOne(() => Channel,  channel => channel.messages)
+	@ManyToOne(() => Channel,  channel => channel.messages, { cascade: true, onDelete: 'CASCADE', orphanedRowAction: 'delete'})
 	target: Channel;
 
 }

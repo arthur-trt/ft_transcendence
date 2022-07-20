@@ -8,7 +8,7 @@ import { ChannelService } from 'src/channel/channel.service';
 import { MessageDto } from 'src/dtos/message.dto';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, Not, Repository } from 'typeorm';
 import { channelMessage } from './channelMessage.entity';
 import { privateMessage } from './privateMessage.entity';
 
@@ -55,17 +55,33 @@ export class MessageService {
 	 * @param chanIdentifier
 	 * @returns the Channel with relation to its message
 	 */
-	public async getMessage(chanIdentifier: string) : Promise<Channel>
+	public async getMessage(chanIdentifier: string, user: User) : Promise<Channel>
 	{
-		let chan : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
-		const msgs = this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
+		const chan: Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
+
+		let msgs : Channel;
+		if (user.blocked != null) {
+			msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
+				.leftJoinAndSelect("chan.messages", "messages")
+				.leftJoinAndSelect("messages.sender", "sender")
+				.where(new Brackets(qb => {
+					qb.where("sender.id NOT IN (:...blocked)", { blocked: user.blocked })
+				}))
+				.getOne()
+		}
+		else
+		{
+			msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
 			.leftJoinAndSelect("chan.messages", "messages")
-			.leftJoinAndSelect("messages.sender", "sender").getOne();
+			.leftJoinAndSelect("messages.sender", "sender")
+			.getOne()
+		}
 		return msgs;
 	}
 
+
 	/**
-	 * @brief get messages from a specific channel
+	 * @brief get all messages a user sent on a particular channel
 	 * @param chanIdentifier
 	 * @param user the user we wanr to see messages of
 	 * @returns the Channel with relation to its message

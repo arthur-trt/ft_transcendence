@@ -71,5 +71,7 @@ export class User extends BaseEntity {
 	@OneToMany(() => channelMessage, channelMessage => channelMessage.sender)
 	channelMessages: channelMessage[];
 
+	@Column('varchar', { array: true, nullable : true})
+	blocked: string[];
 
 }
