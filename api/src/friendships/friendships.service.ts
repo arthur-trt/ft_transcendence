@@ -18,7 +18,6 @@ export class FriendshipsService {
 		});
 	}
 
-
 	public async acceptFriendRequest(user1: User, user2: User) : Promise<Friendships>
 	{
 		const friendship = await this.friendRepo
@@ -39,9 +38,28 @@ export class FriendshipsService {
 		return await this.friendRepo.save(friendship);
 	}
 
+	public async getFriendsRequests(user : User) : Promise<Friendships[]>
+	{
+		return await this.friendRepo
+		.createQueryBuilder('friend')
+		.leftJoinAndMapOne("friend.sender", User, 'users', 'users.id = friend.sender')
+		.leftJoinAndMapOne("friend.target", User, 'usert', 'usert.id = friend.target')
+		.where("friend.target = :target", { target: user.id })
+		.andWhere("friend.status = :ok", { ok: "pending" })
+		.select(['friend.sender'])
+		.addSelect([
+			'friend.target',
+			'friend.status',
+			'users.name',
+			'users.avatar_url',
+			'usert.name',
+			'usert.avatar_url'
+		  ])
+		.getMany();
+	}
+
 	public async getFriendsofUsers(user: User) : Promise<Friendships[]>
 	{
-		console.log("SALUT ");
 		return await this.friendRepo
 			.createQueryBuilder('friend')
 			.leftJoinAndMapOne("friend.sender", User, 'users', 'users.id = friend.sender')

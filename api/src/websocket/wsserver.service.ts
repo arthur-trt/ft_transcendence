@@ -408,9 +408,16 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getFriends')
-	async getFriends(client: Socket, friend: User)
+	async getFriends(client: Socket)
 	{
 		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('getFriendRequests')
+	async getFriendRequests(client: Socket)
+	{
+		this.server.to(client.id).emit('friendList', "Friend requests list : you are target of", await this.friendService.getFriendsRequests(client.data.user));
 	}
 
 	/*
