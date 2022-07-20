@@ -375,16 +375,22 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('addFriend')
 	async addFriend(client: Socket, friend: User)
 	{
+		const friendSocket: Socket = await this.findSocketId(friend)
 		await this.friendService.sendFriendRequest(client.data.user, friend);
-		this.server.to((await this.findSocketId(friend)).id).emit('newFriendRequest', "You have a new friend request", client.data.user)
+		if (friendSocket)
+			this.server.to(friendSocket.id).emit('newFriendRequest', "You have a new friend request", client.data.user)
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('acceptFriend')
 	async acceptFriendRequest(client: Socket, friend: User)
 	{
+		const friendSocket: Socket = await this.findSocketId(friend)
 		await this.friendService.acceptFriendRequest(client.data.user, friend);
-		this.server.to((await this.findSocketId(friend)).id).to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+		if (friendSocket)
+			this.server.to(friendSocket.id).to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+		else
+			this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
 	}
 
 
@@ -392,8 +398,12 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('removeFriend')
 	async removeFriend(client: Socket, friend: User)
 	{
+		const friendSocket: Socket = await this.findSocketId(friend);
 		await this.friendService.removeFriend(client.data.user, friend);
-		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+		if (friendSocket)
+			this.server.to(friendSocket.id).to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+		else
+			this.server.to(friendSocket.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
 	}
 
 	@UseGuards(WsJwtAuthGuard)

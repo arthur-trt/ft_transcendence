@@ -50,7 +50,7 @@ export class FriendshipsService {
 				qb.where("friend.sender = :sender", { sender: user.id })
 					.orWhere("friend.target = :sender2", { sender2: user.id })
 			}))
-			.andWhere("status = :ok", { ok: "accepted" })
+			.andWhere("friend.status = :ok", { ok: "accepted" })
 			.select(['friend.sender'])
 			.addSelect([
 				'friend.target',
