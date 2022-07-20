@@ -7,8 +7,8 @@ import { Header } from './components/Header';
 import TwoFactor from './components/TwoFactor';
 import Profile from './components/Profile';
 import Channels from './components/Channels-add';
-import Game from './components/Game';
-
+//import Game from './components/Game';
+import { CookiesProvider } from "react-cookie";
 import io from 'socket.io-client';
 import Debug from './components/Debug';
 export const socketo = io();
@@ -17,6 +17,7 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
+  <CookiesProvider>
     <Router>
       <Routes>
 
@@ -26,10 +27,11 @@ root.render(
       <Route path="/profile" element={<><Header/><Profile/></>} />
       <Route path="/chat" element={<><Header/><Channels/></>} />
       <Route path="/debug" element={<><Header/><Debug/></>} />
-      <Route path="/game" element={<><Game/></>} />
+      {/*<Route path="/game" element={<><Game/></>} />*/}
 
       </Routes>
     </Router>
+  </CookiesProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function

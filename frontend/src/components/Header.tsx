@@ -2,18 +2,25 @@ import { useState, useEffect } from "react";
 import 'font-awesome/css/font-awesome.min.css';
 import { Link } from 'react-router-dom';
 import '../index.css';
+import { useCookies } from "react-cookie";
+
 
 export const Header = () => {
 
     const [data, setData] = useState<any>([]);
+    const [cookies, setCookie] = useCookies();
 
     useEffect(() => {
     const getData = async () => {
         const response = await fetch(
             `/api/user/me`
         );
-        let actualData = await response.json();
-        setData(actualData);
+        if (response.ok)
+        {
+            let actualData = await response.json();
+            setData(actualData);
+            localStorage.setItem(actualData.name, cookies.Authentication);
+        }
     }
     getData()
     }, [])
