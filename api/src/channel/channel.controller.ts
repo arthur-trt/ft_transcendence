@@ -88,4 +88,15 @@ export class ChannelController {
 		const toBan: User = await this.userService.getUserByIdentifier(deleteUser.userToDelete);
 		return await this.chanService.deleteUserFromChannel(user, channel, toBan)
 	}
+
+	@Post('banUser')
+	@UseGuards(JwtAuthGuard)
+	@ApiOperation({ summary: "Delete user from channel" })
+	public async temporaryBanUser(@Req() req: Request, @Body() deleteUser : deleteFromChannelDto) // autoban pour le test
+	{
+		const user: User = await this.userService.getUserByRequest(req);
+		const channel: Channel = await this.chanService.getChannelByIdentifier(deleteUser.chanName);
+		const toBan: User = await this.userService.getUserByIdentifier(deleteUser.userToDelete);
+		return await this.chanService.temporaryBanUser(user, channel, toBan)
+	}
 }
