@@ -41,6 +41,7 @@ export class FriendshipsService {
 
 	public async getFriendsofUsers(user: User) : Promise<Friendships[]>
 	{
+		console.log("SALUT ");
 		return await this.friendRepo
 			.createQueryBuilder('friend')
 			.leftJoinAndMapOne("friend.sender", User, 'users', 'users.id = friend.sender')
@@ -57,6 +58,7 @@ export class FriendshipsService {
 				'usert.avatar_url'
 			  ])
 			.getMany();
+
 	}
 
 	async removeFriend(user1 : User, user2 : User)
