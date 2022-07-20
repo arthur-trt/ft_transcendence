@@ -42,6 +42,7 @@ export class ChannelService {
 		return await this.channelsRepo.createQueryBuilder('Channel')
 			.orderBy("Channel.name")
 			.leftJoinAndSelect("Channel.users", "Users")
+			.leftJoinAndSelect("Channel.banned", "b")
 			.leftJoinAndSelect("Channel.owner", "o")
 		.getMany();
 	}
@@ -53,9 +54,9 @@ export class ChannelService {
 	 */
 	public async getChannelByIdentifier(channelIdentifier : string) : Promise<Channel>
 	{
-		let chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages'] });
+		let chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages', 'banned'] });
 		if (!chan && isValidUUID(channelIdentifier))
-			await this.channelsRepo.findOne({ where: { id: channelIdentifier }, relations: ['messages'] });
+			await this.channelsRepo.findOne({ where: { id: channelIdentifier }, relations: ['messages', 'banned'] });
 		if (!chan)
 			throw new HttpException('Channel not found (id or name)', HttpStatus.NOT_FOUND);
 		return chan;
@@ -100,15 +101,37 @@ export class ChannelService {
  	* @param toBan
  	* @returns
  	*/
-	 public async deleteUserFromChannel(user: User, channel : Channel, toBan: User) : Promise<Channel[]>
-	 {
+	public async deleteUserFromChannel(user: User, channel : Channel, toBan: User) : Promise<Channel[]>
+	{
 		await this.channelsRepo.createQueryBuilder()
 			.relation(Channel, "users")
 			.of({ id: toBan.id })
 			.remove({ id: channel.id });
+		return this.getUsersOfChannels();
+	}
 
-		return this.getUsersOfChannels();	 // image id
-	 }
+	public async unban(channel: Channel, toUnBan: User)
+	{
+		channel.banned = channel.banned.filter((banned) => {
+			return banned.id !== toUnBan.id
+		})
+		channel.save();
+		return channel;
+	}
+
+	public async temporaryBanUser(user: User, channel: Channel, toBan: User)
+	{
+		console.log("Bannishement");
+		/** Step one : Deleting user from channel */
+		await this.deleteUserFromChannel(user, channel, toBan);
+		/** Step two : add it to ban list  */
+		console.log(channel.banned);
+		channel.banned = [...channel.banned, toBan];
+		await channel.save();
+		/** Step three : set timeout to remove from ban list */
+		setTimeout(() => { this.unban(channel, toBan)}, 30000);
+		return channel;
+	}
 
 
 
