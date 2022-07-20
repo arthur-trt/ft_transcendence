@@ -172,6 +172,16 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		return (data);
 	}
 
+	async findSocketId(user: User) : Promise<Socket>
+	{
+		for (let [allUsers, socket] of this.active_users.entries())
+		{
+  			if (allUsers.id == user.id)
+  			{
+    			return socket;
+  			}
+		}
+	}
 
 	/*
 	** 		_____ _    _       _______    _____       _______ ________          __ __     __
@@ -366,7 +376,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async addFriend(client: Socket, friend: User)
 	{
 		await this.friendService.sendFriendRequest(client.data.user, friend);
-		this.server.to(this.active_users.get(friend).id).emit('newFriendRequest', "You have a new friend request", client.data.user)
+
+		this.server.to((await this.findSocketId(friend)).id).emit('newFriendRequest', "You have a new friend request", client.data.user)
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -374,7 +385,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async acceptFriendRequest(client: Socket, friend: User)
 	{
 		await this.friendService.acceptFriendRequest(client.data.user, friend);
-		this.server.to(this.active_users.get(friend).id).to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+		this.server.to((await this.findSocketId(friend)).id).to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
 	}
 
 
