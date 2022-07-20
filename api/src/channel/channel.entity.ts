@@ -2,7 +2,7 @@
 
 
 import { channelMessage } from "src/message/channelMessage.entity";
-import { BaseEntity, Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "../user/user.entity";
 
 @Entity('Channels') /** table name */
@@ -24,10 +24,12 @@ export class Channel extends BaseEntity {
 	@JoinTable()		/* owner is channels */
 	users: User[]
 
-
 	/** Tous les messages du channel : un message n'a qu'une target, un channel a plusieurs messages */
 	@OneToMany(() => channelMessage, (channelMessage) => channelMessage.target)
 	messages: channelMessage[];
 
+	@ManyToMany(() => User)
+	@JoinTable()
+	banned: User[];
 
 }
