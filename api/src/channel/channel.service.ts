@@ -25,11 +25,12 @@ export class ChannelService {
 	 * @param req the request containing user id
 	 * @returns
 	 */
-	public async createChannel(name: string, user : User, password: string = null)
+	public async createChannel(name: string, user: User, password: string = null, privacy : boolean = false)
 	{
 		const chan: Channel = new Channel();
 		chan.name = name;
 		chan.owner = user;
+		chan.private = privacy;
 		if (password)
 		{
 			chan.password_protected = true;
@@ -51,6 +52,22 @@ export class ChannelService {
 			.leftJoinAndSelect("Channel.banned", "b")
 			.leftJoinAndSelect("Channel.owner", "o")
 		.getMany();
+	}
+
+	/**
+	 * @brief Returns all users of all existing channels
+	 * @returns
+	 */
+	public async getChannelsForUser(user : User) : Promise<Channel[]>
+	{
+		return await this.channelsRepo.createQueryBuilder('channel')
+			.orderBy("channel.name")
+			.leftJoinAndSelect("channel.users", "Users")
+			.leftJoinAndSelect("channel.banned", "b")
+			.leftJoinAndSelect("channel.owner", "o")
+			.where('channel.private = false')
+			.orWhere("Users.id = :id", { id : user.id} )
+			.getMany();
 	}
 
 	/**

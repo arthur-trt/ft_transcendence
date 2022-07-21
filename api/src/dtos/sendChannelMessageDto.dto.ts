@@ -8,5 +8,8 @@ import { ManyToMany } from "typeorm";
 export class sendChannelMessageDto
 {
 	@IsNotEmpty()
+	
+
+	@IsNotEmpty()
 	msg: string;
 }

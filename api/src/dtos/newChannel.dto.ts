@@ -6,4 +6,7 @@ export class newChannelDto {
 	@IsNotEmpty()
 	readonly chanName: string;
 
+	readonly password?: string;
+	readonly private?: boolean;
+
 }

@@ -23,6 +23,12 @@ export class Channel extends BaseEntity {
 	password_protected: boolean
 
 	@Column({
+		type: 'boolean',
+		default: false,
+	})
+	private: boolean
+
+	@Column({
 		type: 'varchar',
 		default: null,
 		nullable: true,

@@ -216,14 +216,14 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @returns
 	 */
 	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
 	@SubscribeMessage('createRoom') /** Join ROom parce que ca le creera aussi */
-	async onCreateRoom(client: Socket, channel: string) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
+	async onCreateRoom(client: Socket, channel: newChannelDto) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
 		this.logger.log(channel)
-		await this.userService.joinChannel(client.data.user, channel);
-		// client.join(channel);
-		client.join(channel)
-		return this.server.emit('rooms', client.data.user.name + " created the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+		await this.channelService.createChannel(channel.chanName, client.data.user, channel.password, channel.private);
+		client.join(channel.chanName)
+		return this.server.emit('rooms', client.data.user.name + " created the room ", await this.channelService.getChannelsForUser(client.data.user)); // a recuperer dans le service du front
 
 	}
 
@@ -237,7 +237,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('getRooms') /** Join ROom parce que ca le creera aussi */
 	async onGetRooms(client: Socket, channel: string)
 	{
-		return this.server.to(client.id).emit('rooms', client.data.user.name + " receive rooms ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+		return this.server.to(client.id).emit('rooms', client.data.user.name + " receive rooms ", await this.channelService.getChannelsForUser(client.data.user)); // a recuperer dans le service du front
 	}
 
 	/**
@@ -247,25 +247,17 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @returns
 	 */
 	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
 	@SubscribeMessage('joinRoom') /** Join ROom parce que ca le creera aussi */
-	async onJoinRoom(client: Socket, user_args: any) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
+	async onJoinRoom(client: Socket, joinRoom: newChannelDto) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
-		let channel: string
-		let password: string
+		let channel: string = joinRoom.chanName;
+		let password: string = joinRoom.password;
 
-		if (isArray(user_args))
+		if (await this.userService.joinChannel(client.data.user, channel, password))
 		{
-			channel = user_args[0];
-			password = user_args[1];
-		}
-		else
-		{
-			channel = user_args;
-			password = null;
-		}
-		if (await this.userService.joinChannel(client.data.user, channel, password)) {
 			client.join(channel);
-			return this.server.emit('rooms', client.data.user.name + " joined the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+			return this.server.emit('rooms', client.data.user.name + " joined the room ", await this.channelService.getChannelsForUser(client.data.user)); // a recuperer dans le service du front
 		}
 		else {
 			return this.server.emit('rooms', 'incorect password');
@@ -282,7 +274,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('deleteRoom')
 	async onDeletedRoom(client: Socket, channel: string) {
 		await this.channelService.deleteChannel(client.data.user, await this.channelService.getChannelByIdentifier(channel));
-		return this.server.emit('rooms', channel + "has been deleted", await this.channelService.getUsersOfChannels()); // on emet a tt le monde que le chan a ete supp
+		return this.server.emit('rooms', channel + "has been deleted", await this.channelService.getChannelsForUser(client.data.user)); // on emet a tt le monde que le chan a ete supp
 	}
 
 	/**
@@ -297,7 +289,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	{
 		this.logger.log(client.data.user.name + " LEFT ROOM")
 		await this.userService.leaveChannel(client.data.user, channel);
-		this.server.emit('rooms', client.data.user.name + " left the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
+		this.server.emit('rooms', client.data.user.name + " left the room ", await this.channelService.getChannelsForUser(client.data.user)); // a recuperer dans le service du front
 		client.leave(channel);
 	}
 
