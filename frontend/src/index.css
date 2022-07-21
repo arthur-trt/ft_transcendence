@@ -236,6 +236,15 @@ code {
   display: none;
 }
 
+.users-tab button {
+text-decoration: none;
+border: 2px solid black;
+padding: 5px;
+margin: 2px;
+border-radius: 3px;
+cursor: pointer;
+}
+
 .users-single {
   margin: 5px;
   width: 230px;
@@ -453,6 +462,10 @@ textarea:focus, input:focus{
   margin-right: 15px;
   border-radius: 150px;
   border: 5px solid #1dd1a1;
+}
+
+.profile-img {
+  background-color: aquamarine;
 }
 
 .profile-info {
