@@ -14,7 +14,6 @@ let tmp:any[any];
 var indents:any = [];
 let indexFriends = 0;
 let u_or_f = "SHOW FRIENDS";
-var frequest:any = [];
 
 export default function Channels() {
 
@@ -67,11 +66,11 @@ export default function Channels() {
           setMessages(msg);
       });
       socket.on('friendList', (msg:any, tab:any) => {
+        // console.log(tab);
         setFriends(tab);
     });
     socket.on('newFriendRequest', (msg:any, tab:any) => {
-      // frequest.push(tab);
-      console.log(tab);
+      // console.log(tab);
       setFriendsRequest(tab);
   });
 
@@ -105,7 +104,16 @@ export default function Channels() {
     socket.emit('addFriend', datausers[parseInt(e.currentTarget.id)]);
   }
   let handleAcceptFriend = (e:any) => {
-    socket.emit('acceptFriend', friendsrequest[parseInt(e.currentTarget.id)]);
+    let i = 0;
+    while (i < datausers?.length)
+    {
+      if (datausers[i]?.id === friendsrequest[parseInt(e.currentTarget.id)].sender.id)
+        socket.emit('acceptFriend', datausers[i]);
+      i++;
+    }
+  }
+  let handleRemoveFriend = (e:any) => {
+    // socket.emit('removeFriend', datausers[parseInt(e.currentTarget.id)]);
   }
 
   // DISPLAY CHANNELS
@@ -172,11 +180,30 @@ export default function Channels() {
     {
       while (i < friendsrequest?.length)
       {
-        indents.push(<div key={i}>
-          <div>
-            {friendsrequest[i]?.sender.name}
-            <button id={i.toString()} onClick={handleAcceptFriend}>Accept</button>
-          </div>
+        indents.push(<div className='friendsrequest-single' key={i + 111}>
+              <div className='friendsrequest-single-img'>
+                <img src={friendsrequest[i].sender.avatar_url}></img>
+              </div>
+              <div className='friendsrequest-single-name'>
+                <p>{friendsrequest[i]?.sender.name}</p>
+              </div>
+              <div className='friendsrequest-single-button'>
+                <button id={i.toString()} onClick={handleAcceptFriend}>Accept</button>
+              </div>
+        </div>);
+        i++;
+      }
+      i = 0;
+      while (i < datausers?.length)
+      {
+        indents.push(<div className="friends-single" key={i}>
+            <div className='friends-single-img'>
+              <img src={datausers[i]?.avatar_url}></img>
+            </div>
+            <div className='friends-single-info'>
+              <h5>{datausers[i]?.name}</h5>
+              <button id={i.toString()} onClick={handleRemoveFriend}>Remove friend</button>
+            </div>
         </div>);
         i++;
       }
@@ -281,7 +308,7 @@ export default function Channels() {
       <div className='community-container'>
         
         <div className='channels-container'>
-          <h3>CHANNELS</h3>
+          {/* <h3>CHANNELS</h3> */}
           <form onSubmit={handleCreate}>
             <input
               type="text"
@@ -296,12 +323,12 @@ export default function Channels() {
         </div>
 
         <div className='chat-container'>
-          <h3>CHAT</h3>
+          {/* <h3>CHAT</h3> */}
           {display_chat(0)}
         </div>
 
         <div className='users-container'>
-          <h3>USERS</h3>
+          {/* <h3>USERS</h3> */}
           <button onClick={handleFriends}>{u_or_f}</button>
           <div className='users-list'>
               {display_users()}
