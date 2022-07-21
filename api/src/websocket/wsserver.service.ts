@@ -1,7 +1,7 @@
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from "@nestjs/websockets"
-import { Injectable, Logger, UseGuards } from '@nestjs/common';
+import { Injectable, Logger, UseGuards, UsePipes } from '@nestjs/common';
 import { jwtConstants } from '../auth/jwt/jwt.constants';
 import { JwtService, JwtVerifyOptions } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
@@ -16,6 +16,10 @@ import { UserModule } from 'src/user/user.module';
 import { FriendshipsService } from 'src/friendships/friendships.service';
 import { AfterRecover } from 'typeorm';
 import { isArray, isObject } from 'class-validator';
+import { newChannelDto } from 'src/dtos/newChannel.dto';
+import { CreateMatchDto } from 'src/dtos/match.dto';
+import { ValidationPipe } from '@nestjs/common';
+
 
 @Injectable()
 @WebSocketGateway()
@@ -215,8 +219,10 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('createRoom') /** Join ROom parce que ca le creera aussi */
 	async onCreateRoom(client: Socket, channel: string) // qd on pourrq faire passer pqr le service avant, on pourra mettre Channel
 	{
+		this.logger.log(channel)
 		await this.userService.joinChannel(client.data.user, channel);
-		client.join(channel);
+		// client.join(channel);
+		client.join(channel)
 		return this.server.emit('rooms', client.data.user.name + " created the room ", await this.channelService.getUsersOfChannels()); // a recuperer dans le service du front
 
 	}
@@ -397,7 +403,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		const friendSocket: Socket = await this.findSocketId(friend)
 		await this.friendService.sendFriendRequest(client.data.user, friend);
 		if (friendSocket)
-			this.server.to(friendSocket.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(client.data.user))
+			this.server.to(friendSocket.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(friend))
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -409,9 +415,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.friendService.acceptFriendRequest(client.data.user, friend);
 		this.server.to(client.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(client.data.user))
 		if (friendSocket)
-			this.server.to(friendSocket.id).to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
-		else
-			this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+			this.server.to(friendSocket.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(friend));
+		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
 	}
 
 
@@ -422,9 +427,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		const friendSocket: Socket = await this.findSocketId(friend);
 		await this.friendService.removeFriend(client.data.user, friend);
 		if (friendSocket)
-			this.server.to(friendSocket.id).to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
-		else
-			this.server.to(friendSocket.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+			this.server.to(friendSocket.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(friend));
+		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
 	}
 
 	@UseGuards(WsJwtAuthGuard)
