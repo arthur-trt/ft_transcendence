@@ -89,17 +89,17 @@ export class FriendshipsService {
 			'usert.id',
 			'usert.avatar_url'
 		  ])
-			.getMany();
+		.getMany();
 
 	}
 
-	public async getFriendsofUsers(user: User) : Promise<User[]>
+	public async getFriendsofUsers(user: User) : Promise<User>
 	{
-		const res: User[] = await this.userRepo.createQueryBuilder('user')
+		console.log( "get friends : ")
+		const res: User = await this.userRepo.createQueryBuilder('user')
 			.leftJoinAndSelect('user.friends', "u")
 			.where('user.id = :id', { id: user.id })
-			.getMany();
-	
+			.getOne();
 		return res;
 	}
 
