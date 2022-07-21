@@ -121,7 +121,7 @@ export class TwoFAAuthController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@UsePipes(ValidationPipe)
-	async turnOnTwoFA (@Req() req: Request, @Body() twofa_token : twoFaDto) {
+	async turnOnTwoFA (@Req() req: Request, @Res() res: Response, @Body() twofa_token : twoFaDto) {
 		const isValidCode = await this.authService.isTwoFactorCodeValid(
 			twofa_token.token,
 			req
@@ -129,6 +129,10 @@ export class TwoFAAuthController {
 		if (!isValidCode)
 			throw new HttpException('Wrong 2FA', HttpStatus.UNAUTHORIZED);
 		await this.userService.turnOnTwoFactorAuthentication(req);
+		this.authService.twofa_login(
+			await this.userService.getUserByRequest(req),
+			res
+		);
 	}
 
 	@Post('validate')
