@@ -103,12 +103,12 @@ export class UserService {
 	 */
 	public async getUserByIdentifier(userIdentifier: string) : Promise<User> {
 
-		let user : User = await this.userRepo.findOne({ where: { name: userIdentifier }, relations: ['channels'] }); /* Pay attention to load relations !!! */
+		let user : User = await this.userRepo.findOne({ where: { name: userIdentifier }, relations: ['channels', 'friends'] }); /* Pay attention to load relations !!! */
 
 		if (!user && isValidUUID(userIdentifier))
 			 user = await this.userRepo.findOne({
 			where: {id: userIdentifier},
-			relations: ['channels']
+				 relations: ['channels', 'friends']
 			});
 		if (!user)
 			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
