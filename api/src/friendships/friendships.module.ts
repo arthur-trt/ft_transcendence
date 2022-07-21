@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from 'src/user/user.entity';
+import { UserModule } from 'src/user/user.module';
 import { FriendshipsController } from './friendships.controller';
 import { FriendshipsService } from './friendships.service';
 import { Friendships } from './frienship.entity';
@@ -8,6 +10,6 @@ import { Friendships } from './frienship.entity';
   controllers: [FriendshipsController],
 	providers: [FriendshipsService],
 	exports: [FriendshipsService],
-  imports : [TypeOrmModule.forFeature([Friendships])]
+  imports : [TypeOrmModule.forFeature([Friendships, User]), UserModule]
 })
 export class FriendshipsModule {}

@@ -397,7 +397,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		const friendSocket: Socket = await this.findSocketId(friend)
 		await this.friendService.sendFriendRequest(client.data.user, friend);
 		if (friendSocket)
-			this.server.to(friendSocket.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(client.data.user))
+			this.server.to(friendSocket.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(friend))
 	}
 
 	@UseGuards(WsJwtAuthGuard)
