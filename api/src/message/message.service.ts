@@ -127,9 +127,8 @@ export class MessageService {
 	 * @param target
 	 * @returns private messages between two users
 	 */
-	public async getPrivateMessage(user1: User, target: string) : Promise<privateMessage[]>
+	public async getPrivateMessage(user1: User, user2: User) : Promise<privateMessage[]>
 	{
-		let user2: User = await this.userService.getUserByIdentifier(target);
 
 		const msgs = this.pmRepo.createQueryBuilder("PM")
 			.leftJoinAndMapOne("PM.sender", User, 'users', 'users.id = PM.sender')
