@@ -106,21 +106,27 @@ export class FriendshipsService {
 	async removeFriend(user1 : User, user2 : User)
 	{
 		await this.userRepo
-			.createQueryBuilder()
+			.createQueryBuilder("user")
 			.relation(User, "friends")
 			.of(user1)
 			.remove(user2);
 
-		return await this.friendRepo.createQueryBuilder('friend')
+		await this.userRepo
+			.createQueryBuilder("user")
+			.relation(User, "friends")
+			.of(user2)
+			.remove(user1);
+
+		return await this.friendRepo.createQueryBuilder()
 			.delete()
 			.from(Friendships)
 			.where(new Brackets(qb => {
-				qb.where("friend.sender = :sender", { sender: user1.id })
-					.orWhere("friend.sender = :sender2", { sender2: user2.id })
+				qb.where("sender = :sender", { sender: user1.id })
+					.orWhere("sender = :sender2", { sender2: user2.id })
 			}))
 			.andWhere(new Brackets(qb => {
-				qb.where("friend.target = :dst", { dst: user1.id })
-					.orWhere("friend.target = :dst1", { dst1: user2.id })
+				qb.where("target = :dst", { dst: user1.id })
+					.orWhere("target = :dst1", { dst1: user2.id })
 			}))
 			.execute();
 
