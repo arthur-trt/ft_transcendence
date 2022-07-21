@@ -9,6 +9,7 @@ export default function Profile() {
     const [data, setData] = useState<any>([]);
     const [name, setName] = useState("");
     const [inputState, setInputState] = useState(0);
+    const [file, setFile] = useState<any>();
 
     useEffect(() => {
     const getData = async () => {
@@ -62,12 +63,36 @@ export default function Profile() {
     }
     if (inputState % 2 === 0)
         return("");
-}
+    }
+
+    function handleChangeAvatar(event:any) {
+        setFile(event.target.files[0])
+    }
+
+    function handleSubmitAvatar(event:any) {
+        event.preventDefault();
+        // console.log(file);
+        
+        // // var postFile = new FormData();
+        // postFile.append('file', file);
+
+        fetch('/api/user/avatar', {
+            method: 'POST',
+            body: file,
+            headers: {
+                'Content-type': 'multipart/form-data',
+            },
+            })
+      }
 
     return (
         <div className="profile-container">
             <div className="profile-img">
                 <img src={data.avatar_url}></img>
+                <form onSubmit={handleSubmitAvatar}>
+                    <input type="file" onChange={handleChangeAvatar}/>
+                    <button type="submit">Upload</button>
+                </form>
             </div>
             <div className="profile-info">
                 <div className="profile-name">

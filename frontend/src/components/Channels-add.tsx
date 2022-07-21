@@ -13,7 +13,6 @@ import {socketo} from '../index';
 let tmp:any[any];
 var indents:any = [];
 let indexFriends = 0;
-let u_or_f = "SHOW FRIENDS";
 
 export default function Channels() {
 
@@ -34,6 +33,9 @@ export default function Channels() {
   const [switching, setSwitching] = useState(0);
   const [friends, setFriends] = useState<any>([]);
   const [friendsrequest, setFriendsRequest] = useState<any>([]);
+  const [UsersBtnColor, setUsersBtnColor] = useState('#1dd1a1');
+  const [FriendsBtnColor, setFriendsBtnColor] = useState('white');
+
 
   useEffect(() => {
     const getData = async () => {
@@ -294,15 +296,25 @@ export default function Channels() {
     )
   }
 
-  function handleFriends() {
-    if (u_or_f == "SHOW FRIENDS")
-      u_or_f = "SHOW USERS";
-    else if (u_or_f == "SHOW USERS")
-      u_or_f = "SHOW FRIENDS";
-    indexFriends++;
-    setSwitching(indexFriends);
+  function handleUsers() {
+    if (switching % 2 === 1)
+    {
+      setUsersBtnColor('#1dd1a1');
+      setFriendsBtnColor('white');
+      indexFriends++;
+      setSwitching(indexFriends);
+    }
   }
-    
+  function handleFriends() {
+    if (switching % 2 === 0)
+    {
+      setUsersBtnColor('white');
+      setFriendsBtnColor('#1dd1a1');
+      indexFriends++;
+      setSwitching(indexFriends);
+    }
+  }
+
     // PAGE RENDER
     return (
 
@@ -330,7 +342,10 @@ export default function Channels() {
 
         <div className='users-container'>
           {/* <h3>USERS</h3> */}
-          <button onClick={handleFriends}>{u_or_f}</button>
+          <div className='users-tab'>
+            <button style={{backgroundColor: UsersBtnColor}} onClick={handleUsers}>USERS</button>
+            <button style={{backgroundColor: FriendsBtnColor}} onClick={handleFriends}>FRIENDS</button>
+          </div>
           <div className='users-list'>
               {display_users()}
           </div>
