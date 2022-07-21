@@ -28,7 +28,7 @@ API_42_SECRET=<client_secret>
 API_42_CALLBACK=http://localhost:8080/api/auth/42/callback
 
 # JWT
-JWT_SECRET=ft_transcendenceCvraimentTropBien
+JWT_SECRET=<WhatEverYouWant>
 
 ```
 
