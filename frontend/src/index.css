@@ -284,6 +284,10 @@ cursor: pointer;
   font-size: 11px;
 }
 
+.users-single-info .usergroup {
+  color: #1dd1a1;
+}
+
 .friendsrequest-single {
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   display: flex;
@@ -462,10 +466,6 @@ textarea:focus, input:focus{
   margin-right: 15px;
   border-radius: 150px;
   border: 5px solid #1dd1a1;
-}
-
-.profile-img {
-  background-color: aquamarine;
 }
 
 .profile-info {
