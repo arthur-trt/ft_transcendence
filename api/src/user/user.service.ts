@@ -47,7 +47,8 @@ export class UserService {
 	public async getUsers()
 	{
 		return await this.userRepo.createQueryBuilder('User')
-			.select(["User.id", "User.name", "User.mail", "User.avatar_url", "User.blocked"])
+			.leftJoinAndSelect("User.friends", "u")
+			.select(["User.id", "User.name", "User.mail", "User.avatar_url", "User.blocked", "u"])
 			.getMany();
 	}
 
