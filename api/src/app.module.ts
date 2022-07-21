@@ -40,7 +40,7 @@ import { AchievementsModule } from './achievements/achievements.module';
 			// entities: //[User, Channel, privateMessage, channelMessage, MatchHistory, UserActivity], /* Create tables according to prototype in entities */
 			//entities: [ './car/*.entity.{js,ts}'],
 			synchronize: true,
-			logging: true
+			logging: false
 		}),
 		AuthModule,
 		FriendshipsModule],
