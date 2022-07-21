@@ -105,6 +105,12 @@ export class FriendshipsService {
 
 	async removeFriend(user1 : User, user2 : User)
 	{
+		await this.userRepo
+			.createQueryBuilder()
+			.relation(User, "friends")
+			.of(user1)
+			.remove(user2);
+
 		return await this.friendRepo.createQueryBuilder('friend')
 			.delete()
 			.from(Friendships)
@@ -117,5 +123,6 @@ export class FriendshipsService {
 					.orWhere("friend.target = :dst1", { dst1: user2.id })
 			}))
 			.execute();
+
 	}
 }
