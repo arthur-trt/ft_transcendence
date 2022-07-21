@@ -12,7 +12,7 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix('/api/');
+  app.setGlobalPrefix('api');
 	app.use(cookieParser());
 	app.useGlobalPipes(new ValidationPipe());
 
@@ -38,13 +38,14 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('api')
     .addCookieAuth('Authentication')
+    .setBasePath('api')
     .build();
 
   const options: SwaggerDocumentOptions = {
     deepScanRoutes: true,
   };
   const document = SwaggerModule.createDocument(app, config, options);
-  SwaggerModule.setup('/api/', app, document);
+  SwaggerModule.setup('docs', app, document);
 
 
   await app.listen(3000);
