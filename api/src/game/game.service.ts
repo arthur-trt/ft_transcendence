@@ -17,6 +17,11 @@ export class GameService {
 		private userService: UserService
 	) { }
 
+	/**
+	 *
+	 * 
+	 * @returns All the matches with details (joining users tab)
+	 */
 	async getCompleteMatchHistory(): Promise<MatchHistory[]> {
 		return this.MatchRepo.createQueryBuilder("Match")
 			.leftJoinAndMapOne("Match.user1", User, 'users', 'users.id = Match.user1')
