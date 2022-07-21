@@ -50,7 +50,6 @@ export default function Channels() {
   useEffect(
     () => {
       const socket = socketo;
-      // const socket = io('http://localhost:8080');
       setSocket(socket);
       socket.emit('getRooms');
       socket.emit('getUsers');
@@ -73,10 +72,6 @@ export default function Channels() {
       // console.log(tab);
       setFriendsRequest(tab);
   });
-
-      // return () => {
-      //   socket.emit('disconnectUser', name);
-      // };
   }, []);
 
   // FUNCTIONS TO HANDLE ACTIONS ON CHANNELS
@@ -113,7 +108,13 @@ export default function Channels() {
     }
   }
   let handleRemoveFriend = (e:any) => {
-    // socket.emit('removeFriend', datausers[parseInt(e.currentTarget.id)]);
+    let i = 0;
+    while (i < datausers?.length)
+    {
+      if (datausers[i]?.id === friends.friends[parseInt(e.currentTarget.id)].id)
+        socket.emit('removeFriend', datausers[i]);
+      i++;
+    }
   }
 
   // DISPLAY CHANNELS
@@ -194,14 +195,14 @@ export default function Channels() {
         i++;
       }
       i = 0;
-      while (i < datausers?.length)
+      while (i < friends?.friends.length)
       {
         indents.push(<div className="friends-single" key={i}>
             <div className='friends-single-img'>
-              <img src={datausers[i]?.avatar_url}></img>
+              <img src={friends.friends[i]?.avatar_url}></img>
             </div>
             <div className='friends-single-info'>
-              <h5>{datausers[i]?.name}</h5>
+              <h5>{friends.friends[i]?.name}</h5>
               <button id={i.toString()} onClick={handleRemoveFriend}>Remove friend</button>
             </div>
         </div>);

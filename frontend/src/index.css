@@ -459,18 +459,42 @@ textarea:focus, input:focus{
   text-align: left;
 }
 
-.profile-info h5 {
-  margin-left: 5px;
-}
-
 .profile-name {
   display: flex;
   align-items: center;
+  height: 40px;
 }
 
-.setpro-container .profile h5 {
-  margin-left: 10px;
+.profile-name h5 {
+  margin: 0;
+  margin-left: 5px;
 }
+
+.profile-name .pen {
+  cursor: pointer;
+  margin-left: 5px;
+  border-radius: 50px;
+  font-size: 10px;
+}
+
+.profile-name .pen:hover {
+  color: #1dd1a1;
+  transition: all 0.5s ease-out;
+}
+
+.profile-name input {
+  margin-left: 5px;
+  padding: 5px;
+  border-radius: 3px;
+  border: 2px solid black;
+  text-decoration: none;
+}
+
+.profile-other h5 {
+  margin: 0;
+  margin-left: 5px;
+}
+
 
 /*
 ** DEBUG
@@ -500,14 +524,4 @@ textarea:focus, input:focus{
 }
 .debug .key {
   color: red;
-}
-.profile-name .pen {
-  cursor: pointer;
-  margin-left: 5px;
-  border-radius: 50px;
-}
-
-.profile-name .pen:hover {
-  color: #1dd1a1;
-  transition: all 0.5s ease-out;
 }
