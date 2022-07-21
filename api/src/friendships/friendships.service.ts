@@ -111,6 +111,12 @@ export class FriendshipsService {
 			.of(user1)
 			.remove(user2);
 
+		await this.userRepo
+			.createQueryBuilder("user")
+			.relation(User, "friends")
+			.of(user2)
+			.remove(user1);
+
 		return await this.friendRepo.createQueryBuilder()
 			.delete()
 			.from(Friendships)
