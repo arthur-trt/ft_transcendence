@@ -11,6 +11,7 @@ import Channels from './components/Channels-add';
 import { CookiesProvider } from "react-cookie";
 import io from 'socket.io-client';
 import Debug from './components/Debug';
+import PublicProfile from './components/PublicProfile';
 export const socketo = io();
 
 const root = ReactDOM.createRoot(
@@ -21,13 +22,16 @@ root.render(
     <Router>
       <Routes>
 
-      <Route path="/" element={<Auth />} />
-      <Route path="/home" element={<Header />} />
-      <Route path="/2fa" element={<><Header/><TwoFactor/></>} />
-      <Route path="/profile" element={<><Header/><Profile/></>} />
-      <Route path="/chat" element={<><Header/><Channels/></>} />
-      <Route path="/debug" element={<><Header/><Debug/></>} />
-      {/*<Route path="/game" element={<><Game/></>} />*/}
+        <Route path="/" element={<Auth />} />
+        <Route path="/home" element={<Header />} />
+        <Route path="/2fa" element={<><Header /><TwoFactor /></>} />
+        <Route path="profile">
+            <Route path="me" element={<><Header /><Profile /></>} />
+            <Route path=":uuid" element={<><Header /><PublicProfile /></>} />
+        </Route>
+        <Route path="/chat" element={<><Header /><Channels /></>} />
+        <Route path="/debug" element={<><Header /><Debug /></>} />
+        {/*<Route path="/game" element={<><Game/></>} />*/}
 
       </Routes>
     </Router>
