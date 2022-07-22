@@ -33,7 +33,7 @@ export class AuthService {
 		{
 			return res.redirect('/2fa');
 		}
-		return res.redirect('/home');
+		return res.redirect('/');
 	}
 
 	public twofa_login (user: User, @Res() res: Response) {
