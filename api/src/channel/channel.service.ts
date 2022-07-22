@@ -28,6 +28,7 @@ export class ChannelService {
 	public async createChannel(name: string, user: User, password: string = null, privacy : boolean = false)
 	{
 		const chan: Channel = new Channel();
+		console.log ( "creating ")
 		chan.name = name;
 		chan.owner = user;
 		chan.private = privacy;
@@ -79,9 +80,12 @@ export class ChannelService {
 	{
 		let chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages', 'banned'] });
 		if (!chan && isValidUUID(channelIdentifier))
-			await this.channelsRepo.findOne({ where: { id: channelIdentifier }, relations: ['messages', 'banned'] });
+			await this.channelsRepo.findOne({ where: { id: channelIdentifier }, relations: ['messages', 'banned'] })
+				.catch(err => {
+					throw new HttpException('Something bad has occured.', HttpStatus.BAD_REQUEST);
+			})
 		if (!chan)
-			throw new HttpException('Channel not found (id or name)', HttpStatus.NOT_FOUND);
+			throw new HttpException('Channel ' + channelIdentifier + ' not found (id or name)', HttpStatus.NOT_FOUND);
 		return chan;
 	}
 

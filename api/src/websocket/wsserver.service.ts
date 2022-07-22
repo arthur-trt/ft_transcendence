@@ -20,7 +20,10 @@ import { newChannelDto } from 'src/dtos/newChannel.dto';
 import { CreateMatchDto } from 'src/dtos/match.dto';
 import { ValidationPipe } from '@nestjs/common';
 import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto.dto';
-
+import { WsException } from '@nestjs/websockets'
+import { UseFilters, WsExceptionFilter} from '@nestjs/common';
+import { HttpStatus, HttpException } from '@nestjs/common';
+import { Catch } from '@nestjs/common';
 
 @Injectable()
 @WebSocketGateway()
@@ -230,6 +233,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	** ├─ joinRoom
 	** ├─ deleteRoom
 	** ├─ leaveRoom
+   	** ├─ banUser
 	*/
 
 	@SubscribeMessage('getRooms') /** Join ROom parce que ca le creera aussi */
@@ -247,18 +251,14 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
+	@UseFilters()
 	@SubscribeMessage('createRoom') /** Join ROom parce que ca le creera aussi */
 	async onCreateRoom(client: Socket, channel: newChannelDto)
 	{
-		this.logger.log(channel)
-		try
-		{
-			await this.channelService.createChannel(channel.chanName, client.data.user, channel.password, channel.private);
-		}
-		catch (err) {
-			if (err.code == 23505)
-				return this.server.to(client.id).emit('error', "Channel name already exists.");
-		}
+		await this.channelService.createChannel(channel.chanName, client.data.user, channel.password, channel.private)
+			.catch(err => {
+				throw new WsException({ error : HttpStatus.CONFLICT, code : err.code, message: err.message } );
+		})
 		client.join(channel.chanName)
 		for (let [allUsers, socket] of this.active_users.entries())
 		 	this.server.to(socket.id).emit('rooms', client.data.user.name + " created the room ", await this.channelService.getChannelsForUser(allUsers));
@@ -275,15 +275,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('joinRoom') /** Join ROom parce que ca le creera aussi */
 	async onJoinRoom(client: Socket, joinRoom: newChannelDto)
 	{
-		let channel: string = joinRoom.chanName;
-		let password: string = joinRoom.password;
-
-		this.logger.log("name " + joinRoom.chanName)
-		this.logger.log("pass "+ joinRoom.password)
-
-		if (await this.userService.joinChannel(client.data.user, channel, password))
+		if (await this.userService.joinChannel(client.data.user, joinRoom.chanName, joinRoom.password))
 		{
-			client.join(channel);
+			client.join( joinRoom.chanName);
 			return this.server.emit('rooms', client.data.user.name + " joined the room ", await this.channelService.getChannelsForUser(client.data.user)); // a recuperer dans le service du front
 		}
 		else
@@ -303,7 +297,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async onDeletedRoom(client: Socket, channel: string) {
 
 		console.log(channel);
-		await this.channelService.deleteChannel(client.data.user, await this.channelService.getChannelByIdentifier(channel));
+		const chan = await this.channelService.getChannelByIdentifier(channel);
+		await this.channelService.deleteChannel(client.data.user, chan);
 		return this.server.emit('rooms', channel + "has been deleted", await this.channelService.getChannelsForUser(client.data.user)); // on emet a tt le monde que le chan a ete supp
 	}
 
@@ -323,6 +318,13 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		client.leave(channel);
 	}
 
+	@SubscribeMessage('banUser') /** Join ROom parce que ca le creera aussi */
+	async onBanUser(client: Socket, channel : string, toBan: User)
+	{
+		const chan: Channel = await this.channelService.getChannelByIdentifier(channel);
+		this.channelService.temporaryBanUser(client.data.user, chan, toBan);
+		this.server.to(toBan.id).emit('rooms')
+	}
 
 	/*
 	**
