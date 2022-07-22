@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { deepStrictEqual } from 'assert';
 import { UUIDVersion } from 'class-validator';
 import { Request } from 'express';
+import { throwIfEmpty } from 'rxjs';
 import { Channel } from 'src/channel/channel.entity';
 import { ChannelService } from 'src/channel/channel.service';
 import { MessageDto } from 'src/dtos/message.dto';
@@ -107,13 +108,17 @@ export class MessageService {
 	 * @param msg
 	 * @returns array of all private messages
 	 */
-	public async sendPrivateMessage(src: User, target: string, msg: string) : Promise<privateMessage[]> {
+	public async sendPrivateMessage(src: User, target: User, msg: string) : Promise<privateMessage[]> {
 
-		const dest : User = await this.userService.getUserByIdentifier(target);
+		//let user2 = target;
+		//console.log ( "coucou")
+		//if (!target.id)
+		console.log (target.name)
+		const user2 = await this.userService.getUserByIdentifier(target.name);
 		const newMessage : privateMessage = await this.pmRepo.save(
 		{
 			sender: src.id,
-			target: dest.id,
+			target: user2.id,
 			message : msg,
 		}
 		)
@@ -127,9 +132,9 @@ export class MessageService {
 	 * @param target
 	 * @returns private messages between two users
 	 */
-	public async getPrivateMessage(user1: User, target: string) : Promise<privateMessage[]>
+	public async getPrivateMessage(user1: User, user2: User) : Promise<privateMessage[]>
 	{
-		let user2: User = await this.userService.getUserByIdentifier(target);
+		//let user2: User = await this.userService.getUserByIdentifier(target);
 
 		const msgs = this.pmRepo.createQueryBuilder("PM")
 			.leftJoinAndMapOne("PM.sender", User, 'users', 'users.id = PM.sender')

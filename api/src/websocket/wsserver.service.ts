@@ -323,10 +323,15 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('privateMessage')
-	async onPrivateMessage(client: Socket, msg: sendPrivateMessageDto) {
+	async onPrivateMessage(client: Socket, msg: sendPrivateMessageDto)
+	{
 		// sending message to both users : sender (client.id) and msg.socketId
-		this.server.to(this.active_users.get(msg.to).id).to(client.id).emit('privateMessage', client.data.user.name + " sent a message to " + msg.to.name, msg);
-		return await this.messageService.sendPrivateMessage(client.data.user, msg.to.name, msg.msg);
+		const friendSocket: Socket = await this.findSocketId(msg.to);
+		await this.messageService.sendPrivateMessage(client.data.user, msg.to, msg.msg);
+		const conversation = await this.messageService.getPrivateMessage(client.data.user, msg.to);
+		if (friendSocket)
+			this.server.to(friendSocket.id).emit('privateMessage', client.data.user.name + " sent a message to " + msg.to.name, conversation);
+		this.server.to(client.id).emit('privateMessage', client.data.user.name + " sent a message to " + msg.to.name, conversation);
 	}
 
 	/**
@@ -337,8 +342,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getPrivateMessage')
-	async onGetPrivateMessage(client: Socket, user2: string) {
-
+	async onGetPrivateMessage(client: Socket, user2: User)
+	{
 		const msg = await this.messageService.getPrivateMessage(client.data.user, user2);
 		this.server.to(client.id).emit('privateMessage', client.data.user.name + " get messages with " + user2, msg);
 	}
