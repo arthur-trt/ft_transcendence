@@ -123,7 +123,7 @@ export class MessageController {
 	@UseGuards(JwtAuthGuard)
 	public async getPrivateMessage(@Req() req : Request, @Body() query : getPrivateMessageDto)
 	{
-		const target =  await this.userService.getUserByIdentifier(query.target);
+		const target : User = await this.userService.getUserByIdentifier(query.target);
 		const user: User = await this.userService.getUserByRequest(req);
 		return await this.messageService.getPrivateMessage(user, target);
 	}

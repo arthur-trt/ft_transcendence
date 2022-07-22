@@ -58,6 +58,22 @@ export default function Debug() {
 			socket.emit(event, args, args2);
 		else if (event && args)
 			socket.emit(event, args);
+		else if (event == "joinRoom")
+			socket.emit('joinRoom', { chanName: "Test normal" });
+		else if (event == "joinRoom1")
+			socket.emit('joinRoom', { chanName: "Test password" }); // must fail
+		else if (event == "joinRoom2")
+			socket.emit('joinRoom', { chanName: "Test password", password : "kiki" }); // must fail
+		else if (event == "joinRoom3")
+			socket.emit('joinRoom', { chanName: "Test password", password : "root" }); // must succeed
+		else if (event == "createRoom")
+			socket.emit('createRoom', { chanName: "Test normal" } );
+		else if (event == "createRoom1")
+			socket.emit('createRoom', { chanName : "Test private", private : true});
+		else if (event == "createRoom2")
+			socket.emit('createRoom', { chanName : "Test password", password : "root"});
+		else if (event == "privateMessage")
+			socket.emit('privateMessage', { to: { name: "ccommiss" } , msg : "lol"})
 		else if (event)
 			socket.emit(event);
 
