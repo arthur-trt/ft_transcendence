@@ -40,7 +40,7 @@ export const Header = () => {
             <div className="info">
                 <img src={data.avatar_url}></img>
                 <h1>{data.name}</h1>
-                <Link to="/profile" style={{ textDecoration: 'none', color: 'black' }}>
+                <Link to="/profile/me" style={{ textDecoration: 'none', color: 'black' }}>
                 <i className="fa fa-solid fa-user"></i>
 
                 </Link>

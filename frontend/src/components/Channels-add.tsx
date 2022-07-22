@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import '../index.css';
+import { Link } from 'react-router-dom';
 
 // FONT AWESOME SINGLE IMPORT
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons'
 import { faArrowAltCircleRight } from '@fortawesome/free-regular-svg-icons'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faUserGroup } from '@fortawesome/free-solid-svg-icons'
 
 // IMPORT THE SOCKET
 import {socketo} from '../index';
@@ -13,7 +15,6 @@ import {socketo} from '../index';
 let tmp:any[any];
 var indents:any = [];
 let indexFriends = 0;
-let u_or_f = "SHOW FRIENDS";
 
 export default function Channels() {
 
@@ -34,6 +35,9 @@ export default function Channels() {
   const [switching, setSwitching] = useState(0);
   const [friends, setFriends] = useState<any>([]);
   const [friendsrequest, setFriendsRequest] = useState<any>([]);
+  const [UsersBtnColor, setUsersBtnColor] = useState('#1dd1a1');
+  const [FriendsBtnColor, setFriendsBtnColor] = useState('white');
+
 
   useEffect(() => {
     const getData = async () => {
@@ -147,16 +151,31 @@ export default function Channels() {
     return indents;
   }
 
+  function displayButtonAddFriend(i: number) {
+    let j = 0;
+    while (j < friends?.friends?.length)
+    {
+      if (datausers[i]?.id === friends?.friends[i]?.id)
+        return (<FontAwesomeIcon className='usergroup' icon={faUserGroup}></FontAwesomeIcon>);
+      j++;
+    }
+   return (
+    <button id={i.toString()} onClick={handleAddFriend}>Add as friend</button>
+   ) 
+  }
+
   // DISPLAY USERS
   function display_users() {
     var indents = [];
     let i = 0;
     let borderStatus = 'white';
+    let profilelink;
 
     if (switching % 2 === 0)
     {
       while (i < datausers?.length)
       {
+        profilelink = "/profile/" + datausers[i]?.id;
         if (datausers[i]?.status === 'online')
           borderStatus = 'springgreen';
         else if (datausers[i]?.status === 'ingame')
@@ -166,11 +185,11 @@ export default function Channels() {
         
         indents.push(<div className="users-single" key={i}>
             <div className='users-single-img'>
-              <img style={{'borderColor': borderStatus}} src={datausers[i]?.avatar_url}></img>
+              <Link to={profilelink}><img style={{'borderColor': borderStatus}} src={datausers[i]?.avatar_url}></img></Link>
             </div>
             <div className='users-single-info'>
               <h5>{datausers[i]?.name}</h5>
-              <button id={i.toString()} onClick={handleAddFriend}>Add as friend</button>
+              {displayButtonAddFriend(i)}
             </div>
         </div>);
         i++;
@@ -197,9 +216,10 @@ export default function Channels() {
       i = 0;
       while (i < friends?.friends.length)
       {
+        profilelink = "/profile/" + friends?.friends[i]?.id;
         indents.push(<div className="friends-single" key={i}>
             <div className='friends-single-img'>
-              <img src={friends.friends[i]?.avatar_url}></img>
+              <Link to={profilelink}><img src={friends.friends[i]?.avatar_url}></img></Link>
             </div>
             <div className='friends-single-info'>
               <h5>{friends.friends[i]?.name}</h5>
@@ -294,15 +314,25 @@ export default function Channels() {
     )
   }
 
-  function handleFriends() {
-    if (u_or_f == "SHOW FRIENDS")
-      u_or_f = "SHOW USERS";
-    else if (u_or_f == "SHOW USERS")
-      u_or_f = "SHOW FRIENDS";
-    indexFriends++;
-    setSwitching(indexFriends);
+  function handleUsers() {
+    if (switching % 2 === 1)
+    {
+      setUsersBtnColor('#1dd1a1');
+      setFriendsBtnColor('white');
+      indexFriends++;
+      setSwitching(indexFriends);
+    }
   }
-    
+  function handleFriends() {
+    if (switching % 2 === 0)
+    {
+      setUsersBtnColor('white');
+      setFriendsBtnColor('#1dd1a1');
+      indexFriends++;
+      setSwitching(indexFriends);
+    }
+  }
+
     // PAGE RENDER
     return (
 
@@ -330,7 +360,10 @@ export default function Channels() {
 
         <div className='users-container'>
           {/* <h3>USERS</h3> */}
-          <button onClick={handleFriends}>{u_or_f}</button>
+          <div className='users-tab'>
+            <button style={{backgroundColor: UsersBtnColor}} onClick={handleUsers}>USERS</button>
+            <button style={{backgroundColor: FriendsBtnColor}} onClick={handleFriends}>FRIENDS</button>
+          </div>
           <div className='users-list'>
               {display_users()}
           </div>

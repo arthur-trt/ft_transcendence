@@ -236,6 +236,15 @@ code {
   display: none;
 }
 
+.users-tab button {
+text-decoration: none;
+border: 2px solid black;
+padding: 5px;
+margin: 2px;
+border-radius: 3px;
+cursor: pointer;
+}
+
 .users-single {
   margin: 5px;
   width: 230px;
@@ -273,6 +282,10 @@ code {
 .users-single-info h5 {
   margin: 0;
   font-size: 11px;
+}
+
+.users-single-info .usergroup {
+  color: #1dd1a1;
 }
 
 .friendsrequest-single {
