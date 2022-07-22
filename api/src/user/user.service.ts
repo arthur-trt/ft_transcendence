@@ -157,11 +157,9 @@ export class UserService {
 		}
 		if (channel.password_protected)
 		{
-			if (password == null)
-				return (false)
-			if (!await bcrypt.compare(password, await this.chanService.getChannelPasswordHash(channel.id)))
+			if (!password || !await bcrypt.compare(password, await this.chanService.getChannelPasswordHash(channel.id)))
 			{
-				return (false);
+				throw new HttpException('Bad Password', HttpStatus.FORBIDDEN)
 			}
 		}
 		user.channels = [...user.channels, channel]; /* if pb of is not iterable, it is because we did not get the realtions in the find one */
@@ -178,7 +176,10 @@ export class UserService {
 			.createQueryBuilder()
 			.relation(Channel, "users")
 			.of(user)
-			.remove(chan);
+			.remove(chan)
+			.catch(err => {
+				throw new HttpException('Fail to leave chan : ' + err.message, HttpStatus.BAD_REQUEST);
+			});
 
 		const ownership : Channel = await this.channelsRepo.findOne({
 			where: {

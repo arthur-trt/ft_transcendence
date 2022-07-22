@@ -7,9 +7,26 @@ import { UserService } from 'src/user/user.service';
 import { getRepository, Repository } from 'typeorm';
 import { Channel } from './channel.entity';
 import { validate as isValidUUID } from 'uuid';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
 import * as bcrypt from 'bcrypt';
+import { ExceptionFilter } from '@nestjs/common';
+import { ArgumentsHost } from '@nestjs/common';
+import { Catch } from '@nestjs/common';
+import { QueryFailedError } from 'typeorm';
+
+
+@Catch(HttpException)
+export class HttpExceptionsFilter implements ExceptionFilter {
+  catch(exception: any, host: ArgumentsHost) {
+	  console.log(exception)
+		console.log ( "coucou laaa ")
+	  const test : Response = host.switchToHttp().getResponse<Response>();	  //const response: Response = ctx.getResponse<Response>();
+	  test.status(100);
+	 // console.log("REEPONSE IS " + response + "haha")
+	//return res.status("LOL");
+  }
+}
 
 
 @Injectable()
@@ -28,7 +45,6 @@ export class ChannelService {
 	public async createChannel(name: string, user: User, password: string = null, privacy : boolean = false)
 	{
 		const chan: Channel = new Channel();
-		console.log ( "creating ")
 		chan.name = name;
 		chan.owner = user;
 		chan.private = privacy;
@@ -37,7 +53,10 @@ export class ChannelService {
 			chan.password_protected = true;
 			chan.password = await bcrypt.hash(password, 10);
 		}
-		await this.channelsRepo.save(chan);
+		await this.channelsRepo.save(chan)
+			.catch(err => {
+				throw new HttpException('Cannot create channel : ' + err.message, err.code)
+			})
 		return await this.userService.joinChannel(user, name, password);
 	}
 
@@ -52,7 +71,7 @@ export class ChannelService {
 			.leftJoinAndSelect("Channel.users", "Users")
 			.leftJoinAndSelect("Channel.banned", "b")
 			.leftJoinAndSelect("Channel.owner", "o")
-		.getMany();
+			.getMany();
 	}
 
 	/**
@@ -67,7 +86,7 @@ export class ChannelService {
 			.leftJoinAndSelect("channel.banned", "b")
 			.leftJoinAndSelect("channel.owner", "o")
 			.where('channel.private = false')
-			.orWhere("Users.id = :id", { id : user.id} )
+			.orWhere("Users.id = :id", { id: user.id })
 			.getMany();
 	}
 
@@ -81,9 +100,6 @@ export class ChannelService {
 		let chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages', 'banned'] });
 		if (!chan && isValidUUID(channelIdentifier))
 			await this.channelsRepo.findOne({ where: { id: channelIdentifier }, relations: ['messages', 'banned'] })
-				.catch(err => {
-					throw new HttpException('Something bad has occured.', HttpStatus.BAD_REQUEST);
-			})
 		if (!chan)
 			throw new HttpException('Channel ' + channelIdentifier + ' not found (id or name)', HttpStatus.NOT_FOUND);
 		return chan;
@@ -91,10 +107,9 @@ export class ChannelService {
 
 	async	getChannelPasswordHash(channelId: string): Promise<string> {
 		const chan: Channel = await this.channelsRepo.createQueryBuilder('Channel')
-		.select(["Channel.password"])
-		.where({ "id": channelId})
-		.getOne();
-
+			.select(["Channel.password"])
+			.where({ "id": channelId })
+			.getOne();
 		return chan.password;
 	}
 
@@ -119,17 +134,17 @@ export class ChannelService {
  	* @param changes changes to be performed - chanName or ownership
  	* @returns All channels after deletion
  	*/
-	 public async deleteChannel(user: User, channel: Channel) : Promise<Channel[]>
+
+	 public async deleteChannel(user: User, channel: Channel)// : Promise<Channel[]>
 	 {
 		if (channel.ownerId != user.id)
-			throw ("NOPE");
+			throw new HttpException("You must be admin to delete chan.", HttpStatus.FORBIDDEN);
 		await this.channelsRepo
     		.createQueryBuilder()
     		.delete()
     		.from(Channel)
     		.where("name = :channame", { channame: channel.name })
 			.execute();
-		 return await this.getUsersOfChannels();
 	}
 
 
@@ -142,7 +157,7 @@ export class ChannelService {
 	public async deleteUserFromChannel(user: User, channel : Channel, toBan: User) : Promise<Channel[]>
 	{
 		if (channel.ownerId != user.id)
-			throw ("NOPE");
+		throw new HttpException("You must be admin to delete chan.", HttpStatus.FORBIDDEN);
 		await this.channelsRepo.createQueryBuilder()
 			.relation(Channel, "users")
 			.of({ id: toBan.id })

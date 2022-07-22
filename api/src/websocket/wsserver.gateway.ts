@@ -14,7 +14,7 @@ import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
 import { Channel } from 'src/channel/channel.entity';
 import { UserModule } from 'src/user/user.module';
 import { FriendshipsService } from 'src/friendships/friendships.service';
-import { AfterRecover } from 'typeorm';
+import { AfterRecover, QueryFailedError, TreeRepositoryNotSupportedError } from 'typeorm';
 import { isArray, isObject } from 'class-validator';
 import { newChannelDto } from 'src/dtos/newChannel.dto';
 import { CreateMatchDto } from 'src/dtos/match.dto';
@@ -23,9 +23,15 @@ import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto.dto';
 import { WsException } from '@nestjs/websockets'
 import { UseFilters, WsExceptionFilter} from '@nestjs/common';
 import { HttpStatus, HttpException } from '@nestjs/common';
-import { Catch } from '@nestjs/common';
+import { ExceptionFilter, Catch } from '@nestjs/common';
+import { ArgumentsHost } from '@nestjs/common';
+import { NextFunction, Request, Response} from 'express';
+import { BaseWsExceptionFilter } from '@nestjs/websockets'
+import { WebsocketExceptionsFilter } from './exception.filter';
+
 
 @Injectable()
+@UseFilters(new WebsocketExceptionsFilter())
 @WebSocketGateway()
 export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
@@ -44,6 +50,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	protected all_users: User[];
 	protected active_users = new Map<User, Socket>();
 	protected users = [];
+
 
 
 	/*
@@ -251,14 +258,10 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
-	@UseFilters()
 	@SubscribeMessage('createRoom') /** Join ROom parce que ca le creera aussi */
 	async onCreateRoom(client: Socket, channel: newChannelDto)
 	{
 		await this.channelService.createChannel(channel.chanName, client.data.user, channel.password, channel.private)
-			.catch(err => {
-				throw new WsException({ error : HttpStatus.CONFLICT, code : err.code, message: err.message } );
-		})
 		client.join(channel.chanName)
 		for (let [allUsers, socket] of this.active_users.entries())
 		 	this.server.to(socket.id).emit('rooms', client.data.user.name + " created the room ", await this.channelService.getChannelsForUser(allUsers));
@@ -273,17 +276,16 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('joinRoom') /** Join ROom parce que ca le creera aussi */
-	async onJoinRoom(client: Socket, joinRoom: newChannelDto)
-	{
-		if (await this.userService.joinChannel(client.data.user, joinRoom.chanName, joinRoom.password))
-		{
-			client.join( joinRoom.chanName);
-			return this.server.emit('rooms', client.data.user.name + " joined the room ", await this.channelService.getChannelsForUser(client.data.user)); // a recuperer dans le service du front
-		}
-		else
-		{
-			return this.server.emit('rooms', 'Incorrect password');
-		}
+	async onJoinRoom(client: Socket, joinRoom: newChannelDto) {
+
+		await this.userService.joinChannel(client.data.user, joinRoom.chanName, joinRoom.password)
+			.then(async () =>  {
+				client.join(joinRoom.chanName);
+				this.server.emit('rooms', client.data.user.name + " joined the room ", await this.channelService.getChannelsForUser(client.data.user));
+			})
+			// .catch(err => {
+			// 	throw new WsException({error : 'Cannot join channel : ' + err.message, code : err.code});
+			// })
 	}
 
 	/**
@@ -296,7 +298,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('deleteRoom')
 	async onDeletedRoom(client: Socket, channel: string) {
 
-		console.log(channel);
 		const chan = await this.channelService.getChannelByIdentifier(channel);
 		await this.channelService.deleteChannel(client.data.user, chan);
 		return this.server.emit('rooms', channel + "has been deleted", await this.channelService.getChannelsForUser(client.data.user)); // on emet a tt le monde que le chan a ete supp
@@ -313,7 +314,10 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async onLeaveRoom(client: Socket, channel: string)
 	{
 		this.logger.log(client.data.user.name + " LEFT ROOM")
-		await this.userService.leaveChannel(client.data.user, channel);
+		await this.userService.leaveChannel(client.data.user, channel)
+			// .catch(err => {
+			// 	throw new WsException({ error: err.status, message: err.message });
+			// });
 		this.server.emit('rooms', client.data.user.name + " left the room ", await this.channelService.getChannelsForUser(client.data.user)); // a recuperer dans le service du front
 		client.leave(channel);
 	}
