@@ -1,3 +1,4 @@
+import "./index.css"
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
@@ -13,6 +14,7 @@ import io from 'socket.io-client';
 import Debug from './components/Debug';
 import PublicProfile from './components/PublicProfile';
 import jwtDecode from 'jwt-decode';
+
 export const socketo = io();
 
 /**
@@ -52,7 +54,7 @@ root.render(
           <Route path="me" element={<><Header /><RequireAuth><Profile /></RequireAuth></>} />
           <Route path=":uuid" element={<><Header /><RequireAuth><PublicProfile /></RequireAuth></>} />
         </Route>
-        <Route path="/chat" element={<><Header /><RequireAuth><Channels /></RequireAuth></>} />
+        <Route path="/community" element={<><Header /><RequireAuth><Channels /></RequireAuth></>} />
         <Route path="/debug" element={<><Header /><RequireAuth><Debug /></RequireAuth></>} />
         {/*<Route path="/game" element={<><Game/></>} />*/}
 
