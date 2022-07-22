@@ -47,7 +47,7 @@ root.render(
       <Routes>
         <Route path="/login" element={<Auth />} />
         <Route path="/" element={<Header />} />
-        <Route path="/2fa" element={<><Header /><TwoFactor /></>} />
+        <Route path="/2fa" element={<><Header /><RequireAuth><TwoFactor /></RequireAuth></>} />
         <Route path="profile">
           <Route path="me" element={<><Header /><RequireAuth><Profile /></RequireAuth></>} />
           <Route path=":uuid" element={<><Header /><RequireAuth><PublicProfile /></RequireAuth></>} />
