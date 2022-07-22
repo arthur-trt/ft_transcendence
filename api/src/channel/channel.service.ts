@@ -54,9 +54,6 @@ export class ChannelService {
 			chan.password = await bcrypt.hash(password, 10);
 		}
 		await this.channelsRepo.save(chan)
-			.catch(err => {
-				throw new HttpException('Cannot create channel : ' + err.message, err.code)
-			})
 		return await this.userService.joinChannel(user, name, password);
 	}
 
@@ -157,7 +154,7 @@ export class ChannelService {
 	public async deleteUserFromChannel(user: User, channel : Channel, toBan: User) : Promise<Channel[]>
 	{
 		if (channel.ownerId != user.id)
-		throw new HttpException("You must be admin to delete chan.", HttpStatus.FORBIDDEN);
+			throw new HttpException("You must be admin to delete chan.", HttpStatus.FORBIDDEN);
 		await this.channelsRepo.createQueryBuilder()
 			.relation(Channel, "users")
 			.of({ id: toBan.id })
@@ -177,7 +174,7 @@ export class ChannelService {
 	public async temporaryBanUser(user: User, channel: Channel, toBan: User)
 	{
 		if (channel.ownerId != user.id)
-			throw ("NOPE");
+			throw new HttpException("You must be admin to delete chan.", HttpStatus.FORBIDDEN);
 		console.log("Bannishement");
 		/** Step one : Deleting user from channel */
 		await this.deleteUserFromChannel(user, channel, toBan);

@@ -176,10 +176,7 @@ export class UserService {
 			.createQueryBuilder()
 			.relation(Channel, "users")
 			.of(user)
-			.remove(chan)
-			.catch(err => {
-				throw new HttpException('Fail to leave chan : ' + err.message, HttpStatus.BAD_REQUEST);
-			});
+			.remove(chan);
 
 		const ownership : Channel = await this.channelsRepo.findOne({
 			where: {

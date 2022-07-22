@@ -261,6 +261,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('createRoom') /** Join ROom parce que ca le creera aussi */
 	async onCreateRoom(client: Socket, channel: newChannelDto)
 	{
+		console.log( "wesh ")
 		await this.channelService.createChannel(channel.chanName, client.data.user, channel.password, channel.private)
 		client.join(channel.chanName)
 		for (let [allUsers, socket] of this.active_users.entries())
@@ -283,9 +284,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 				client.join(joinRoom.chanName);
 				this.server.emit('rooms', client.data.user.name + " joined the room ", await this.channelService.getChannelsForUser(client.data.user));
 			})
-			// .catch(err => {
-			// 	throw new WsException({error : 'Cannot join channel : ' + err.message, code : err.code});
-			// })
 	}
 
 	/**
@@ -315,9 +313,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	{
 		this.logger.log(client.data.user.name + " LEFT ROOM")
 		await this.userService.leaveChannel(client.data.user, channel)
-			// .catch(err => {
-			// 	throw new WsException({ error: err.status, message: err.message });
-			// });
 		this.server.emit('rooms', client.data.user.name + " left the room ", await this.channelService.getChannelsForUser(client.data.user)); // a recuperer dans le service du front
 		client.leave(channel);
 	}
