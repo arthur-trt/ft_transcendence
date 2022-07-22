@@ -302,6 +302,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('deleteRoom')
 	async onDeletedRoom(client: Socket, channel: string) {
 
+		console.log(channel);
 		await this.channelService.deleteChannel(client.data.user, await this.channelService.getChannelByIdentifier(channel));
 		return this.server.emit('rooms', channel + "has been deleted", await this.channelService.getChannelsForUser(client.data.user)); // on emet a tt le monde que le chan a ete supp
 	}

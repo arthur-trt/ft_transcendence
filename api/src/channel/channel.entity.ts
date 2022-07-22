@@ -2,6 +2,7 @@
 
 
 import { channelMessage } from "src/message/channelMessage.entity";
+import { RelationId } from "typeorm";
 import { BaseEntity, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "../user/user.entity";
 
@@ -39,6 +40,11 @@ export class Channel extends BaseEntity {
 
 	@ManyToOne(() => User, { nullable: true, cascade: true, onDelete: 'CASCADE', orphanedRowAction: 'delete'})
 	owner: User;
+
+	// TEST
+	@RelationId((channel: Channel) => channel.owner)
+	ownerId: string;
+
 
 	/** Tous les users du channel */
 	@ManyToMany(() => User, user => user.channels, { cascade: true, onDelete: 'CASCADE', orphanedRowAction: 'delete'})

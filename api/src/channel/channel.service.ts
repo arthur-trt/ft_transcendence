@@ -117,6 +117,8 @@ export class ChannelService {
  	*/
 	 public async deleteChannel(user: User, channel: Channel) : Promise<Channel[]>
 	 {
+		if (channel.ownerId != user.id)
+			throw ("NOPE");
 		await this.channelsRepo
     		.createQueryBuilder()
     		.delete()
@@ -135,6 +137,8 @@ export class ChannelService {
  	*/
 	public async deleteUserFromChannel(user: User, channel : Channel, toBan: User) : Promise<Channel[]>
 	{
+		if (channel.ownerId != user.id)
+			throw ("NOPE");
 		await this.channelsRepo.createQueryBuilder()
 			.relation(Channel, "users")
 			.of({ id: toBan.id })
@@ -153,6 +157,8 @@ export class ChannelService {
 
 	public async temporaryBanUser(user: User, channel: Channel, toBan: User)
 	{
+		if (channel.ownerId != user.id)
+			throw ("NOPE");
 		console.log("Bannishement");
 		/** Step one : Deleting user from channel */
 		await this.deleteUserFromChannel(user, channel, toBan);
