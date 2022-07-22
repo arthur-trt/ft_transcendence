@@ -251,7 +251,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async onCreateRoom(client: Socket, channel: newChannelDto)
 	{
 		this.logger.log(channel)
-		try {
+		try
+		{
 			await this.channelService.createChannel(channel.chanName, client.data.user, channel.password, channel.private);
 		}
 		catch (err) {
@@ -277,18 +278,22 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		let channel: string = joinRoom.chanName;
 		let password: string = joinRoom.password;
 
+		this.logger.log("name " + joinRoom.chanName)
+		this.logger.log("pass "+ joinRoom.password)
+
 		if (await this.userService.joinChannel(client.data.user, channel, password))
 		{
 			client.join(channel);
 			return this.server.emit('rooms', client.data.user.name + " joined the room ", await this.channelService.getChannelsForUser(client.data.user)); // a recuperer dans le service du front
 		}
-		else {
-			return this.server.emit('rooms', 'incorect password');
+		else
+		{
+			return this.server.emit('rooms', 'Incorrect password');
 		}
 	}
 
 	/**
-	 *
+	 * @brief delete room for current user : check if channel owner
 	 * @param client
 	 * @param channel
 	 * @returns
@@ -296,14 +301,15 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('deleteRoom')
 	async onDeletedRoom(client: Socket, channel: string) {
+
 		await this.channelService.deleteChannel(client.data.user, await this.channelService.getChannelByIdentifier(channel));
 		return this.server.emit('rooms', channel + "has been deleted", await this.channelService.getChannelsForUser(client.data.user)); // on emet a tt le monde que le chan a ete supp
 	}
 
 	/**
-	 *
+	 * @brief leave room for current user
 	 * @param client
-	 * @param channel
+	 * @param channel by string
 	 * @returns
 	 */
 	@UseGuards(WsJwtAuthGuard)
