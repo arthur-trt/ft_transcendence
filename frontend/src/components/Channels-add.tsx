@@ -1,22 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import '../index.css';
 import { Link } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 
 // FONT AWESOME SINGLE IMPORT
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons'
 import { faArrowAltCircleRight } from '@fortawesome/free-regular-svg-icons'
+import { faTrashCan } from '@fortawesome/free-regular-svg-icons'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
-import { faUserGroup } from '@fortawesome/free-solid-svg-icons'
+import { faPaperPlane } from '@fortawesome/free-regular-svg-icons'
 
 // IMPORT THE SOCKET
 import {socketo} from '../index';
 
+// VARIABLE DECLARATION OUTSIDE
 let tmp:any[any];
 var indents:any = [];
 let indexFriends = 0;
+// let DisplayChat = 0;
 
 export default function Channels() {
+
+  // TO DETECT ROUTE CHANGE
+  const location = useLocation();
 
   // VARIABLE DECLARATIONS
   const [socket, setSocket] = useState<any>([]);
@@ -30,6 +36,7 @@ export default function Channels() {
   const [chanName, setChanName] = useState("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any>([]);
+  const [DisplayChat, setDisplayChat] = useState(0);
 
   // DISPLAY FRIENDS LIST
   const [switching, setSwitching] = useState(0);
@@ -38,7 +45,12 @@ export default function Channels() {
   const [UsersBtnColor, setUsersBtnColor] = useState('#1dd1a1');
   const [FriendsBtnColor, setFriendsBtnColor] = useState('white');
 
+  // IF THE ROUTE CHANGE
+  useEffect(() => {
+    setDisplayChat(0);
+  }, [location]);
 
+  // FETCH DATA FROM THE USER
   useEffect(() => {
     const getData = async () => {
         const response = await fetch(
@@ -89,14 +101,19 @@ export default function Channels() {
   }
   let handleDelete = (e:any) => {
     socket.emit('deleteRoom', e.currentTarget.id);
+    if (chanName === e.currentTarget.id)
+      setDisplayChat(0);
   }
   let handleLeave = (e:any) => {
     socket.emit('leaveRoom', e.currentTarget.id);
+    if (chanName === e.currentTarget.id)
+      setDisplayChat(0);
   }
   let handleOpen = (e:any) => {
     if (isInChan(e.currentTarget.id) == 0)
       return(0);
     socket.emit('getChannelMessages', e.currentTarget.id);
+    setDisplayChat(1);
     setChanName(e.currentTarget.id);
   }
   let handleAddFriend = (e:any) => {
@@ -137,26 +154,34 @@ export default function Channels() {
         }
 
         // push every chan div in the array "indents"
-        indents.push(<div style={{'backgroundColor': BgColor}} className="channels-single" key={i} id={data[i]?.name} onClick={handleOpen}>
-            <h5>
-            {data[i]?.name}
-            </h5>
-            <FontAwesomeIcon icon={faCircleXmark} className="circlexmark" id={data[i]?.name} onClick={handleDelete} />
-            <FontAwesomeIcon icon={faArrowAltCircleRight} className="arrow" id={data[i]?.name} onClick={handleLeave} />
-            <FontAwesomeIcon icon={faPlus} className="plus" id={data[i]?.name} onClick={handleJoin} />
-            </div>);
+        indents.push(
+            <div className="channels-single" key={i}>
+              <div style={{'backgroundColor': BgColor}} className='channels-single-clickable' id={data[i]?.name} onClick={handleOpen}>
+               <h5>{data[i]?.name}</h5>
+              </div>
+              <div style={{'backgroundColor': BgColor}} className='channels-single-actions'>
+                <FontAwesomeIcon icon={faTrashCan} className="trashcan" id={data[i]?.name} onClick={handleDelete} />
+                <FontAwesomeIcon icon={faCircleXmark} className="circlexmark" id={data[i]?.name} onClick={handleLeave} />
+                <FontAwesomeIcon icon={faArrowAltCircleRight} className="arrow" id={data[i]?.name} onClick={handleJoin} />
+              </div>
+            </div>
+            );
         i++;
         BgColor = 'white';
     }
     return indents;
   }
 
-  function displayButtonAddFriend(i: number) {
+  function displayButtonFriend(i: number) {
     let j = 0;
     while (j < friends?.friends?.length)
     {
-      if (datausers[i]?.id === friends?.friends[i]?.id)
-        return (<FontAwesomeIcon className='usergroup' icon={faUserGroup}></FontAwesomeIcon>);
+      if (datausers[i]?.id === friends?.friends[j]?.id)
+        return (<div className='users-single-info-friends'>
+                  <FontAwesomeIcon className='paperplane' icon={faPaperPlane}></FontAwesomeIcon>
+                  <button id={i.toString()} onClick={handleRemoveFriend}>Remove</button>
+                </div>
+        );
       j++;
     }
    return (
@@ -189,7 +214,7 @@ export default function Channels() {
             </div>
             <div className='users-single-info'>
               <h5>{datausers[i]?.name}</h5>
-              {displayButtonAddFriend(i)}
+              {displayButtonFriend(i)}
             </div>
         </div>);
         i++;
@@ -210,21 +235,6 @@ export default function Channels() {
               <div className='friendsrequest-single-button'>
                 <button id={i.toString()} onClick={handleAcceptFriend}>Accept</button>
               </div>
-        </div>);
-        i++;
-      }
-      i = 0;
-      while (i < friends?.friends.length)
-      {
-        profilelink = "/profile/" + friends?.friends[i]?.id;
-        indents.push(<div className="friends-single" key={i}>
-            <div className='friends-single-img'>
-              <Link to={profilelink}><img src={friends.friends[i]?.avatar_url}></img></Link>
-            </div>
-            <div className='friends-single-info'>
-              <h5>{friends.friends[i]?.name}</h5>
-              <button id={i.toString()} onClick={handleRemoveFriend}>Remove friend</button>
-            </div>
         </div>);
         i++;
       }
@@ -264,7 +274,7 @@ export default function Channels() {
         if (datame.name == tmp.messages[i]?.sender.name)
           msgColor = 'lightskyblue';
         
-        indents.push(<div className='chat-message' key={i + datame.id}>
+        indents.push(<div className='chat-message' key={i}>
           <h5>{tmp.messages[i]?.sender.name} <span>{tmp.messages[i]?.sent_at.substr(0, 10)}</span></h5>
           <p style={{'backgroundColor': msgColor}}>{tmp.messages[i]?.message}</p>
         </div>);
@@ -295,9 +305,11 @@ export default function Channels() {
 
   // DISPLAY CHAT
     let display_chat = (e: any) => {
+      if (!DisplayChat)
+        return("");
 
     return (
-      <div className='chat-wrapper' key={0}>
+      <div className='chat-wrapper'>
       <div className='chat-title'>#{chanName.toUpperCase()}</div>
       <div className='chat-box'>
         {display_msg()}
@@ -355,14 +367,14 @@ export default function Channels() {
 
         <div className='chat-container'>
           {/* <h3>CHAT</h3> */}
-          {display_chat(0)}
+          {display_chat(DisplayChat)}
         </div>
 
         <div className='users-container'>
           {/* <h3>USERS</h3> */}
           <div className='users-tab'>
             <button style={{backgroundColor: UsersBtnColor}} onClick={handleUsers}>USERS</button>
-            <button style={{backgroundColor: FriendsBtnColor}} onClick={handleFriends}>FRIENDS</button>
+            <button style={{backgroundColor: FriendsBtnColor}} onClick={handleFriends}>REQUESTS</button>
           </div>
           <div className='users-list'>
               {display_users()}

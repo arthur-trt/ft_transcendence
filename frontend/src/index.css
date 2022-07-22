@@ -161,61 +161,97 @@ code {
 .channels-single {
   margin: 5px;
   width: 165px;
-  padding: 5px;
+  height: 70px;
+  /* padding: 5px; */
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-  text-align: center;
-  text-transform: uppercase;
+  /* text-align: center; */
+  /* text-transform: uppercase; */
   border-radius: 5px;
-  position: relative;
-  cursor: pointer;
+  /* position: relative; */
+  /* cursor: pointer; */
 }
 
-.channels-single:hover {
+/* .channels-single:hover {
   filter: brightness(1.2);
   transition: all 0.5s ease-out;
 }
 
 .channels-single:active {
   transform: scale(0.80);
+} */
+
+.channels-single-clickable {
+  height: 40px;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.channels-single-clickable:hover {
+  filter: brightness(1.2);
+  transition: all 0.5s ease-out;
+}
+
+/* .channels-single-clickable:active {
+  transform: scale(1.2);
+} */
+
+.channels-single-clickable h5 {
+  margin: 0;
+}
+
+.channels-single-actions {
+  height: 30px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.channels-single .trashcan {
+  /* position: absolute;
+  bottom: 0;
+  right: 0; */
+  /* margin-right: 5px;
+  margin-bottom: 5px; */
+  /* border-radius: 50px; */
+  cursor: pointer;
+  color: black;
 }
 
 .channels-single .circlexmark {
-  position: absolute;
+  /* position: absolute;
   top: 0;
-  left: 0;
-  margin-left: 5px;
-  margin-top: 5px;
+  left: 0; */
+  /* margin-left: 5px;
+  margin-top: 5px; */
   border-radius: 50px;
   cursor: pointer;
   color: black;
 }
 
 .channels-single .arrow {
-  position: absolute;
+  /* position: absolute;
   bottom: 0;
-  left: 0;
-  margin-left: 5px;
-  margin-bottom: 5px;
+  left: 0; */
+  /* margin-left: 5px;
+  margin-bottom: 5px; */
   border-radius: 50px;
   cursor: pointer;
   color: black;
 }
 
-.channels-single .circlexmark:hover, .arrow:hover {
-  background-color:tomato ;
+.channels-single .trashcan:hover, .circlexmark:hover, .arrow:hover {
+  /* color: red; */
+  transform: scale(1.2);
   transition: all 0.5s ease-out;
 }
 
-.channels-single .plus {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  margin-right: 5px;
-  margin-bottom: 5px;
-  border-radius: 50px;
-  cursor: pointer;
-  color: black;
-}
 
 /* --------------USERS-------------- */
 
@@ -250,12 +286,9 @@ cursor: pointer;
   width: 230px;
   padding: 3px;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-  text-align: center;
   text-transform: uppercase;
   border-radius: 50px;
   display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .users-single-img {
@@ -272,6 +305,7 @@ cursor: pointer;
   height: 30px;
   border-radius: 50px;
   border: 2px solid;
+  display: flex;
 }
 
 .users-single-info {
@@ -284,8 +318,18 @@ cursor: pointer;
   font-size: 11px;
 }
 
-.users-single-info .usergroup {
+.users-single-info .paperplane {
   color: #1dd1a1;
+  cursor: pointer;
+}
+
+.users-single-info .paperplane:active {
+  transition: all 0.5s ease-out;
+  transform: scale(0.80);
+}
+  
+.users-single-info-friends button {
+  margin-left: 5px;
 }
 
 .friendsrequest-single {
@@ -323,45 +367,6 @@ cursor: pointer;
 
 .friendsrequest-single-button {
   width: 30%;
-}
-
-.friends-single {
-  margin: 5px;
-  width: 230px;
-  padding: 3px;
-  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-  text-align: center;
-  text-transform: uppercase;
-  border-radius: 50px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.friends-single-img {
-  width: 30%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.friends-single-img img {
-  max-height: 100%;
-  max-width: 100%;
-  width: 30px;
-  height: 30px;
-  border-radius: 50px;
-  border: 2px solid; 
-}
-
-.friends-single-info {
-  width: 70%;
-  text-align: left;
-}
-
-.friends-single-info h5 {
-  margin: 0;
-  font-size: 11px;
 }
 
 /* --------------CHAT-------------- */
