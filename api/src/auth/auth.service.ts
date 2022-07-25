@@ -8,6 +8,7 @@ import { Request, Response } from 'express';
 import { toDataURL } from 'qrcode';
 import { jwtConstants } from './jwt/jwt.constants';
 import { TransformStreamDefaultController } from 'stream/web';
+import { useContainer } from 'class-validator';
 
 @Injectable()
 export class AuthService {
@@ -79,5 +80,12 @@ export class AuthService {
 			token: code,
 			secret: user_secret,
 		}));
+	}
+
+	async deactivateTwoFa (user: User)
+	{
+		user.TwoFA_enable = false;
+		user.TwoFA_secret = null;
+		return await user.save();
 	}
 }

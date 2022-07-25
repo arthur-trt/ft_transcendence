@@ -13,7 +13,7 @@ services:
      - api_network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`localhost`) && PathPrefix(`/api/`, `/socket.io/`, `/docs/`, `/public/`)"
+      - "traefik.http.routers.api.rule=Host(`localhost`) && PathPrefix(`/api/`, `/socket.io/`, `/docs`, `/public/`)"
       - "traefik.http.routers.api.entrypoints=web"
       - "traefik.http.services.api.loadbalancer.server.port=3000"
       - "traefik.docker.network=ft_transcendence_api_network"

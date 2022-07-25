@@ -42,8 +42,8 @@ async function bootstrap() {
   app.enableCors(cors_options);
 
   const config = new DocumentBuilder()
-    .setTitle('API example')
-    .setDescription('The API description')
+    .setTitle('FT_TRANSCENDENCE API')
+    .setDescription('API used by ft_transcendence backend')
     .setVersion('1.0')
     .addTag('api')
     .addCookieAuth('Authentication')

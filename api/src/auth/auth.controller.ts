@@ -9,7 +9,7 @@ import { UserService } from 'src/user/user.service';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { twoFaDto } from 'src/dtos/twofa_token.dto';
-import { AuthGuard } from '@nestjs/passport';
+import { User } from 'src/user/user.entity';
 
 
 
@@ -155,6 +155,18 @@ export class TwoFAAuthController {
 			res
 		);
 	}
+
+	@Post('deactivate')
+	@ApiOperation({ summary: "Deactivate twofa for current user" })
+	@ApiResponse({ status: 201, description: "TwoFa is deactivate for current user" })
+	@ApiResponse({ status: 403, description: "User is not logged in" })
+	@ApiCookieAuth()
+	@UseGuards(JwtAuthGuard)
+	async deactivateTwoFa(@Req() req)
+	{
+		const user: User = await this.userService.getUserByRequest(req);
+		return await this.authService.deactivateTwoFa(user);
+	}
 }
 
 @ApiTags('auth')
@@ -174,12 +186,5 @@ export class AuthController {
 		const cookie = `Authentication=deleted; HttpOnly; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
 		res.setHeader('Set-Cookie', cookie);
 		res.send()
-	}
-
-	@Post('test')
-	@ApiOperation({ summary: "Super tet"})
-	@ApiResponse({ status: 418, description:'This is a test'})
-	async test() {
-		return;
 	}
 }
