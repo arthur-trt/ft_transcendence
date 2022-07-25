@@ -38,7 +38,7 @@ export class GameService {
 			.getMany();
 	}
 
-	async createMatch(user1: User, user2: User): Promise<MatchHistory> {
+	async createMatch(user1: User, user2: User) {//Promise<MatchHistory> {
 		const newMatch: MatchHistory = await this.MatchRepo.save(
 			{
 				user1: user1.id,

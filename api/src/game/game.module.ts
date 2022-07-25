@@ -12,6 +12,7 @@ import { GameService } from './game.service';
   	controllers: [GameController],
 	providers: [GameService],
 	imports: [UserModule, TypeOrmModule.forFeature([MatchHistory, User]), JwtModule,
-	]
+	],
+	exports:[GameService]
 })
 export class GameModule {}

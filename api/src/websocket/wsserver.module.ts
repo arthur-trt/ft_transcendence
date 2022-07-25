@@ -6,11 +6,12 @@ import { FriendshipsModule } from 'src/friendships/friendships.module';
 import { MessageModule } from 'src/message/message.module';
 import { UserModule } from 'src/user/user.module';
 import { WSServer } from './wsserver.gateway';
+import { GameModule } from 'src/game/game.module';
 //import { ChatGateway } from './chat.gateway';
 
 @Module({
 
-	imports: [UserModule, MessageModule, JwtModule, ChannelModule, FriendshipsModule],
+	imports: [UserModule, MessageModule, JwtModule, ChannelModule, FriendshipsModule, GameModule],
 	providers: [WSServer],
 })
 export class WSServerModule {}

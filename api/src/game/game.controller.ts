@@ -19,7 +19,7 @@ export class GameController {
 	}
 
 	@Post('new')
-	@ApiOperation({ summary: "Get all matches" })
+	@ApiOperation({ summary: "New matche" })
 	public async startMatch(@Body() match : CreateMatchDto) : Promise<MatchHistory[]>
 	{
 		const user1: User = await this.userService.getUserByIdentifier(match.user1);
@@ -29,7 +29,7 @@ export class GameController {
 	}
 
 	@Post('end')
-	@ApiOperation({ summary: "Get all matches" })
+	@ApiOperation({ summary: "End matches" })
 	public async endMatch(@Body() match : endMatchDto) : Promise<MatchHistory[]>
 	{
 		if (!match.id)

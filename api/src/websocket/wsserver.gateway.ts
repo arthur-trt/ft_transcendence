@@ -7,6 +7,7 @@ import { JwtService, JwtVerifyOptions } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import { GameService } from '../game/game.service';
+import { GameModule } from 'src/game/game.module';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
 import { ChannelService } from 'src/channel/channel.service';
 import { MessageService } from 'src/message/message.service';
@@ -28,6 +29,7 @@ import { ArgumentsHost } from '@nestjs/common';
 import { NextFunction, Request, Response} from 'express';
 import { BaseWsExceptionFilter } from '@nestjs/websockets'
 import { WebsocketExceptionsFilter } from './exception.filter';
+import { MatchHistory } from 'src/game/game.entity';
 
 
 @Injectable()
@@ -43,7 +45,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly userService: UserService,
 		protected readonly channelService: ChannelService,
 		protected readonly messageService: MessageService,
-		protected readonly friendService: FriendshipsService
+		protected readonly friendService: FriendshipsService,
+		protected readonly gameService: GameService
+
 	) { }
 
 	protected logger: Logger = new Logger('WebSocketServer');
@@ -520,5 +524,69 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	{
 		this.userService.unblock(client.data.user, toUnBlock);
 		this.server.to(client.id).emit('unblocked', toUnBlock.name + " has been unblocked");
+	}	
+	/*
+	**  ██████   █████  ███    ███ ███████      ██████   █████  ████████ ███████ ██     ██  █████  ██    ██ 
+	**██       ██   ██ ████  ████ ██          ██       ██   ██    ██    ██      ██     ██ ██   ██  ██  ██  
+	**██   ███ ███████ ██ ████ ██ █████       ██   ███ ███████    ██    █████   ██  █  ██ ███████   ████   
+	**██    ██ ██   ██ ██  ██  ██ ██          ██    ██ ██   ██    ██    ██      ██ ███ ██ ██   ██    ██    
+	** ██████  ██   ██ ██      ██ ███████      ██████  ██   ██    ██    ███████  ███ ███  ██   ██    ██    
+	**                                                                                                  
+	**                                                                                                  
+	**	Game
+	**	├─ JoinGame
+	**	├─ WatchGame
+	**	├─ getInQueue
+	**  
+	/**
+	 *
+	 * @param player_ID
+	 * @returns 
+	 */
+
+	pendingPlayers = {};
+	activeMatches = {};
+
+	Lobby = {};
+	//module.exports = Lobby;
+
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('game_inQueue')
+	async getInQueue(client: Socket, player_waiting : User)
+	{
+		console.log("hi bitches !!!!")
+		player_waiting = new User();
+		// manage if player is disconected from the room
+
+		var Match = this.matchPlayers(player_waiting);
+		while(!Match)
+		{
+			console.log(player_waiting.fullname, "is waiting for a match");
+		}	
+		//deal with match events
+		this.activeMatches[(await Match).id];
+		//this.server.to(client)
+	}
+	
+	/**
+	 * Try to pair a new player with a pending player for a match
+	 * @param {Player} newPlayer - The new player
+	 * @returns {Match}
+	 */
+	async matchPlayers (newPlayer : User) {
+		// Loop through the pending players
+		var currPlayer = new User();
+		for (currPlayer.id in this.pendingPlayers) {
+			// If the current player os the new player, skip (obviously one can not be paired with itself)
+			if (this.pendingPlayers[currPlayer.id].id === newPlayer.id) {
+				continue;}		
+			// Found a pair, create a Match
+			console.log(" it's a match !!!");
+			console.log(currPlayer.fullname);
+			console.log(newPlayer.fullname);
+			return this.gameService.createMatch(currPlayer, newPlayer);		 
+		}
+		return null;
 	}
 }
