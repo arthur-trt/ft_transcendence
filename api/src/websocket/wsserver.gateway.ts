@@ -361,8 +361,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.messageService.sendPrivateMessage(client.data.user, msg.to, msg.msg);
 		const conversation = await this.messageService.getPrivateMessage(client.data.user, msg.to);
 		if (friendSocket)
-			this.server.to(friendSocket.id).emit('privateMessage', client.data.user.name + " sent a message to " + msg.to.name, conversation);
-		this.server.to(client.id).emit('privateMessage', client.data.user.name + " sent a message to " + msg.to.name, conversation);
+			this.server.to(friendSocket.id).emit('privateMessage', client.data.user.name + " " + msg.to.name, conversation);
+		this.server.to(client.id).emit('privateMessage', client.data.user.name + " " + msg.to.name, conversation);
 	}
 
 	/**
@@ -376,7 +376,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async onGetPrivateMessage(client: Socket, user2: User)
 	{
 		const msg = await this.messageService.getPrivateMessage(client.data.user, user2);
-		this.server.to(client.id).emit('privateMessage', client.data.user.name + " get messages with " + user2, msg);
+		this.server.to(client.id).emit('privateMessage', client.data.user.name + " " + user2.name, msg);
 	}
 	/**
 	 * @brief Send Channel Messages
