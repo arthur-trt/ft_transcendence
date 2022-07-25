@@ -17,8 +17,7 @@ export class ChatService {
 		protected readonly channelService: ChannelService,
 		protected readonly messageService: MessageService,
 		protected readonly friendService: FriendshipsService,
-		protected server,
-		protected active_users : Map<User, Socket>
+		protected readonly wss : 
 	) { }
 
 	async getRooms()
