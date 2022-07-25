@@ -1,7 +1,7 @@
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from "@nestjs/websockets"
-import { Injectable, Logger, UseGuards, UsePipes } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger, UseGuards, UsePipes } from '@nestjs/common';
 import { jwtConstants } from '../auth/jwt/jwt.constants';
 import { JwtService, JwtVerifyOptions } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
@@ -37,7 +37,7 @@ import { ChatService } from './chat.service';
 export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
 	@WebSocketServer()
-	protected server: Server;
+	protected _server: Server;
 
 	constructor(
 		protected readonly jwtService: JwtService,
@@ -45,7 +45,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly channelService: ChannelService,
 		protected readonly messageService: MessageService,
 		protected readonly friendService: FriendshipsService,
-		protected readonly chatService : ChatService
+		@Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService
 	) { }
 
 	protected logger: Logger = new Logger('WebSocketServer');
@@ -53,7 +53,13 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	protected active_users = new Map<User, Socket>();
 	protected users = [];
 
+	get server(): Server {
+		return this._server;
+	}
 
+	get activeUsers(): Map<User, Socket> {
+		return this.active_users;
+	}
 
 	/*
 	**
@@ -105,7 +111,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		this.logger.log(client.id);
 
 		this.active_users.forEach((socket: Socket, user: User) => {
-			this.server.to(socket.id).emit(
+			this._server.to(socket.id).emit(
 				'listUsers',
 				this.listConnectedUser(socket, this.all_users, this.active_users, false)
 			);
@@ -144,7 +150,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 			console.log("Don't know what happened");
 		}
 		this.active_users.forEach((socket: Socket, user: User) => {
-			this.server.to(socket.id).emit(
+			this._server.to(socket.id).emit(
 				'listUsers',
 				this.listConnectedUser(socket, this.all_users, this.active_users, false)
 			);
@@ -211,7 +217,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 @SubscribeMessage('getUsers')
 	 async get_users_list(client: Socket)
 	 {
-		 this.server.to(client.id).emit(
+		 this._server.to(client.id).emit(
 			 'listUsers',
 			 this.listConnectedUser(client, this.all_users, this.active_users, false)
 		 );
@@ -249,8 +255,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async onGetRooms(client: Socket)
 	{
 		this.chatService.getRooms();
-		//for (let [allUsers, socket] of this.active_users.entries())
-		//	this.server.to(socket.id).emit('rooms', " get rooms ", await this.channelService.getChannelsForUser(allUsers));
 	}
 
 	/**
@@ -269,7 +273,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.channelService.createChannel(channel.chanName, client.data.user, channel.password, channel.private)
 		client.join(channel.chanName)
 		for (let [allUsers, socket] of this.active_users.entries())
-		 	this.server.to(socket.id).emit('rooms', client.data.user.name + " created the room ", await this.channelService.getChannelsForUser(allUsers));
+		 	this._server.to(socket.id).emit('rooms', client.data.user.name + " created the room ", await this.channelService.getChannelsForUser(allUsers));
 	}
 
 	/**
@@ -286,7 +290,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.userService.joinChannel(client.data.user, joinRoom.chanName, joinRoom.password)
 			.then(async () =>  {
 				client.join(joinRoom.chanName);
-				this.server.emit('rooms', client.data.user.name + " joined the room ", await this.channelService.getChannelsForUser(client.data.user));
+				this._server.emit('rooms', client.data.user.name + " joined the room ", await this.channelService.getChannelsForUser(client.data.user));
 			})
 	}
 
@@ -302,7 +306,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 		const chan = await this.channelService.getChannelByIdentifier(channel);
 		await this.channelService.deleteChannel(client.data.user, chan);
-		return this.server.emit('rooms', channel + "has been deleted", await this.channelService.getChannelsForUser(client.data.user)); // on emet a tt le monde que le chan a ete supp
+		return this._server.emit('rooms', channel + "has been deleted", await this.channelService.getChannelsForUser(client.data.user)); // on emet a tt le monde que le chan a ete supp
 	}
 
 	/**
@@ -317,7 +321,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	{
 		this.logger.log(client.data.user.name + " LEFT ROOM")
 		await this.userService.leaveChannel(client.data.user, channel)
-		this.server.emit('rooms', client.data.user.name + " left the room ", await this.channelService.getChannelsForUser(client.data.user)); // a recuperer dans le service du front
+		this._server.emit('rooms', client.data.user.name + " left the room ", await this.channelService.getChannelsForUser(client.data.user)); // a recuperer dans le service du front
 		client.leave(channel);
 	}
 
@@ -326,7 +330,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	{
 		const chan: Channel = await this.channelService.getChannelByIdentifier(channel);
 		this.channelService.temporaryBanUser(client.data.user, chan, toBan);
-		this.server.to(toBan.id).emit('rooms')
+		this._server.to(toBan.id).emit('rooms')
 	}
 
 	/*
@@ -365,8 +369,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.messageService.sendPrivateMessage(client.data.user, msg.to, msg.msg);
 		const conversation = await this.messageService.getPrivateMessage(client.data.user, msg.to);
 		if (friendSocket)
-			this.server.to(friendSocket.id).emit('privateMessage', client.data.user.name + " " + msg.to.name, conversation);
-		this.server.to(client.id).emit('privateMessage', client.data.user.name + " " + msg.to.name, conversation);
+			this._server.to(friendSocket.id).emit('privateMessage', client.data.user.name + " " + msg.to.name, conversation);
+		this._server.to(client.id).emit('privateMessage', client.data.user.name + " " + msg.to.name, conversation);
 	}
 
 	/**
@@ -380,7 +384,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async onGetPrivateMessage(client: Socket, user2: User)
 	{
 		const msg = await this.messageService.getPrivateMessage(client.data.user, user2);
-		this.server.to(client.id).emit('privateMessage', client.data.user.name + " " + user2.name, msg);
+		this._server.to(client.id).emit('privateMessage', client.data.user.name + " " + user2.name, msg);
 	}
 	/**
 	 * @brief Send Channel Messages
@@ -394,7 +398,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 {
 		 this.logger.log("MSG " + data.msg + " to " + data.chan + " from " + client.data.user.name)
 		 await this.messageService.sendMessageToChannel(data.chan, client.data.user, data.msg);
-		 this.server.to(data.chan).emit('channelMessage', await this.messageService.getMessage(data.chan, client.data.user));
+		 this._server.to(data.chan).emit('channelMessage', await this.messageService.getMessage(data.chan, client.data.user));
 	 }
 
 	/**
@@ -407,7 +411,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('getChannelMessages')
 	async onGetChannelMessages(client: Socket, channelName: string)
 	{
-		this.server.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName, client.data.user));
+		this._server.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName, client.data.user));
 	}
 
 	/*
@@ -438,7 +442,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		const friendSocket: Socket = await this.findSocketId(friend)
 		await this.friendService.sendFriendRequest(client.data.user, friend);
 		if (friendSocket)
-			this.server.to(friendSocket.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(friend))
+			this._server.to(friendSocket.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(friend))
 	}
 
 	/**
@@ -453,10 +457,10 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		console.log("FRIEND IS " + JSON.stringify(friend))
 		const friendSocket: Socket = await this.findSocketId(friend)
 		await this.friendService.acceptFriendRequest(client.data.user, friend);
-		this.server.to(client.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(client.data.user))
+		this._server.to(client.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(client.data.user))
 		if (friendSocket)
-			this.server.to(friendSocket.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(friend));
-		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+			this._server.to(friendSocket.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(friend));
+		this._server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
 	}
 
 
@@ -472,8 +476,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		const friendSocket: Socket = await this.findSocketId(friend);
 		await this.friendService.removeFriend(client.data.user, friend);
 		if (friendSocket)
-			this.server.to(friendSocket.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(friend));
-		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+			this._server.to(friendSocket.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(friend));
+		this._server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
 	}
 
 	/**
@@ -484,14 +488,14 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('getFriends')
 	async getFriends(client: Socket)
 	{
-		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+		this._server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getFriendRequests')
 	async getFriendRequests(client: Socket)
 	{
-		this.server.to(client.id).emit('newFriendRequest', "Friend requests list : you are target of", await this.friendService.getFriendsRequests(client.data.user));
+		this._server.to(client.id).emit('newFriendRequest', "Friend requests list : you are target of", await this.friendService.getFriendsRequests(client.data.user));
 	}
 
 	/*
@@ -514,7 +518,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async block(client: Socket, toBlock: User)
 	{
 		this.userService.block(client.data.user, toBlock);
-		this.server.to(client.id).emit('blocked', toBlock.name + " has been blocked");
+		this._server.to(client.id).emit('blocked', toBlock.name + " has been blocked");
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -522,6 +526,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async unblock(client: Socket, toUnBlock: User)
 	{
 		this.userService.unblock(client.data.user, toUnBlock);
-		this.server.to(client.id).emit('unblocked', toUnBlock.name + " has been unblocked");
+		this._server.to(client.id).emit('unblocked', toUnBlock.name + " has been unblocked");
 	}
 }
