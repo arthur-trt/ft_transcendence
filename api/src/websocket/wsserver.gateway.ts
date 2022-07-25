@@ -28,6 +28,7 @@ import { ArgumentsHost } from '@nestjs/common';
 import { NextFunction, Request, Response} from 'express';
 import { BaseWsExceptionFilter } from '@nestjs/websockets'
 import { WebsocketExceptionsFilter } from './exception.filter';
+import { ChatService } from './chat.service';
 
 
 @Injectable()
@@ -43,7 +44,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly userService: UserService,
 		protected readonly channelService: ChannelService,
 		protected readonly messageService: MessageService,
-		protected readonly friendService: FriendshipsService
+		protected readonly friendService: FriendshipsService,
+		protected readonly chatService : ChatService
 	) { }
 
 	protected logger: Logger = new Logger('WebSocketServer');
@@ -246,8 +248,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('getRooms') /** Join ROom parce que ca le creera aussi */
 	async onGetRooms(client: Socket)
 	{
-		for (let [allUsers, socket] of this.active_users.entries())
-			this.server.to(socket.id).emit('rooms', " get rooms ", await this.channelService.getChannelsForUser(allUsers));
+		this.chatService.getRooms();
+		//for (let [allUsers, socket] of this.active_users.entries())
+		//	this.server.to(socket.id).emit('rooms', " get rooms ", await this.channelService.getChannelsForUser(allUsers));
 	}
 
 	/**
