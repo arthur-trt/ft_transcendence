@@ -8,7 +8,7 @@ import { Header } from './components/Header';
 import TwoFactor from './components/TwoFactor';
 import Profile from './components/Profile';
 import Channels from './components/Channels-add';
-//import Game from './components/Game';
+import Game from './components/Game';
 import { CookiesProvider, useCookies } from "react-cookie";
 import io from 'socket.io-client';
 import Debug from './components/Debug';
@@ -56,7 +56,7 @@ root.render(
         </Route>
         <Route path="/community" element={<><Header /><RequireAuth><Channels /></RequireAuth></>} />
         <Route path="/debug" element={<><Header /><RequireAuth><Debug /></RequireAuth></>} />
-        {/*<Route path="/game" element={<><Game/></>} />*/}
+        <Route path="/game" element={<><Game/></>} />
 
       </Routes>
     </BrowserRouter>
