@@ -30,6 +30,7 @@ import { BaseWsExceptionFilter } from '@nestjs/websockets'
 import { WebsocketExceptionsFilter } from './exception.filter';
 import { ChatService } from './chat.service';
 import { FortyTwoAuthStrategy } from 'src/auth/fortyTwo/fortyTwo.strategy';
+import { ConnectService } from './connect.service';
 
 
 @Injectable()
@@ -46,8 +47,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly channelService: ChannelService,
 		protected readonly messageService: MessageService,
 		protected readonly friendService: FriendshipsService,
-		@Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService
-	) { }
+		@Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
+		@Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
+		) { }
 
 	protected logger: Logger = new Logger('WebSocketServer');
 	protected all_users: User[];
@@ -73,21 +75,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	*/
 
 	protected async validateConnection(client: Socket): Promise<User> {
-		try {
-			const authCookies: string[] = client.handshake.headers.cookie.split('; ');
-			const authCookie: string[] = authCookies.filter(s => s.includes('Authentication='));
-			const authToken = authCookie[0].substring(15, authCookie[0].length);
-			const jwtOptions: JwtVerifyOptions = {
-				secret: jwtConstants.secret
-			}
-			const jwtPayload = await this.jwtService.verify(authToken, jwtOptions);
-			const user: any = await this.userService.getUserByIdentifierLight(jwtPayload.sub);
-
-			return user;
-		} catch (err) {
-			console.log("Guard error :");
-			console.log(err.message);
-		}
+		return this.connectService.validateConnection(client);
 	}
 
 	/**
@@ -97,35 +85,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @returns Nothing, but handle disconnection if problems occurs
 	 */
 	async handleConnection(client: Socket) {
-		const user = await this.validateConnection(client);
-		if (!user)
-			return this.handleDisconnect(client);
-
-		client.data.user = user;
-		this.logger.log("New connection: " + user.name);
-		this.all_users = await this.userService.getUsers();
-		if (!this.active_users.has(user))
-		{
-			console.log("Add : " + user.name);
-			this.active_users.set(user, client);
-		}
-		this.logger.log(client.id);
-
-		this.active_users.forEach((socket: Socket, user: User) => {
-			this._server.to(socket.id).emit(
-				'listUsers',
-				this.listConnectedUser(socket, this.all_users, this.active_users, false)
-			);
-		});
-
-		let chan : Channel[] = await this.userService.getChannelsForUser(user);
-		this.logger.log("CHANS" + chan);
-
-		for (let c of chan) {
-			client.join(c.name);
-			this.logger.log(user.name + " : Client joining" + c.name)
-		}
-
+		this.connectService.handleConnection(client);
 	}
 
 	afterInit(server: Server) {
@@ -137,27 +97,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @param client Socket received from client
 	 */
 	async handleDisconnect(client: Socket) {
-		try {
-			for (let [entries, socket] of this.active_users.entries())
-			{
-				if (entries.id == client.data.user.id)
-				{
-					this.active_users.delete(entries);
-					break;
-				}
-			}
-		}
-		catch (err) {
-			console.log("Don't know what happened");
-		}
-		this.active_users.forEach((socket: Socket, user: User) => {
-			this._server.to(socket.id).emit(
-				'listUsers',
-				this.listConnectedUser(socket, this.all_users, this.active_users, false)
-			);
-		});
-		client.emit('bye');
-		client.disconnect(true);
+		this.connectService.handleDisconnect(client)
 	}
 
 	/**
@@ -168,34 +108,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @param withCurrentUser if true user who made the request will be included
 	 * @returns
 	 */
-	protected listConnectedUser(client: Socket, all_users: User[] ,active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
-		let data: User[] = [];
-		let i = 0;
-
-		for (let user of active_user.keys()) {
-			user.status = "online";
-			if (client.data.user.id == user.id && withCurrentUser) {
-				data[i] = user;
-				i++;
-			}
-			else if (client.data.user.id != user.id) {
-				data[i] = user;
-				i++;
-			}
-		}
-		if (all_users)
-		{
-			for (let user of all_users)
-			{
-				if (!data.find(element => element.id == user.id) && client.data.user.id != user.id)
-				{
-					user.status = "offline";
-					data[i] = user;
-					i++;
-				}
-			}
-		}
-		return (data);
+	protected listConnectedUser(client: Socket, all_users: User[], active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
+		this.connectService.listConnectedUser(client, all_users, active_user, withCurrentUser);
 	}
 
 
@@ -207,10 +121,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 @SubscribeMessage('getUsers')
 	 async get_users_list(client: Socket)
 	 {
-		 this._server.to(client.id).emit(
-			 'listUsers',
-			 this.listConnectedUser(client, this.all_users, this.active_users, false)
-		 );
+		 this.connectService.getUserList(client);
 	 }
 
 	/*
