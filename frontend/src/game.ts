@@ -102,7 +102,7 @@ let keyPressed : { [index:string] : {} } = {};
 document.addEventListener('keydown', (e) => {
 
     keyPressed[e.key] = true;
-    
+
     if (keyPressed['w'] == true)
     {
         // if (user.y - 20 <= 0)
@@ -180,29 +180,29 @@ function drawText(text: any,x: any,y: any, color: any){
 
 // render function, the function that does al the drawing
 function render(data: any){
-    
+
     // clear the canvas
     drawRect(0, 0, canvas.width, canvas.height, "WHITE");
-    
+
     // draw the user score to the left
     drawText(user.score,canvas.width/4,canvas.height/5, '#00000080');
-    
+
     // draw the COM score to the right
     drawText(com.score,3*canvas.width/4,canvas.height/5, '#00000080');
 
     drawText("PLAYER 1", canvas.width * 0.12, canvas.height * 0.1, '#00000080');
 
     drawText("PLAYER 2", canvas.width * 0.62, canvas.height * 0.1, '#00000080');
-    
+
     // draw the net
     drawNet();
-    
+
     // draw the user's paddle
     drawRect(data.player1_paddle_x, data.player1_paddle_y, user.width, user.height, user.color);
-    
+
     // draw the COM's paddle
     drawRect(data.player2_paddle_x, data.player2_paddle_y, user.width, user.height, user.color);
-    
+
     // draw the ball
     drawArc(data.ball_x, data.ball_y, ball.radius, ball.color);
 }
@@ -220,7 +220,7 @@ async function game_start()
         start.innerHTML = "The game starts in ";
 
     render(data);
-    
+
     while (i > 0)
     {
         if (start != null)
@@ -238,9 +238,9 @@ async function game_start()
     //loop = setInterval(game,1000/framePerSecond);
 }
 
-socket.on('game_countdownStart', game_start());
+socket.on('game_countdownStart', (args: any) => {game_start()});
 
-socket.on('game_position', render(data));
+socket.on('game_position', (args: any) => {render(data)});
 
 socket.on('game_position', function(pos: any){
     data.player1_paddle_x = pos.player1_paddle_x;

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { socketo } from '..';
 import '../pong.css';
 
 export default function Game() {
 
-  // const socket = socketo;
+   const socket = socketo;
   // socket.on('init', () => { });
 
   // const [name, setName] = useState("");
@@ -23,9 +24,14 @@ export default function Game() {
 
   // }
 
+  let handleStart = () => {
+    socket.emit('game_inQueue')
+  }
+
   return (
 
     <div className='game-container'>
+      <button type='button' onClick={handleStart}>Start game</button>
       <div id="start">The game starts in 3 seconds ...</div>
       <canvas id="pong"></canvas>
       <script src="../game.ts"></script>
