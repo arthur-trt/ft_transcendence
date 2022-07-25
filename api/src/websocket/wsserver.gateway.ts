@@ -15,7 +15,7 @@ import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
 import { Channel } from 'src/channel/channel.entity';
 import { UserModule } from 'src/user/user.module';
 import { FriendshipsService } from 'src/friendships/friendships.service';
-import { AfterRecover, QueryFailedError, TreeRepositoryNotSupportedError } from 'typeorm';
+import { AfterRecover, IsNull, QueryFailedError, TreeRepositoryNotSupportedError } from 'typeorm';
 import { isArray, isObject } from 'class-validator';
 import { newChannelDto } from 'src/dtos/newChannel.dto';
 import { CreateMatchDto } from 'src/dtos/match.dto';
@@ -544,10 +544,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @returns 
 	 */
 
-	pendingPlayers = {};
-	activeMatches = {};
-
-	Lobby = {};
+	
 	//module.exports = Lobby;
 
 	@UseGuards(WsJwtAuthGuard)
@@ -555,17 +552,22 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('game_inQueue')
 	async getInQueue(client: Socket, player_waiting : User)
 	{
+		var pendingPlayers = [];
+		var activeMatches = [];
+
+		//Lobby = {};
 		console.log("hi bitches !!!!")
 		player_waiting = new User();
 		// manage if player is disconected from the room
-
-		var Match = this.matchPlayers(player_waiting);
-		while(!Match)
+		pendingPlayers.push(player_waiting);
+		var Match = this.matchPlayers(pendingPlayers, player_waiting);
+		while(Match === null)
 		{
 			console.log(player_waiting.fullname, "is waiting for a match");
 		}	
 		//deal with match events
-		this.activeMatches[(await Match).id];
+		//join a room with socket.io
+		activeMatches.push(Match);
 		//this.server.to(client)
 	}
 	
@@ -574,18 +576,18 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @param {Player} newPlayer - The new player
 	 * @returns {Match}
 	 */
-	async matchPlayers (newPlayer : User) {
+	async matchPlayers (pendingPlayers, newPlayer : User) {
 		// Loop through the pending players
-		var currPlayer = new User();
-		for (currPlayer.id in this.pendingPlayers) {
+		//var currPlayer = new User();
+		for (var currPlayer in pendingPlayers) {
 			// If the current player os the new player, skip (obviously one can not be paired with itself)
-			if (this.pendingPlayers[currPlayer.id].id === newPlayer.id) {
-				continue;}		
+			if (currPlayer === null) //currPlayer === newPlayer.id || ) 
+			{ return null;}		
 			// Found a pair, create a Match
 			console.log(" it's a match !!!");
-			console.log(currPlayer.fullname);
+			//console.log(currPlayer.fullname);
 			console.log(newPlayer.fullname);
-			return this.gameService.createMatch(currPlayer, newPlayer);		 
+			return this.gameService.createMatch(pendingPlayers[currPlayer], newPlayer);		 
 		}
 		return null;
 	}
