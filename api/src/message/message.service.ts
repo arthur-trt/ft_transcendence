@@ -110,10 +110,6 @@ export class MessageService {
 	 */
 	public async sendPrivateMessage(src: User, target: User, msg: string) : Promise<privateMessage[]> {
 
-		//let user2 = target;
-		//console.log ( "coucou")
-		//if (!target.id)
-		console.log (target.name)
 		const user2 = await this.userService.getUserByIdentifier(target.name);
 		const newMessage : privateMessage = await this.pmRepo.save(
 		{
@@ -147,6 +143,7 @@ export class MessageService {
 			}))
 			.select(['PM.message'])
 			.addSelect([
+				'sent_at',
 				'PM.sender',
 				'PM.target',
 				'PM.message',
