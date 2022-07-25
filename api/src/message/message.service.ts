@@ -143,14 +143,16 @@ export class MessageService {
 			}))
 			.select(['PM.message'])
 			.addSelect([
-				'sent_at',
+				'PM.sent_at',
 				'PM.sender',
 				'PM.target',
 				'PM.message',
 				'users.name',
 				'users.avatar_url',
 				'usert.name',
-				'usert.avatar_url'
+				'usert.avatar_url',
+				'users.id',
+				'usert.id'
 			  ])
 			.getMany();
 		return msgs;
