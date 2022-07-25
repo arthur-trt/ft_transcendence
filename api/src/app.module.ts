@@ -16,31 +16,34 @@ import { GameModule } from './game/game.module';
 import { UserActivity } from './user/user_activity.entity';
 import { FriendshipsModule } from './friendships/friendships.module';
 import { WSServerModule } from './websocket/wsserver.module'
+import { AchievementsModule } from './achievements/achievements.module';
 
 @Module({
 
 	imports: [
-	  ConfigModule.forRoot({ //<- imported the config module
-		  envFilePath: '.env',
+		ConfigModule.forRoot({ //<- imported the config module
+			envFilePath: '.env',
 		}),
-	  UserModule,
+		UserModule,
 		ChannelModule,
 		WSServerModule,
 		GameModule,
-	  TypeOrmModule.forRoot({
-	  type: 'postgres',
-	  host: 'db',
-	  port: 5432,
-	  username: process.env.POSTGRES_USER,
-	  password: process.env.POSTGRES_PASSWORD,
-	  database: process.env.POSTGRES_DB,
-	  entities: [User, Channel, privateMessage, channelMessage, MatchHistory, UserActivity], /* Create tables according to prototype in entities */
-	  //entities: [ './car/*.entity.{js,ts}'],
-		synchronize: true,
-		logging: true
-	}),
-	  AuthModule,
-	  FriendshipsModule],
+		AchievementsModule,
+		TypeOrmModule.forRoot({
+			type: 'postgres',
+			host: 'db',
+			port: 5432,
+			username: process.env.POSTGRES_USER,
+			password: process.env.POSTGRES_PASSWORD,
+			database: process.env.POSTGRES_DB,
+			autoLoadEntities: true,
+			// entities: //[User, Channel, privateMessage, channelMessage, MatchHistory, UserActivity], /* Create tables according to prototype in entities */
+			//entities: [ './car/*.entity.{js,ts}'],
+			synchronize: true,
+			logging: false
+		}),
+		AuthModule,
+		FriendshipsModule],
 })
 
-  export class AppModule { }
+export class AppModule { }

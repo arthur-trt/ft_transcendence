@@ -13,10 +13,10 @@
 #
 # Dev image
 #
-FROM	node:alpine
+FROM	node
 
 
 WORKDIR	/api/
 COPY	./entrypoint.sh ./entrypoint.sh
 
-CMD ["ash", "/api/entrypoint.sh"]
+CMD ["sh", "/api/entrypoint.sh"]

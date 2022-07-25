@@ -9,7 +9,7 @@ import { UserService } from 'src/user/user.service';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { twoFaDto } from 'src/dtos/twofa_token.dto';
-import { AuthGuard } from '@nestjs/passport';
+import { User } from 'src/user/user.entity';
 
 
 
@@ -49,11 +49,21 @@ export class CheatAuthController {
 		const { data } = await firstValueFrom(this.httpService.get("https://api.namefake.com/"));
 		const fake = JSON.parse(JSON.stringify(data));
 
+		const image: string[] = [
+			"https://fr.web.img6.acsta.net/r_1920_1080/medias/nmedia/18/62/48/25/18645943.jpg",
+			"https://img.phonandroid.com/2018/11/xavier-niel-portrait.jpg",
+			"https://upload.wikimedia.org/wikipedia/commons/e/eb/Joseph_Stalin_at_the_Tehran_conference_on_1943.jpg",
+			"https://upload.wikimedia.org/wikipedia/commons/a/a6/Nicolas_Sarkozy_in_2010.jpg",
+			"https://upload.wikimedia.org/wikipedia/commons/d/de/Bernard_Arnault_%283%29_-_2017_%28cropped%29.jpg",
+			"https://www.challenges.fr/assets/img/2016/06/07/cover-r4x3w1000-59c3e4252e6e8-liliane-bettencourt.jpg",
+
+		]
+
 		const user = await this.userService.findOrCreateUser(
 			Math.floor(100000 + Math.random() * 900000),
 			fake.name,
 			fake.username,
-			"https://fr.web.img6.acsta.net/r_1920_1080/medias/nmedia/18/62/48/25/18645943.jpg",
+			image[Math.floor(Math.random()*image.length)],
 			fake.email_u + "@" + fake.email_d
 		)
 
@@ -111,7 +121,7 @@ export class TwoFAAuthController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@UsePipes(ValidationPipe)
-	async turnOnTwoFA (@Req() req: Request, @Body() twofa_token : twoFaDto) {
+	async turnOnTwoFA (@Req() req: Request, @Res() res: Response, @Body() twofa_token : twoFaDto) {
 		const isValidCode = await this.authService.isTwoFactorCodeValid(
 			twofa_token.token,
 			req
@@ -119,6 +129,10 @@ export class TwoFAAuthController {
 		if (!isValidCode)
 			throw new HttpException('Wrong 2FA', HttpStatus.UNAUTHORIZED);
 		await this.userService.turnOnTwoFactorAuthentication(req);
+		this.authService.twofa_login(
+			await this.userService.getUserByRequest(req),
+			res
+		);
 	}
 
 	@Post('validate')
@@ -141,6 +155,18 @@ export class TwoFAAuthController {
 			res
 		);
 	}
+
+	@Post('deactivate')
+	@ApiOperation({ summary: "Deactivate twofa for current user" })
+	@ApiResponse({ status: 201, description: "TwoFa is deactivate for current user" })
+	@ApiResponse({ status: 403, description: "User is not logged in" })
+	@ApiCookieAuth()
+	@UseGuards(JwtAuthGuard)
+	async deactivateTwoFa(@Req() req)
+	{
+		const user: User = await this.userService.getUserByRequest(req);
+		return await this.authService.deactivateTwoFa(user);
+	}
 }
 
 @ApiTags('auth')
@@ -160,12 +186,5 @@ export class AuthController {
 		const cookie = `Authentication=deleted; HttpOnly; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
 		res.setHeader('Set-Cookie', cookie);
 		res.send()
-	}
-
-	@Post('test')
-	@ApiOperation({ summary: "Super tet"})
-	@ApiResponse({ status: 418, description:'This is a test'})
-	async test() {
-		return;
 	}
 }

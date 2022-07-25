@@ -8,6 +8,7 @@ import { Request, Response } from 'express';
 import { toDataURL } from 'qrcode';
 import { jwtConstants } from './jwt/jwt.constants';
 import { TransformStreamDefaultController } from 'stream/web';
+import { useContainer } from 'class-validator';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +24,7 @@ export class AuthService {
 			isSecondFactorAuthenticated
 		}
 		const token = this.jwtService.sign(payload);
-		const cookie = `Authentication=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire_time}`;
+		const cookie = `Authentication=${token}; Path=/; Max-Age=${jwtConstants.expire_time}`;
 		return cookie;
 	}
 
@@ -33,7 +34,7 @@ export class AuthService {
 		{
 			return res.redirect('/2fa');
 		}
-		return res.redirect('/home');
+		return res.redirect('/');
 	}
 
 	public twofa_login (user: User, @Res() res: Response) {
@@ -79,5 +80,12 @@ export class AuthService {
 			token: code,
 			secret: user_secret,
 		}));
+	}
+
+	async deactivateTwoFa (user: User)
+	{
+		user.TwoFA_enable = false;
+		user.TwoFA_secret = null;
+		return await user.save();
 	}
 }

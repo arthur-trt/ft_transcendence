@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import '../index.css';
+import { Link } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 
 // FONT AWESOME SINGLE IMPORT
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons'
 import { faArrowAltCircleRight } from '@fortawesome/free-regular-svg-icons'
+import { faTrashCan } from '@fortawesome/free-regular-svg-icons'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { faPaperPlane } from '@fortawesome/free-regular-svg-icons'
 
 // IMPORT THE SOCKET
 import {socketo} from '../index';
 
+// VARIABLE DECLARATION OUTSIDE
 let tmp:any[any];
 var indents:any = [];
+let indexFriends = 0;
+// let DisplayChat = 0;
 
 export default function Channels() {
+
+  // TO DETECT ROUTE CHANGE
+  const location = useLocation();
 
   // VARIABLE DECLARATIONS
   const [socket, setSocket] = useState<any>([]);
@@ -28,7 +36,21 @@ export default function Channels() {
   const [chanName, setChanName] = useState("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any>([]);
+  const [DisplayChat, setDisplayChat] = useState(0);
 
+  // DISPLAY FRIENDS LIST
+  const [switching, setSwitching] = useState(0);
+  const [friends, setFriends] = useState<any>([]);
+  const [friendsrequest, setFriendsRequest] = useState<any>([]);
+  const [UsersBtnColor, setUsersBtnColor] = useState('#1dd1a1');
+  const [FriendsBtnColor, setFriendsBtnColor] = useState('white');
+
+  // IF THE ROUTE CHANGE
+  useEffect(() => {
+    setDisplayChat(0);
+  }, [location]);
+
+  // FETCH DATA FROM THE USER
   useEffect(() => {
     const getData = async () => {
         const response = await fetch(
@@ -44,10 +66,11 @@ export default function Channels() {
   useEffect(
     () => {
       const socket = socketo;
-      // const socket = io('http://localhost:8080');
       setSocket(socket);
       socket.emit('getRooms');
       socket.emit('getUsers');
+      socket.emit('getFriends');
+      socket.emit('getFriendRequests');
       socket.on('rooms', (msg:any, tab:any) => {
         setData(tab);
       });
@@ -57,10 +80,14 @@ export default function Channels() {
       socket.on('channelMessage', (msg:any) => {
           setMessages(msg);
       });
-
-      // return () => {
-      //   socket.emit('disconnectUser', name);
-      // };
+      socket.on('friendList', (msg:any, tab:any) => {
+        // console.log(tab);
+        setFriends(tab);
+    });
+    socket.on('newFriendRequest', (msg:any, tab:any) => {
+      // console.log(tab);
+      setFriendsRequest(tab);
+  });
   }, []);
 
   // FUNCTIONS TO HANDLE ACTIONS ON CHANNELS
@@ -74,15 +101,41 @@ export default function Channels() {
   }
   let handleDelete = (e:any) => {
     socket.emit('deleteRoom', e.currentTarget.id);
+    if (chanName === e.currentTarget.id)
+      setDisplayChat(0);
   }
   let handleLeave = (e:any) => {
     socket.emit('leaveRoom', e.currentTarget.id);
+    if (chanName === e.currentTarget.id)
+      setDisplayChat(0);
   }
   let handleOpen = (e:any) => {
     if (isInChan(e.currentTarget.id) == 0)
       return(0);
     socket.emit('getChannelMessages', e.currentTarget.id);
+    setDisplayChat(1);
     setChanName(e.currentTarget.id);
+  }
+  let handleAddFriend = (e:any) => {
+    socket.emit('addFriend', datausers[parseInt(e.currentTarget.id)]);
+  }
+  let handleAcceptFriend = (e:any) => {
+    let i = 0;
+    while (i < datausers?.length)
+    {
+      if (datausers[i]?.id === friendsrequest[parseInt(e.currentTarget.id)].sender.id)
+        socket.emit('acceptFriend', datausers[i]);
+      i++;
+    }
+  }
+  let handleRemoveFriend = (e:any) => {
+    let i = 0;
+    while (i < datausers?.length)
+    {
+      if (datausers[i]?.id === friends.friends[parseInt(e.currentTarget.id)].id)
+        socket.emit('removeFriend', datausers[i]);
+      i++;
+    }
   }
 
   // DISPLAY CHANNELS
@@ -101,39 +154,92 @@ export default function Channels() {
         }
 
         // push every chan div in the array "indents"
-        indents.push(<div style={{'backgroundColor': BgColor}} className="channels-single" key={i} id={data[i]?.name} onClick={handleOpen}>
-            <h5>
-            {data[i]?.name}
-            </h5>
-            <FontAwesomeIcon icon={faCircleXmark} className="circlexmark" id={data[i]?.name} onClick={handleDelete} />
-            <FontAwesomeIcon icon={faArrowAltCircleRight} className="arrow" id={data[i]?.name} onClick={handleLeave} />
-            <FontAwesomeIcon icon={faPlus} className="plus" id={data[i]?.name} onClick={handleJoin} />
-            {/* <FontAwesomeIcon icon={faPaperPlane} className="paperplane" id={data[i]?.name} onClick={handleOpen} /> */}
-            </div>);
+        indents.push(
+            <div className="channels-single" key={i}>
+              <div style={{'backgroundColor': BgColor}} className='channels-single-clickable' id={data[i]?.name} onClick={handleOpen}>
+               <h5>{data[i]?.name}</h5>
+              </div>
+              <div style={{'backgroundColor': BgColor}} className='channels-single-actions'>
+                <FontAwesomeIcon icon={faTrashCan} className="trashcan" id={data[i]?.name} onClick={handleDelete} />
+                <FontAwesomeIcon icon={faCircleXmark} className="circlexmark" id={data[i]?.name} onClick={handleLeave} />
+                <FontAwesomeIcon icon={faArrowAltCircleRight} className="arrow" id={data[i]?.name} onClick={handleJoin} />
+              </div>
+            </div>
+            );
         i++;
         BgColor = 'white';
     }
     return indents;
   }
 
+  function displayButtonFriend(i: number) {
+    let j = 0;
+    while (j < friends?.friends?.length)
+    {
+      if (datausers[i]?.id === friends?.friends[j]?.id)
+        return (<div className='users-single-info-friends'>
+                  <FontAwesomeIcon className='paperplane' icon={faPaperPlane}></FontAwesomeIcon>
+                  <button id={i.toString()} onClick={handleRemoveFriend}>Remove</button>
+                </div>
+        );
+      j++;
+    }
+   return (
+    <button id={i.toString()} onClick={handleAddFriend}>Add as friend</button>
+   ) 
+  }
+
   // DISPLAY USERS
   function display_users() {
     var indents = [];
     let i = 0;
+    let borderStatus = 'white';
+    let profilelink;
 
-    while (i < datausers?.length)
+    if (switching % 2 === 0)
     {
-      indents.push(<div className="users-single" key={i}>
-          <div className='users-single-img'>
-            <img src={datausers[i]?.avatar_url}></img>
-          </div>
-          <div className='users-single-info'>
-            <h5>{datausers[i]?.name}</h5>
-            <p>{datausers[i]?.id}</p>
-          </div>
-      </div>);
-      i++; 
+      while (i < datausers?.length)
+      {
+        profilelink = "/profile/" + datausers[i]?.id;
+        if (datausers[i]?.status === 'online')
+          borderStatus = 'springgreen';
+        else if (datausers[i]?.status === 'ingame')
+          borderStatus = 'orange';
+        else if (datausers[i]?.status === 'offline')
+          borderStatus = 'red';
+        
+        indents.push(<div className="users-single" key={i}>
+            <div className='users-single-img'>
+              <Link to={profilelink}><img style={{'borderColor': borderStatus}} src={datausers[i]?.avatar_url}></img></Link>
+            </div>
+            <div className='users-single-info'>
+              <h5>{datausers[i]?.name}</h5>
+              {displayButtonFriend(i)}
+            </div>
+        </div>);
+        i++;
+        borderStatus = 'white';
+      }
     }
+    if (switching % 2 === 1)
+    {
+      while (i < friendsrequest?.length)
+      {
+        indents.push(<div className='friendsrequest-single' key={i + 111}>
+              <div className='friendsrequest-single-img'>
+                <img src={friendsrequest[i].sender.avatar_url}></img>
+              </div>
+              <div className='friendsrequest-single-name'>
+                <p>{friendsrequest[i]?.sender.name}</p>
+              </div>
+              <div className='friendsrequest-single-button'>
+                <button id={i.toString()} onClick={handleAcceptFriend}>Accept</button>
+              </div>
+        </div>);
+        i++;
+      }
+    }
+
     return indents;
   }
 
@@ -150,13 +256,14 @@ export default function Channels() {
   // need to reverse printing the array of messages because of
   // chat box displaying from bottom to top
   function display_msg() {
-    let i = messages.messages?.length -1;
+    let i;
+    if (messages)
+      i = messages.messages?.length -1;
     let msgColor = 'bisque';
     
-    if (chanName == messages.name)
-    {
-      tmp = messages;
-    }
+    if (messages)
+      if (chanName == messages.name)
+        tmp = messages;
     
     if (tmp)
     {
@@ -167,7 +274,7 @@ export default function Channels() {
         if (datame.name == tmp.messages[i]?.sender.name)
           msgColor = 'lightskyblue';
         
-        indents.push(<div className='chat-message' key={i + datame.id}>
+        indents.push(<div className='chat-message' key={i}>
           <h5>{tmp.messages[i]?.sender.name} <span>{tmp.messages[i]?.sent_at.substr(0, 10)}</span></h5>
           <p style={{'backgroundColor': msgColor}}>{tmp.messages[i]?.message}</p>
         </div>);
@@ -198,9 +305,11 @@ export default function Channels() {
 
   // DISPLAY CHAT
     let display_chat = (e: any) => {
+      if (!DisplayChat)
+        return("");
 
     return (
-      <div className='chat-wrapper' key={0}>
+      <div className='chat-wrapper'>
       <div className='chat-title'>#{chanName.toUpperCase()}</div>
       <div className='chat-box'>
         {display_msg()}
@@ -216,14 +325,33 @@ export default function Channels() {
     </div> 
     )
   }
-    
+
+  function handleUsers() {
+    if (switching % 2 === 1)
+    {
+      setUsersBtnColor('#1dd1a1');
+      setFriendsBtnColor('white');
+      indexFriends++;
+      setSwitching(indexFriends);
+    }
+  }
+  function handleFriends() {
+    if (switching % 2 === 0)
+    {
+      setUsersBtnColor('white');
+      setFriendsBtnColor('#1dd1a1');
+      indexFriends++;
+      setSwitching(indexFriends);
+    }
+  }
+
     // PAGE RENDER
     return (
 
       <div className='community-container'>
         
         <div className='channels-container'>
-          <h3>CHANNELS</h3>
+          {/* <h3>CHANNELS</h3> */}
           <form onSubmit={handleCreate}>
             <input
               type="text"
@@ -238,12 +366,16 @@ export default function Channels() {
         </div>
 
         <div className='chat-container'>
-          <h3>CHAT</h3>
-          {display_chat(0)}
+          {/* <h3>CHAT</h3> */}
+          {display_chat(DisplayChat)}
         </div>
 
         <div className='users-container'>
-          <h3>USERS</h3>
+          {/* <h3>USERS</h3> */}
+          <div className='users-tab'>
+            <button style={{backgroundColor: UsersBtnColor}} onClick={handleUsers}>USERS</button>
+            <button style={{backgroundColor: FriendsBtnColor}} onClick={handleFriends}>REQUESTS</button>
+          </div>
           <div className='users-list'>
               {display_users()}
           </div>

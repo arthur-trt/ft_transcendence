@@ -17,6 +17,7 @@ code {
   width: 100%;
   color: #1dd1a1;
   display: flex;
+  height: 70px;
   justify-content: left;
   align-items: center;
   background-color: white;
@@ -53,11 +54,15 @@ code {
   color: white;
 }
 
+/* --------------HEADER-------------- */
+
 .header {
   width: 100%;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   color: black;
   display: flex;
+  height: 70px;
+  align-items: center;
   background-color: white;
 }
 
@@ -91,9 +96,8 @@ code {
 .info img {
   max-height: 100%;
   max-width: 100%;
-  width: 64px;
-  height: 64px;
-  border: 2px solid white ;
+  width: 50px;
+  height: 50px;
   margin-right: 15px;
   border-radius: 50px;
 }
@@ -113,6 +117,7 @@ code {
   display: flex;
   margin-top: 20px;
   padding-bottom: 20px;
+  padding-top: 20px;
   margin-right: 2%;
   margin-left: 2%;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
@@ -123,7 +128,6 @@ code {
 /* --------------CHANNELS-------------- */
 
 .channels-container {
-  margin-left: 20px;
   width: 30%;
 }
 
@@ -157,78 +161,102 @@ code {
 .channels-single {
   margin: 5px;
   width: 165px;
-  padding: 5px;
+  height: 70px;
+  /* padding: 5px; */
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-  text-align: center;
-  text-transform: uppercase;
+  /* text-align: center; */
+  /* text-transform: uppercase; */
   border-radius: 5px;
-  position: relative;
-  cursor: pointer;
+  /* position: relative; */
+  /* cursor: pointer; */
 }
 
-.channels-single:hover {
+/* .channels-single:hover {
   filter: brightness(1.2);
   transition: all 0.5s ease-out;
 }
 
 .channels-single:active {
   transform: scale(0.80);
+} */
+
+.channels-single-clickable {
+  height: 40px;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.channels-single-clickable:hover {
+  filter: brightness(1.2);
+  transition: all 0.5s ease-out;
+}
+
+/* .channels-single-clickable:active {
+  transform: scale(1.2);
+} */
+
+.channels-single-clickable h5 {
+  margin: 0;
+}
+
+.channels-single-actions {
+  height: 30px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.channels-single .trashcan {
+  /* position: absolute;
+  bottom: 0;
+  right: 0; */
+  /* margin-right: 5px;
+  margin-bottom: 5px; */
+  /* border-radius: 50px; */
+  cursor: pointer;
+  color: black;
 }
 
 .channels-single .circlexmark {
-  position: absolute;
+  /* position: absolute;
   top: 0;
-  left: 0;
-  margin-left: 5px;
-  margin-top: 5px;
+  left: 0; */
+  /* margin-left: 5px;
+  margin-top: 5px; */
   border-radius: 50px;
   cursor: pointer;
   color: black;
 }
 
 .channels-single .arrow {
-  position: absolute;
+  /* position: absolute;
   bottom: 0;
-  left: 0;
-  margin-left: 5px;
-  margin-bottom: 5px;
-  border-radius: 50px;
-  cursor: pointer;
-  color: black; 
-}
-
-.channels-single .circlexmark:hover, .arrow:hover {
-  background-color:tomato ;
-  transition: all 0.5s ease-out;
-}
-
-.channels-single .plus {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  margin-right: 5px;
-  margin-bottom: 5px;
-  border-radius: 50px;
-  cursor: pointer;
-  color: black; 
-}
-
-/* .channels-single .paperplane {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin-right: 5px;
-  margin-top: 5px;
+  left: 0; */
+  /* margin-left: 5px;
+  margin-bottom: 5px; */
   border-radius: 50px;
   cursor: pointer;
   color: black;
-} */
+}
+
+.channels-single .trashcan:hover, .circlexmark:hover, .arrow:hover {
+  /* color: red; */
+  transform: scale(1.2);
+  transition: all 0.5s ease-out;
+}
+
 
 /* --------------USERS-------------- */
 
 .users-container {
   width: 30%;
-  margin-right: 20px;
   text-align: center;
 }
 
@@ -244,17 +272,23 @@ code {
   display: none;
 }
 
+.users-tab button {
+text-decoration: none;
+border: 2px solid black;
+padding: 5px;
+margin: 2px;
+border-radius: 3px;
+cursor: pointer;
+}
+
 .users-single {
   margin: 5px;
   width: 230px;
-  padding: 5px;
+  padding: 3px;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-  text-align: center;
   text-transform: uppercase;
   border-radius: 50px;
   display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .users-single-img {
@@ -267,23 +301,72 @@ code {
 .users-single-img img {
   max-height: 100%;
   max-width: 100%;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border-radius: 50px;
-  border: 2px solid springgreen;
+  border: 2px solid;
+  display: flex;
 }
 
 .users-single-info {
   width: 70%;
+  text-align: left;
 }
 
 .users-single-info h5 {
   margin: 0;
+  font-size: 11px;
 }
 
-.users-single-info p {
+.users-single-info .paperplane {
+  color: #1dd1a1;
+  cursor: pointer;
+}
+
+.users-single-info .paperplane:active {
+  transition: all 0.5s ease-out;
+  transform: scale(0.80);
+}
+  
+.users-single-info-friends button {
+  margin-left: 5px;
+}
+
+.friendsrequest-single {
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  display: flex;
+  align-items: center;
+  margin: 2.5px;
+  border-radius: 50px;
+}
+
+.friendsrequest-single-img {
+  width: 20%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.friendsrequest-single-img img {
+  max-height: 100%;
+  max-width: 100%;
+  width: 15px;
+  height: 15px;
+  border-radius: 50px;
+}
+
+.friendsrequest-single-name {
+  width: 50%;
+  text-align: left;
+}
+
+.friendsrequest-single p {
   margin: 0;
-  font-size: 10px;
+  font-size: 12px;
+}
+
+.friendsrequest-single-button {
+  width: 30%;
 }
 
 /* --------------CHAT-------------- */
@@ -368,30 +451,95 @@ textarea:focus, input:focus{
 /* --------------PROFILE---------------- */
 /* ------------------------------------- */
 
-.setpro-container {
-  /* background-color: aqua; */
-  display: flex;
-  width: 100%;
+.profile-container {
+  background-color: white;
+  width: 50%;
+  margin: auto;
+  text-align: center;
   margin-top: 20px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 10px;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 
-.setpro-container .settings {
-  /* background-color: blueviolet; */
-  width: 50%;
-  text-align: center;
-  border-right: 1px solid black;
+.profile-container img {
+  max-height: 100%;
+  max-width: 100%;
+  width: 150px;
+  height: 150px;
+  margin-right: 15px;
+  border-radius: 150px;
+  border: 5px solid #1dd1a1;
 }
 
-.setpro-container .profile {
-  /* background-color: brown; */
-  width: 50%;
-  border-left: 1px solid black;
+.profile-info {
+  text-align: left;
 }
 
-.setpro-container .profile h3 {
-  text-align: center;
+.profile-name {
+  display: flex;
+  align-items: center;
+  height: 40px;
 }
 
-.setpro-container .profile h5 {
-  margin-left: 10px;
+.profile-name h5 {
+  margin: 0;
+  margin-left: 5px;
+}
+
+.profile-name .pen {
+  cursor: pointer;
+  margin-left: 5px;
+  border-radius: 50px;
+  font-size: 10px;
+}
+
+.profile-name .pen:hover {
+  color: #1dd1a1;
+  transition: all 0.5s ease-out;
+}
+
+.profile-name input {
+  margin-left: 5px;
+  padding: 5px;
+  border-radius: 3px;
+  border: 2px solid black;
+  text-decoration: none;
+}
+
+.profile-other h5 {
+  margin: 0;
+  margin-left: 5px;
+}
+
+
+/*
+** DEBUG
+*/
+
+.debug pre {
+  /*display: flex;*/
+  background-color: white;
+  /*width: 50%;*/
+  /*align-self: center;*/
+  outline: 1px solid #ccc;
+  padding: 5px;
+  margin: 15px;
+}
+
+.debug .string {
+  color: green;
+}
+.debug .number {
+  color: darkorange;
+}
+.debug .boolean {
+  color: blue;
+}
+.debug .null {
+  color: magenta;
+}
+.debug .key {
+  color: red;
 }

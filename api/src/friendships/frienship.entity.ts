@@ -8,10 +8,10 @@ export class Friendships extends BaseEntity {
 	@PrimaryGeneratedColumn("uuid")  // id du match
 	id: string;
 
-	@Column()
+	@Column("uuid")
 	sender: string; // uuid de l'initiateurice de la req
 
-	@Column()
+	@Column("uuid")
 	target: string; // uuid de la personne avec qui on veut etre poto
 
 	@Column()

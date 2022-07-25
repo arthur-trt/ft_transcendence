@@ -9,7 +9,7 @@ import { validate as isValidUUID } from 'uuid';
 import { ModifyUserDto } from 'src/dtos/user.dto';
 import { UserActivity } from './user_activity.entity';
 import { UpsertOptions } from 'typeorm/repository/UpsertOptions';
-
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -103,12 +103,12 @@ export class UserService {
 	 */
 	public async getUserByIdentifier(userIdentifier: string) : Promise<User> {
 
-		let user : User = await this.userRepo.findOne({ where: { name: userIdentifier }, relations: ['channels'] }); /* Pay attention to load relations !!! */
+		let user : User = await this.userRepo.findOne({ where: { name: userIdentifier }, relations: ['channels', 'friends'] }); /* Pay attention to load relations !!! */
 
 		if (!user && isValidUUID(userIdentifier))
 			 user = await this.userRepo.findOne({
 			where: {id: userIdentifier},
-			relations: ['channels']
+				 relations: ['channels', 'friends']
 			});
 		if (!user)
 			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
@@ -144,7 +144,7 @@ export class UserService {
 	}
 
 
-	public async joinChannel(user: User, channelname: string)
+	public async joinChannel(user: User, channelname: string, password: string = null): Promise<boolean>
 	{
 		let channel: Channel;
 		try
@@ -153,10 +153,18 @@ export class UserService {
 		}
 		catch (err)
 		{
-			return await this.chanService.createChannel(channelname, user);
+			return await this.chanService.createChannel(channelname, user, password);
+		}
+		if (channel.password_protected)
+		{
+			if (!password || !await bcrypt.compare(password, await this.chanService.getChannelPasswordHash(channel.id)))
+			{
+				throw new HttpException('Bad Password', HttpStatus.FORBIDDEN)
+			}
 		}
 		user.channels = [...user.channels, channel]; /* if pb of is not iterable, it is because we did not get the realtions in the find one */
-		return await user.save();
+		await user.save();
+		return (true);
 	}
 
 
@@ -201,8 +209,18 @@ export class UserService {
 
 	public async block(user: User, toBan: User) :  Promise<User>
 	{
-		user.blocked = [];
+		if (user.blocked == null)
+			user.blocked = [];
 		user.blocked.push(toBan.id);
+		user.save();
+		return user;
+	}
+
+	public async unblock(user: User, toUnBan: User): Promise<User> {
+		const index = user.blocked.indexOf(toUnBan.id);
+		if (index > -1) {
+			user.blocked.splice(index, 1);
+		}
 		user.save();
 		return user;
 	}
