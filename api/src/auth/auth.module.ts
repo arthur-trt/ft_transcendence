@@ -1,17 +1,19 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { FortyTwoAuthController, CheatAuthController, TwoFAAuthController, AuthController } from './auth.controller';
+import { CheatAuthController, AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
 import { UserModule } from 'src/user/user.module';
-import { UserRepository } from 'src/user/user.repository';
-import { FortyTwoAuthStrategy } from './auth.strategy';
+import { FortyTwoAuthStrategy } from './fortyTwo/fortyTwo.strategy';
 import { PassportModule } from '@nestjs/passport';
-import { UserService } from 'src/user/user.service';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './jwt/jwt.constants';
 import { JwtStrategy } from './jwt/jwt.strategy';
 import { HttpModule } from '@nestjs/axios';
+import { TwoFaService } from './2fa/2fa.service';
+import { FortyTwoService } from './fortyTwo/fortyTwo.service';
+import { FortyTwoAuthController } from './fortyTwo/fortyTwo.controller';
+import { TwoFAAuthController } from './2fa/2fa.controller';
 
 @Module({
   imports: [
@@ -24,7 +26,7 @@ import { HttpModule } from '@nestjs/axios';
     }),
     HttpModule
   ],
-  providers: [AuthService, FortyTwoAuthStrategy, JwtStrategy],
+  providers: [AuthService, FortyTwoAuthStrategy, JwtStrategy, TwoFaService, FortyTwoService],
   controllers: [FortyTwoAuthController, CheatAuthController, TwoFAAuthController, AuthController],
 })
 export class AuthModule {}
