@@ -22,7 +22,6 @@ export class FortyTwoAuthStrategy extends PassportStrategy(Strategy)
 				'email': 'email',
 				'image_url': 'image_url'
 			  },
-			//passReqToCallback: true,
 		});
 	}
 
