@@ -7,8 +7,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons'
 import { faArrowAltCircleRight } from '@fortawesome/free-regular-svg-icons'
 import { faTrashCan } from '@fortawesome/free-regular-svg-icons'
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { faPaperPlane } from '@fortawesome/free-regular-svg-icons'
+import { faLock } from '@fortawesome/free-solid-svg-icons'
+import { faMask } from '@fortawesome/free-solid-svg-icons'
+import { faUserPlus } from '@fortawesome/free-solid-svg-icons'
+import { faUserXmark } from '@fortawesome/free-solid-svg-icons'
+import { faUserSlash } from '@fortawesome/free-solid-svg-icons'
+import { faGamepad } from '@fortawesome/free-solid-svg-icons'
 
 // IMPORT THE SOCKET
 import {socketo} from '../index';
@@ -27,6 +32,7 @@ export default function Channels() {
   const [socket, setSocket] = useState<any>([]);
   const [data, setData] = useState<any>([]);
   const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
   const [datame, setDatame] = useState<any>([]);
   const [datausers, setDatausers] = useState<any>([]);
   let BgColor = 'white';
@@ -46,9 +52,15 @@ export default function Channels() {
   const [UsersBtnColor, setUsersBtnColor] = useState('#1dd1a1');
   const [FriendsBtnColor, setFriendsBtnColor] = useState('white');
 
+  // CHANNEL CREATION
+  const [publicChan, setPublicChan] = useState(2);
+  const [passToJoin, setPassToJoin] = useState("");
+  const [chanToJoin, setChanToJoin] = useState("");
+
   // IF THE ROUTE CHANGE
   useEffect(() => {
     setDisplayChat(0);
+    setPublicChan(2);
   }, [location]);
 
   // FETCH DATA FROM THE USER
@@ -99,12 +111,40 @@ export default function Channels() {
   
   // FUNCTIONS TO HANDLE ACTIONS ON CHANNELS
   let handleCreate = (e: any) => {
-      e.preventDefault(); // to prevent the refresh on submit
-      socket.emit('createRoom', {chanName : name});
-      setName("");  
+      e.preventDefault();
+      if (publicChan == 1)
+      {
+        if (!password)
+          socket.emit('createRoom', {chanName : name});
+        else if (password)
+          socket.emit('createRoom', {chanName : name, password: password});
+      }
+      else if (!publicChan)
+        socket.emit('createRoom', {chanName : name, private: true});
+      setName("");
+      setPassword("");
+      setPublicChan(2);
   }
   let handleJoin = (e:any) => {
-    socket.emit('joinRoom', {chanName : e.currentTarget.id});
+    let i = 0;
+
+    while (i < data?.length)
+    {
+      if (data[i]?.name === e.currentTarget.id)
+      {
+        if (data[i]?.password_protected == true)
+          setChanToJoin(e.currentTarget.id);
+        else
+          socket.emit('joinRoom', {chanName : e.currentTarget.id});
+      }
+      i++;
+    }
+  }
+  let handleJoinProtected = (e:any) => {
+    e.preventDefault();
+    socket.emit('joinRoom', {chanName : chanToJoin, password: passToJoin});
+    setChanToJoin("");
+    setPassToJoin("");
   }
   let handleDelete = (e:any) => {
     socket.emit('deleteRoom', e.currentTarget.id);
@@ -158,6 +198,34 @@ export default function Channels() {
     setprivMsgChat(1);
   }
 
+  function ChanStatus(i: number) {
+    if (data[i]?.private == false)
+    {
+      if (data[i]?.password_protected == true)
+        return (<FontAwesomeIcon icon={faLock} className="lock"/>)
+    }
+    else if (data[i]?.private == true)
+      return (<FontAwesomeIcon icon={faMask} className="mask"/>)
+  }
+
+  function PopUp_PassToJoin(i: number) {
+    if (chanToJoin && chanToJoin === data[i]?.name)
+    {
+      return (
+        <div className='channels-single-popuptojoin'>
+          <form onSubmit={handleJoinProtected}>
+            <input
+            type="text"
+            value={passToJoin}
+            placeholder="Password"
+            onChange={(e) => setPassToJoin(e.target.value)}
+            />
+          </form>
+        </div>
+      )
+    }
+  }
+
   // DISPLAY CHANNELS
   function display_chan() {
     var indents = [];
@@ -178,11 +246,13 @@ export default function Channels() {
             <div className="channels-single" key={i}>
               <div style={{'backgroundColor': BgColor}} className='channels-single-clickable' id={data[i]?.name} onClick={handleOpen}>
                <h5>{data[i]?.name}</h5>
+               {ChanStatus(i)}
               </div>
               <div style={{'backgroundColor': BgColor}} className='channels-single-actions'>
                 <FontAwesomeIcon icon={faTrashCan} className="trashcan" id={data[i]?.name} onClick={handleDelete} />
                 <FontAwesomeIcon icon={faCircleXmark} className="circlexmark" id={data[i]?.name} onClick={handleLeave} />
                 <FontAwesomeIcon icon={faArrowAltCircleRight} className="arrow" id={data[i]?.name} onClick={handleJoin} />
+                {PopUp_PassToJoin(i)}
               </div>
             </div>
             );
@@ -199,13 +269,15 @@ export default function Channels() {
       if (datausers[i]?.id === friends?.friends[j]?.id)
         return (<div className='users-single-info-friends'>
                   <FontAwesomeIcon className='paperplane' icon={faPaperPlane} id={datausers[i]?.name} onClick={handleOpenPrivate} ></FontAwesomeIcon>
-                  <button id={j.toString()} onClick={handleRemoveFriend}>Remove</button>
+                  <FontAwesomeIcon className='gamepad' icon={faGamepad} ></FontAwesomeIcon>
+                  <FontAwesomeIcon className='userslash' icon={faUserSlash} ></FontAwesomeIcon>
+                  <FontAwesomeIcon className='userxmark' icon={faUserXmark} id={j.toString()} onClick={handleRemoveFriend} ></FontAwesomeIcon>
                 </div>
         );
       j++;
     }
    return (
-    <button id={i.toString()} onClick={handleAddFriend}>Add as friend</button>
+    <FontAwesomeIcon className='userplus' icon={faUserPlus} id={i.toString()} onClick={handleAddFriend} ></FontAwesomeIcon>
    ) 
   }
 
@@ -295,6 +367,7 @@ export default function Channels() {
       i = messages.messages?.length -1;
     let msgColor = 'bisque';
     let ispriv = 1;
+    let profilelink;
 
     if (messages)
     {
@@ -315,12 +388,17 @@ export default function Channels() {
       indents = [];
       i = tmp.messages?.length -1;  
       while (i >= 0)
-      {
+      { 
+        profilelink = "/profile/" + tmp.messages[i]?.sender.id;
+
         if (datame.name == tmp.messages[i]?.sender.name)
           msgColor = 'lightskyblue';
         
         indents.push(<div className='chat-message' key={i}>
-          <h5>{tmp.messages[i]?.sender.name} <span>{tmp.messages[i]?.sent_at.substr(0, 10)}</span></h5>
+          <div className='chat-message-info'>
+          <Link to={profilelink} style={{ textDecoration: 'none', color: 'black' }}><h5>{tmp.messages[i]?.sender.name}</h5></Link>
+            <span>{tmp.messages[i]?.sent_at.substr(0, 8)}</span>
+          </div>
           <p style={{'backgroundColor': msgColor}}>{tmp.messages[i]?.message}</p>
         </div>);
         i--;
@@ -333,11 +411,15 @@ export default function Channels() {
       i = tmp?.length -1;  
       while (i >= 0)
       {
+        profilelink = "/profile/" + tmp[i]?.sender.id;
         if (datame.name == tmp[i]?.sender.name)
           msgColor = 'lightskyblue';
         
         indents.push(<div className='chat-message' key={i}>
-          <h5>{tmp[i]?.sender.name}</h5>
+          <div className='chat-message-info'>
+            <Link to={profilelink} style={{ textDecoration: 'none', color: 'black' }}><h5>{tmp[i]?.sender.name}</h5></Link>
+            <span>{tmp[i]?.sent_at.substr(0, 8)}</span>
+          </div>
           <p style={{'backgroundColor': msgColor}}>{tmp[i]?.message}</p>
         </div>);
         i--;
@@ -408,33 +490,74 @@ export default function Channels() {
     }
   }
 
+  function display_ChanCreation() {
+
+    if (publicChan == 2)
+    {
+      return (
+        <div className='channels-creation-selection'>
+        <button onClick={() => setPublicChan(1)}>PUBLIC</button>
+        <button onClick={() => setPublicChan(0)}>PRIVATE</button>
+        </div>
+      )
+    }
+    else if (publicChan == 1)
+    {
+      return (
+        <div className='channels-creation-selection'>
+        <form onSubmit={handleCreate}>
+          <input
+          type="text"
+          value={name}
+          placeholder="Name"
+          onChange={(e) => setName(e.target.value)}
+          />
+          <input
+          type="password"
+          value={password}
+          placeholder="Password"
+          onChange={(e) => setPassword(e.target.value)}
+          />
+          <button type="submit">CREATE</button>
+        </form>
+        </div>
+      )
+    }
+    else if (publicChan == 0)
+    {
+      return (
+        <div className='channels-creation-selection'>
+        <form onSubmit={handleCreate}>
+          <input
+          type="text"
+          value={name}
+          placeholder="Name"
+          onChange={(e) => setName(e.target.value)}
+          />
+          <button type="submit">CREATE</button>
+        </form>
+        </div>
+      )
+    }
+  }
+
     // PAGE RENDER
     return (
 
       <div className='community-container'>
         
         <div className='channels-container'>
-          {/* <h3>CHANNELS</h3> */}
-          <form onSubmit={handleCreate}>
-            <input
-              type="text"
-              value={name}
-              placeholder="Create channel..."
-              onChange={(e) => setName(e.target.value)}
-            />
-          </form>
+          {display_ChanCreation()}
           <div className="channels-list">
               {display_chan()}
           </div>
         </div>
 
         <div className='chat-container'>
-          {/* <h3>CHAT</h3> */}
           {display_chat(DisplayChat)}
         </div>
 
         <div className='users-container'>
-          {/* <h3>USERS</h3> */}
           <div className='users-tab'>
             <button style={{backgroundColor: UsersBtnColor}} onClick={handleUsers}>USERS</button>
             <button style={{backgroundColor: FriendsBtnColor}} onClick={handleFriends}>REQUESTS</button>
