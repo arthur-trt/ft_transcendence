@@ -299,9 +299,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 		const chan = await this.channelService.getChannelByIdentifier(channel);
 		await this.channelService.deleteChannel(client.data.user, chan);
-		return this.server.emit('rooms', channel + "has been deleted", await this.channelService.getChannelsForUser(client.data.user)); // on emet a tt le monde que le chan a ete supp
+		for (let [allUsers, socket] of this.active_users.entries())
+			this.server.to(socket.id).emit('rooms', client.data.user.name + " deleted " + channel, await this.channelService.getChannelsForUser(allUsers));
 	}
-
 	/**
 	 * @brief leave room for current user
 	 * @param client
@@ -414,6 +414,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	** █████   ██████  ██ █████   ██ ██  ██ ██   ██ ███████
 	** ██      ██   ██ ██ ██      ██  ██ ██ ██   ██      ██
 	** ██      ██   ██ ██ ███████ ██   ████ ██████  ███████
+	**
 	**
 	** Friends
 	** ├─ addFriend
