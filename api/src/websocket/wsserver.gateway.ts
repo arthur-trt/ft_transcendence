@@ -257,8 +257,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @returns
 	 */
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
 	@SubscribeMessage('createRoom') /** Join ROom parce que ca le creera aussi */
+	@UsePipes(ValidationPipe)
+
 	async onCreateRoom(client: Socket, channel: newChannelDto)
 	{
 		console.log( "wesh ")
@@ -413,7 +414,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	** █████   ██████  ██ █████   ██ ██  ██ ██   ██ ███████
 	** ██      ██   ██ ██ ██      ██  ██ ██ ██   ██      ██
 	** ██      ██   ██ ██ ███████ ██   ████ ██████  ███████
-	**
 	**
 	** Friends
 	** ├─ addFriend
