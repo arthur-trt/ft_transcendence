@@ -4,16 +4,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen } from '@fortawesome/free-solid-svg-icons'
 
 
-
 export default function Profile() {
 
     const [data, setData] = useState<any>([]);
     const [name, setName] = useState("");
     const [inputState, setInputState] = useState(0);
+
     const [errorMsg, setErrorMsg] = useState<string>("");
-    const [twofaCheck, setTwofaCheck] = useState<boolean>(false);
+
     const [twoFaSecret, setTwoFaSecret] = useState<string>();
     const [twoFaImage, setTwoFaImage] = useState<string>();
+    
+    const [twofaCheck, setTwofaCheck] = useState<boolean>(false);
     const [code, setCode] = useState<string>("");
     const [message, setMessage] = useState<string>("");
 

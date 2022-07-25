@@ -17,7 +17,6 @@ import {socketo} from '../index';
 let tmp:any[any];
 var indents:any = [];
 let indexFriends = 0;
-// let DisplayChat = 0;
 
 export default function Channels() {
 
@@ -37,6 +36,8 @@ export default function Channels() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any>([]);
   const [DisplayChat, setDisplayChat] = useState(0);
+  const [privMsgChat, setprivMsgChat] = useState(0);
+  const [privTarget, setPrivTarget] = useState<any>([]);
 
   // DISPLAY FRIENDS LIST
   const [switching, setSwitching] = useState(0);
@@ -81,23 +82,29 @@ export default function Channels() {
           setMessages(msg);
       });
       socket.on('friendList', (msg:any, tab:any) => {
-        // console.log(tab);
-        setFriends(tab);
-    });
-    socket.on('newFriendRequest', (msg:any, tab:any) => {
-      // console.log(tab);
-      setFriendsRequest(tab);
-  });
+          setFriends(tab);
+      });
+      socket.on('newFriendRequest', (msg:any, tab:any) => {
+        setFriendsRequest(tab);
+      });
+      socket.on('privateMessage', (msg:any, tab:any) => {
+        setPrivTarget(msg.split(' '));
+        setMessages(tab);
+      });
+      socket.on('error', (tab:any) => {
+        console.log(tab);
+      });
+    
   }, []);
-
+  
   // FUNCTIONS TO HANDLE ACTIONS ON CHANNELS
   let handleCreate = (e: any) => {
       e.preventDefault(); // to prevent the refresh on submit
-      socket.emit('createRoom', name);
+      socket.emit('createRoom', {chanName : name});
       setName("");  
   }
   let handleJoin = (e:any) => {
-    socket.emit('joinRoom', e.currentTarget.id);
+    socket.emit('joinRoom', {chanName : e.currentTarget.id});
   }
   let handleDelete = (e:any) => {
     socket.emit('deleteRoom', e.currentTarget.id);
@@ -115,6 +122,7 @@ export default function Channels() {
     socket.emit('getChannelMessages', e.currentTarget.id);
     setDisplayChat(1);
     setChanName(e.currentTarget.id);
+    setprivMsgChat(0);
   }
   let handleAddFriend = (e:any) => {
     socket.emit('addFriend', datausers[parseInt(e.currentTarget.id)]);
@@ -132,10 +140,22 @@ export default function Channels() {
     let i = 0;
     while (i < datausers?.length)
     {
-      if (datausers[i]?.id === friends.friends[parseInt(e.currentTarget.id)].id)
+      if (datausers[i]?.id === friends.friends[parseInt(e.currentTarget.id)]?.id)
         socket.emit('removeFriend', datausers[i]);
       i++;
     }
+  }
+  let handleOpenPrivate = (e:any) => {
+    let j = 0;
+    while (j < datausers?.length)
+    {
+      if (e.currentTarget.id === datausers[j]?.name)
+        socket.emit('getPrivateMessage', datausers[j]);
+      j++;
+    }
+    setDisplayChat(1);
+    setChanName(e.currentTarget.id);
+    setprivMsgChat(1);
   }
 
   // DISPLAY CHANNELS
@@ -178,8 +198,8 @@ export default function Channels() {
     {
       if (datausers[i]?.id === friends?.friends[j]?.id)
         return (<div className='users-single-info-friends'>
-                  <FontAwesomeIcon className='paperplane' icon={faPaperPlane}></FontAwesomeIcon>
-                  <button id={i.toString()} onClick={handleRemoveFriend}>Remove</button>
+                  <FontAwesomeIcon className='paperplane' icon={faPaperPlane} id={datausers[i]?.name} onClick={handleOpenPrivate} ></FontAwesomeIcon>
+                  <button id={j.toString()} onClick={handleRemoveFriend}>Remove</button>
                 </div>
         );
       j++;
@@ -246,9 +266,23 @@ export default function Channels() {
   // SEND MESSAGE TO CHANNEL
   let handleMessages = (e:any) => {
     e.preventDefault();
-    if (isInChan(e.currentTarget.id) == 0)
-      return(0);
-    socket.emit('sendChannelMessages', {chan: e.currentTarget.id, msg: message});
+    if (!privMsgChat)
+    {
+      if (isInChan(e.currentTarget.id) == 0)
+        return(0);
+      socket.emit('sendChannelMessages', {chan: e.currentTarget.id, msg: message});
+    }
+    else if (privMsgChat)
+    {
+      let j = 0;
+      while (j < datausers?.length)
+      {
+        if (e.currentTarget.id === datausers[j]?.name)
+          socket.emit('privateMessage', {to: datausers[j], msg: message});
+        j++;
+      }
+    }
+    
     setMessage("");
   }
 
@@ -260,12 +294,23 @@ export default function Channels() {
     if (messages)
       i = messages.messages?.length -1;
     let msgColor = 'bisque';
-    
+    let ispriv = 1;
+
     if (messages)
+    {
       if (chanName == messages.name)
+      {
         tmp = messages;
+        ispriv = 0;
+      }
+      else if (chanName == privTarget[0] || chanName == privTarget[1])
+      {
+        tmp = messages;
+        ispriv = 1;
+      }
+    }
     
-    if (tmp)
+    if (tmp && !ispriv)
     {
       indents = [];
       i = tmp.messages?.length -1;  
@@ -282,6 +327,24 @@ export default function Channels() {
         msgColor = 'bisque';
       }
     }
+    else if (tmp && ispriv)
+    {
+      indents = [];
+      i = tmp?.length -1;  
+      while (i >= 0)
+      {
+        if (datame.name == tmp[i]?.sender.name)
+          msgColor = 'lightskyblue';
+        
+        indents.push(<div className='chat-message' key={i}>
+          <h5>{tmp[i]?.sender.name}</h5>
+          <p style={{'backgroundColor': msgColor}}>{tmp[i]?.message}</p>
+        </div>);
+        i--;
+        msgColor = 'bisque';
+      }
+    }
+
     return indents;
   }
 
