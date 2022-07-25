@@ -24,11 +24,9 @@ export class JwtStrategy extends PassportStrategy(Strategy)
 	async validate(request: Request, payload: any) {
 		const	user = await this.userService.getUserByIdentifier(payload.sub);
 		if (!user.TwoFA_enable)
-			//return user
 			return { userId: payload.sub };
 		if (payload.isSecondFactorAuthenticated || request.url == "/api/auth/2fa/validate")
 		{
-			//return user;
 			return { userId: payload.sub };
 		}
 	}
