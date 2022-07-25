@@ -149,7 +149,6 @@ export class UserService {
 		const channel: Channel = await this.chanService.getChannelByIdentifier(channelname);
 		if (channel.banned.includes(user))
 			throw new HttpException('You are banned', HttpStatus.FORBIDDEN)
-
 		if (channel.password_protected)
 		{
 			if (!password || !await bcrypt.compare(password, await this.chanService.getChannelPasswordHash(channel.id)))
