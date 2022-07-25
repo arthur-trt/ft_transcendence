@@ -5,7 +5,7 @@ import { ChannelModule } from 'src/channel/channel.module';
 import { FriendshipsModule } from 'src/friendships/friendships.module';
 import { MessageModule } from 'src/message/message.module';
 import { UserModule } from 'src/user/user.module';
-import { WSServer } from './wsserver.service';
+import { WSServer } from './wsserver.gateway';
 //import { ChatGateway } from './chat.gateway';
 
 @Module({
