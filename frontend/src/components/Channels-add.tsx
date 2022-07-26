@@ -57,6 +57,9 @@ export default function Channels() {
   const [passToJoin, setPassToJoin] = useState("");
   const [chanToJoin, setChanToJoin] = useState("");
 
+  // CHANOP
+  const [chanOpPass, setChanOpPass] = useState("");
+
   // IF THE ROUTE CHANGE
   useEffect(() => {
     setDisplayChat(0);
@@ -360,6 +363,7 @@ export default function Channels() {
     setMessage("");
   }
 
+
   // DISPLAY MESSAGES IN THE CHAT
   // need to reverse printing the array of messages because of
   // chat box displaying from bottom to top
@@ -450,6 +454,70 @@ export default function Channels() {
     return(0);
   }
 
+  function chanOwnerOp() {
+    let i = 0;
+    while(i < data?.length)
+    {
+      if (data[i]?.ownerId === datame.id)
+      {
+        if (data[i]?.name === chanName)
+        {
+          if (!data[i]?.private)
+          {
+            if (data[i]?.password_protected) // change / unset
+            {
+              return (
+                <div className='chat-owner-op'>
+                  <form>
+                    <input
+                    type="text"
+                    value={chanOpPass}
+                    placeholder="Change Password"
+                    onChange={(e) => setChanOpPass(e.target.value)}
+                    />
+                  </form>
+                  <button>UNSET</button>
+                </div>
+              )
+            }
+            else if (!data[i]?.password_protected) //set
+            {
+              return (
+                <div className='chat-owner-op'>
+                  <form>
+                      <input
+                      type="text"
+                      value={chanOpPass}
+                      placeholder="Set Password"
+                      onChange={(e) => setChanOpPass(e.target.value)}
+                      />
+                  </form>
+                </div>
+              )
+            }
+          }
+          else if (data[i]?.private) //add members
+          {
+            return (
+              <div className='chat-owner-op'>
+                <form>
+                  <input
+                  type="text"
+                  value={chanOpPass}
+                  placeholder="Add Members"
+                  onChange={(e) => setChanOpPass(e.target.value)}
+                  />
+                </form>
+              </div>
+            )
+          }
+        }
+      }
+      i++; 
+    }
+    return ("");
+  }
+
   // DISPLAY CHAT
     let display_chat = (e: any) => {
       if (!DisplayChat)
@@ -457,11 +525,12 @@ export default function Channels() {
 
     return (
       <div className='chat-wrapper'>
+        {chanOwnerOp()}
       <div className='chat-title'>#{chanName.toUpperCase()}</div>
       <div className='chat-box'>
         {display_msg()}
       </div>
-      <form id={chanName} onSubmit={handleMessages}>
+      <form className='chat-input' id={chanName} onSubmit={handleMessages}>
         <input
             type="text"
             value={message}
