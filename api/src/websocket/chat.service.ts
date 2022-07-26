@@ -1,5 +1,6 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { IoAdapter } from "@nestjs/platform-socket.io";
 import { Socket } from "socket.io";
 import { Channel } from "src/channel/channel.entity";
 import { ChannelService } from "src/channel/channel.service";
@@ -16,20 +17,28 @@ import { WSServer } from "./wsserver.gateway";
 @Injectable()
 export class ChatService {
 
-	private server;
+	private server : WSServer;
 	constructor(
 		protected readonly jwtService: JwtService,
 		protected readonly userService: UserService,
 		protected readonly channelService: ChannelService,
 		protected readonly messageService: MessageService,
 		protected readonly friendService: FriendshipsService,
-		@Inject(forwardRef(() => WSServer)) protected gateway: WSServer
+		@Inject(forwardRef(() => WSServer)) protected gateway : WSServer
 	) {}
 
 	async findSocketId(user: User) : Promise<Socket> {
 		for (let [allUsers, socket] of this.gateway.activeUsers.entries()) {
   			if (allUsers.id == user.id)
     			return socket;
+		}
+	}
+
+	async findUserbySocket(askedsocket: string): Promise<User> {
+
+		for (let [allUsers, socket] of this.gateway.activeUsers.entries()) {
+  			if (socket.id == askedsocket)
+    			return allUsers;
 		}
 	}
 
@@ -46,12 +55,13 @@ export class ChatService {
 		await this.getRooms();
 	}
 
+	// https://stackoverflow.com/questions/18093638/socket-io-rooms-get-list-of-clients-in-specific-room
 	async joinRoom(client: Socket, joinRoom: newChannelDto)
 	{
 		await this.userService.joinChannel(client.data.user, joinRoom.chanName, joinRoom.password)
 		.then(async () =>  {
 			client.join(joinRoom.chanName);
-			await this.getRooms(); // pas forcement besoin de renvoyer a tout le monde
+			await this.getRooms();
 		})
 	}
 
