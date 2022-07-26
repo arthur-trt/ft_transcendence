@@ -1,0 +1,30 @@
+{
+	http_port 3000
+	auto_https off
+	servers :3000 {
+		protocol {
+			experimental_http3
+		}
+	}
+	log {
+		output stdout
+		level error
+		format console
+	}
+}
+
+
+*:3000 {
+	log {
+		output stdout
+		level error
+		format console
+	}
+
+	header Cache-Control max-age=3600
+	header /static/* Cache-Control max-age=31536000
+
+	root * /site
+	try_files {path} /index.html
+	file_server
+}
