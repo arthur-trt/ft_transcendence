@@ -545,50 +545,77 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 
 	
-	//module.exports = Lobby;
+	protected players = new Set<Socket>();
+	//delete
 
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('game_inQueue')
-	async getInQueue(client: Socket, player_waiting : User)
+	async getInQueue(client : Socket)
 	{
-		var pendingPlayers = [];
-		var activeMatches = [];
-
-		//Lobby = {};
-		console.log("hi bitches !!!!")
-		player_waiting = new User();
-		// manage if player is disconected from the room
-		pendingPlayers.push(player_waiting);
-		var Match = this.matchPlayers(pendingPlayers, player_waiting);
-		while(Match === null)
+		console.log("coucou");
+		client.join('queue');
+		this.players.add(client);
+		if (this.players.size == 2)
 		{
-			console.log(player_waiting.fullname, "is waiting for a match");
-		}	
-		//deal with match events
-		//join a room with socket.io
-		activeMatches.push(Match);
-		//this.server.to(client)
+			const Match = this.startMatch(this.players);
+			delete this.players;
+		}
 	}
 	
-	/**
-	 * Try to pair a new player with a pending player for a match
-	 * @param {Player} newPlayer - The new player
-	 * @returns {Match}
-	 */
-	async matchPlayers (pendingPlayers, newPlayer : User) {
-		// Loop through the pending players
-		//var currPlayer = new User();
-		for (var currPlayer in pendingPlayers) {
-			// If the current player os the new player, skip (obviously one can not be paired with itself)
-			if (currPlayer === null) //currPlayer === newPlayer.id || ) 
-			{ return null;}		
-			// Found a pair, create a Match
-			console.log(" it's a match !!!");
-			//console.log(currPlayer.fullname);
-			console.log(newPlayer.fullname);
-			return this.gameService.createMatch(pendingPlayers[currPlayer], newPlayer);		 
-		}
-		return null;
-	}
+	async startMatch(players)
+	{
+		console.log(this.players.size);
+		const [first] = players;
+		const[, second] = players;
+		console.log("starting match");
+		var Match = this.gameService.createMatch(first.data.user, second.data.user);
+		first.join('Match');
+		second.join('Match');
+		this.server.to('match').emit('game_countdownStart');
+		this.server.in('queue').socketsLeave('queue');
+	}//
+// 	@UseGuards(WsJwtAuthGuard)
+// 	@UsePipes(ValidationPipe)
+// 	@SubscribeMessage('game_inQueue')
+// 	async getInQueue(client: Socket)
+// 	{
+// 		var pendingPlayers = [];
+// 		var activeMatches = [];
+
+// 		//Lobby = {};
+// 		console.log("hi bitches !!!!")
+// 		// manage if player is disconected from the room
+// 		pendingPlayers.push(player_waiting);
+// 		var Match = this.matchPlayers(pendingPlayers, player_waiting);
+// 		while(Match === null)
+// 		{
+// 			console.log(player_waiting.fullname, "is waiting for a match");
+// 		}	
+// 		//deal with match events
+// 		//join a room with socket.io
+// 		activeMatches.push(Match);
+// 		//this.server.to(client)
+// 	}
+	
+// 	/**
+// 	 * Try to pair a new player with a pending player for a match
+// 	 * @param {Player} newPlayer - The new player
+// 	 * @returns {Match}
+// 	 */
+// 	async matchPlayers (pendingPlayers, newPlayer : User) {
+// 		// Loop through the pending players
+// 		//var currPlayer = new User();
+// 		for (var currPlayer in pendingPlayers) {
+// 			// If the current player os the new player, skip (obviously one can not be paired with itself)
+// 			if (currPlayer === null) //currPlayer === newPlayer.id || ) 
+// 			{ return null;}		
+// 			// Found a pair, create a Match
+// 			console.log(" it's a match !!!");
+// 			//console.log(currPlayer.fullname);
+// 			console.log(newPlayer.fullname);
+// 			return this.gameService.createMatch(pendingPlayers[currPlayer], newPlayer);		 
+// 		}
+// 		return null;
+// 	}
 }
