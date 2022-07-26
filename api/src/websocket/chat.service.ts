@@ -17,7 +17,7 @@ import { WSServer } from "./wsserver.gateway";
 @Injectable()
 export class ChatService {
 
-	private server;
+	private server : WSServer;
 	constructor(
 		protected readonly jwtService: JwtService,
 		protected readonly userService: UserService,
@@ -34,6 +34,14 @@ export class ChatService {
 		}
 	}
 
+	async findUserbySocket(askedsocket: string): Promise<User> {
+
+		for (let [allUsers, socket] of this.gateway.activeUsers.entries()) {
+  			if (socket.id == askedsocket)
+    			return allUsers;
+		}
+	}
+
 	async getRooms(client? : Socket)
 	{
 		for (let [allUsers, socket] of this.gateway.activeUsers.entries())
@@ -47,21 +55,13 @@ export class ChatService {
 		await this.getRooms();
 	}
 
+	// https://stackoverflow.com/questions/18093638/socket-io-rooms-get-list-of-clients-in-specific-room
 	async joinRoom(client: Socket, joinRoom: newChannelDto)
 	{
-		//console.log("ROOM => " + this.gateway.server.engine.clientsCount);
-		//console.log("ROOM => " + this.gateway.server.adapter.rooms[joinRoom.chanName].length);
-		//console.log(Object.keys(this.gateway.server.engine.clientsCount))
-		//console.log("ROOM => " + this.gateway.server.sockets.rooms[joinRoom.chanName].length);
-		//console.log(await this.gateway.server.in(joinRoom.chanName).fetchSockets())
-		console.log(await this.gateway.server.in(joinRoom.chanName).allSockets())
-
-		var util = require('util')
-		console.log( "ICI "+ util.inspect(this.gateway.server.of('/').in(joinRoom.chanName)).rooms) ;
 		await this.userService.joinChannel(client.data.user, joinRoom.chanName, joinRoom.password)
 		.then(async () =>  {
 			client.join(joinRoom.chanName);
-			await this.getRooms(); // pas forcement besoin de renvoyer a tout le monde
+			await this.getRooms();
 		})
 	}
 
