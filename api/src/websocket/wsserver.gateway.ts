@@ -117,12 +117,12 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @brief get all users
 	 * @param client
 	 */
-	 @UseGuards(WsJwtAuthGuard)
-	 @SubscribeMessage('getUsers')
-	 async get_users_list(client: Socket)
-	 {
-		 this.connectService.getUserList(client);
-	 }
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('getUsers')
+	async get_users_list(client: Socket)
+	{
+		this.connectService.getUserList(client);
+	}
 
 	/*
 	** 		_____ _    _       _______    _____       _______ ________          __ __     __
