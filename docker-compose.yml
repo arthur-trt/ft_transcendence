@@ -8,6 +8,8 @@ services:
     container_name: api
     volumes:
      - ./api:/api:cached
+    environment:
+      - NODE_ENV=development
     env_file:
       - ./.env
     networks:
@@ -28,6 +30,8 @@ services:
     container_name: frontend
     volumes:
      - ./frontend:/frontend:cached
+    environment:
+      - NODE_ENV=development
     env_file:
       - ./.env
     networks:
