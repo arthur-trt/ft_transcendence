@@ -1,7 +1,10 @@
-import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable, UseFilters } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { IoAdapter } from "@nestjs/platform-socket.io";
-import { Socket } from "socket.io";
+import { WebSocketGateway, WebSocketServer, WsException } from "@nestjs/websockets";
+import { Http2ServerRequest } from "http2";
+import { Server, Socket } from "socket.io";
+import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { Channel } from "src/channel/channel.entity";
 import { ChannelService } from "src/channel/channel.service";
 import { newChannelDto } from "src/dtos/newChannel.dto";
@@ -11,13 +14,15 @@ import { FriendshipsService } from "src/friendships/friendships.service";
 import { MessageService } from "src/message/message.service";
 import { User } from "src/user/user.entity";
 import { UserService } from "src/user/user.service";
+import { ConnectService } from "./connect.service";
+import { WebsocketExceptionsFilter } from "./exception.filter";
 import { WSServer } from "./wsserver.gateway";
+
 
 
 @Injectable()
 export class ChatService {
 
-	private server : WSServer;
 	constructor(
 		protected readonly jwtService: JwtService,
 		protected readonly userService: UserService,
@@ -25,7 +30,8 @@ export class ChatService {
 		protected readonly messageService: MessageService,
 		protected readonly friendService: FriendshipsService,
 		@Inject(forwardRef(() => WSServer)) protected gateway : WSServer
-	) {}
+	) {
+	}
 
 	async findSocketId(user: User) : Promise<Socket> {
 		for (let [allUsers, socket] of this.gateway.activeUsers.entries()) {
@@ -35,7 +41,6 @@ export class ChatService {
 	}
 
 	async findUserbySocket(askedsocket: string): Promise<User> {
-
 		for (let [allUsers, socket] of this.gateway.activeUsers.entries()) {
   			if (socket.id == askedsocket)
     			return allUsers;
@@ -44,12 +49,15 @@ export class ChatService {
 
 	async getRooms(client? : Socket)
 	{
+		console.log("test 3")
+		console.log (this.gateway.activeUsers.entries())
 		for (let [allUsers, socket] of this.gateway.activeUsers.entries())
 			this.gateway.server.to(socket.id).emit('rooms', " get rooms ", await this.channelService.getChannelsForUser(allUsers));
 	}
 
 	async createRoom(client: Socket, channel: newChannelDto)
 	{
+		console.log( "test ")
 		await this.channelService.createChannel(channel.chanName, client.data.user, channel.password, channel.private)
 		client.join(channel.chanName)
 		await this.getRooms();

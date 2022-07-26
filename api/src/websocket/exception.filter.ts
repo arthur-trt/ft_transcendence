@@ -3,13 +3,18 @@ import { Response } from "express";
 import { BaseWsExceptionFilter, WsException } from '@nestjs/websockets';
 import { QueryFailedError } from "typeorm";
 import { Socket } from "socket.io";
+import { RpcExceptionFilter } from '@nestjs/common';
+import { Observable, throwError } from 'rxjs';
 
 
 @Catch(WsException, HttpException, QueryFailedError)
 export class WebsocketExceptionsFilter extends BaseWsExceptionFilter {
-  catch(exception: WsException | HttpException | QueryFailedError, host: ArgumentsHost) {
-    const client = host.switchToWs().getClient() as Socket;
-    const data = host.switchToWs().getData();
+  catch(exception: WsException | HttpException | QueryFailedError , host: ArgumentsHost) {
+  //catch(exception: any , host: ArgumentsHost) {
+
+  const client = host.switchToWs().getClient() as Socket;
+	  const data = host.switchToWs().getData();
+	  console.log ( "HAYO" + exception)
 	let error;
 	if (exception instanceof WsException)
 		error = exception.getError()
@@ -27,3 +32,5 @@ export class WebsocketExceptionsFilter extends BaseWsExceptionFilter {
 	client.emit("error", { event : error, data : data })
   }
 }
+
+

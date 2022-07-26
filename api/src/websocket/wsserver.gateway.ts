@@ -39,7 +39,7 @@ import { ConnectService } from './connect.service';
 export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
 	@WebSocketServer()
-	protected _server : Server;
+	public _server : Server;
 
 	constructor(
 		protected readonly jwtService: JwtService,
@@ -47,7 +47,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly channelService: ChannelService,
 		protected readonly messageService: MessageService,
 		protected readonly friendService: FriendshipsService,
-		@Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
+	    @Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
 		@Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
 		) { }
 
@@ -154,8 +154,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@SubscribeMessage('getRooms')
 	@UseGuards(WsJwtAuthGuard)
-	async onGetRooms(client: Socket){
-		this.chatService.getRooms();
+	async getRooms(client: Socket)
+	{
+		await this.chatService.getRooms().catch((err) => { throw new WsException ('puree')});
 	}
 
 	/**
@@ -167,8 +168,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('createRoom')
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
-	async onCreateRoom(client: Socket, channel: newChannelDto) {
-		this.chatService.createRoom(client, channel);
+	async createRoom(client: Socket, channel: newChannelDto) {
+		await this.chatService.createRoom(client, channel)
 	}
 
 	/**
@@ -181,7 +182,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
 	async onJoinRoom(client: Socket, joinRoom: newChannelDto) {
-		this.chatService.joinRoom(client, joinRoom);
+		await this.chatService.joinRoom(client, joinRoom);
 	}
 
 	/**
@@ -193,7 +194,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('deleteRoom')
 	@UseGuards(WsJwtAuthGuard)
 	async onDeletedRoom(client: Socket, channel: string) {
-		this.chatService.deleteRoom(client, channel);
+		await this.chatService.deleteRoom(client, channel);
 	}
 
 	/**
@@ -204,13 +205,13 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@SubscribeMessage('leaveRoom')
 	@UseGuards(WsJwtAuthGuard)
-	async onLeaveRoom(client: Socket, channel: string){
-		this.chatService.leaveRoom(client, channel)
+	async onLeaveRoom(client: Socket, channel: string) {
+		await this.chatService.leaveRoom(client, channel)
 	}
 
 	@SubscribeMessage('banUser')
 	async onBanUser(client: Socket, channel : string, toBan: User) {
-		this.chatService.ban(client, channel, toBan);
+		await this.chatService.ban(client, channel, toBan);
 	}
 
 	/*
@@ -243,7 +244,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
 	async onPrivateMessage(client: Socket, msg: sendPrivateMessageDto) {
-		this.chatService.sendPrivateMessage(client, msg)
+		await this.chatService.sendPrivateMessage(client, msg)
 	}
 
 	/**
@@ -255,7 +256,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('getPrivateMessage')
 	@UseGuards(WsJwtAuthGuard)
 	async onGetPrivateMessage(client: Socket, user2: User){
-		this.chatService.getPrivateMessages(client, user2);
+		await this.chatService.getPrivateMessages(client, user2);
 	}
 
 	/**
@@ -267,7 +268,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UsePipes(ValidationPipe)
 	@UseGuards(WsJwtAuthGuard)
 	async onSendChannelMessages(client: Socket, data: sendChannelMessageDto) {
-		this.chatService.sendChannelMessage(client, data)
+		await this.chatService.sendChannelMessage(client, data)
 	}
 
 	/**
@@ -279,7 +280,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('getChannelMessages')
 	@UseGuards(WsJwtAuthGuard)
 	async onGetChannelMessages(client: Socket, channelName: string) {
-		this.chatService.getChannelMessages(client, channelName);
+		await this.chatService.getChannelMessages(client, channelName);
 	}
 
 	/*
@@ -307,7 +308,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('addFriend')
 	@UseGuards(WsJwtAuthGuard)
 	async addFriend(client: Socket, friend: User) {
-		this.chatService.addFriend(client, friend);
+		await this.chatService.addFriend(client, friend);
 	}
 
 	/**
@@ -318,7 +319,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('acceptFriend')
 	@UseGuards(WsJwtAuthGuard)
 	async acceptFriendRequest(client: Socket, friend: User) {
-		this.chatService.acceptFriendRquest(client, friend);
+		await this.chatService.acceptFriendRquest(client, friend);
 	}
 
 
@@ -330,7 +331,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('removeFriend')
 	async removeFriend(client: Socket, friend: User) {
-		this.chatService.removeFriend(client, friend);
+		await this.chatService.removeFriend(client, friend);
 	}
 
 	/**
@@ -340,13 +341,13 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getFriends')
 	async getFriends(client: Socket) {
-		this.chatService.getFriends(client);
+		await this.chatService.getFriends(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getFriendRequests')
 	async getFriendRequests(client: Socket) {
-		this.chatService.getFriendRequests(client);
+		await this.chatService.getFriendRequests(client);
 	}
 
 	/*
@@ -367,13 +368,13 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('block')
 	async block(client: Socket, toBlock: User) {
-		this.chatService.block(client, toBlock);
+		await this.chatService.block(client, toBlock);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('unblock')
 	async unblock(client: Socket, toUnBlock: User) {
-		this.chatService.unblock(client, toUnBlock)
+		await this.chatService.unblock(client, toUnBlock)
 	}
 
 	async getQueueUsers()
