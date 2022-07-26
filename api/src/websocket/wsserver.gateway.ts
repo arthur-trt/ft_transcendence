@@ -14,7 +14,7 @@ import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
 import { Channel } from 'src/channel/channel.entity';
 import { UserModule } from 'src/user/user.module';
 import { FriendshipsService } from 'src/friendships/friendships.service';
-import { AfterRecover, QueryFailedError, TreeRepositoryNotSupportedError } from 'typeorm';
+import { AfterRecover, QueryFailedError, TreeRepositoryNotSupportedError, UsingJoinColumnOnlyOnOneSideAllowedError } from 'typeorm';
 import { isArray, isObject } from 'class-validator';
 import { newChannelDto } from 'src/dtos/newChannel.dto';
 import { CreateMatchDto } from 'src/dtos/match.dto';
@@ -39,7 +39,7 @@ import { ConnectService } from './connect.service';
 export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
 	@WebSocketServer()
-	protected _server: Server;
+	protected _server : Server;
 
 	constructor(
 		protected readonly jwtService: JwtService,
@@ -374,5 +374,20 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('unblock')
 	async unblock(client: Socket, toUnBlock: User) {
 		this.chatService.unblock(client, toUnBlock)
+	}
+
+	async getQueueUsers()
+	{
+		const users: User[] = [];
+		const sockets  = await this._server.in('queue').allSockets();
+		console.log(sockets);
+		for (let [k] of sockets.entries())
+		{
+			let u = await this.chatService.findUserbySocket(k);
+			console.log(u);
+
+			users.push(u);
+		}
+		return users;
 	}
 }
