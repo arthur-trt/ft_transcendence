@@ -19,7 +19,7 @@ export class GameService {
 
 	/**
 	 *
-	 * 
+	 *
 	 * @returns All the matches with details (joining users tab)
 	 */
 	async getCompleteMatchHistory(): Promise<MatchHistory[]> {
@@ -38,6 +38,12 @@ export class GameService {
 			.getMany();
 	}
 
+	/**
+	 *
+	 * @param user1
+	 * @param user2
+	 * @returns
+	 */
 	async createMatch(user1: User, user2: User): Promise<MatchHistory> {
 		const newMatch: MatchHistory = await this.MatchRepo.save(
 			{
@@ -74,36 +80,19 @@ export class GameService {
 		return await this.getCompleteMatchHistory();
 	}
 
+
+	async ladder(): Promise<User[]>
+	{
+		return this.UserRepo.createQueryBuilder('user')
+			.orderBy('user.wonMatches', 'ASC')
+			.getMany();
+	}
+
 	async findMatchById(matchId: string) {
 		const match: MatchHistory = await this.MatchRepo.findOne({
 			where: { id: matchId }
 		});
 		return match;
-	}
-
-	/**
-	 * Return a JSON object with all active user. With or without the user who made the request
-	 * regardind of `withCurrentUser` parameters
-	 * @param client user who made the request
-	 * @param active_user map of active user
-	 * @param withCurrentUser if true user who made the request will be included
-	 * @returns
-	 */
-	listConnectedUser(client: Socket, active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
-		let data	= [];
-		let i		= 0;
-
-		for (let user of active_user.keys()) {
-			if (client.data.user.id == user.id && withCurrentUser) {
-				data[i] = user;
-				i++;
-			}
-			else if (client.data.user.id != user.id) {
-				data[i] = user;
-				i++;
-			}
-		}
-		return (data);
 	}
 
 }

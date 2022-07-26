@@ -48,14 +48,14 @@ export class ConnectService {
 		if (!user)
 			return this.handleDisconnect(client);
 
+
 		client.data.user = user;
-		//this.logger.log("New connection: " + user.name);
 		this.all_users = await this.userService.getUsers();
 		if (!this.gateway.activeUsers.has(user)) {
 			console.log("Add : " + user.name);
 			this.gateway.activeUsers.set(user, client);
 		}
-		//this.logger.log(client.id);
+
 		this.gateway.activeUsers.forEach((socket: Socket, user: User) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
