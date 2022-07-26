@@ -1,7 +1,7 @@
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from "@nestjs/websockets"
-import { Injectable, Logger, UseGuards, UsePipes } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger, UseGuards, UsePipes } from '@nestjs/common';
 import { jwtConstants } from '../auth/jwt/jwt.constants';
 import { JwtService, JwtVerifyOptions } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
@@ -14,7 +14,7 @@ import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
 import { Channel } from 'src/channel/channel.entity';
 import { UserModule } from 'src/user/user.module';
 import { FriendshipsService } from 'src/friendships/friendships.service';
-import { AfterRecover, QueryFailedError, TreeRepositoryNotSupportedError } from 'typeorm';
+import { AfterRecover, QueryFailedError, TreeRepositoryNotSupportedError, UsingJoinColumnOnlyOnOneSideAllowedError } from 'typeorm';
 import { isArray, isObject } from 'class-validator';
 import { newChannelDto } from 'src/dtos/newChannel.dto';
 import { CreateMatchDto } from 'src/dtos/match.dto';
@@ -28,6 +28,9 @@ import { ArgumentsHost } from '@nestjs/common';
 import { NextFunction, Request, Response} from 'express';
 import { BaseWsExceptionFilter } from '@nestjs/websockets'
 import { WebsocketExceptionsFilter } from './exception.filter';
+import { ChatService } from './chat.service';
+import { FortyTwoAuthStrategy } from 'src/auth/fortyTwo/fortyTwo.strategy';
+import { ConnectService } from './connect.service';
 
 
 @Injectable()
@@ -36,22 +39,30 @@ import { WebsocketExceptionsFilter } from './exception.filter';
 export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
 	@WebSocketServer()
-	protected server: Server;
+	protected _server : Server;
 
 	constructor(
 		protected readonly jwtService: JwtService,
 		protected readonly userService: UserService,
 		protected readonly channelService: ChannelService,
 		protected readonly messageService: MessageService,
-		protected readonly friendService: FriendshipsService
-	) { }
+		protected readonly friendService: FriendshipsService,
+		@Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
+		@Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
+		) { }
 
 	protected logger: Logger = new Logger('WebSocketServer');
 	protected all_users: User[];
 	protected active_users = new Map<User, Socket>();
 	protected users = [];
 
+	get server(): Server {
+		return this._server;
+	}
 
+	get activeUsers(): Map<User, Socket> {
+		return this.active_users;
+	}
 
 	/*
 	**
@@ -64,21 +75,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	*/
 
 	protected async validateConnection(client: Socket): Promise<User> {
-		try {
-			const authCookies: string[] = client.handshake.headers.cookie.split('; ');
-			const authCookie: string[] = authCookies.filter(s => s.includes('Authentication='));
-			const authToken = authCookie[0].substring(15, authCookie[0].length);
-			const jwtOptions: JwtVerifyOptions = {
-				secret: jwtConstants.secret
-			}
-			const jwtPayload = await this.jwtService.verify(authToken, jwtOptions);
-			const user: any = await this.userService.getUserByIdentifierLight(jwtPayload.sub);
-
-			return user;
-		} catch (err) {
-			console.log("Guard error :");
-			console.log(err.message);
-		}
+		return this.connectService.validateConnection(client);
 	}
 
 	/**
@@ -88,35 +85,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @returns Nothing, but handle disconnection if problems occurs
 	 */
 	async handleConnection(client: Socket) {
-		const user = await this.validateConnection(client);
-		if (!user)
-			return this.handleDisconnect(client);
-
-		client.data.user = user;
-		this.logger.log("New connection: " + user.name);
-		this.all_users = await this.userService.getUsers();
-		if (!this.active_users.has(user))
-		{
-			console.log("Add : " + user.name);
-			this.active_users.set(user, client);
-		}
-		this.logger.log(client.id);
-
-		this.active_users.forEach((socket: Socket, user: User) => {
-			this.server.to(socket.id).emit(
-				'listUsers',
-				this.listConnectedUser(socket, this.all_users, this.active_users, false)
-			);
-		});
-
-		let chan : Channel[] = await this.userService.getChannelsForUser(user);
-		this.logger.log("CHANS" + chan);
-
-		for (let c of chan) {
-			client.join(c.name);
-			this.logger.log(user.name + " : Client joining" + c.name)
-		}
-
+		this.connectService.handleConnection(client);
 	}
 
 	afterInit(server: Server) {
@@ -128,27 +97,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @param client Socket received from client
 	 */
 	async handleDisconnect(client: Socket) {
-		try {
-			for (let [entries, socket] of this.active_users.entries())
-			{
-				if (entries.id == client.data.user.id)
-				{
-					this.active_users.delete(entries);
-					break;
-				}
-			}
-		}
-		catch (err) {
-			console.log("Don't know what happened");
-		}
-		this.active_users.forEach((socket: Socket, user: User) => {
-			this.server.to(socket.id).emit(
-				'listUsers',
-				this.listConnectedUser(socket, this.all_users, this.active_users, false)
-			);
-		});
-		client.emit('bye');
-		client.disconnect(true);
+		this.connectService.handleDisconnect(client)
 	}
 
 	/**
@@ -159,45 +108,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @param withCurrentUser if true user who made the request will be included
 	 * @returns
 	 */
-	protected listConnectedUser(client: Socket, all_users: User[] ,active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
-		let data: User[] = [];
-		let i = 0;
-
-		for (let user of active_user.keys()) {
-			user.status = "online";
-			if (client.data.user.id == user.id && withCurrentUser) {
-				data[i] = user;
-				i++;
-			}
-			else if (client.data.user.id != user.id) {
-				data[i] = user;
-				i++;
-			}
-		}
-		if (all_users)
-		{
-			for (let user of all_users)
-			{
-				if (!data.find(element => element.id == user.id) && client.data.user.id != user.id)
-				{
-					user.status = "offline";
-					data[i] = user;
-					i++;
-				}
-			}
-		}
-		return (data);
-	}
-
-	async findSocketId(user: User) : Promise<Socket>
-	{
-		for (let [allUsers, socket] of this.active_users.entries())
-		{
-  			if (allUsers.id == user.id)
-  			{
-    			return socket;
-  			}
-		}
+	protected listConnectedUser(client: Socket, all_users: User[], active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
+		this.connectService.listConnectedUser(client, all_users, active_user, withCurrentUser);
 	}
 
 
@@ -205,15 +117,12 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @brief get all users
 	 * @param client
 	 */
-	 @UseGuards(WsJwtAuthGuard)
-	 @SubscribeMessage('getUsers')
-	 async get_users_list(client: Socket)
-	 {
-		 this.server.to(client.id).emit(
-			 'listUsers',
-			 this.listConnectedUser(client, this.all_users, this.active_users, false)
-		 );
-	 }
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('getUsers')
+	async get_users_list(client: Socket)
+	{
+		this.connectService.getUserList(client);
+	}
 
 	/*
 	** 		_____ _    _       _______    _____       _______ ________          __ __     __
@@ -245,10 +154,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@SubscribeMessage('getRooms')
 	@UseGuards(WsJwtAuthGuard)
-	async onGetRooms(client: Socket)
-	{
-		for (let [allUsers, socket] of this.active_users.entries())
-			this.server.to(socket.id).emit('rooms', " get rooms ", await this.channelService.getChannelsForUser(allUsers));
+	async onGetRooms(client: Socket){
+		this.chatService.getRooms();
 	}
 
 	/**
@@ -260,12 +167,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('createRoom')
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
-	async onCreateRoom(client: Socket, channel: newChannelDto)
-	{
-		console.log( "wesh ")
-		await this.channelService.createChannel(channel.chanName, client.data.user, channel.password, channel.private)
-		client.join(channel.chanName)
-		await this.onGetRooms(client);
+	async onCreateRoom(client: Socket, channel: newChannelDto) {
+		this.chatService.createRoom(client, channel);
 	}
 
 	/**
@@ -278,12 +181,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
 	async onJoinRoom(client: Socket, joinRoom: newChannelDto) {
-
-		await this.userService.joinChannel(client.data.user, joinRoom.chanName, joinRoom.password)
-			.then(async () =>  {
-				client.join(joinRoom.chanName);
-				await this.onGetRooms(client);
-			})
+		this.chatService.joinRoom(client, joinRoom);
 	}
 
 	/**
@@ -295,11 +193,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('deleteRoom')
 	@UseGuards(WsJwtAuthGuard)
 	async onDeletedRoom(client: Socket, channel: string) {
-
-		const chan = await this.channelService.getChannelByIdentifier(channel);
-		await this.channelService.deleteChannel(client.data.user, chan);
-		await this.onGetRooms(client);
+		this.chatService.deleteRoom(client, channel);
 	}
+
 	/**
 	 * @brief leave room for current user
 	 * @param client
@@ -308,20 +204,13 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@SubscribeMessage('leaveRoom')
 	@UseGuards(WsJwtAuthGuard)
-	async onLeaveRoom(client: Socket, channel: string)
-	{
-		this.logger.log(client.data.user.name + " LEFT ROOM")
-		await this.userService.leaveChannel(client.data.user, channel)
-		client.leave(channel);
-		await this.onGetRooms(client);
+	async onLeaveRoom(client: Socket, channel: string){
+		this.chatService.leaveRoom(client, channel)
 	}
 
 	@SubscribeMessage('banUser')
-	async onBanUser(client: Socket, channel : string, toBan: User)
-	{
-		const chan: Channel = await this.channelService.getChannelByIdentifier(channel);
-		await this.channelService.temporaryBanUser(client.data.user, chan, toBan);
-		await this.onGetRooms(client);
+	async onBanUser(client: Socket, channel : string, toBan: User) {
+		this.chatService.ban(client, channel, toBan);
 	}
 
 	/*
@@ -353,14 +242,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('privateMessage')
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
-	async onPrivateMessage(client: Socket, msg: sendPrivateMessageDto)
-	{
-		const friendSocket: Socket = await this.findSocketId(msg.to);
-		await this.messageService.sendPrivateMessage(client.data.user, msg.to, msg.msg);
-		const conversation = await this.messageService.getPrivateMessage(client.data.user, msg.to);
-		if (friendSocket)
-			this.server.to(friendSocket.id).emit('privateMessage', client.data.user.name + " " + msg.to.name, conversation);
-		this.server.to(client.id).emit('privateMessage', client.data.user.name + " " + msg.to.name, conversation);
+	async onPrivateMessage(client: Socket, msg: sendPrivateMessageDto) {
+		this.chatService.sendPrivateMessage(client, msg)
 	}
 
 	/**
@@ -371,26 +254,21 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@SubscribeMessage('getPrivateMessage')
 	@UseGuards(WsJwtAuthGuard)
-	async onGetPrivateMessage(client: Socket, user2: User)
-	{
-		const msg = await this.messageService.getPrivateMessage(client.data.user, user2);
-		this.server.to(client.id).emit('privateMessage', client.data.user.name + " " + user2.name, msg);
+	async onGetPrivateMessage(client: Socket, user2: User){
+		this.chatService.getPrivateMessages(client, user2);
 	}
+
 	/**
 	 * @brief Send Channel Messages
 	 * @param client
 	 * @param data an object containing : chan (string) and msg (string)
 	 */
-
-	 @SubscribeMessage('sendChannelMessages')
-	 @UsePipes(ValidationPipe)
-	 @UseGuards(WsJwtAuthGuard)
-	 async onSendChannelMessages(client: Socket, data: sendChannelMessageDto)
-	 {
-		 this.logger.log("MSG " + data.msg + " to " + data.chan + " from " + client.data.user.name)
-		 await this.messageService.sendMessageToChannel(data.chan, client.data.user, data.msg);
-		 this.server.to(data.chan).emit('channelMessage', await this.messageService.getMessage(data.chan, client.data.user));
-	 }
+	@SubscribeMessage('sendChannelMessages')
+	@UsePipes(ValidationPipe)
+	@UseGuards(WsJwtAuthGuard)
+	async onSendChannelMessages(client: Socket, data: sendChannelMessageDto) {
+		this.chatService.sendChannelMessage(client, data)
+	}
 
 	/**
 	 * @brief get Channel Messages
@@ -400,9 +278,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@SubscribeMessage('getChannelMessages')
 	@UseGuards(WsJwtAuthGuard)
-	async onGetChannelMessages(client: Socket, channelName: string)
-	{
-		this.server.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName, client.data.user));
+	async onGetChannelMessages(client: Socket, channelName: string) {
+		this.chatService.getChannelMessages(client, channelName);
 	}
 
 	/*
@@ -429,12 +306,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@SubscribeMessage('addFriend')
 	@UseGuards(WsJwtAuthGuard)
-	async addFriend(client: Socket, friend: User)
-	{
-		const friendSocket: Socket = await this.findSocketId(friend)
-		await this.friendService.sendFriendRequest(client.data.user, friend);
-		if (friendSocket)
-			this.server.to(friendSocket.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(friend))
+	async addFriend(client: Socket, friend: User) {
+		this.chatService.addFriend(client, friend);
 	}
 
 	/**
@@ -444,15 +317,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@SubscribeMessage('acceptFriend')
 	@UseGuards(WsJwtAuthGuard)
-	async acceptFriendRequest(client: Socket, friend: User)
-	{
-		console.log("FRIEND IS " + JSON.stringify(friend))
-		const friendSocket: Socket = await this.findSocketId(friend)
-		await this.friendService.acceptFriendRequest(client.data.user, friend);
-		this.server.to(client.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(client.data.user))
-		if (friendSocket)
-			this.server.to(friendSocket.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(friend));
-		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+	async acceptFriendRequest(client: Socket, friend: User) {
+		this.chatService.acceptFriendRquest(client, friend);
 	}
 
 
@@ -463,13 +329,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('removeFriend')
-	async removeFriend(client: Socket, friend: User)
-	{
-		const friendSocket: Socket = await this.findSocketId(friend);
-		await this.friendService.removeFriend(client.data.user, friend);
-		if (friendSocket)
-			this.server.to(friendSocket.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(friend));
-		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+	async removeFriend(client: Socket, friend: User) {
+		this.chatService.removeFriend(client, friend);
 	}
 
 	/**
@@ -478,16 +339,14 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getFriends')
-	async getFriends(client: Socket)
-	{
-		this.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
+	async getFriends(client: Socket) {
+		this.chatService.getFriends(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getFriendRequests')
-	async getFriendRequests(client: Socket)
-	{
-		this.server.to(client.id).emit('newFriendRequest', "Friend requests list : you are target of", await this.friendService.getFriendsRequests(client.data.user));
+	async getFriendRequests(client: Socket) {
+		this.chatService.getFriendRequests(client);
 	}
 
 	/*
@@ -507,17 +366,28 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('block')
-	async block(client: Socket, toBlock: User)
-	{
-		this.userService.block(client.data.user, toBlock);
-		this.server.to(client.id).emit('blocked', toBlock.name + " has been blocked");
+	async block(client: Socket, toBlock: User) {
+		this.chatService.block(client, toBlock);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('unblock')
-	async unblock(client: Socket, toUnBlock: User)
+	async unblock(client: Socket, toUnBlock: User) {
+		this.chatService.unblock(client, toUnBlock)
+	}
+
+	async getQueueUsers()
 	{
-		this.userService.unblock(client.data.user, toUnBlock);
-		this.server.to(client.id).emit('unblocked', toUnBlock.name + " has been unblocked");
+		const users: User[] = [];
+		const sockets  = await this._server.in('queue').allSockets();
+		console.log(sockets);
+		for (let [k] of sockets.entries())
+		{
+			let u = await this.chatService.findUserbySocket(k);
+			console.log(u);
+
+			users.push(u);
+		}
+		return users;
 	}
 }

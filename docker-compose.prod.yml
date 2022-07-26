@@ -4,10 +4,8 @@ services:
   api:
     build:
       context: ./api
-      target: dev
+      target: prod
     container_name: api
-    volumes:
-     - ./api:/api:cached
     env_file:
       - ./.env
     networks:
@@ -24,12 +22,10 @@ services:
   frontend:
     build:
       context: ./frontend
-      target: dev
+      target: prod
     container_name: frontend
     volumes:
-     - ./frontend:/frontend:cached
-    env_file:
-      - ./.env
+     - ./Caddyfile:/etc/caddy/Caddyfile
     networks:
      - api_network
     labels:
@@ -65,24 +61,6 @@ services:
      - db_network
     volumes:
      - ${DB_PATH}:/var/lib/postgresql/data
-
-##
-# DEBUG CONTAINERS --profile debug
-##
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
-    restart: always
-    env_file:
-      - ./.env
-    networks:
-      - db_network
-    volumes:
-      - ${PGADMIN_PATH}:/var/lib/pgadmin
-    ports:
-      - "5050:80"
-    profiles:
-      - debug
 
 networks:
   db_network:
