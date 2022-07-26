@@ -267,13 +267,15 @@ export default function Channels() {
     while (j < friends?.friends?.length)
     {
       if (datausers[i]?.id === friends?.friends[j]?.id)
+      {
         return (<div className='users-single-info-friends'>
                   <FontAwesomeIcon className='paperplane' icon={faPaperPlane} id={datausers[i]?.name} onClick={handleOpenPrivate} ></FontAwesomeIcon>
-                  <FontAwesomeIcon className='gamepad' icon={faGamepad} ></FontAwesomeIcon>
+                  {datausers[i]?.status === 'online' && <FontAwesomeIcon className='gamepad' icon={faGamepad} ></FontAwesomeIcon>}
                   <FontAwesomeIcon className='userslash' icon={faUserSlash} ></FontAwesomeIcon>
                   <FontAwesomeIcon className='userxmark' icon={faUserXmark} id={j.toString()} onClick={handleRemoveFriend} ></FontAwesomeIcon>
                 </div>
         );
+      }
       j++;
     }
    return (

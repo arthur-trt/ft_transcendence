@@ -303,6 +303,7 @@ cursor: pointer;
   display: flex;
   margin: auto;
   margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .users-single-img {
