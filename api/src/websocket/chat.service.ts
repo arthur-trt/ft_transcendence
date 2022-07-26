@@ -1,5 +1,6 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { IoAdapter } from "@nestjs/platform-socket.io";
 import { Socket } from "socket.io";
 import { Channel } from "src/channel/channel.entity";
 import { ChannelService } from "src/channel/channel.service";
@@ -23,7 +24,7 @@ export class ChatService {
 		protected readonly channelService: ChannelService,
 		protected readonly messageService: MessageService,
 		protected readonly friendService: FriendshipsService,
-		@Inject(forwardRef(() => WSServer)) protected gateway: WSServer
+		@Inject(forwardRef(() => WSServer)) protected gateway : WSServer
 	) {}
 
 	async findSocketId(user: User) : Promise<Socket> {
@@ -48,6 +49,15 @@ export class ChatService {
 
 	async joinRoom(client: Socket, joinRoom: newChannelDto)
 	{
+		//console.log("ROOM => " + this.gateway.server.engine.clientsCount);
+		//console.log("ROOM => " + this.gateway.server.adapter.rooms[joinRoom.chanName].length);
+		//console.log(Object.keys(this.gateway.server.engine.clientsCount))
+		//console.log("ROOM => " + this.gateway.server.sockets.rooms[joinRoom.chanName].length);
+		//console.log(await this.gateway.server.in(joinRoom.chanName).fetchSockets())
+		console.log(await this.gateway.server.in(joinRoom.chanName).allSockets())
+
+		var util = require('util')
+		console.log( "ICI "+ util.inspect(this.gateway.server.of('/').in(joinRoom.chanName)).rooms) ;
 		await this.userService.joinChannel(client.data.user, joinRoom.chanName, joinRoom.password)
 		.then(async () =>  {
 			client.join(joinRoom.chanName);

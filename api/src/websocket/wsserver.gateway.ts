@@ -39,7 +39,7 @@ import { ConnectService } from './connect.service';
 export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
 	@WebSocketServer()
-	protected _server: Server;
+	protected _server : Server;
 
 	constructor(
 		protected readonly jwtService: JwtService,

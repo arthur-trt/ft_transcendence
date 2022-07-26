@@ -19,7 +19,7 @@ export class GameService {
 
 	/**
 	 *
-	 * 
+	 *
 	 * @returns All the matches with details (joining users tab)
 	 */
 	async getCompleteMatchHistory(): Promise<MatchHistory[]> {
@@ -38,6 +38,12 @@ export class GameService {
 			.getMany();
 	}
 
+	/**
+	 * 
+	 * @param user1 
+	 * @param user2 
+	 * @returns 
+	 */
 	async createMatch(user1: User, user2: User): Promise<MatchHistory> {
 		const newMatch: MatchHistory = await this.MatchRepo.save(
 			{
@@ -80,6 +86,14 @@ export class GameService {
 		});
 		return match;
 	}
+
+
+
+
+
+
+
+
 
 	/**
 	 * Return a JSON object with all active user. With or without the user who made the request
