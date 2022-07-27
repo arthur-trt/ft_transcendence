@@ -416,7 +416,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		var Match = this.gameService.createMatch(first.data.user, second.data.user);
 		first.join('Match');
 		second.join('Match');
-		this.server.to('match').emit('game_countdownStart');
+		this.server.to('Match').emit('game_countdownStart');
 		this.server.in('queue').socketsLeave('queue');
 	}
 

@@ -590,11 +590,12 @@ textarea:focus, input:focus{
 }
 
 /* ------------------------------------- */
-/* --------------COMMUNITY-------------- */
+/* -----------------GAME---------------- */
 /* ------------------------------------- */
 
 .game-container {
   width: 96%;
+  height: 30%;
   display: flex;
   margin-top: 20px;
   padding-bottom: 20px;
@@ -604,6 +605,15 @@ textarea:focus, input:focus{
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   border-radius: 10px;
   background-color: white;
+}
+
+.pong-container {
+  width: 80%;
+  display: flex;
+  border: 10px solid black;
+  margin: auto;
+  max-width: 1200px;
+  border-radius: 50px;
 }
 
 
