@@ -28,29 +28,39 @@ code {
   margin-left: 35px;
 }
 
-
 .auth-link {
-  margin-top: 5%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: fixed;
+  height: 250px;
+  width: 400px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.auth-link img {
+  max-height: 100%;
+  max-width: 100%;
+  width: 20px;
+  height: 20px;
 }
 
 .auth-link button {
-  border: solid 2px black;
+  border: solid 2px #1dd1a1;
   border-radius: 5px;
   color: black;
   padding: 15px 15px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
   font-size: 16px;
   transition-duration: 0.4s;
   cursor: pointer;
+  margin-top: 20px;
 }
 
 .auth-link button:hover{
-  background-color: black;
+  background-color: #1dd1a1;
   color: white;
 }
 
@@ -635,7 +645,8 @@ textarea:focus, input:focus{
 }
 
 .profile-2fa-enable {
-  background-color: #1dd1a1;
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   text-align: center;
   padding: 25px;
   border-radius: 5px;
@@ -734,6 +745,7 @@ textarea:focus, input:focus{
   margin: auto;
   max-width: 1200px;
   border-radius: 50px;
+
 }
 
 
