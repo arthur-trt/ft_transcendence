@@ -26,6 +26,8 @@ export default function Game() {
 
   let handleStart = () => {
     socket.emit('game_inQueue')
+    socket.on('game_countdownStart', (args: any)=> console.log("ca marche chez moi"));
+    console.log("ca marche chez moi");
   }
 
   return (

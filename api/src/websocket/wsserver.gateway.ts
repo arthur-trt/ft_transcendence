@@ -2,6 +2,23 @@ import { forwardRef, Inject, Injectable, Logger, UseFilters, UseGuards, UsePipes
 import { JwtService } from '@nestjs/jwt';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from "@nestjs/websockets"
+import { Injectable, Logger, UseGuards, UsePipes } from '@nestjs/common';
+import { jwtConstants } from '../auth/jwt/jwt.constants';
+import { JwtService, JwtVerifyOptions } from '@nestjs/jwt';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
+import { GameService } from '../game/game.service';
+import { GameModule } from 'src/game/game.module';
+import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
+import { ChannelService } from 'src/channel/channel.service';
+import { MessageService } from 'src/message/message.service';
+import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
+import { Channel } from 'src/channel/channel.entity';
+import { UserModule } from 'src/user/user.module';
+import { FriendshipsService } from 'src/friendships/friendships.service';
+import { AfterRecover, IsNull, QueryFailedError, TreeRepositoryNotSupportedError } from 'typeorm';
+import { isArray, isObject } from 'class-validator';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
 import { ChannelService } from 'src/channel/channel.service';
 import { newChannelDto } from 'src/dtos/newChannel.dto';
@@ -14,6 +31,7 @@ import { UserService } from '../user/user.service';
 import { ChatService } from './chat.service';
 import { ConnectService } from './connect.service';
 import { WebsocketExceptionsFilter } from './exception.filter';
+import { MatchHistory } from 'src/game/game.entity';
 
 
 @Injectable()
@@ -30,9 +48,12 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly channelService: ChannelService,
 		protected readonly messageService: MessageService,
 		protected readonly friendService: FriendshipsService,
-	    @Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
+		protected readonly gameService: GameService
+    
+	  @Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
 		@Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
 		) { }
+
 
 	protected logger: Logger = new Logger('WebSocketServer');
 	protected all_users: User[];
@@ -366,18 +387,61 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.chatService.unblock(client, toUnBlock)
 	}
 
-	async getQueueUsers()
-	{
-		const users: User[] = [];
-		const sockets  = await this._server.in('queue').allSockets();
-		console.log(sockets);
-		for (let [k] of sockets.entries())
-		{
-			let u = await this.chatService.findUserbySocket(k);
-			console.log(u);
+	/*
+	**  ██████   █████  ███    ███ ███████      ██████   █████  ████████ ███████ ██     ██  █████  ██    ██ 
+	**██       ██   ██ ████  ████ ██          ██       ██   ██    ██    ██      ██     ██ ██   ██  ██  ██  
+	**██   ███ ███████ ██ ████ ██ █████       ██   ███ ███████    ██    █████   ██  █  ██ ███████   ████   
+	**██    ██ ██   ██ ██  ██  ██ ██          ██    ██ ██   ██    ██    ██      ██ ███ ██ ██   ██    ██    
+	** ██████  ██   ██ ██      ██ ███████      ██████  ██   ██    ██    ███████  ███ ███  ██   ██    ██    
+	**                                                                                                  
+	**                                                                                                  
+	**	Game
+	**	├─ startMatch
+	**	├─ WatchGame
+	**	├─ getInQueue
+	**  
+	/**
+	 *
+	 * @param client Socket
+	 * @returns 
+	 */
+	protected players = new Set<Socket>();
+	//delete
 
-			users.push(u);
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('game_inQueue')
+	async getInQueue(client : Socket)
+	{
+		console.log("coucou");
+		client.join('queue');
+		this.players.add(client);
+		if (this.players.size == 2)
+		{
+			const Match = this.startMatch(this.players);
+			delete this.players;
 		}
-		return users;
+	}
+  
+	/* Game_relay_Service */
+	async startMatch(players)
+	{
+		console.log(this.players.size);
+		const [first] = players;
+		const[, second] = players;
+		console.log("starting match");
+		var Match = this.gameService.createMatch(first.data.user, second.data.user);
+		first.join('Match');
+		second.join('Match');
+		this.server.to('match').emit('game_countdownStart');
+		this.server.in('queue').socketsLeave('queue');
+	}
+	
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('game_settings')
+	async updateCanvas(client : Socket)
+	{
+	
 	}
 }

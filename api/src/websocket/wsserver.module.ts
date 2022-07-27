@@ -7,10 +7,12 @@ import { UserModule } from 'src/user/user.module';
 import { ChatService } from './chat.service';
 import { ConnectService } from './connect.service';
 import { WSServer } from './wsserver.gateway';
+import { GameModule } from 'src/game/game.module';
+//import { ChatGateway } from './chat.gateway';
 
 @Module({
 
-	imports: [UserModule, MessageModule, JwtModule, ChannelModule, FriendshipsModule],
+	imports: [UserModule, MessageModule, JwtModule, ChannelModule, FriendshipsModule, GameModule],
 	providers: [WSServer, ChatService, ConnectService],
-})
+
 export class WSServerModule {}
