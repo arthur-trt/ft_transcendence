@@ -172,21 +172,17 @@ export class UserService {
 			.of(user)
 			.remove(chan);
 
-		const ownership : Channel = await this.channelsRepo.findOne({
-			where: {
-				owner: { id: user.id },
-				name: channel
-			}
-		});
 
-		if (ownership)
+		if (chan.ownerId == user.id)
 		{
 			await this.channelsRepo
 				.createQueryBuilder()
 				.relation(Channel, "owner")
 				.of(chan)
 				.set(null);
+			chan.ownerId = ""; // See how possible to not do it manually
 		}
+
 
 		return await this.chanService.getUsersOfChannels();
 	}
