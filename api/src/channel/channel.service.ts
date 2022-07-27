@@ -113,8 +113,17 @@ export class ChannelService {
 	public async updateChannelSettings(user: User, changes: ModifyChannelDto) : Promise<Channel>
 	{
 		const chan: Channel = await this.getChannelByIdentifier(changes.chanName);
-		chan.name = changes.chanName;
-		chan.owner = changes.owner;
+		if (chan.ownerId != user.id)
+			throw new HttpException("You must be owner to change chan settings.", HttpStatus.FORBIDDEN);
+		if (changes.password)
+		{
+			chan.password_protected = true;
+			chan.password = await bcrypt.hash(changes.password, 10);
+		}
+		else
+		{
+			chan.password_protected = false;
+		}
 		return this.channelsRepo.save(chan);
 	}
 

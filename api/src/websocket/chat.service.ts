@@ -3,6 +3,7 @@ import { JwtService } from "@nestjs/jwt";
 import { Socket } from "socket.io";
 import { Channel } from "src/channel/channel.entity";
 import { ChannelService } from "src/channel/channel.service";
+import { ModifyChannelDto } from "src/dtos/modifyChannel.dto";
 import { newChannelDto } from "src/dtos/newChannel.dto";
 import { sendChannelMessageDto } from "src/dtos/sendChannelMessageDto.dto";
 import { sendPrivateMessageDto } from "src/dtos/sendPrivateMessageDto.dto";
@@ -90,6 +91,12 @@ export class ChatService {
 	{
 		const chan: Channel = await this.channelService.getChannelByIdentifier(channel);
 		await this.channelService.setNewAdmin(client.data.user, chan, toSetAdmin);
+		await this.getRooms();
+	}
+
+	async modifyChanSettings(client: Socket, changes: ModifyChannelDto)
+	{
+		await this.channelService.updateChannelSettings(client.data.user, changes);
 		await this.getRooms();
 	}
 
