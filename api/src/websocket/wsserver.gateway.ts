@@ -2,23 +2,6 @@ import { forwardRef, Inject, Injectable, Logger, UseFilters, UseGuards, UsePipes
 import { JwtService } from '@nestjs/jwt';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from "@nestjs/websockets"
-import { Injectable, Logger, UseGuards, UsePipes } from '@nestjs/common';
-import { jwtConstants } from '../auth/jwt/jwt.constants';
-import { JwtService, JwtVerifyOptions } from '@nestjs/jwt';
-import { User } from '../user/user.entity';
-import { UserService } from '../user/user.service';
-import { GameService } from '../game/game.service';
-import { GameModule } from 'src/game/game.module';
-import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
-import { ChannelService } from 'src/channel/channel.service';
-import { MessageService } from 'src/message/message.service';
-import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
-import { Channel } from 'src/channel/channel.entity';
-import { UserModule } from 'src/user/user.module';
-import { FriendshipsService } from 'src/friendships/friendships.service';
-import { AfterRecover, IsNull, QueryFailedError, TreeRepositoryNotSupportedError } from 'typeorm';
-import { isArray, isObject } from 'class-validator';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
 import { ChannelService } from 'src/channel/channel.service';
 import { newChannelDto } from 'src/dtos/newChannel.dto';
@@ -26,12 +9,12 @@ import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto.dto';
 import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
 import { FriendshipsService } from 'src/friendships/friendships.service';
 import { MessageService } from 'src/message/message.service';
+import { GameService } from '../game/game.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import { ChatService } from './chat.service';
 import { ConnectService } from './connect.service';
 import { WebsocketExceptionsFilter } from './exception.filter';
-import { MatchHistory } from 'src/game/game.entity';
 
 
 @Injectable()
@@ -48,8 +31,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly channelService: ChannelService,
 		protected readonly messageService: MessageService,
 		protected readonly friendService: FriendshipsService,
-		protected readonly gameService: GameService
-    
+		protected readonly gameService: GameService,
+
 	  @Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
 		@Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
 		) { }
@@ -388,22 +371,22 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	}
 
 	/*
-	**  ██████   █████  ███    ███ ███████      ██████   █████  ████████ ███████ ██     ██  █████  ██    ██ 
-	**██       ██   ██ ████  ████ ██          ██       ██   ██    ██    ██      ██     ██ ██   ██  ██  ██  
-	**██   ███ ███████ ██ ████ ██ █████       ██   ███ ███████    ██    █████   ██  █  ██ ███████   ████   
-	**██    ██ ██   ██ ██  ██  ██ ██          ██    ██ ██   ██    ██    ██      ██ ███ ██ ██   ██    ██    
-	** ██████  ██   ██ ██      ██ ███████      ██████  ██   ██    ██    ███████  ███ ███  ██   ██    ██    
-	**                                                                                                  
-	**                                                                                                  
+	**  ██████   █████  ███    ███ ███████      ██████   █████  ████████ ███████ ██     ██  █████  ██    ██
+	**██       ██   ██ ████  ████ ██          ██       ██   ██    ██    ██      ██     ██ ██   ██  ██  ██
+	**██   ███ ███████ ██ ████ ██ █████       ██   ███ ███████    ██    █████   ██  █  ██ ███████   ████
+	**██    ██ ██   ██ ██  ██  ██ ██          ██    ██ ██   ██    ██    ██      ██ ███ ██ ██   ██    ██
+	** ██████  ██   ██ ██      ██ ███████      ██████  ██   ██    ██    ███████  ███ ███  ██   ██    ██
+	**
+	**
 	**	Game
 	**	├─ startMatch
 	**	├─ WatchGame
 	**	├─ getInQueue
-	**  
+	**
 	/**
 	 *
 	 * @param client Socket
-	 * @returns 
+	 * @returns
 	 */
 	protected players = new Set<Socket>();
 	//delete
@@ -422,7 +405,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 			delete this.players;
 		}
 	}
-  
+
 	/* Game_relay_Service */
 	async startMatch(players)
 	{
@@ -436,12 +419,12 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		this.server.to('match').emit('game_countdownStart');
 		this.server.in('queue').socketsLeave('queue');
 	}
-	
+
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('game_settings')
 	async updateCanvas(client : Socket)
 	{
-	
+
 	}
 }
