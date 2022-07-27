@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen } from '@fortawesome/free-solid-svg-icons'
-
+import { faXmark } from '@fortawesome/free-solid-svg-icons'
 
 export default function Profile() {
 
@@ -12,12 +11,12 @@ export default function Profile() {
 
     const [errorMsg, setErrorMsg] = useState<string>("");
 
-    const [twoFaSecret, setTwoFaSecret] = useState<string>();
-    const [twoFaImage, setTwoFaImage] = useState<string>();
-    
-    const [twofaCheck, setTwofaCheck] = useState<boolean>(false);
-    const [code, setCode] = useState<string>("");
-    const [message, setMessage] = useState<string>("");
+    // NEW TWO-FA
+    const [enable_disable, setEnableDisable] = useState("");
+    const [indexDisplayTwoFa, setIndexDisplayTwoFa] = useState(0);
+    const [twoFadata, setTwoFaData] = useState<any>([]);
+    const [codeTwoFa, setCodeTwoFa] = useState<string>("");
+
 
     useEffect(() => {
         const getData = async () => {
@@ -26,10 +25,22 @@ export default function Profile() {
             );
             let actualData = await response.json();
             setData(actualData);
-            if (actualData.TwoFA_enable == true)
-                setTwofaCheck(true);
+            if (actualData.TwoFA_enable)
+                setEnableDisable("DISABLE 2FA");
+            else if (!actualData.TwoFA_enable)
+                setEnableDisable("ENABLE 2FA");
         }
+
+        const getImage = async () => {
+            const response = await fetch(
+                `/api/auth/2fa/generate`
+            );
+            let actualData = await response.json();
+            setTwoFaData(actualData);
+        }
+
         getData()
+        getImage()
     }, [])
 
     let handleChangeName = (e: any) => {
@@ -48,7 +59,7 @@ export default function Profile() {
                 'Content-type': 'application/json; charset=UTF-8',
             },
         })
-
+        window.location.reload();
         setName("");
     }
 
@@ -85,99 +96,123 @@ export default function Profile() {
             method: 'POST',
             body: postFile,
         })
-        if (!response.ok) {
-            if (response.status == 415)
-                setErrorMsg("JS c'est du caca");
-        }
-        else {
+        if (!response.ok)
+            alert("error with avatar");
+        else
             window.location.reload();
-        }
-    }
-
-    async function handleTwoFAChange(event: any) {
-        const secret = await (await fetch(
-            "/api/auth/2fa/generate"
-        )).json();
-        setTwoFaSecret(secret.secret);
-        setTwoFaImage(secret.qrcode);
     }
 
     async function handleTurnOnTwoFa(e: any) {
         e.preventDefault();
-        try {
             let res = await fetch("/api/auth/2fa/turn-on", {
               method: "POST",
               body: JSON.stringify({
-                token: code,
+                token: codeTwoFa,
               }),
               headers: {
                   "Content-Type": "application/json",
               },
             });
-             let resJson = await res.json();
+            let resJson = await res.json();
             if (res.status !== 201) {
-              setMessage(resJson.message);
+                alert(resJson.message);
             }
-            else{
-                setTwoFaSecret("");
-                setTwofaCheck(true);
-            }
-          } catch (err) {
-            console.log(err);
+            else
+                window.location.reload();
+    }
+
+    async function handleDeactivateTwoFa() {
+        let res = await fetch("/api/auth/2fa/deactivate", {
+            method: "POST",
+          });
+           let resJson = await res.json();
+          if (res.status !== 201) {
+              alert(resJson.message);
           }
+          else
+              window.location.reload();
     }
 
 
+    function handleDisplayTwoFa() {
+        let i = indexDisplayTwoFa;
+        i++;
+        setIndexDisplayTwoFa(i);
+    }
+
+    function displayTwoFa() {
+        if (indexDisplayTwoFa % 2 === 1)
+        {
+            if (data.TwoFA_enable)
+                handleDeactivateTwoFa();
+            else if (!data.TwoFA_enable)
+            {
+                return (
+                    <div className="profile-2fa-enable">
+                        <FontAwesomeIcon icon={faXmark} className="xmark" onClick={handleDisplayTwoFa} />
+                        <img src={twoFadata.qrcode}/>
+                        <p>{twoFadata.secret}</p>
+                        <form onSubmit={handleTurnOnTwoFa}>
+                            <input
+                                type="text"
+                                value={codeTwoFa}
+                                placeholder="Send your code"
+                                onChange={(e) => setCodeTwoFa(e.target.value)}
+                            />
+                        </form>
+                    </div>
+                )
+            }
+        }
+        else if (indexDisplayTwoFa % 2 === 0)
+            return ("");
+    }
+
+    async function handleLogout(e: any) {
+        e.preventDefault();
+        let res = await fetch("/api/auth/logout", {
+            method: "GET",
+        });
+        window.location.reload();
+    }
 
     return (
         <div className="profile-container">
+
             <div className="profile-img">
                 <img src={data.avatar_url}></img>
+            </div>
+            <div className="profile-upload-img">
                 <form onSubmit={handleSubmitAvatar}>
-                    <input type="file" />
-                    <button type="submit">Upload</button>
+                    <input type="file"/>
+                    <button type="submit">UPLOAD</button>
                 </form>
                 {errorMsg && <h3 className="error"> {errorMsg} </h3>}
             </div>
-            <div className="profile-info">
+
                 <div className="profile-name">
-                    <h5>PSEUDO : {data.name}</h5>
+                    <h5>PSEUDO : <span>{data.name}</span></h5>
                     <FontAwesomeIcon icon={faPen} className="pen" onClick={handleInputName} />
                     {displayInputName()}
                 </div>
-                <div className="twofa_user">
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={twofaCheck}
-                            onChange={handleTwoFAChange}
-                        />
-                        TwoFA Enable
-                    </label>
-                    {twoFaSecret &&
-                        <div className="secret">
-                            <img src={twoFaImage} alt="TwoFA QRCode Image" />
-                            <p>{twoFaSecret}</p>
-                            <form onSubmit={handleTurnOnTwoFa}>
-                                <input
-                                    type="text"
-                                    value={code}
-                                    placeholder="Validate your code"
-                                    onChange={(e) => setCode(e.target.value)}
-                                />
-                                <button type="submit">Validate</button>
-                                <div className="message">{message ? <p>{message}</p> : null}</div>
-                            </form>
-                        </div>
-                    }
 
-                </div>
                 <div className="profile-other">
-                    <h5>FULL NAME : {data.fullname}</h5>
-                    <h5>MAIL : {data.mail}</h5>
-                    <h5>VICTORY : {data.wonMatches}</h5>
+                    <div><h5>FULL NAME</h5><p>{data.fullname}</p></div>
+                    <div><h5>MAIL</h5><p>{data.mail}</p></div>
+                    <div><h5>VICTORY</h5><p>{data.wonMatches}</p></div>
+                </div>
+
+            <div className="profile-2fa-and-logout">
+                <div className="profile-2fa">
+                    <button onClick={handleDisplayTwoFa}>{enable_disable}</button>
+                    {displayTwoFa()}
+                </div>
+
+                <div className="profile-logout">
+                    <button onClick={handleLogout}>LOGOUT</button>
                 </div>
             </div>
+
         </div >
     )
 
