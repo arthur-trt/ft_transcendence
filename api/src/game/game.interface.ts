@@ -7,14 +7,37 @@ import { Brackets, Repository } from 'typeorm';
 import { MatchHistory } from './game.entity';
 import { Socket, Server } from 'socket.io'
 
-interface Match
+
+interface Player extends User
+{
+    pos_X: number;
+    pos_Y: number;
+}
+
+interface Ball
+{
+    pos_X: number;
+    pos_Y: number;
+}
+
+interface Paddle
+{
+    pos_X: number;
+    pos_Y: number;
+}
+
+interface Canvas
 {
     width: string;
     height: string;
-    player_1: User;
-    player_2: User;
-    // player_1PaddleX: number;
-    // player_1PaddleY: number;
-    // posBall_x: number;
-    // posBall_y: number;
+}
+
+interface Match
+{
+    Canvas;
+    Paddle;
+    Ball;
+    player_1: Player;
+    player_2: Player;
+    watcher : User;
 }

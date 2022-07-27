@@ -15,6 +15,7 @@ import { UserService } from '../user/user.service';
 import { ChatService } from './chat.service';
 import { ConnectService } from './connect.service';
 import { WebsocketExceptionsFilter } from './exception.filter';
+import { GameRelayService } from './game.relayService';
 
 
 @Injectable()
@@ -32,9 +33,10 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly messageService: MessageService,
 		protected readonly friendService: FriendshipsService,
 		protected readonly gameService: GameService,
+		protected readonly gameRelayService: GameRelayService,
 
 	  @Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
-		@Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
+	@Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
 		) { }
 
 
@@ -379,52 +381,22 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	**
 	**
 	**	Game
-	**	├─ startMatch
-	**	├─ WatchGame
 	**	├─ getInQueue
 	**
 	/**
-	 *
 	 * @param client Socket
 	 * @returns
 	 */
-	protected players = new Set<Socket>();
-	//delete
 
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('game_inQueue')
 	async getInQueue(client : Socket)
 	{
-		console.log("coucou");
-		client.join('queue');
-		this.players.add(client);
-		if (this.players.size == 2)
-		{
-			const Match = this.startMatch(this.players);
-			delete this.players;
-		}
+		await this.gameRelayService.getInQueue(client)
 	}
 
-	/* Game_relay_Service */
-	async startMatch(players)
-	{
-		console.log(this.players.size);
-		const [first] = players;
-		const[, second] = players;
-		console.log("starting match");
-		var Match = this.gameService.createMatch(first.data.user, second.data.user);
-		first.join('Match');
-		second.join('Match');
-		this.server.to('match').emit('game_countdownStart');
-		this.server.in('queue').socketsLeave('queue');
-	}
 
-	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
-	@SubscribeMessage('game_settings')
-	async updateCanvas(client : Socket)
-	{
 
-	}
+
 }
