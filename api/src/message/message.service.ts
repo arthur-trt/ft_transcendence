@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { deepStrictEqual } from 'assert';
 import { UUIDVersion } from 'class-validator';
@@ -38,6 +38,8 @@ export class MessageService {
 	public async sendMessageToChannel(chanIdentifier : string, user : User, msg : string) : Promise<Channel>
 	{
 		const channel : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier);
+		if (channel.mutedId.includes(user.id))
+			throw (new HttpException('You are mute and cannot send message to channel.', HttpStatus.FORBIDDEN))
 		const newMessage = await this.chatRepo.save
 		(
 			{
@@ -130,6 +132,8 @@ export class MessageService {
 	 */
 	public async getPrivateMessage(user1: User, user2: User) : Promise<privateMessage[]>
 	{
+		if (user1.blocked.includes(user2.id))
+			throw new HttpException('Cannot get messages with a blocked user', HttpStatus.OK)
 		const msgs = this.pmRepo.createQueryBuilder("PM")
 			.leftJoinAndMapOne("PM.sender", User, 'users', 'users.id = PM.sender')
 			.leftJoinAndMapOne("PM.target", User, 'usert', 'usert.id = PM.target')

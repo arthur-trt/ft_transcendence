@@ -28,6 +28,8 @@ export class ChannelService {
 		chan.name = name;
 		chan.owner = user;
 		chan.admins = [];
+		chan.muted = [];
+		chan.banned = [];
 		chan.admins = [...chan.admins, user];
 		chan.private = privacy;
 		if (password)
@@ -36,7 +38,8 @@ export class ChannelService {
 			chan.password = await bcrypt.hash(password, 10);
 		}
 		await this.channelsRepo.save(chan)
-		return await this.userService.joinChannel(user, name, password);
+		await this.userService.joinChannel(user, name, password);
+
 	}
 
 	public async setNewAdmin(user: User, channel : Channel, toBeAdmin: User)
@@ -162,6 +165,21 @@ export class ChannelService {
 		return channel;
 	}
 
+	public async unmute(channel: Channel, toUnMute: User)
+	{
+		console.log("Un Mute")
+		channel.muted = channel.muted.filter((muted) => {
+			return muted.id !== toUnMute.id
+		})
+		channel.mutedId = channel.mutedId.filter((muted) => {
+			return muted !== toUnMute.id
+		}) // See how it is possible that relationId are not updated automatically and i have to do it manually;
+		channel.save();
+		console.log("Muted" + channel.muted)
+		console.log( "Id " + channel.mutedId)
+		return channel;
+	}
+
 	public async temporaryBanUser(user: User, channel: Channel, toBan: User)
 	{
 		if (!channel.adminsId.includes(user.id))
@@ -175,6 +193,20 @@ export class ChannelService {
 		await channel.save();
 		/** Step three : set timeout to remove from ban list */
 		setTimeout(() => { this.unban(channel, toBan)}, 30000);
+		return channel;
+	}
+
+
+	public async temporaryMuteUser(user: User, channel: Channel, toMute: User)
+	{
+		if (!channel.adminsId.includes(user.id))
+			throw new HttpException("You must be admin to mute an user from chan.", HttpStatus.FORBIDDEN);
+		console.log("Mute");
+		channel.muted = [...channel.muted, toMute];
+		await channel.save();
+		console.log("Muted" + channel.muted)
+		console.log( "Id " + channel.mutedId)
+		setTimeout(() => { this.unmute(channel, toMute)}, 30000);
 		return channel;
 	}
 }
