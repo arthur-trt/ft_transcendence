@@ -1,36 +1,19 @@
-import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { forwardRef, Inject, Injectable, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from "@nestjs/websockets"
-import { forwardRef, Inject, Injectable, Logger, UseGuards, UsePipes } from '@nestjs/common';
-import { jwtConstants } from '../auth/jwt/jwt.constants';
-import { JwtService, JwtVerifyOptions } from '@nestjs/jwt';
-import { User } from '../user/user.entity';
-import { UserService } from '../user/user.service';
-import { GameService } from '../game/game.service';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
 import { ChannelService } from 'src/channel/channel.service';
-import { MessageService } from 'src/message/message.service';
-import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
-import { Channel } from 'src/channel/channel.entity';
-import { UserModule } from 'src/user/user.module';
-import { FriendshipsService } from 'src/friendships/friendships.service';
-import { AfterRecover, QueryFailedError, TreeRepositoryNotSupportedError, UsingJoinColumnOnlyOnOneSideAllowedError } from 'typeorm';
-import { isArray, isObject } from 'class-validator';
 import { newChannelDto } from 'src/dtos/newChannel.dto';
-import { CreateMatchDto } from 'src/dtos/match.dto';
-import { ValidationPipe } from '@nestjs/common';
 import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto.dto';
-import { WsException } from '@nestjs/websockets'
-import { UseFilters, WsExceptionFilter} from '@nestjs/common';
-import { HttpStatus, HttpException } from '@nestjs/common';
-import { ExceptionFilter, Catch } from '@nestjs/common';
-import { ArgumentsHost } from '@nestjs/common';
-import { NextFunction, Request, Response} from 'express';
-import { BaseWsExceptionFilter } from '@nestjs/websockets'
-import { WebsocketExceptionsFilter } from './exception.filter';
+import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
+import { FriendshipsService } from 'src/friendships/friendships.service';
+import { MessageService } from 'src/message/message.service';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import { ChatService } from './chat.service';
-import { FortyTwoAuthStrategy } from 'src/auth/fortyTwo/fortyTwo.strategy';
 import { ConnectService } from './connect.service';
+import { WebsocketExceptionsFilter } from './exception.filter';
 
 
 @Injectable()

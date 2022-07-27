@@ -1,10 +1,6 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable, UseFilters } from "@nestjs/common";
+import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { IoAdapter } from "@nestjs/platform-socket.io";
-import { WebSocketGateway, WebSocketServer, WsException } from "@nestjs/websockets";
-import { Http2ServerRequest } from "http2";
-import { Server, Socket } from "socket.io";
-import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { Socket } from "socket.io";
 import { Channel } from "src/channel/channel.entity";
 import { ChannelService } from "src/channel/channel.service";
 import { newChannelDto } from "src/dtos/newChannel.dto";
@@ -14,8 +10,6 @@ import { FriendshipsService } from "src/friendships/friendships.service";
 import { MessageService } from "src/message/message.service";
 import { User } from "src/user/user.entity";
 import { UserService } from "src/user/user.service";
-import { ConnectService } from "./connect.service";
-import { WebsocketExceptionsFilter } from "./exception.filter";
 import { WSServer } from "./wsserver.gateway";
 
 
@@ -33,14 +27,16 @@ export class ChatService {
 	) {
 	}
 
-	async findSocketId(user: User) : Promise<Socket> {
+	async findSocketId(user: User) : Promise<Socket>
+	{
 		for (let [allUsers, socket] of this.gateway.activeUsers.entries()) {
   			if (allUsers.id == user.id)
     			return socket;
 		}
 	}
 
-	async findUserbySocket(askedsocket: string): Promise<User> {
+	async findUserbySocket(askedsocket: string): Promise<User>
+	{
 		for (let [allUsers, socket] of this.gateway.activeUsers.entries()) {
   			if (socket.id == askedsocket)
     			return allUsers;
@@ -60,7 +56,6 @@ export class ChatService {
 		await this.getRooms();
 	}
 
-	// https://stackoverflow.com/questions/18093638/socket-io-rooms-get-list-of-clients-in-specific-room
 	async joinRoom(client: Socket, joinRoom: newChannelDto)
 	{
 		await this.userService.joinChannel(client.data.user, joinRoom.chanName, joinRoom.password)
@@ -120,7 +115,7 @@ export class ChatService {
 		this.gateway.server.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName, client.data.user));
 	}
 
-	/** Frindships */
+	/** Friendships */
 
 	async addFriend(client: Socket, friend: User)
 	{
@@ -161,13 +156,13 @@ export class ChatService {
 
 	async block(client: Socket, toBlock: User)
 	{
-		this.userService.block(client.data.user, toBlock);
+		await this.userService.block(client.data.user, toBlock);
 		this.gateway.server.to(client.id).emit('blocked', toBlock.name + " has been blocked");
 	}
 
 	async unblock(client: Socket, toUnBlock: User)
 	{
-		this.userService.unblock(client.data.user, toUnBlock);
+		await this.userService.unblock(client.data.user, toUnBlock);
 		this.gateway.server.to(client.id).emit('unblocked', toUnBlock.name + " has been unblocked");
 	}
 }

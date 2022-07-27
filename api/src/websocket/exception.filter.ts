@@ -1,10 +1,7 @@
-import { ArgumentsHost, BadRequestException, Catch, ExceptionFilter, HttpException } from "@nestjs/common";
-import { Response } from "express";
+import { ArgumentsHost, BadRequestException, Catch, HttpException } from "@nestjs/common";
 import { BaseWsExceptionFilter, WsException } from '@nestjs/websockets';
-import { QueryFailedError } from "typeorm";
 import { Socket } from "socket.io";
-import { RpcExceptionFilter } from '@nestjs/common';
-import { Observable, throwError } from 'rxjs';
+import { QueryFailedError } from "typeorm";
 
 
 @Catch(WsException, HttpException, QueryFailedError)

@@ -1,6 +1,5 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthModule } from 'src/auth/auth.module';
 import { ChannelModule } from 'src/channel/channel.module';
 import { FriendshipsModule } from 'src/friendships/friendships.module';
 import { MessageModule } from 'src/message/message.module';
@@ -8,7 +7,6 @@ import { UserModule } from 'src/user/user.module';
 import { ChatService } from './chat.service';
 import { ConnectService } from './connect.service';
 import { WSServer } from './wsserver.gateway';
-//import { ChatGateway } from './chat.gateway';
 
 @Module({
 
