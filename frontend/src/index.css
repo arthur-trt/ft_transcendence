@@ -351,7 +351,7 @@ cursor: pointer;
   transition: all 0.5s ease-out;
   transform: scale(0.80);
 }
-  
+
 .friendsrequest-single {
   display: flex;
   align-items: center;
@@ -587,6 +587,33 @@ textarea:focus, input:focus{
 .profile-other h5 {
   margin: 0;
   margin-left: 5px;
+}
+
+/* ------------------------------------- */
+/* -----------------GAME---------------- */
+/* ------------------------------------- */
+
+.game-container {
+  width: 96%;
+  height: 30%;
+  display: flex;
+  margin-top: 20px;
+  padding-bottom: 20px;
+  padding-top: 20px;
+  margin-right: 2%;
+  margin-left: 2%;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 10px;
+  background-color: white;
+}
+
+.pong-container {
+  width: 80%;
+  display: flex;
+  border: 10px solid black;
+  margin: auto;
+  max-width: 1200px;
+  border-radius: 50px;
 }
 
 
