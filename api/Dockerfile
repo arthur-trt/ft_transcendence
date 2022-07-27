@@ -13,10 +13,19 @@
 #
 # Dev image
 #
-FROM	node
+FROM	node as dev
 
 
 WORKDIR	/api/
 COPY	./entrypoint.sh ./entrypoint.sh
 
 CMD ["sh", "/api/entrypoint.sh"]
+
+
+FROM	node:alpine as prod
+
+COPY	. /api/
+WORKDIR /api/
+RUN		npm ci --omit=dev
+
+CMD		["npm", "run", "start:prod"]
