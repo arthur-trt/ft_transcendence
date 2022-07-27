@@ -49,15 +49,12 @@ export class ChatService {
 
 	async getRooms(client? : Socket)
 	{
-		console.log("test 3")
-		console.log (this.gateway.activeUsers.entries())
 		for (let [allUsers, socket] of this.gateway.activeUsers.entries())
 			this.gateway.server.to(socket.id).emit('rooms', " get rooms ", await this.channelService.getChannelsForUser(allUsers));
 	}
 
 	async createRoom(client: Socket, channel: newChannelDto)
 	{
-		console.log( "test ")
 		await this.channelService.createChannel(channel.chanName, client.data.user, channel.password, channel.private)
 		client.join(channel.chanName)
 		await this.getRooms();
