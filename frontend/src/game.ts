@@ -2,7 +2,7 @@ import {socketo } from './index';
 const socket = socketo;
 
 // select canvas element
-let canvas = <HTMLCanvasElement>document.getElementById("pong");
+let cancanvas = <HTMLCanvasElement>document.getElementById("pong");
 var start = document.getElementById("start");
 
 if (canvas != null)
@@ -271,3 +271,57 @@ socket.on('game_winner', function(winner: any){
         drawText("PLAYER 1 WON !", canvas.width * 0.25, canvas.height * 0.2, '#D0AF0A');
     }
 });
+
+
+///**
+//   * Draw a rectangle on the canva
+//   * @param x X position of the rectangle
+//   * @param y Y position of the rectangle
+//   * @param w Weidth of the rectangle
+//   * @param h Heigth of the rectangle
+//   * @param color Color to draw
+//   */
+// function drawRect (x: number, y: number, w: number, h: number, color: string) {
+//    if (ctx != null) {
+//      ctx.fillStyle = color;
+//      ctx.fillRect(x, y, w, h);
+//    }
+//  }
+
+//  /**
+//   * Draw a circle on the canva
+//   * @param x X position of the circle
+//   * @param y Y poistion of the circle
+//   * @param r Radius of the circle
+//   * @param color Color of the circle
+//   */
+//  function drawArc (x: number, y: number, r: number, color: string) {
+//    if (ctx != null) {
+//      ctx.fillStyle = color;
+//      ctx.beginPath();
+//      ctx.arc(x, y, r, 0, Math.PI * 2, true);
+//      ctx.closePath();
+//      ctx.fill();
+//    }
+//  }
+
+//  function drawNet () {
+//    if (net) {
+//      for (let i = 0; i <= canvas.height; i += 15) {
+//        drawRect(net.x, net.y + i, net.width, net.height, net.color);
+//      }
+//    }
+//  }
+
+//  function drawText (text: string, x: number, y: number, color: string) {
+//    if (ctx != null) {
+//      ctx.fillStyle = color;
+//      ctx.font = "75px fantasy";
+//      ctx.fillText(text, x, y);
+//    }
+//  }
+
+//  function render (data: dataT) {
+//    // Clear the canva
+//    ctx.clearRect(0, 0, canvas.height, canvas.width);
+//  }

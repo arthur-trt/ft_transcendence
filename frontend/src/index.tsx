@@ -56,7 +56,7 @@ root.render(
         </Route>
         <Route path="/community" element={<><Header /><RequireAuth><Channels /></RequireAuth></>} />
         <Route path="/debug" element={<><Header /><RequireAuth><Debug /></RequireAuth></>} />
-        <Route path="/game" element={<><Game/></>} />
+        <Route path="/game" element={<><Header /><Game/></>} />
 
       </Routes>
     </BrowserRouter>
