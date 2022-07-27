@@ -13,6 +13,9 @@ import { GameModule } from 'src/game/game.module';
 @Module({
 
 	imports: [UserModule, MessageModule, JwtModule, ChannelModule, FriendshipsModule, GameModule],
-	providers: [WSServer, ChatService, ConnectService],
+	providers: [WSServer, ChatService, ConnectService]
+})
 
 export class WSServerModule {}
+
+
