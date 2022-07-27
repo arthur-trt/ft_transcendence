@@ -86,6 +86,13 @@ export class ChatService {
 		await this.getRooms();
 	}
 
+	async setAdmin(client: Socket, channel : string, toSetAdmin: User)
+	{
+		const chan: Channel = await this.channelService.getChannelByIdentifier(channel);
+		await this.channelService.setNewAdmin(client.data.user, chan, toSetAdmin);
+		await this.getRooms();
+	}
+
 	/** 	Messages 	*/
 
 	async sendPrivateMessage(client: Socket, msg: sendPrivateMessageDto)
