@@ -403,7 +403,4 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.gameRelayService.getInQueue(client)
 	}
 
-
-
-
 }
