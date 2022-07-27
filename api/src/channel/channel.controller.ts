@@ -1,16 +1,14 @@
-import { Body, Controller, Get, Post, Query, UsePipes, ValidationPipe, Req, UseGuards, Patch, Delete } from '@nestjs/common';
-import { ChannelService } from './channel.service';
-import { Channel } from './channel.entity';
+import { Body, Controller, Delete, Get, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
-
-import { newChannelDto } from 'src/dtos/newChannel.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Channel } from './channel.entity';
+import { ChannelService } from './channel.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { UserService } from 'src/user/user.service';
-import { User } from 'src/user/user.entity';
-import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { deleteFromChannelDto } from 'src/dtos/deleteFromChannelDto.dto';
+import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
+import { newChannelDto } from 'src/dtos/newChannel.dto';
+import { User } from 'src/user/user.entity';
+import { UserService } from 'src/user/user.service';
 
 @ApiTags('Channel')
 @Controller('channel')

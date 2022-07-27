@@ -1,36 +1,21 @@
-import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { forwardRef, Inject, Injectable, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from "@nestjs/websockets"
-import { forwardRef, Inject, Injectable, Logger, UseGuards, UsePipes } from '@nestjs/common';
-import { jwtConstants } from '../auth/jwt/jwt.constants';
-import { JwtService, JwtVerifyOptions } from '@nestjs/jwt';
-import { User } from '../user/user.entity';
-import { UserService } from '../user/user.service';
-import { GameService } from '../game/game.service';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
 import { ChannelService } from 'src/channel/channel.service';
-import { MessageService } from 'src/message/message.service';
-import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
-import { Channel } from 'src/channel/channel.entity';
-import { UserModule } from 'src/user/user.module';
-import { FriendshipsService } from 'src/friendships/friendships.service';
-import { AfterRecover, QueryFailedError, TreeRepositoryNotSupportedError, UsingJoinColumnOnlyOnOneSideAllowedError } from 'typeorm';
-import { isArray, isObject } from 'class-validator';
+import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
 import { newChannelDto } from 'src/dtos/newChannel.dto';
-import { CreateMatchDto } from 'src/dtos/match.dto';
-import { ValidationPipe } from '@nestjs/common';
 import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto.dto';
-import { WsException } from '@nestjs/websockets'
-import { UseFilters, WsExceptionFilter} from '@nestjs/common';
-import { HttpStatus, HttpException } from '@nestjs/common';
-import { ExceptionFilter, Catch } from '@nestjs/common';
-import { ArgumentsHost } from '@nestjs/common';
-import { NextFunction, Request, Response} from 'express';
-import { BaseWsExceptionFilter } from '@nestjs/websockets'
-import { WebsocketExceptionsFilter } from './exception.filter';
+import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
+import { FriendshipsService } from 'src/friendships/friendships.service';
+import { MessageService } from 'src/message/message.service';
+import { GameService } from '../game/game.service';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import { ChatService } from './chat.service';
-import { FortyTwoAuthStrategy } from 'src/auth/fortyTwo/fortyTwo.strategy';
 import { ConnectService } from './connect.service';
+import { WebsocketExceptionsFilter } from './exception.filter';
 
 
 @Injectable()
@@ -39,7 +24,7 @@ import { ConnectService } from './connect.service';
 export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
 	@WebSocketServer()
-	protected _server : Server;
+	public _server : Server;
 
 	constructor(
 		protected readonly jwtService: JwtService,
@@ -47,9 +32,12 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly channelService: ChannelService,
 		protected readonly messageService: MessageService,
 		protected readonly friendService: FriendshipsService,
-		@Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
+		protected readonly gameService: GameService,
+
+	  @Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
 		@Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
 		) { }
+
 
 	protected logger: Logger = new Logger('WebSocketServer');
 	protected all_users: User[];
@@ -150,12 +138,15 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	** ├─ deleteRoom
 	** ├─ leaveRoom
    	** ├─ banUser
+	** ├─ setAdmin
+  	** ├─ modifyChanSettings
 	*/
 
 	@SubscribeMessage('getRooms')
 	@UseGuards(WsJwtAuthGuard)
-	async onGetRooms(client: Socket){
-		this.chatService.getRooms();
+	async getRooms(client: Socket)
+	{
+		await this.chatService.getRooms().catch((err) => { throw new WsException ('puree')});
 	}
 
 	/**
@@ -167,8 +158,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('createRoom')
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
-	async onCreateRoom(client: Socket, channel: newChannelDto) {
-		this.chatService.createRoom(client, channel);
+	async createRoom(client: Socket, channel: newChannelDto) {
+		await this.chatService.createRoom(client, channel)
 	}
 
 	/**
@@ -181,7 +172,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
 	async onJoinRoom(client: Socket, joinRoom: newChannelDto) {
-		this.chatService.joinRoom(client, joinRoom);
+		await this.chatService.joinRoom(client, joinRoom);
 	}
 
 	/**
@@ -193,7 +184,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('deleteRoom')
 	@UseGuards(WsJwtAuthGuard)
 	async onDeletedRoom(client: Socket, channel: string) {
-		this.chatService.deleteRoom(client, channel);
+		await this.chatService.deleteRoom(client, channel);
 	}
 
 	/**
@@ -204,13 +195,23 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@SubscribeMessage('leaveRoom')
 	@UseGuards(WsJwtAuthGuard)
-	async onLeaveRoom(client: Socket, channel: string){
-		this.chatService.leaveRoom(client, channel)
+	async onLeaveRoom(client: Socket, channel: string) {
+		await this.chatService.leaveRoom(client, channel)
 	}
 
 	@SubscribeMessage('banUser')
 	async onBanUser(client: Socket, channel : string, toBan: User) {
-		this.chatService.ban(client, channel, toBan);
+		await this.chatService.ban(client, channel, toBan);
+	}
+
+	@SubscribeMessage('setAdmin')
+	async onSetAdmin(client: Socket, channel : string, toBeAdmin: User) {
+		await this.chatService.setAdmin(client, channel, toBeAdmin);
+	}
+
+	@SubscribeMessage('modifyChanSettings')
+	async onsetOrUnsetPass(client: Socket, channelSettings : ModifyChannelDto) {
+		await this.chatService.modifyChanSettings(client, channelSettings);
 	}
 
 	/*
@@ -243,7 +244,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
 	async onPrivateMessage(client: Socket, msg: sendPrivateMessageDto) {
-		this.chatService.sendPrivateMessage(client, msg)
+		await this.chatService.sendPrivateMessage(client, msg)
 	}
 
 	/**
@@ -255,7 +256,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('getPrivateMessage')
 	@UseGuards(WsJwtAuthGuard)
 	async onGetPrivateMessage(client: Socket, user2: User){
-		this.chatService.getPrivateMessages(client, user2);
+		await this.chatService.getPrivateMessages(client, user2);
 	}
 
 	/**
@@ -267,7 +268,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UsePipes(ValidationPipe)
 	@UseGuards(WsJwtAuthGuard)
 	async onSendChannelMessages(client: Socket, data: sendChannelMessageDto) {
-		this.chatService.sendChannelMessage(client, data)
+		await this.chatService.sendChannelMessage(client, data)
 	}
 
 	/**
@@ -279,7 +280,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('getChannelMessages')
 	@UseGuards(WsJwtAuthGuard)
 	async onGetChannelMessages(client: Socket, channelName: string) {
-		this.chatService.getChannelMessages(client, channelName);
+		await this.chatService.getChannelMessages(client, channelName);
 	}
 
 	/*
@@ -307,7 +308,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('addFriend')
 	@UseGuards(WsJwtAuthGuard)
 	async addFriend(client: Socket, friend: User) {
-		this.chatService.addFriend(client, friend);
+		await this.chatService.addFriend(client, friend);
 	}
 
 	/**
@@ -318,7 +319,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('acceptFriend')
 	@UseGuards(WsJwtAuthGuard)
 	async acceptFriendRequest(client: Socket, friend: User) {
-		this.chatService.acceptFriendRquest(client, friend);
+		await this.chatService.acceptFriendRquest(client, friend);
 	}
 
 
@@ -330,7 +331,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('removeFriend')
 	async removeFriend(client: Socket, friend: User) {
-		this.chatService.removeFriend(client, friend);
+		await this.chatService.removeFriend(client, friend);
 	}
 
 	/**
@@ -340,13 +341,13 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getFriends')
 	async getFriends(client: Socket) {
-		this.chatService.getFriends(client);
+		await this.chatService.getFriends(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('getFriendRequests')
 	async getFriendRequests(client: Socket) {
-		this.chatService.getFriendRequests(client);
+		await this.chatService.getFriendRequests(client);
 	}
 
 	/*
@@ -367,27 +368,70 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('block')
 	async block(client: Socket, toBlock: User) {
-		this.chatService.block(client, toBlock);
+		await this.chatService.block(client, toBlock);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('unblock')
 	async unblock(client: Socket, toUnBlock: User) {
-		this.chatService.unblock(client, toUnBlock)
+		await this.chatService.unblock(client, toUnBlock)
 	}
 
-	async getQueueUsers()
-	{
-		const users: User[] = [];
-		const sockets  = await this._server.in('queue').allSockets();
-		console.log(sockets);
-		for (let [k] of sockets.entries())
-		{
-			let u = await this.chatService.findUserbySocket(k);
-			console.log(u);
+	/*
+	**  ██████   █████  ███    ███ ███████      ██████   █████  ████████ ███████ ██     ██  █████  ██    ██
+	**██       ██   ██ ████  ████ ██          ██       ██   ██    ██    ██      ██     ██ ██   ██  ██  ██
+	**██   ███ ███████ ██ ████ ██ █████       ██   ███ ███████    ██    █████   ██  █  ██ ███████   ████
+	**██    ██ ██   ██ ██  ██  ██ ██          ██    ██ ██   ██    ██    ██      ██ ███ ██ ██   ██    ██
+	** ██████  ██   ██ ██      ██ ███████      ██████  ██   ██    ██    ███████  ███ ███  ██   ██    ██
+	**
+	**
+	**	Game
+	**	├─ startMatch
+	**	├─ WatchGame
+	**	├─ getInQueue
+	**
+	/**
+	 *
+	 * @param client Socket
+	 * @returns
+	 */
+	protected players = new Set<Socket>();
+	//delete
 
-			users.push(u);
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('game_inQueue')
+	async getInQueue(client : Socket)
+	{
+		console.log("coucou");
+		client.join('queue');
+		this.players.add(client);
+		if (this.players.size == 2)
+		{
+			const Match = this.startMatch(this.players);
+			delete this.players;
 		}
-		return users;
+	}
+
+	/* Game_relay_Service */
+	async startMatch(players)
+	{
+		console.log(this.players.size);
+		const [first] = players;
+		const[, second] = players;
+		console.log("starting match");
+		var Match = this.gameService.createMatch(first.data.user, second.data.user);
+		first.join('Match');
+		second.join('Match');
+		this.server.to('Match').emit('game_countdownStart');
+		this.server.in('queue').socketsLeave('queue');
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('game_settings')
+	async updateCanvas(client : Socket)
+	{
+
 	}
 }

@@ -1,32 +1,12 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable, Req } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UUIDVersion } from 'class-validator';
-import { channel } from 'diagnostics_channel';
+import * as bcrypt from 'bcrypt';
+import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
-import { getRepository, Repository } from 'typeorm';
-import { Channel } from './channel.entity';
+import { Repository } from 'typeorm';
 import { validate as isValidUUID } from 'uuid';
-import { Request, Response } from 'express';
-import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
-import * as bcrypt from 'bcrypt';
-import { ExceptionFilter } from '@nestjs/common';
-import { ArgumentsHost } from '@nestjs/common';
-import { Catch } from '@nestjs/common';
-import { QueryFailedError } from 'typeorm';
-
-
-@Catch(HttpException)
-export class HttpExceptionsFilter implements ExceptionFilter {
-  catch(exception: any, host: ArgumentsHost) {
-	  console.log(exception)
-		console.log ( "coucou laaa ")
-	  const test : Response = host.switchToHttp().getResponse<Response>();	  //const response: Response = ctx.getResponse<Response>();
-	  test.status(100);
-	 // console.log("REEPONSE IS " + response + "haha")
-	//return res.status("LOL");
-  }
-}
+import { Channel } from './channel.entity';
 
 
 @Injectable()
@@ -47,6 +27,10 @@ export class ChannelService {
 		const chan: Channel = new Channel();
 		chan.name = name;
 		chan.owner = user;
+		chan.admins = [];
+		chan.muted = [];
+		chan.banned = [];
+		chan.admins = [...chan.admins, user];
 		chan.private = privacy;
 		if (password)
 		{
@@ -54,7 +38,16 @@ export class ChannelService {
 			chan.password = await bcrypt.hash(password, 10);
 		}
 		await this.channelsRepo.save(chan)
-		return await this.userService.joinChannel(user, name, password);
+		await this.userService.joinChannel(user, name, password);
+
+	}
+
+	public async setNewAdmin(user: User, channel : Channel, toBeAdmin: User)
+	{
+		if (!channel.adminsId.includes(user.id))
+			throw new HttpException("You must be admin to name another admin.", HttpStatus.FORBIDDEN);
+		channel.admins = [...channel.admins, toBeAdmin];
+		await channel.save();
 	}
 
 	/**
@@ -82,6 +75,7 @@ export class ChannelService {
 			.leftJoinAndSelect("channel.users", "Users")
 			.leftJoinAndSelect("channel.banned", "b")
 			.leftJoinAndSelect("channel.owner", "o")
+			.leftJoinAndSelect("channel.admins", "a")
 			.where('channel.private = false')
 			.orWhere("Users.id = :id", { id: user.id })
 			.getMany();
@@ -119,8 +113,17 @@ export class ChannelService {
 	public async updateChannelSettings(user: User, changes: ModifyChannelDto) : Promise<Channel>
 	{
 		const chan: Channel = await this.getChannelByIdentifier(changes.chanName);
-		chan.name = changes.chanName;
-		chan.owner = changes.owner;
+		if (chan.ownerId != user.id)
+			throw new HttpException("You must be owner to change chan settings.", HttpStatus.FORBIDDEN);
+		if (changes.password)
+		{
+			chan.password_protected = true;
+			chan.password = await bcrypt.hash(changes.password, 10);
+		}
+		else
+		{
+			chan.password_protected = false;
+		}
 		return this.channelsRepo.save(chan);
 	}
 
@@ -134,7 +137,7 @@ export class ChannelService {
 
 	 public async deleteChannel(user: User, channel: Channel)// : Promise<Channel[]>
 	 {
-		if (channel.ownerId != user.id)
+		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to delete chan.", HttpStatus.FORBIDDEN);
 		await this.channelsRepo
     		.createQueryBuilder()
@@ -153,8 +156,8 @@ export class ChannelService {
  	*/
 	public async deleteUserFromChannel(user: User, channel : Channel, toBan: User) : Promise<Channel[]>
 	{
-		if (channel.ownerId != user.id)
-			throw new HttpException("You must be admin to delete chan.", HttpStatus.FORBIDDEN);
+		if (!channel.adminsId.includes(user.id))
+			throw new HttpException("You must be admin to delete an user from chan.", HttpStatus.FORBIDDEN);
 		await this.channelsRepo.createQueryBuilder()
 			.relation(Channel, "users")
 			.of({ id: toBan.id })
@@ -171,10 +174,25 @@ export class ChannelService {
 		return channel;
 	}
 
+	public async unmute(channel: Channel, toUnMute: User)
+	{
+		console.log("Un Mute")
+		channel.muted = channel.muted.filter((muted) => {
+			return muted.id !== toUnMute.id
+		})
+		channel.mutedId = channel.mutedId.filter((muted) => {
+			return muted !== toUnMute.id
+		}) // See how it is possible that relationId are not updated automatically and i have to do it manually;
+		channel.save();
+		console.log("Muted" + channel.muted)
+		console.log( "Id " + channel.mutedId)
+		return channel;
+	}
+
 	public async temporaryBanUser(user: User, channel: Channel, toBan: User)
 	{
-		if (channel.ownerId != user.id)
-			throw new HttpException("You must be admin to delete chan.", HttpStatus.FORBIDDEN);
+		if (!channel.adminsId.includes(user.id))
+			throw new HttpException("You must be admin to ban an user from chan.", HttpStatus.FORBIDDEN);
 		console.log("Bannishement");
 		/** Step one : Deleting user from channel */
 		await this.deleteUserFromChannel(user, channel, toBan);
@@ -188,5 +206,16 @@ export class ChannelService {
 	}
 
 
-
+	public async temporaryMuteUser(user: User, channel: Channel, toMute: User)
+	{
+		if (!channel.adminsId.includes(user.id))
+			throw new HttpException("You must be admin to mute an user from chan.", HttpStatus.FORBIDDEN);
+		console.log("Mute");
+		channel.muted = [...channel.muted, toMute];
+		await channel.save();
+		console.log("Muted" + channel.muted)
+		console.log( "Id " + channel.mutedId)
+		setTimeout(() => { this.unmute(channel, toMute)}, 30000);
+		return channel;
+	}
 }

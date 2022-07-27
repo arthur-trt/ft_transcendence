@@ -32,6 +32,7 @@ services:
      - ./frontend:/frontend:cached
     environment:
       - NODE_ENV=development
+      - FAST_REFRESH=true
     env_file:
       - ./.env
     networks:
