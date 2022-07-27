@@ -37,14 +37,13 @@ export class GameService {
 			])
 			.getMany();
 	}
-
 	/**
 	 *
 	 * @param user1
 	 * @param user2
 	 * @returns
 	 */
-	async createMatch(user1: User, user2: User): Promise<MatchHistory> {
+   	async createMatch(user1: User, user2: User) {//Promise<MatchHistory> {
 		const newMatch: MatchHistory = await this.MatchRepo.save(
 			{
 				user1: user1.id,
