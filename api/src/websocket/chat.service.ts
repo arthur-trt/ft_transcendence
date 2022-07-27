@@ -1,9 +1,9 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { IoAdapter } from "@nestjs/platform-socket.io";
 import { Socket } from "socket.io";
 import { Channel } from "src/channel/channel.entity";
 import { ChannelService } from "src/channel/channel.service";
+import { ModifyChannelDto } from "src/dtos/modifyChannel.dto";
 import { newChannelDto } from "src/dtos/newChannel.dto";
 import { sendChannelMessageDto } from "src/dtos/sendChannelMessageDto.dto";
 import { sendPrivateMessageDto } from "src/dtos/sendPrivateMessageDto.dto";
@@ -14,10 +14,10 @@ import { UserService } from "src/user/user.service";
 import { WSServer } from "./wsserver.gateway";
 
 
+
 @Injectable()
 export class ChatService {
 
-	private server : WSServer;
 	constructor(
 		protected readonly jwtService: JwtService,
 		protected readonly userService: UserService,
@@ -25,17 +25,19 @@ export class ChatService {
 		protected readonly messageService: MessageService,
 		protected readonly friendService: FriendshipsService,
 		@Inject(forwardRef(() => WSServer)) protected gateway : WSServer
-	) {}
+	) {
+	}
 
-	async findSocketId(user: User) : Promise<Socket> {
+	async findSocketId(user: User) : Promise<Socket>
+	{
 		for (let [allUsers, socket] of this.gateway.activeUsers.entries()) {
   			if (allUsers.id == user.id)
     			return socket;
 		}
 	}
 
-	async findUserbySocket(askedsocket: string): Promise<User> {
-
+	async findUserbySocket(askedsocket: string): Promise<User>
+	{
 		for (let [allUsers, socket] of this.gateway.activeUsers.entries()) {
   			if (socket.id == askedsocket)
     			return allUsers;
@@ -55,7 +57,6 @@ export class ChatService {
 		await this.getRooms();
 	}
 
-	// https://stackoverflow.com/questions/18093638/socket-io-rooms-get-list-of-clients-in-specific-room
 	async joinRoom(client: Socket, joinRoom: newChannelDto)
 	{
 		await this.userService.joinChannel(client.data.user, joinRoom.chanName, joinRoom.password)
@@ -83,6 +84,19 @@ export class ChatService {
 	{
 		const chan: Channel = await this.channelService.getChannelByIdentifier(channel);
 		await this.channelService.temporaryBanUser(client.data.user, chan, toBan);
+		await this.getRooms();
+	}
+
+	async setAdmin(client: Socket, channel : string, toSetAdmin: User)
+	{
+		const chan: Channel = await this.channelService.getChannelByIdentifier(channel);
+		await this.channelService.setNewAdmin(client.data.user, chan, toSetAdmin);
+		await this.getRooms();
+	}
+
+	async modifyChanSettings(client: Socket, changes: ModifyChannelDto)
+	{
+		await this.channelService.updateChannelSettings(client.data.user, changes);
 		await this.getRooms();
 	}
 
@@ -115,7 +129,7 @@ export class ChatService {
 		this.gateway.server.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName, client.data.user));
 	}
 
-	/** Frindships */
+	/** Friendships */
 
 	async addFriend(client: Socket, friend: User)
 	{
@@ -156,13 +170,13 @@ export class ChatService {
 
 	async block(client: Socket, toBlock: User)
 	{
-		this.userService.block(client.data.user, toBlock);
+		await this.userService.block(client.data.user, toBlock);
 		this.gateway.server.to(client.id).emit('blocked', toBlock.name + " has been blocked");
 	}
 
 	async unblock(client: Socket, toUnBlock: User)
 	{
-		this.userService.unblock(client.data.user, toUnBlock);
+		await this.userService.unblock(client.data.user, toUnBlock);
 		this.gateway.server.to(client.id).emit('unblocked', toUnBlock.name + " has been unblocked");
 	}
 }

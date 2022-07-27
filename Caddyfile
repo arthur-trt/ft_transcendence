@@ -13,7 +13,7 @@
 	}
 }
 
-*:3000 {
+http:// {
 	log {
 		output stdout
 		level error
