@@ -133,6 +133,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	** ├─ deleteRoom
 	** ├─ leaveRoom
    	** ├─ banUser
+	** ├─ setAdmin
 	*/
 
 	@SubscribeMessage('getRooms')
@@ -195,6 +196,11 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('banUser')
 	async onBanUser(client: Socket, channel : string, toBan: User) {
 		await this.chatService.ban(client, channel, toBan);
+	}
+
+	@SubscribeMessage('setAdmin')
+	async onSetAdmin(client: Socket, channel : string, toBeAdmin: User) {
+		await this.chatService.setAdmin(client, channel, toBeAdmin);
 	}
 
 	/*
