@@ -37,6 +37,13 @@ export class GameController {
 		return await this.gameService.endMatch(match);
 	}
 
+	@Get('ladder')
+	@ApiOperation({ summary: "Get ladder" })
+	public async getLadder(@Body() match : endMatchDto) : Promise<User[]>
+	{
+		return await this.gameService.ladder();
+	}
+
 
 
 }

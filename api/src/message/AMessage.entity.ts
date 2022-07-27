@@ -11,6 +11,6 @@ export abstract class AMessage  {
     @Column()
 	message: string;
 
-	@CreateDateColumn({ nullable : true, type: "timestamp"})
+	@CreateDateColumn({ nullable : true, type: "time"})
 	sent_at: Date;
 }

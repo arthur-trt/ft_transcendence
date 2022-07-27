@@ -12,8 +12,6 @@ POSTGRES_USER=<user>
 POSTGRES_PASSWORD=<db_password>
 POSTGRES_DB=<db_name>
 
-# NODE
-NODE_ENV=development
 
 # PGADMIN
 PGADMIN_PATH=(./private/pgadmin) (for 42Linux use: ${HOME}/goinfre/pgadmin)

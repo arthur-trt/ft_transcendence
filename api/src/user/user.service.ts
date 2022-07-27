@@ -146,15 +146,9 @@ export class UserService {
 
 	public async joinChannel(user: User, channelname: string, password: string = null): Promise<boolean>
 	{
-		let channel: Channel;
-		try
-		{
-			channel = await this.chanService.getChannelByIdentifier(channelname);
-		}
-		catch (err)
-		{
-			return await this.chanService.createChannel(channelname, user, password);
-		}
+		const channel: Channel = await this.chanService.getChannelByIdentifier(channelname);
+		if (channel.banned.includes(user))
+			throw new HttpException('You are banned', HttpStatus.FORBIDDEN)
 		if (channel.password_protected)
 		{
 			if (!password || !await bcrypt.compare(password, await this.chanService.getChannelPasswordHash(channel.id)))

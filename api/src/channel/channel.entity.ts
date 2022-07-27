@@ -2,11 +2,10 @@
 
 
 import { channelMessage } from "src/message/channelMessage.entity";
-import { RelationId } from "typeorm";
-import { BaseEntity, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationId } from "typeorm";
 import { User } from "../user/user.entity";
 
-@Entity('Channels') /** table name */
+@Entity('Channels')
 export class Channel extends BaseEntity {
 
 	@PrimaryGeneratedColumn("uuid")
@@ -41,17 +40,20 @@ export class Channel extends BaseEntity {
 	@ManyToOne(() => User, { nullable: true, cascade: true, onDelete: 'CASCADE', orphanedRowAction: 'delete'})
 	owner: User;
 
-	// TEST
 	@RelationId((channel: Channel) => channel.owner)
 	ownerId: string;
 
+	@ManyToMany(() => User, { nullable: true, cascade: true, onDelete: 'CASCADE', orphanedRowAction: 'delete' })
+	@JoinTable()
+	admins: User[];
 
-	/** Tous les users du channel */
+	@RelationId((channel: Channel) => channel.admins)
+	adminsId: string[];
+
 	@ManyToMany(() => User, user => user.channels, { cascade: true, onDelete: 'CASCADE', orphanedRowAction: 'delete'})
-	@JoinTable()		/* owner is channels */
+	@JoinTable()
 	users: User[]
 
-	/** Tous les messages du channel : un message n'a qu'une target, un channel a plusieurs messages */
 	@OneToMany(() => channelMessage, (channelMessage) => channelMessage.target)
 	messages: channelMessage[];
 
