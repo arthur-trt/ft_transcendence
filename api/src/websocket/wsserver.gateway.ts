@@ -4,6 +4,7 @@ import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessa
 import { Server, Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
 import { ChannelService } from 'src/channel/channel.service';
+import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
 import { newChannelDto } from 'src/dtos/newChannel.dto';
 import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto.dto';
 import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
@@ -140,6 +141,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	** ├─ leaveRoom
    	** ├─ banUser
 	** ├─ setAdmin
+  	** ├─ modifyChanSettings
 	*/
 
 	@SubscribeMessage('getRooms')
@@ -207,6 +209,11 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('setAdmin')
 	async onSetAdmin(client: Socket, channel : string, toBeAdmin: User) {
 		await this.chatService.setAdmin(client, channel, toBeAdmin);
+	}
+
+	@SubscribeMessage('modifyChanSettings')
+	async onsetOrUnsetPass(client: Socket, channelSettings : ModifyChannelDto) {
+		await this.chatService.modifyChanSettings(client, channelSettings);
 	}
 
 	/*

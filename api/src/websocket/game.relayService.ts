@@ -48,7 +48,6 @@ export class GameRelayService
     
 	async startMatch(players)
 	{
-		console.log(this.players.size);
 		const [first] = players;
 		const[, second] = players;
 		console.log("starting match");
