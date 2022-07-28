@@ -14,6 +14,7 @@ import io from 'socket.io-client';
 import Debug from './components/Debug';
 import PublicProfile from './components/PublicProfile';
 import jwtDecode from 'jwt-decode';
+import Ladder from "./components/Ladder";
 
 export const socketo = io();
 
@@ -49,12 +50,13 @@ root.render(
       <Routes>
         <Route path="/login" element={<Auth />} />
         <Route path="/" element={<RequireAuth><Header /></RequireAuth>} />
-        <Route path="/2fa" element={<><Header /><RequireAuth><TwoFactor /></RequireAuth></>} />
+        <Route path="/2fa" element={<><RequireAuth><TwoFactor /></RequireAuth></>} />
         <Route path="profile">
           <Route path="me" element={<><Header /><RequireAuth><Profile /></RequireAuth></>} />
           <Route path=":uuid" element={<><Header /><RequireAuth><PublicProfile /></RequireAuth></>} />
         </Route>
         <Route path="/community" element={<><Header /><RequireAuth><Channels /></RequireAuth></>} />
+        <Route path="/ladder" element={<><Header /><RequireAuth><Ladder /></RequireAuth></>} />
         <Route path="/debug" element={<><Header /><RequireAuth><Debug /></RequireAuth></>} />
         <Route path="/game" element={<><Header /><Game/></>} />
 

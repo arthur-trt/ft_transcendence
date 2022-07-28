@@ -33,19 +33,24 @@ function TwoFactor() {
   };
 
   return (
-    <div className="App">
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={name}
-          placeholder="2FA..."
-          onChange={(e) => setName(e.target.value)}
-        />
+    <div>
+      <div className="auth-header">
+      <h1>BABY-PONG</h1>
+      </div>
 
-        <button type="submit">Create</button>
-
-        <div className="message">{message ? <p>{message}</p> : null}</div>
-      </form>
+      <div className="twofa-container">
+        <h2>2FA AUTHENTICATION</h2>
+        <p>You must send your 2fa code.</p>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            value={name}
+            placeholder="Send your code"
+            onChange={(e) => setName(e.target.value)}
+          />
+          <div className="message">{message ? <p>{message}</p> : null}</div>
+        </form>
+      </div>
     </div>
   );
 }
