@@ -53,7 +53,7 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "${DOCKER_SOCK}:/var/run/docker.sock:ro"
 
   db:
     container_name: postgres
