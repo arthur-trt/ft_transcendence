@@ -10,10 +10,13 @@ import { jwtConstants } from '../jwt/jwt.constants';
 import { TransformStreamDefaultController } from 'stream/web';
 import { useContainer } from 'class-validator';
 import { AuthService } from '../auth.service';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class TwoFaService extends AuthService {
 	constructor(
+		@InjectRepository(User) private userRepo: Repository<User>,
 		userService: UserService,
 		jwtService: JwtService
 	) { super (userService, jwtService); }
@@ -24,12 +27,14 @@ export class TwoFaService extends AuthService {
 	 * @returns secret and url to put in qrcode
 	 */
 	public async generateTwoFactorAuthtificationSecret (user: User) {
-		let		secret;
-		if (user.TwoFA_enable != null)
-			secret			= user.TwoFA_secret;
+		let	secret: string;
+		if (user.TwoFA_enable)
+			secret = (await this.userRepo.createQueryBuilder('User')
+						.select(["User.TwoFA_secret"])
+						.where({ "id": user.id})
+						.getOne()).TwoFA_secret;
 		else
-			secret			= authenticator.generateSecret();
-		console.log("Generate secret : " + secret + " // Should appear once when click on enable");
+			secret = authenticator.generateSecret();
 		const	optAuthUrl	= authenticator.keyuri(
 			encodeURIComponent(user.name),
 			encodeURIComponent(process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME),
