@@ -39,7 +39,7 @@ export class GameController {
 
 	@Get('ladder')
 	@ApiOperation({ summary: "Get ladder" })
-	public async getLadder(@Body() match : endMatchDto) : Promise<User[]>
+	public async getLadder() : Promise<User[]>
 	{
 		return await this.gameService.ladder();
 	}

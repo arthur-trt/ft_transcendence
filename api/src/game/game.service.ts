@@ -82,7 +82,7 @@ export class GameService {
 
 	async ladder(): Promise<User[]>
 	{
-		return this.UserRepo.createQueryBuilder('user')
+		return await this.UserRepo.createQueryBuilder('user')
 			.orderBy('user.wonMatches', 'ASC')
 			.getMany();
 	}
@@ -90,6 +90,14 @@ export class GameService {
 	async findMatchById(matchId: string) {
 		const match: MatchHistory = await this.MatchRepo.findOne({
 			where: { id: matchId }
+		});
+		return match;
+	}
+
+	async findMatchByUser(user: User) {
+		const match: MatchHistory = await this.MatchRepo.findOne({
+			where: [ { user1: user.id },
+					 { user2: user.id } ]
 		});
 		return match;
 	}

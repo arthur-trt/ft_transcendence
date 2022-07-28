@@ -44,10 +44,13 @@ export class ChannelService {
 
 	public async setNewAdmin(user: User, channel : Channel, toBeAdmin: User)
 	{
+		console.log('kiki')
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to name another admin.", HttpStatus.FORBIDDEN);
+			console.log('toto')
 		channel.admins = [...channel.admins, toBeAdmin];
-		await channel.save();
+		channel.adminsId = [...channel.adminsId, toBeAdmin.id]
+		await this.channelsRepo.save(channel);
 	}
 
 	/**
@@ -88,9 +91,9 @@ export class ChannelService {
 	 */
 	public async getChannelByIdentifier(channelIdentifier : string) : Promise<Channel>
 	{
-		let chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages', 'banned'] });
+		let chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages', 'banned', 'admins', 'muted'] });
 		if (!chan && isValidUUID(channelIdentifier))
-			await this.channelsRepo.findOne({ where: { id: channelIdentifier }, relations: ['messages', 'banned'] })
+			await this.channelsRepo.findOne({ where: { id: channelIdentifier }, relations: ['messages', 'banned', 'admins', 'muted'] })
 		if (!chan)
 			throw new HttpException('Channel ' + channelIdentifier + ' not found (id or name)', HttpStatus.NOT_FOUND);
 		return chan;

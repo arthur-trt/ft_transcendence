@@ -202,13 +202,13 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	}
 
 	@SubscribeMessage('banUser')
-	async onBanUser(client: Socket, channel : string, toBan: User) {
-		await this.chatService.ban(client, channel, toBan);
+	async onBanUser(client: Socket, data : { channel: string, toBan: User }) {
+		await this.chatService.ban(client, data);
 	}
 
 	@SubscribeMessage('setAdmin')
-	async onSetAdmin(client: Socket, channel : string, toBeAdmin: User) {
-		await this.chatService.setAdmin(client, channel, toBeAdmin);
+	async onSetAdmin(client: Socket, data : { channel: string, toSetAdmin: User }) {
+		await this.chatService.setAdmin(client, data);
 	}
 
 	@SubscribeMessage('modifyChanSettings')
