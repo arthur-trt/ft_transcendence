@@ -16,6 +16,17 @@ export class ChannelService {
 	@Inject(forwardRef(() => UserService)) private readonly userService: UserService)
 	{ }
 
+	public async isInChan(chanName: string, user: User)
+	{
+		const Chan : Channel = await this.channelsRepo.findOneOrFail({
+			where : { name : chanName, users : { id : user.id } }
+		})
+		if (!Chan)
+			return false;
+		return true;
+	}
+
+
 	/**
 	 * @brief Create channel
 	 * @param name the name of the channel
@@ -161,6 +172,10 @@ export class ChannelService {
 	{
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to delete an user from chan.", HttpStatus.FORBIDDEN);
+
+		if (!this.isInChan(channel, user))
+			throw new HttpException("You must be admin to delete an user from chan.", HttpStatus.FORBIDDEN);
+
 		await this.channelsRepo.createQueryBuilder()
 			.relation(Channel, "users")
 			.of({ id: toBan.id })
