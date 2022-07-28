@@ -116,9 +116,9 @@ export default function Channels() {
       socket.on('error', (tab:any) => {
         // console.log(tab);
       });
-    
+
   }, []);
-  
+
   // FUNCTIONS TO HANDLE ACTIONS ON CHANNELS
   let handleCreate = (e: any) => {
       e.preventDefault();
@@ -290,7 +290,7 @@ export default function Channels() {
     }
    return (
     <FontAwesomeIcon className='userplus' icon={faUserPlus} id={i.toString()} onClick={handleAddFriend} ></FontAwesomeIcon>
-   ) 
+   )
   }
 
   // DISPLAY USERS
@@ -311,7 +311,7 @@ export default function Channels() {
           borderStatus = 'orange';
         else if (datausers[i]?.status === 'offline')
           borderStatus = 'red';
-        
+
         indents.push(<div className="users-single" key={i}>
             <div className='users-single-img'>
               <Link to={profilelink}><img style={{'borderColor': borderStatus}} src={datausers[i]?.avatar_url}></img></Link>
@@ -366,7 +366,7 @@ export default function Channels() {
         j++;
       }
     }
-    
+
     setMessage("");
   }
 
@@ -384,9 +384,9 @@ export default function Channels() {
   function handleSetAdmin(chan: string, id: string) {
     console.log(chan);
     console.log(id);
-    socket.emit('setAdmin', chan, id);
+	  socket.emit('setAdmin', { channel: chan, toSetAdmin: id } );
   }
-  
+
 
   function displayChanOp(i:number , tmp:any) {
       if (datame.name == tmp.messages[i]?.sender.name) // si c'est moi-meme j'affiche rien
@@ -408,7 +408,7 @@ export default function Channels() {
           return (
             <div className='chat-chanOp'>
               <FontAwesomeIcon icon={faGamepad}></FontAwesomeIcon>
-              <FontAwesomeIcon onClick={() => handleSetAdmin(tmp.name, tmp.messages[i]?.sender.id)} icon={faHandsHoldingCircle}></FontAwesomeIcon>
+              <FontAwesomeIcon onClick={() => handleSetAdmin(tmp.name, tmp.messages[i]?.sender)} icon={faHandsHoldingCircle}></FontAwesomeIcon>
               <FontAwesomeIcon icon={faBan}></FontAwesomeIcon>
               <FontAwesomeIcon icon={faCommentSlash}></FontAwesomeIcon>
             </div>
@@ -451,14 +451,14 @@ export default function Channels() {
     if (tmp && !ispriv)
     {
       indents = [];
-      i = tmp.messages?.length -1;  
+      i = tmp.messages?.length -1;
       while (i >= 0)
-      { 
+      {
         profilelink = "/profile/" + tmp.messages[i]?.sender.id;
 
         if (datame.name == tmp.messages[i]?.sender.name)
           msgColor = 'lightskyblue';
-        
+
         indents.push(<div className='chat-message' key={i}>
           <div className='chat-message-info'>
           <Link to={profilelink} style={{ textDecoration: 'none', color: 'black' }}><h5>{tmp.messages[i]?.sender.name}</h5></Link>
@@ -474,13 +474,13 @@ export default function Channels() {
     else if (tmp && ispriv === 1)
     {
       indents = [];
-      i = tmp?.length -1;  
+      i = tmp?.length -1;
       while (i >= 0)
       {
         profilelink = "/profile/" + tmp[i]?.sender.id;
         if (datame.name == tmp[i]?.sender.name)
           msgColor = 'lightskyblue';
-        
+
         indents.push(<div className='chat-message' key={i}>
           <div className='chat-message-info'>
             <Link to={profilelink} style={{ textDecoration: 'none', color: 'black' }}><h5>{tmp[i]?.sender.name}</h5></Link>
@@ -500,7 +500,7 @@ export default function Channels() {
   let isInChan = (str: string) => {
     let i = 0;
     while(i < data?.length)
-    { 
+    {
       let j = 0;
       while (j < data[i]?.users.length)
       {
@@ -585,7 +585,7 @@ export default function Channels() {
           }
         }
       }
-      i++; 
+      i++;
     }
     return ("");
   }
@@ -608,9 +608,9 @@ export default function Channels() {
             value={message}
             placeholder="Send a message..."
             onChange={(e) => setMessage(e.target.value)}
-        /> 
+        />
       </form>
-    </div> 
+    </div>
     )
   }
 
@@ -688,7 +688,7 @@ export default function Channels() {
     return (
 
       <div className='community-container'>
-        
+
         <div className='channels-container'>
           {display_ChanCreation()}
           <div className="channels-list">
