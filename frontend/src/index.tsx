@@ -15,6 +15,7 @@ import Debug from './components/Debug';
 import PublicProfile from './components/PublicProfile';
 import jwtDecode from 'jwt-decode';
 import Ladder from "./components/Ladder";
+import { TestClair } from "./components/TestClair";
 
 export const socketo = io();
 
@@ -58,7 +59,7 @@ root.render(
         <Route path="/community" element={<><Header /><RequireAuth><Channels /></RequireAuth></>} />
         <Route path="/ladder" element={<><Header /><RequireAuth><Ladder /></RequireAuth></>} />
         <Route path="/debug" element={<><Header /><RequireAuth><Debug /></RequireAuth></>} />
-        <Route path="/game" element={<><Header /><Game/></>} />
+        <Route path="/game" element={<><Header /><TestClair/></>} />
 
       </Routes>
     </BrowserRouter>
