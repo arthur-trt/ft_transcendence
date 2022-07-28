@@ -94,4 +94,12 @@ export class GameService {
 		return match;
 	}
 
+	async findMatchByUser(user: User) {
+		const match: MatchHistory = await this.MatchRepo.findOne({
+			where: [ { user1: user.id },
+					 { user2: user.id } ]
+		});
+		return match;
+	}
+
 }
