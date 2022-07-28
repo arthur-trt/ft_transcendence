@@ -68,7 +68,7 @@ export default function Game() {
     color: "FIREBRICK"
   });
 
-  const [ball, setBall] = useState<{x:number, y:number, radius:number, velocityX:number, velocityY:number, speed:number, color:string}>({
+  const [ball, setBall] = useState<ballT>({
      x: 0,
      y: 0,
     radius: 10,
@@ -78,7 +78,15 @@ export default function Game() {
     color: "BLACK"
   });
 
-  const [net, setNet] = useState<netT>();
+  const [net, setNet] = useState<netT>(
+    {
+      x: 0,
+      y: 0,
+      height: 30,
+      width: 15,
+      color: "BLACK"
+    });
+
   const [data, setData] = useState<dataT>();
   const [mouse, setMouse] = React.useState({ x: 120, y: 120 });
 
@@ -111,22 +119,25 @@ export default function Game() {
       }
 
       if (canvas)
-        setBall({x: 0, y : 10, radius:10, velocityX:5, velocityY:5, speed:7, color:"BLACK"});
-
-      const pos : dataT = {
-        player1_paddle_x : userLeft.x,
-        player1_paddle_y : userLeft.y,
-        player2_paddle_x : userRight.x,
-        player2_paddle_y : userRight.y,
-        ball_x : ball.x,
-        ball_y : ball.y
+      {
+        const tmp : ballT = {
+          x: 0,
+          y : 10,
+          radius:15,
+          velocityX:5,
+          velocityY:5,
+          speed:7,
+          color:"BLACK"
+        }
+        setBall(tmp);
+        setNet({x : canvas.width/2, y : 0, height : 20, width : 5, color : "BLACK"});
+        setUserLeft({x : 10, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, score: 0, color: "DEEPSKYBLUE"});
+        setUserRight({x : canvas.width - 10, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, score: 0, color: "FIREBRICK"});
       }
 
-      setData(pos);
-
-      // socket.on('game_postion', (pos: dataT) => {
-      //   setData(pos)
-      // });
+      socket.on('game_postion', (pos: dataT) => {
+        setData(pos);
+      });
 
       socket.on('game_countdownStart', () => {
         console.log("YEAH");
@@ -134,6 +145,17 @@ export default function Game() {
       })
     }, []
   );
+
+  // const pos : dataT = {
+  //   player1_paddle_x : userLeft.x,
+  //   player1_paddle_y : userLeft.y,
+  //   player2_paddle_x : userRight.x,
+  //   player2_paddle_y : userRight.y,
+  //   ball_x : ball.x,
+  //   ball_y : ball.y
+  // }
+
+  // setData(pos);
 
   // Wait for context to be ready.
   useEffect(() => {
@@ -160,6 +182,7 @@ export default function Game() {
   useEffect(() => {
     if (canvas && ctx)
     {
+      console.log(net.x);
       console.log("render is triggered")
       if (data)
         render(data);
@@ -201,7 +224,7 @@ export default function Game() {
 
   function drawNet() {
     if (net) {
-      for (let i = 0; i <= canvas.height; i += 15) {
+      for (let i = 0; i <= canvas.height; i += 15 + net.height) {
         drawRect(net.x, net.y + i, net.width, net.height, net.color);
       }
     }
@@ -218,16 +241,24 @@ export default function Game() {
 
   function render(data: dataT) {
     if (ctx) {
-      // Clear the canva
-      console.log("bouh");
+      // Clear the canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       // Draw score for userLeft
-      drawText("PLAYER 1", canvas.width * 0.15, canvas.height * 0.1, '#00000080', "48px serif");
+      drawText("PLAYER 1", canvas.width * 0.2, canvas.height * 0.1, '#00000080', "48px serif");
       drawText(userLeft.score.toString(), canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
+
       // Draw score for userRight
-      drawText("PLAYER 2", canvas.width * 0.7, canvas.height * 0.1, '#00000080', "48px serif");
+      drawText("PLAYER 2", canvas.width * 0.8, canvas.height * 0.1, '#00000080', "48px serif");
       drawText(userRight.score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
+
       // Draw net
+      drawNet();
+
+      //Draw paddles
+      drawRect(userLeft.x, userLeft.y, userLeft.width, userLeft.height, userLeft.color);
+      drawRect(userRight.x, userRight.y, userRight.width, userRight.height, userRight.color);
+
     }
   }
 
