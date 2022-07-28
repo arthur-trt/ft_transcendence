@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 #!/bin/bash
 
+=======
+>>>>>>> origin/main
 function	check_env_file() {
 	if [ -f ".env" ]; then
 		read -p "Env file already exist, do you want to erase it ? " -n 1 -r
