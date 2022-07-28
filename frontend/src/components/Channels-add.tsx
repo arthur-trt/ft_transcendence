@@ -100,7 +100,6 @@ export default function Channels() {
         setDatausers(tab);
       });
       socket.on('channelMessage', (msg:any) => {
-          console.log(msg);
           setMessages(msg);
       });
       socket.on('friendList', (msg:any, tab:any) => {

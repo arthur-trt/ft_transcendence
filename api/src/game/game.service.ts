@@ -82,7 +82,7 @@ export class GameService {
 
 	async ladder(): Promise<User[]>
 	{
-		return this.UserRepo.createQueryBuilder('user')
+		return await this.UserRepo.createQueryBuilder('user')
 			.orderBy('user.wonMatches', 'ASC')
 			.getMany();
 	}
