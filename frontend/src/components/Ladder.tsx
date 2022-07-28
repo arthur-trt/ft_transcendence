@@ -27,9 +27,7 @@ export default function Ladder() {
         indents.push(
             <div className='ladder-line' key={i}>
 				<div className='ladder-rank'><h5>#</h5>{i + 1}</div>
-				<div className="profile-img">
-				<img src={dataLadder[i].avatar_url}></img>
-            	</div>
+				<div className="ladder-img"><img src={dataLadder[i].avatar_url}></img></div>
                 <div className='ladder-name'>{dataLadder[i].name}</div>
                 <div className='ladder-victories'><h5>VICTORIES :&nbsp;</h5>{dataLadder[i].wonMatches}</div>
                 <div className='ladder-defeats'><h5>DEFEATS :&nbsp;</h5>{dataLadder[i].defeats}</div>

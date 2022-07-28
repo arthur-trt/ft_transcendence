@@ -46,8 +46,15 @@ export class ChatService {
 
 	async getRooms(client? : Socket)
 	{
+		console.log("POPOPO")
 		for (let [allUsers, socket] of this.gateway.activeUsers.entries())
 			this.gateway.server.to(socket.id).emit('rooms', " get rooms ", await this.channelService.getChannelsForUser(allUsers));
+	}
+
+	async refreshChanMessage(channelName: string)
+	{
+		for (let [allUsers, socket] of this.gateway.activeUsers.entries())
+			this.gateway.server.to(socket.id).emit('channelMessage', await this.messageService.getMessage(channelName, allUsers));
 	}
 
 	async createRoom(client: Socket, channel: newChannelDto)
@@ -80,18 +87,27 @@ export class ChatService {
 		await this.getRooms();
 	}
 
-	async ban(client: Socket, channel : string, toBan: User)
+	async ban(client: Socket, data : { channel: string, toBan: User })
 	{
-		const chan: Channel = await this.channelService.getChannelByIdentifier(channel);
-		await this.channelService.temporaryBanUser(client.data.user, chan, toBan);
+		console.log("chat service");
+		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
+		await this.channelService.temporaryBanUser(client.data.user, chan, data.toBan);
+		await this.refreshChanMessage(data.channel);
 		await this.getRooms();
 	}
 
-	async setAdmin(client: Socket, channel : string, toSetAdmin: User)
+	async mute(client: Socket, data : { channel: string, toMute: User })
 	{
-		const chan: Channel = await this.channelService.getChannelByIdentifier(channel);
-		await this.channelService.setNewAdmin(client.data.user, chan, toSetAdmin);
+		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
+		await this.channelService.temporaryMuteUser(client.data.user, chan, data.toMute);
 		await this.getRooms();
+	}
+
+	async setAdmin(client: Socket, data : { channel: string, toSetAdmin: User })
+	{
+		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
+		await this.channelService.setNewAdmin(client.data.user, chan, data.toSetAdmin);
+		await this.refreshChanMessage(data.channel);
 	}
 
 	async modifyChanSettings(client: Socket, changes: ModifyChannelDto)
