@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+#!/bin/bash
+
+=======
+>>>>>>> origin/main
 function	check_env_file() {
 	if [ -f ".env" ]; then
 		read -p "Env file already exist, do you want to erase it ? " -n 1 -r
@@ -90,7 +95,7 @@ function	build_other() {
 
 read_42api_secret
 
-if [[ check_fortytwo ]]; then
+if check_fortytwo; then
 	build_fortytwo
 else
 	build_other
