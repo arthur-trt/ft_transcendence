@@ -48,6 +48,7 @@ export default function Game() {
   const [canvas, setCanvas] = useState<any>();
   const [ctx, setCtx] = useState<any>();
   const [matchMaking, setMatchMaking] = useState<boolean>(false);
+  const [countdown, setCountdown] = useState<boolean>(false);
   const [gameStart, setGameStart] = useState<boolean>(false);
 
   const [userLeft, setUserLeft] = useState<userT>({
@@ -65,6 +66,16 @@ export default function Game() {
     height: 2,
     score: 0,
     color: "FIREBRICK"
+  });
+
+  const [ball, setBall] = useState<{x:number, y:number, radius:number, velocityX:number, velocityY:number, speed:number, color:string}>({
+     x: 0,
+     y: 0,
+    radius: 10,
+    velocityX: 5,
+    velocityY: 5,
+    speed: 7,
+    color: "BLACK"
   });
 
   const [net, setNet] = useState<netT>();
@@ -85,15 +96,29 @@ export default function Game() {
         setCtx(canvas.getContext("2d"));
       }
 
-      socket.on('game_postion', (pos: dataT) => {
-        setData(pos)
-      });
+      if (canvas)
+        setBall({x: 0, y : 10, radius:10, velocityX:5, velocityY:5, speed:7, color:"BLACK"});
+
+      const pos : dataT = {
+        player1_paddle_x : userLeft.x,
+        player1_paddle_y : userLeft.y,
+        player2_paddle_x : userRight.x,
+        player2_paddle_y : userRight.y,
+        ball_x : ball.x,
+        ball_y : ball.y
+      }
+
+      setData(pos);
+
+      // socket.on('game_postion', (pos: dataT) => {
+      //   setData(pos)
+      // });
 
       socket.on('game_countdownStart', () => {
         console.log("YEAH");
         setGameStart(true);
       })
-    }
+    }, []
   );
 
   // Wait for context to be ready.
@@ -114,8 +139,29 @@ export default function Game() {
       ctx.font = "48px serif";
       ctx.textAlign = "center"
       ctx.fillText("Le jeu va démarrer dans 3 secondes !", canvas.width / 2, canvas.height / 2);
+      setCountdown(true);
     }
   }, [gameStart])
+
+  useEffect(() => {
+    console.log("stp");
+    console.log(gameStart);
+    if (countdown == true)
+    {
+      console.log("allo?");
+      callRender();
+      //setInterval(callRender, 1000/60);
+    }
+  }, [countdown])
+
+  function callRender()
+  {
+    if (data)
+    {
+      console.log(data.player1_paddle_x);
+      render(data);
+    }
+  }
 
   /**
    * Draw a rectangle on the canva
