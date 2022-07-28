@@ -63,7 +63,7 @@ export class MessageService {
 		const chan: Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
 
 		let msgs : Channel;
-		if (user.blocked != null) {
+		if (user.blocked && user.blocked.length > 0) {
 			msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
 				.leftJoinAndSelect("chan.messages", "messages")
 				.leftJoinAndSelect("messages.sender", "sender")
@@ -132,7 +132,7 @@ export class MessageService {
 	 */
 	public async getPrivateMessage(user1: User, user2: User) : Promise<privateMessage[]>
 	{
-		if (user1.blocked.includes(user2.id))
+		if (user1.blocked && user1.blocked.includes(user2.id))
 			throw new HttpException('Cannot get messages with a blocked user', HttpStatus.OK)
 		const msgs = this.pmRepo.createQueryBuilder("PM")
 			.leftJoinAndMapOne("PM.sender", User, 'users', 'users.id = PM.sender')

@@ -2,15 +2,16 @@
 
 ## First run
 
+You can use `env_conf.sh` for automatic setup
+
 For the first startup, you need to set up :
 - An `.env` file:
 
 ```
 DB_PATH=<path> (./private/db) (for 42Linux use: ${HOME}/goinfre/db)
-POSTGRES_PASSWORD=<password>
 POSTGRES_USER=<user>
 POSTGRES_PASSWORD=<db_password>
-POSTGRES_DB=<db_name>
+POSTGRES_DB=<user> // Should be the same as user
 
 
 # PGADMIN
@@ -33,6 +34,13 @@ JWT_SECRET=<WhatEverYouWant>
 And give right to pgadmin :
 ```
 chown 5050:5050 (./private/pgadmin) (for 42Linux use: ${HOME}/goinfre/pgadmin)
+```
+
+## Drop the DB at 42
+```
+docker run -it -v /goinfre/${USER}:/data ubuntu
+rm -rf data/db
+exit
 ```
 
 ## Launch project
