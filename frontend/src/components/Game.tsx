@@ -136,12 +136,13 @@ export default function Game() {
       }
 
       socket.on('game_postion', (pos: dataT) => {
-        setData(pos);
+        console.log("socket.on/game_position");
+        setData(adaptToCanvas(pos));
       });
 
       socket.on('game_countdownStart', () => {
-        console.log("YEAH");
-        setGameStart(true);
+        console.log("socket.on/game_countdown");
+        setCountdown(true);
       })
     }, []
   );
@@ -168,6 +169,9 @@ export default function Game() {
     }
   }, [ctx])
 
+  let i = 0;
+  let inter : any;
+
   useEffect(() => {
     if (canvas && ctx)
     {
@@ -175,11 +179,31 @@ export default function Game() {
       ctx.font = "48px serif";
       ctx.textAlign = "center"
       ctx.fillText("Le jeu va démarrer dans 3 secondes !", canvas.width / 2, canvas.height / 2);
-      setCountdown(true);
+      inter = setInterval(count_function, 1000);
     }
-  }, [gameStart])
+  }, [countdown])
+
+  function count_function()
+  {
+    console.log("count");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillText("Le jeu va démarrer dans " + (3 - i) + " secondes !", canvas.width / 2, canvas.height / 2);
+    if (i == 3)
+    {
+      clearInterval(inter);
+      setGameStart(true);
+    }
+    else
+      i++;
+  }
 
   useEffect(() => {
+    if (gameStart == true)
+      socket.emit("game_start");
+  }, [gameStart]);
+
+  useEffect(() => {
+    console.log("gourdin");
     if (canvas && ctx)
     {
       console.log(net.x);
@@ -200,7 +224,7 @@ export default function Game() {
    */
   function drawRect(x: number, y: number, w: number, h: number, color: string) {
     if (ctx != null) {
-      console.log(" DRAW ME BITCH");
+      console.log(" DRAW ME BITCH"); // ????? un peu vnr ?
       console.log(x + " " + y + " " + w + " " + h);
       console.log(canvas.height);
       console.log(canvas.width);
@@ -243,7 +267,6 @@ export default function Game() {
       ctx.fillText(text, x, y);
     }
   }
-<<<<<<< HEAD
 
   function render(data: dataT) {
     if (ctx) {
@@ -262,44 +285,29 @@ export default function Game() {
       drawNet();
 
       //Draw paddles
-      drawRect(userLeft.x, userLeft.y, userLeft.width, userLeft.height, userLeft.color);
-      drawRect(userRight.x, userRight.y, userRight.width, userRight.height, userRight.color);
+      drawRect(userLeft.x, data.player1_paddle_y, userLeft.width, userLeft.height, userLeft.color);
+      drawRect(userRight.x, data.player2_paddle_y, userRight.width, userRight.height, userRight.color);
       
       //Draw the ball
-      drawArc(ball.x, ball.y, ball.radius, ball.color);
-=======
-  
-  function adaptToCanvas(data: dataT)
-    {
-    
-      data.player1_paddle_y = data.player1_paddle_y / 200 * canvas.width;
-      data.player1_paddle_x = data.player1_paddle_x / 100 * canvas.height;
-      data.player2_paddle_y = data.player2_paddle_y / 200 * canvas.width;
-      data.player2_paddle_x = data.player2_paddle_x / 100 * canvas.height;
-      data.ball_y = data.ball_y / 200 * canvas.width;
-      data.ball_x = data.ball_x / 100 * canvas.height;
-      return (data);
-    }
-    function render(data: dataT) {
-      if (ctx) {
-        // Clear the canva
-        data = adaptToCanvas(data);
-        console.log(data);
-      ctx.clearRect(0, 0, canvas.height, canvas.width);
-      // Draw score for userLeft
-      drawNet();
-      // Draw Paddle
-      drawRect(data.player1_paddle_x, data.player1_paddle_y, userLeft.width, userLeft.height, userLeft.color);
-      drawRect(data.player2_paddle_x, data.player2_paddle_y, userRight.width, userRight.height, userRight.color);
-       drawText("PLAYER 1", canvas.width * 0.12, canvas.height * 0.1, '#00000080');
-      drawText(userLeft.score.toString(), canvas.width / 4, canvas.height / 5, '#00000080');
-      //Draw score for userRight
-      drawText("PLAYER 2", canvas.width * 0.62, canvas.height * 0.1, '#00000080');
-      drawText(userRight.score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080');
-      //Draw net
->>>>>>> origin/main
+      //drawArc(ball.x, ball.y, ball.radius, ball.color);
     }
   }
+    
+  function adaptToCanvas(data: dataT)
+    {
+      console.log("issou");
+      if (canvas)
+      {
+        console.log("corentin");
+        data.player1_paddle_y = data.player1_paddle_y / 100 * canvas.width;
+        data.player1_paddle_x = data.player1_paddle_x / 200 * canvas.height;
+        data.player2_paddle_y = data.player2_paddle_y / 100 * canvas.width;
+        data.player2_paddle_x = data.player2_paddle_x / 200 * canvas.height;
+        data.ball_y = data.ball_y / 100 * canvas.width;
+        data.ball_x = data.ball_x / 200 * canvas.height;
+        return (data);
+      }
+    }
 
   function handleClick(e: any) {
     if (!matchMaking)
