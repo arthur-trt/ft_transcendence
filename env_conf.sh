@@ -35,7 +35,6 @@ function	build_fortytwo() {
 		# DOCKER CONFIG
 		DOCKER_SOCK=${DOCKER_HOST:7}
 
-
 		# DB CONFIG
 		DB_PATH=${HOME}/goinfre/db
 		POSTGRES_USER=${USER}
@@ -45,9 +44,8 @@ function	build_fortytwo() {
 		# PG ADMIN
 		PGADMIN_PATH=${HOME}/goinfre/pgadmin
 		PGADMIN_DEFAULT_EMAIL=${USER}@student.42.fr
-		PGADMIN_MAIL=${USER}@student.42.fr
 		PGADMIN_DEFAULT_PASSWORD=password_nul
-		PGADMIN_PASS=password_nul
+		GUNICORN_ACCESS_LOGFILE=/dev/null
 
 		# OAUTH42
 		API_42_UID=${UID42}
@@ -56,6 +54,9 @@ function	build_fortytwo() {
 
 		# JWT
 		JWT_SECRET=`openssl rand -hex 32`
+
+		# 2FA
+		TWO_FACTOR_AUTHENTICATION_APP_NAME=TRANSCENDANCE
 	EOM
 
 }
@@ -75,10 +76,9 @@ function	build_other() {
 		# PG ADMIN
 		PGADMIN_PATH=./private/pgadmin
 		PGADMIN_DEFAULT_EMAIL=${USER}@mail.fr
-		PGADMIN_MAIL=${USER}@mail.fr
 		PGADMIN_DEFAULT_PASSWORD=password_nul
-		PGADMIN_PASS=password_nul
-
+		GUNICORN_ACCESS_LOGFILE=/dev/null
+		
 		# OAUTH42
 		API_42_UID=${UID42}
 		API_42_SECRET=${SECRET42}
@@ -86,6 +86,9 @@ function	build_other() {
 
 		# JWT
 		JWT_SECRET=`openssl rand -hex 32`
+
+		# 2FA
+		TWO_FACTOR_AUTHENTICATION_APP_NAME=TRANSCENDANCE
 	EOM
 
 }
