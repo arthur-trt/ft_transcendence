@@ -11,7 +11,8 @@ import { GameService } from './game.service';
 @Module({
   	controllers: [GameController],
 	providers: [GameService],
-	imports: [UserModule, TypeOrmModule.forFeature([MatchHistory, User]), JwtModule,],
+	imports: [UserModule, TypeOrmModule.forFeature([MatchHistory, User]), JwtModule,
+	],
 	exports:[GameService]
 })
 export class GameModule {}
