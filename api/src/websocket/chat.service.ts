@@ -96,6 +96,13 @@ export class ChatService {
 		await this.getRooms();
 	}
 
+	async mute(client: Socket, data : { channel: string, toMute: User })
+	{
+		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
+		await this.channelService.temporaryMuteUser(client.data.user, chan, data.toMute);
+		await this.getRooms();
+	}
+
 	async setAdmin(client: Socket, data : { channel: string, toSetAdmin: User })
 	{
 		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
