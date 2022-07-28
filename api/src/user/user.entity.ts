@@ -75,7 +75,7 @@ export class User extends BaseEntity {
 	@JoinTable()
 	friends: User[];
 
-	@Column('varchar', { array: true, nullable : true})
+	@Column('varchar', { array: true, nullable : false, default: []})
 	blocked: string[];
 
 }

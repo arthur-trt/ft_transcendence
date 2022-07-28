@@ -90,7 +90,8 @@ export class UserService {
 				name: username,
 				fullname: fullname,
 				avatar_url: avatar,
-				mail: mail
+				mail: mail,
+				blocked: []
 			}
 			return await this.userRepo.save(new_user);
 		}
