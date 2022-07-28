@@ -121,8 +121,8 @@ export default function Game() {
       if (canvas)
       {
         const tmp : ballT = {
-          x: 0,
-          y : 10,
+          x: canvas.width/2,
+          y : canvas.height/2,
           radius:15,
           velocityX:5,
           velocityY:5,
@@ -258,7 +258,9 @@ export default function Game() {
       //Draw paddles
       drawRect(userLeft.x, userLeft.y, userLeft.width, userLeft.height, userLeft.color);
       drawRect(userRight.x, userRight.y, userRight.width, userRight.height, userRight.color);
-
+      
+      //Draw the ball
+      drawArc(ball.x, ball.y, ball.radius, ball.color);
     }
   }
 
