@@ -47,7 +47,8 @@ export class ChannelService {
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to name another admin.", HttpStatus.FORBIDDEN);
 		channel.admins = [...channel.admins, toBeAdmin];
-		await channel.save();
+		channel.adminsId = [...channel.adminsId, toBeAdmin.id]
+		await this.channelsRepo.save(channel);
 	}
 
 	/**
