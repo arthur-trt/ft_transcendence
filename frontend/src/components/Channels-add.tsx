@@ -23,6 +23,7 @@ import {socketo} from '../index';
 let tmp:any[any];
 var indents:any = [];
 let indexFriends = 0;
+let ispriv = 2;
 
 export default function Channels() {
 
@@ -42,6 +43,7 @@ export default function Channels() {
   const [chanName, setChanName] = useState("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any>([]);
+  const [messagesPriv, setMessagesPriv] = useState<any>([]);
   const [DisplayChat, setDisplayChat] = useState(0);
   const [privMsgChat, setprivMsgChat] = useState(0);
   const [privTarget, setPrivTarget] = useState<any>([]);
@@ -95,7 +97,6 @@ export default function Channels() {
         setDatausers(tab);
       });
       socket.on('channelMessage', (msg:any) => {
-          console.log(msg);
           setMessages(msg);
       });
       socket.on('friendList', (msg:any, tab:any) => {
@@ -106,7 +107,7 @@ export default function Channels() {
       });
       socket.on('privateMessage', (msg:any, tab:any) => {
         setPrivTarget(msg.split(' '));
-        setMessages(tab);
+        setMessagesPriv(tab);
       });
       socket.on('error', (tab:any) => {
         console.log(tab);
@@ -376,7 +377,6 @@ export default function Channels() {
     if (messages)
       i = messages.messages?.length -1;
     let msgColor = 'bisque';
-    let ispriv = 1;
     let profilelink;
 
     if (messages)
@@ -388,11 +388,10 @@ export default function Channels() {
       }
       else if (chanName == privTarget[0] || chanName == privTarget[1])
       {
-        tmp = messages;
+        tmp = messagesPriv;
         ispriv = 1;
       }
     }
-    
     if (tmp && !ispriv)
     {
       indents = [];
@@ -415,7 +414,7 @@ export default function Channels() {
         msgColor = 'bisque';
       }
     }
-    else if (tmp && ispriv)
+    else if (tmp && ispriv === 1)
     {
       indents = [];
       i = tmp?.length -1;  
