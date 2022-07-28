@@ -170,9 +170,14 @@ export class ChannelService {
 
 	public async unban(channel: Channel, toUnBan: User)
 	{
+		console.log("Un Ban")
+
 		channel.banned = channel.banned.filter((banned) => {
 			return banned.id !== toUnBan.id
 		})
+		channel.mutedId = channel.mutedId.filter((muted) => {
+			return muted !== toUnBan.id
+		}) // See how it is possible that relationId are not updated aut
 		channel.save();
 		return channel;
 	}
@@ -196,12 +201,15 @@ export class ChannelService {
 	{
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to ban an user from chan.", HttpStatus.FORBIDDEN);
+		if (channel.bannedId.includes(toBan.id))
+			throw new HttpException("This user is already banned.", HttpStatus.FORBIDDEN);
 		console.log("Bannishement");
 		/** Step one : Deleting user from channel */
 		await this.deleteUserFromChannel(user, channel, toBan);
 		/** Step two : add it to ban list  */
 		console.log(channel.banned);
 		channel.banned = [...channel.banned, toBan];
+		console.log(channel.banned);
 		await channel.save();
 		/** Step three : set timeout to remove from ban list */
 		setTimeout(() => { this.unban(channel, toBan)}, 30000);

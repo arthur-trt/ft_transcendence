@@ -69,4 +69,7 @@ export class Channel extends BaseEntity {
 	@JoinTable()
 	banned: User[];
 
+	@RelationId((channel: Channel) => channel.banned)
+	bannedId: string[];
+
 }
