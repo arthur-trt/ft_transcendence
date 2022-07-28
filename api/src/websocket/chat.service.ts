@@ -46,6 +46,7 @@ export class ChatService {
 
 	async getRooms(client? : Socket)
 	{
+		console.log("POPOPO")
 		for (let [allUsers, socket] of this.gateway.activeUsers.entries())
 			this.gateway.server.to(socket.id).emit('rooms', " get rooms ", await this.channelService.getChannelsForUser(allUsers));
 	}
@@ -80,17 +81,17 @@ export class ChatService {
 		await this.getRooms();
 	}
 
-	async ban(client: Socket, channel : string, toBan: User)
+	async ban(client: Socket, data : { channel: string, toBan: User })
 	{
-		const chan: Channel = await this.channelService.getChannelByIdentifier(channel);
-		await this.channelService.temporaryBanUser(client.data.user, chan, toBan);
+		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
+		await this.channelService.temporaryBanUser(client.data.user, chan, data.toBan);
 		await this.getRooms();
 	}
 
-	async setAdmin(client: Socket, channel : string, toSetAdmin: User)
+	async setAdmin(client: Socket, data : { channel: string, toSetAdmin: User })
 	{
-		const chan: Channel = await this.channelService.getChannelByIdentifier(channel);
-		await this.channelService.setNewAdmin(client.data.user, chan, toSetAdmin);
+		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
+		await this.channelService.setNewAdmin(client.data.user, chan, data.toSetAdmin);
 		await this.getRooms();
 	}
 
