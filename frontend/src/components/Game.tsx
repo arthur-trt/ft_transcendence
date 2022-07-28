@@ -88,8 +88,10 @@ export default function Game() {
       setSocket(socket);
       const canvas = canvasRef.current;
       if (canvas) {
-        canvas.height = canvas.clientHeight;
-        canvas.width = canvas.clientWidth;
+        //canvas.height = canvas.clientHeight;
+        canvas.width = window.innerWidth * 0.7; 
+        //canvas.width = canvas.clientWidth;
+        canvas.height = canvas.width * 0.6;
         setCanvas(canvas);
       }
       if (canvas) {
@@ -203,11 +205,11 @@ export default function Game() {
     }
   }
 
-  function drawText(text: string, x: number, y: number, color: string) {
+  function drawText(text: string, x: number, y: number, color: string, font: string) {
     console.log(ctx);
     if (ctx != null) {
       ctx.fillStyle = color;
-      ctx.font = "48px serif";
+      ctx.font = font;
       ctx.fillText(text, x, y);
     }
   }
@@ -215,13 +217,14 @@ export default function Game() {
   function render(data: dataT) {
     if (ctx) {
       // Clear the canva
-      ctx.clearRect(0, 0, canvas.height, canvas.width);
+      console.log("bouh");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       // Draw score for userLeft
-      drawText("PLAYER 1", canvas.width * 0.12, canvas.height * 0.1, '#00000080');
-      drawText(userLeft.score.toString(), canvas.width / 4, canvas.height / 5, '#00000080');
+      drawText("PLAYER 1", canvas.width * 0.15, canvas.height * 0.1, '#00000080', "48px serif");
+      drawText(userLeft.score.toString(), canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
       // Draw score for userRight
-      drawText("PLAYER 2", canvas.width * 0.62, canvas.height * 0.1, '#00000080');
-      drawText(userRight.score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080');
+      drawText("PLAYER 2", canvas.width * 0.7, canvas.height * 0.1, '#00000080', "48px serif");
+      drawText(userRight.score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
       // Draw net
       drawNet();
       // Draw Paddle
@@ -234,7 +237,7 @@ export default function Game() {
     if (!matchMaking)
     {
       socket.emit('game_inQueue');
-      ctx.clearRect(0, 0, canvas.height, canvas.width);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       setMatchMaking(true);
     }
   }
