@@ -48,7 +48,6 @@ export class GameRelayService
             console.log("starting match");
             const Match = this.startMatch(this.players);
             this.players.clear();
-
         }
     }
     
@@ -102,11 +101,12 @@ export class GameRelayService
       async sendPosition(room)
       {
           this.dataT.player1_paddle_x = 50;
-          this.dataT.player1_paddle_y = 100;
-          this.dataT.player2_paddle_x = 100;
-          this.dataT.player2_paddle_y = 100;
-          this.dataT.ball_x = 50;
-          this.dataT.ball_y = 80;
+          this.dataT.player1_paddle_y = 50;
+          this.dataT.player2_paddle_x = 50;
+          this.dataT.player2_paddle_y = 150;
+          this.dataT.ball_x = 100;
+          this.dataT.ball_y = 50;
           return this.gateway.server.to(room).emit('game_postion', this.dataT);
     }
+
 }
