@@ -1,3 +1,4 @@
+// REACT TOOLS IMPORT
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLocation } from "react-router-dom";
@@ -15,10 +16,10 @@ import { faUserXmark } from '@fortawesome/free-solid-svg-icons'
 import { faUserSlash } from '@fortawesome/free-solid-svg-icons'
 import { faGamepad } from '@fortawesome/free-solid-svg-icons'
 
-// IMPORT THE SOCKET
+// SOCKET IMPORT FROM THE INDEX.TSX
 import {socketo} from '../index';
 
-// VARIABLE DECLARATION OUTSIDE
+// VARIABLE DECLARATIONS OUTSIDE THE CHANNELS FUNCTION
 let tmp:any[any];
 var indents:any = [];
 let indexFriends = 0;
@@ -94,6 +95,7 @@ export default function Channels() {
         setDatausers(tab);
       });
       socket.on('channelMessage', (msg:any) => {
+          console.log(msg);
           setMessages(msg);
       });
       socket.on('friendList', (msg:any, tab:any) => {
@@ -346,7 +348,9 @@ export default function Channels() {
     if (!privMsgChat)
     {
       if (isInChan(e.currentTarget.id) == 0)
-        return(0);
+      return(0);
+      console.log(e.currentTarget.id);
+      console.log(message);
       socket.emit('sendChannelMessages', {chan: e.currentTarget.id, msg: message});
     }
     else if (privMsgChat)
@@ -454,6 +458,18 @@ export default function Channels() {
     return(0);
   }
 
+  let handleSetPass = (e:any) => {
+    e.preventDefault();
+    socket.emit('modifyChanSettings', {chanName : chanName, password: chanOpPass});
+    setChanOpPass("");
+  }
+
+  let handleUnsetPass = (e:any) => {
+    e.preventDefault();
+    socket.emit('modifyChanSettings', {chanName : chanName});
+    setChanOpPass("");
+  }
+
   function chanOwnerOp() {
     let i = 0;
     while(i < data?.length)
@@ -468,7 +484,7 @@ export default function Channels() {
             {
               return (
                 <div className='chat-owner-op'>
-                  <form>
+                  <form onSubmit={handleSetPass}>
                     <input
                     type="text"
                     value={chanOpPass}
@@ -476,7 +492,7 @@ export default function Channels() {
                     onChange={(e) => setChanOpPass(e.target.value)}
                     />
                   </form>
-                  <button>UNSET</button>
+                  <button onClick={handleUnsetPass}>UNSET</button>
                 </div>
               )
             }
@@ -484,7 +500,7 @@ export default function Channels() {
             {
               return (
                 <div className='chat-owner-op'>
-                  <form>
+                  <form onSubmit={handleSetPass}>
                       <input
                       type="text"
                       value={chanOpPass}
