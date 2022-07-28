@@ -25,13 +25,14 @@ export class TwoFaService extends AuthService {
 	 */
 	public async generateTwoFactorAuthtificationSecret (user: User) {
 		let		secret;
-		if (user.TwoFA_secret != null)
+		if (user.TwoFA_enable != null)
 			secret			= user.TwoFA_secret;
 		else
 			secret			= authenticator.generateSecret();
+		console.log("Generate secret : " + secret + " // Should appear once when click on enable");
 		const	optAuthUrl	= authenticator.keyuri(
-			user.name,
-			process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME,
+			encodeURIComponent(user.name),
+			encodeURIComponent(process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME),
 			secret
 		);
 
@@ -59,6 +60,8 @@ export class TwoFaService extends AuthService {
 	public async isTwoFactorCodeValid (code: string, req: Request)
 	{
 		const user_secret	= await this.userService.getTwoFASecret(req);
+		console.log(code);
+		console.log(user_secret);
 		return (authenticator.verify({
 			token: code,
 			secret: user_secret,
