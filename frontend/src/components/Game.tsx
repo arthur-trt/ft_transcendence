@@ -54,16 +54,16 @@ export default function Game() {
   const [userLeft, setUserLeft] = useState<userT>({
     x: 10,
     y: 0,
-    width: 2,
-    height: 2,
+    width: 70,
+    height: 70,
     score: 0,
     color: "DEEPSKYBLUE"
   });
   const [userRight, setUserRight] = useState<userT>({
     x: 20,
     y: 0,
-    width: 2,
-    height: 2,
+    width: 70,
+    height: 70,
     score: 0,
     color: "FIREBRICK"
   });
@@ -80,8 +80,20 @@ export default function Game() {
 
   const [net, setNet] = useState<netT>();
   const [data, setData] = useState<dataT>();
+  const [mouse, setMouse] = React.useState({ x: 120, y: 120 });
 
-
+  // const updateMousePosition = (ev: any) => {
+  //   console.log('coucou')
+  //   //const rect = canvas.getBoundingClientRect();
+  //   if (canvasRef.current) {
+  //       const context = canvasRef.current.getContext("2d")
+  //       if (context) {
+  //           setMouse({ x: ev.clientX - context.canvas.getBoundingClientRect().left, y: ev.clientY - context.canvas.getBoundingClientRect().top })
+  //           console.log(mouse.x + ' et ' + mouse.y)
+  //       }
+  //   }
+  //   socket.emit('test', mouse.y);
+//}
   useEffect(
     () => {
       const socket = socketo;
@@ -146,6 +158,7 @@ export default function Game() {
   }, [gameStart])
 
   useEffect(() => {
+<<<<<<< HEAD
     console.log("stp");
     console.log(gameStart);
     if (countdown == true)
@@ -164,6 +177,16 @@ export default function Game() {
       render(data);
     }
   }
+=======
+    if (canvas && ctx)
+    {
+      console.log("render is triggered")
+      if (data)
+        render(data);
+      //blabla les fonctions
+    }
+  }, [data])
+>>>>>>> origin/main
 
   /**
    * Draw a rectangle on the canva
@@ -220,16 +243,21 @@ export default function Game() {
       console.log("bouh");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       // Draw score for userLeft
+<<<<<<< HEAD
       drawText("PLAYER 1", canvas.width * 0.15, canvas.height * 0.1, '#00000080', "48px serif");
       drawText(userLeft.score.toString(), canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
-      // Draw score for userRight
-      drawText("PLAYER 2", canvas.width * 0.7, canvas.height * 0.1, '#00000080', "48px serif");
-      drawText(userRight.score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
-      // Draw net
+=======
       drawNet();
       // Draw Paddle
       drawRect(data.player1_paddle_x, data.player1_paddle_y, userLeft.width, userLeft.height, userLeft.color);
       drawRect(data.player2_paddle_x, data.player2_paddle_y, userRight.width, userRight.height, userRight.color);
+      drawText("PLAYER 1", canvas.width * 0.12, canvas.height * 0.1, '#00000080');
+      drawText(userLeft.score.toString(), canvas.width / 4, canvas.height / 5, '#00000080');
+>>>>>>> origin/main
+      // Draw score for userRight
+      drawText("PLAYER 2", canvas.width * 0.7, canvas.height * 0.1, '#00000080', "48px serif");
+      drawText(userRight.score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
+      // Draw net
     }
   }
 
@@ -246,7 +274,8 @@ export default function Game() {
 
     <div className='game-container'>
       {/*<button type='button' onClick={handleStart}>Start game</button>*/}
-      <canvas ref={canvasRef} className="pong-container" onClick={handleClick} />
+      <canvas ref={canvasRef} className="pong-container" onClick={handleClick}/> 
+      {/*onMouseMove={updateMousePosition}*/}
     </div>
   )
 }
