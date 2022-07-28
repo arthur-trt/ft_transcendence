@@ -100,6 +100,7 @@ export default function Channels() {
         setDatausers(tab);
       });
       socket.on('channelMessage', (msg:any) => {
+        console.log(msg);
           setMessages(msg);
       });
       socket.on('friendList', (msg:any, tab:any) => {
@@ -113,7 +114,7 @@ export default function Channels() {
         setMessagesPriv(tab);
       });
       socket.on('error', (tab:any) => {
-        // console.log(tab);
+        console.log(tab);
       });
 
   }, []);
@@ -381,9 +382,11 @@ export default function Channels() {
   }
 
   function handleSetAdmin(chan: string, id: string) {
-    console.log(chan);
-    console.log(id);
 	  socket.emit('setAdmin', { channel: chan, toSetAdmin: id } );
+  }
+
+  function handleBanUser(chan: string, id: string) {
+	  socket.emit('banUser', { channel: chan, toBan: id } );
   }
 
 
@@ -408,7 +411,7 @@ export default function Channels() {
             <div className='chat-chanOp'>
               <FontAwesomeIcon icon={faGamepad}></FontAwesomeIcon>
               <FontAwesomeIcon onClick={() => handleSetAdmin(tmp.name, tmp.messages[i]?.sender)} icon={faHandsHoldingCircle}></FontAwesomeIcon>
-              <FontAwesomeIcon icon={faBan}></FontAwesomeIcon>
+              <FontAwesomeIcon onClick={() => handleBanUser(tmp.name, tmp.messages[i]?.sender)} icon={faBan}></FontAwesomeIcon>
               <FontAwesomeIcon icon={faCommentSlash}></FontAwesomeIcon>
             </div>
           );
