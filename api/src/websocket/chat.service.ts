@@ -51,6 +51,12 @@ export class ChatService {
 			this.gateway.server.to(socket.id).emit('rooms', " get rooms ", await this.channelService.getChannelsForUser(allUsers));
 	}
 
+	async refreshChanMessage(channelName: string)
+	{
+		for (let [allUsers, socket] of this.gateway.activeUsers.entries())
+			this.gateway.server.to(socket.id).emit('channelMessage', await this.messageService.getMessage(channelName, allUsers));
+	}
+
 	async createRoom(client: Socket, channel: newChannelDto)
 	{
 		await this.channelService.createChannel(channel.chanName, client.data.user, channel.password, channel.private)
@@ -83,8 +89,10 @@ export class ChatService {
 
 	async ban(client: Socket, data : { channel: string, toBan: User })
 	{
+		console.log("chat service");
 		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
 		await this.channelService.temporaryBanUser(client.data.user, chan, data.toBan);
+		await this.refreshChanMessage(data.channel);
 		await this.getRooms();
 	}
 
@@ -99,7 +107,7 @@ export class ChatService {
 	{
 		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
 		await this.channelService.setNewAdmin(client.data.user, chan, data.toSetAdmin);
-		await this.getRooms();
+		await this.refreshChanMessage(data.channel);
 	}
 
 	async modifyChanSettings(client: Socket, changes: ModifyChannelDto)

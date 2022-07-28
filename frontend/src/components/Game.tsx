@@ -53,16 +53,16 @@ export default function Game() {
   const [userLeft, setUserLeft] = useState<userT>({
     x: 10,
     y: 0,
-    width: 70,
-    height: 70,
+    width: 10,
+    height: 30,
     score: 0,
     color: "DEEPSKYBLUE"
   });
   const [userRight, setUserRight] = useState<userT>({
     x: 20,
     y: 0,
-    width: 70,
-    height: 70,
+    width: 10,
+    height: 30,
     score: 0,
     color: "FIREBRICK"
   });
@@ -150,8 +150,13 @@ export default function Game() {
    */
   function drawRect(x: number, y: number, w: number, h: number, color: string) {
     if (ctx != null) {
+      console.log(" DRAW ME BITCH");
+      console.log(x + " " + y + " " + w + " " + h);
+      console.log(canvas.height);
+      console.log(canvas.width);
+      console.log(color);
       ctx.fillStyle = color;
-      ctx.fillRect(x, y, w, h);
+      console.log(ctx.fillRect(x, y, w, h));
     }
   }
 
@@ -188,22 +193,35 @@ export default function Game() {
       ctx.fillText(text, x, y);
     }
   }
-
-  function render(data: dataT) {
-    if (ctx) {
-      // Clear the canva
+  
+  function adaptToCanvas(data: dataT)
+    {
+    
+      data.player1_paddle_y = data.player1_paddle_y / 200 * canvas.width;
+      data.player1_paddle_x = data.player1_paddle_x / 100 * canvas.height;
+      data.player2_paddle_y = data.player2_paddle_y / 200 * canvas.width;
+      data.player2_paddle_x = data.player2_paddle_x / 100 * canvas.height;
+      data.ball_y = data.ball_y / 200 * canvas.width;
+      data.ball_x = data.ball_x / 100 * canvas.height;
+      return (data);
+    }
+    function render(data: dataT) {
+      if (ctx) {
+        // Clear the canva
+        data = adaptToCanvas(data);
+        console.log(data);
       ctx.clearRect(0, 0, canvas.height, canvas.width);
       // Draw score for userLeft
       drawNet();
       // Draw Paddle
       drawRect(data.player1_paddle_x, data.player1_paddle_y, userLeft.width, userLeft.height, userLeft.color);
       drawRect(data.player2_paddle_x, data.player2_paddle_y, userRight.width, userRight.height, userRight.color);
-      drawText("PLAYER 1", canvas.width * 0.12, canvas.height * 0.1, '#00000080');
+       drawText("PLAYER 1", canvas.width * 0.12, canvas.height * 0.1, '#00000080');
       drawText(userLeft.score.toString(), canvas.width / 4, canvas.height / 5, '#00000080');
-      // Draw score for userRight
+      //Draw score for userRight
       drawText("PLAYER 2", canvas.width * 0.62, canvas.height * 0.1, '#00000080');
       drawText(userRight.score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080');
-      // Draw net
+      //Draw net
     }
   }
 
