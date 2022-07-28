@@ -15,6 +15,9 @@ import { faUserPlus } from '@fortawesome/free-solid-svg-icons'
 import { faUserXmark } from '@fortawesome/free-solid-svg-icons'
 import { faUserSlash } from '@fortawesome/free-solid-svg-icons'
 import { faGamepad } from '@fortawesome/free-solid-svg-icons'
+import { faHandsHoldingCircle } from '@fortawesome/free-solid-svg-icons'
+import { faBan } from '@fortawesome/free-solid-svg-icons'
+import { faCommentSlash } from '@fortawesome/free-solid-svg-icons'
 
 // SOCKET IMPORT FROM THE INDEX.TSX
 import {socketo} from '../index';
@@ -97,6 +100,7 @@ export default function Channels() {
         setDatausers(tab);
       });
       socket.on('channelMessage', (msg:any) => {
+          console.log(msg);
           setMessages(msg);
       });
       socket.on('friendList', (msg:any, tab:any) => {
@@ -110,7 +114,7 @@ export default function Channels() {
         setMessagesPriv(tab);
       });
       socket.on('error', (tab:any) => {
-        console.log(tab);
+        // console.log(tab);
       });
     
   }, []);
@@ -350,8 +354,6 @@ export default function Channels() {
     {
       if (isInChan(e.currentTarget.id) == 0)
       return(0);
-      console.log(e.currentTarget.id);
-      console.log(message);
       socket.emit('sendChannelMessages', {chan: e.currentTarget.id, msg: message});
     }
     else if (privMsgChat)
@@ -368,6 +370,60 @@ export default function Channels() {
     setMessage("");
   }
 
+  function isAdmin(id:string, tmp:any) {
+    let i = 0;
+    while (i < tmp.adminsId.length)
+    {
+      if (id === tmp.adminsId[i])
+        return (1);
+      i++;
+    }
+    return (0);
+  }
+
+  function handleSetAdmin(chan: string, id: string) {
+    console.log(chan);
+    console.log(id);
+    socket.emit('setAdmin', chan, id);
+  }
+  
+
+  function displayChanOp(i:number , tmp:any) {
+      if (datame.name == tmp.messages[i]?.sender.name) // si c'est moi-meme j'affiche rien
+      {
+        return ("");
+      }
+      else if (isAdmin(datame.id, tmp)) // si je suis admin
+      {
+        if (isAdmin(tmp.messages[i]?.sender.id, tmp))// si c'est un autre admin j'affiche que le gamepad
+        {
+          return (
+            <div className='chat-chanOp'>
+              <FontAwesomeIcon icon={faGamepad}></FontAwesomeIcon>
+            </div>
+          );
+        }
+        else // sinon j'affiche tout
+        {
+          return (
+            <div className='chat-chanOp'>
+              <FontAwesomeIcon icon={faGamepad}></FontAwesomeIcon>
+              <FontAwesomeIcon onClick={() => handleSetAdmin(tmp.name, tmp.messages[i]?.sender.id)} icon={faHandsHoldingCircle}></FontAwesomeIcon>
+              <FontAwesomeIcon icon={faBan}></FontAwesomeIcon>
+              <FontAwesomeIcon icon={faCommentSlash}></FontAwesomeIcon>
+            </div>
+          );
+        }
+      }
+      else
+      {
+        return (
+          <div className='chat-chanOp'>
+            <FontAwesomeIcon icon={faGamepad}></FontAwesomeIcon>
+          </div>
+        );
+      }
+  }
 
   // DISPLAY MESSAGES IN THE CHAT
   // need to reverse printing the array of messages because of
@@ -407,6 +463,7 @@ export default function Channels() {
           <div className='chat-message-info'>
           <Link to={profilelink} style={{ textDecoration: 'none', color: 'black' }}><h5>{tmp.messages[i]?.sender.name}</h5></Link>
             <span>{tmp.messages[i]?.sent_at.substr(0, 8)}</span>
+            {displayChanOp(i, tmp)}
           </div>
           <p style={{'backgroundColor': msgColor}}>{tmp.messages[i]?.message}</p>
         </div>);

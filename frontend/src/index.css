@@ -516,6 +516,10 @@ margin-left: 5px;
   border-radius: 5px;
 }
 
+.chat-chanOp {
+  color: #1dd1a1;  
+}
+
 .chat-input input {
   margin-top: 7px;
   width: 250px;

@@ -10,10 +10,13 @@ import { jwtConstants } from '../jwt/jwt.constants';
 import { TransformStreamDefaultController } from 'stream/web';
 import { useContainer } from 'class-validator';
 import { AuthService } from '../auth.service';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class TwoFaService extends AuthService {
 	constructor(
+		@InjectRepository(User) private userRepo: Repository<User>,
 		userService: UserService,
 		jwtService: JwtService
 	) { super (userService, jwtService); }
@@ -24,14 +27,17 @@ export class TwoFaService extends AuthService {
 	 * @returns secret and url to put in qrcode
 	 */
 	public async generateTwoFactorAuthtificationSecret (user: User) {
-		let		secret;
-		if (user.TwoFA_secret != null)
-			secret			= user.TwoFA_secret;
+		let	secret: string;
+		if (user.TwoFA_enable)
+			secret = (await this.userRepo.createQueryBuilder('User')
+						.select(["User.TwoFA_secret"])
+						.where({ "id": user.id})
+						.getOne()).TwoFA_secret;
 		else
-			secret			= authenticator.generateSecret();
+			secret = authenticator.generateSecret();
 		const	optAuthUrl	= authenticator.keyuri(
-			user.name,
-			process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME,
+			encodeURIComponent(user.name),
+			encodeURIComponent(process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME),
 			secret
 		);
 
@@ -59,6 +65,8 @@ export class TwoFaService extends AuthService {
 	public async isTwoFactorCodeValid (code: string, req: Request)
 	{
 		const user_secret	= await this.userService.getTwoFASecret(req);
+		console.log(code);
+		console.log(user_secret);
 		return (authenticator.verify({
 			token: code,
 			secret: user_secret,
