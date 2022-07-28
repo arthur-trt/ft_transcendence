@@ -158,26 +158,6 @@ export default function Game() {
   }, [gameStart])
 
   useEffect(() => {
-<<<<<<< HEAD
-    console.log("stp");
-    console.log(gameStart);
-    if (countdown == true)
-    {
-      console.log("allo?");
-      callRender();
-      //setInterval(callRender, 1000/60);
-    }
-  }, [countdown])
-
-  function callRender()
-  {
-    if (data)
-    {
-      console.log(data.player1_paddle_x);
-      render(data);
-    }
-  }
-=======
     if (canvas && ctx)
     {
       console.log("render is triggered")
@@ -186,7 +166,6 @@ export default function Game() {
       //blabla les fonctions
     }
   }, [data])
->>>>>>> origin/main
 
   /**
    * Draw a rectangle on the canva
@@ -243,17 +222,8 @@ export default function Game() {
       console.log("bouh");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       // Draw score for userLeft
-<<<<<<< HEAD
       drawText("PLAYER 1", canvas.width * 0.15, canvas.height * 0.1, '#00000080', "48px serif");
       drawText(userLeft.score.toString(), canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
-=======
-      drawNet();
-      // Draw Paddle
-      drawRect(data.player1_paddle_x, data.player1_paddle_y, userLeft.width, userLeft.height, userLeft.color);
-      drawRect(data.player2_paddle_x, data.player2_paddle_y, userRight.width, userRight.height, userRight.color);
-      drawText("PLAYER 1", canvas.width * 0.12, canvas.height * 0.1, '#00000080');
-      drawText(userLeft.score.toString(), canvas.width / 4, canvas.height / 5, '#00000080');
->>>>>>> origin/main
       // Draw score for userRight
       drawText("PLAYER 2", canvas.width * 0.7, canvas.height * 0.1, '#00000080', "48px serif");
       drawText(userRight.score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
