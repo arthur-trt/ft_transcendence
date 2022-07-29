@@ -7,7 +7,6 @@ interface Player extends User
 {
     x: number;
     y: number;
-    paddle: Paddle;
 }
 
 interface velocity
@@ -17,6 +16,7 @@ interface velocity
 }
 interface Ball
 {
+    speed: number;
     x: number;
     y: number;
     velocity: velocity;
@@ -30,7 +30,7 @@ interface Canvas
 
 export interface Match
 {
-    speed: number;
+    id: string;
     canvas: Canvas;
     ball :Ball;
     player_1: Player;
