@@ -73,7 +73,6 @@ export class GameRelayService
             console.log("starting match");
             const Match = this.startMatch(this.players);
             this.players.clear();
-
         }
     }
     
@@ -90,6 +89,8 @@ export class GameRelayService
         //this.initGamePosition( Match.id);
 
 	}
+
+    
 
     @UseGuards(WsJwtAuthGuard)
     @UsePipes(ValidationPipe)
@@ -118,18 +119,18 @@ export class GameRelayService
         this.sendPosition(client);
     };
 
-    @UseGuards(WsJwtAuthGuard)
-    @UsePipes(ValidationPipe)
-    async sendPosition(room)
-    {
-        this.dataT.player1_paddle_x = this.match.player_1.x;
-        this.dataT.player1_paddle_y = this.match.player_1.y;
-        this.dataT.player2_paddle_x = this.match.player_2.x;
-        this.dataT.player2_paddle_y = this.match.player_2.y;
-        this.dataT.ball_x = this.match.ball.x;
-        this.dataT.ball_y = this.match.ball.y;
-        return this.gateway.server.to(room).emit('game_postion', this.dataT);
-}
+//     @UseGuards(WsJwtAuthGuard)
+//     @UsePipes(ValidationPipe)
+//     async sendPosition(room)
+//     {
+//         this.dataT.player1_paddle_x = this.match.player_1.x;
+//         this.dataT.player1_paddle_y = this.match.player_1.y;
+//         this.dataT.player2_paddle_x = this.match.player_2.x;
+//         this.dataT.player2_paddle_y = this.match.player_2.y;
+//         this.dataT.ball_x = this.match.ball.x;
+//         this.dataT.ball_y = this.match.ball.y;
+//         return this.gateway.server.to(room).emit('game_postion', this.dataT);
+// }
 
     // collision detection
  
@@ -138,4 +139,30 @@ export class GameRelayService
     // for (friend in matchhistory)
     //  if (matchhistory.stoptime == null)
     // join (matchhistory.uuid) (room)
+    
+    // @SubscribeMessage('test')
+    // async test(client: Socket, position: any) {
+    //     this.dataT.player1_paddle_x = 50;
+    //       this.dataT.player1_paddle_y = position;
+    //       this.dataT.player2_paddle_x = 150;
+    //       this.dataT.player2_paddle_y = position;
+    //       this.dataT.ball_x = 50;
+    //       this.dataT.ball_y = 80;
+    //     console.log(client.id + ' position ' + position)
+    //     this.gateway.server.emit('game_postion', position)
+    // }
+      @UseGuards(WsJwtAuthGuard)
+      @UsePipes(ValidationPipe)
+      //@SubscribeMessage('game_postion')
+      async sendPosition(room)
+      {
+          this.dataT.player1_paddle_x = 2;
+          this.dataT.player1_paddle_y = 50;
+          this.dataT.player2_paddle_x = 200-2;
+          this.dataT.player2_paddle_y = 50;
+          this.dataT.ball_x = 100;
+          this.dataT.ball_y = 50;
+          return this.gateway.server.to(room).emit('game_postion', this.dataT);
+    }
+
 }
