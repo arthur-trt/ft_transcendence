@@ -76,6 +76,21 @@ export class GameRelayService
             }
         }
         
+        @UseGuards(WsJwtAuthGuard)
+        @UsePipes(ValidationPipe)
+        //@SubscribeMessage('game_start')
+        async sendPosition(client: Socket)
+        {
+            console.log("ooooooooooooooo")
+            console.log("game_start")
+            this.dataT.player1_paddle_x = 2;
+            this.dataT.player1_paddle_y = 50;
+            this.dataT.player2_paddle_x = 200-2;
+            this.dataT.player2_paddle_y = 50;
+            this.dataT.ball_x = 100;
+            this.dataT.ball_y = 50;
+            this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
+      }
         async startMatch(players) //set a boolean to know if a player is already on match
         {
             const [first] = players;
@@ -152,19 +167,5 @@ export class GameRelayService
     //     console.log(client.id + ' position ' + position)
     //     this.gateway.server.emit('game_postion', position)
     // }
-      @UseGuards(WsJwtAuthGuard)
-      @UsePipes(ValidationPipe)
-      @SubscribeMessage('game_start')
-      async sendPosition(client : Socket)
-      {
-          console.log("game_start")
-          this.dataT.player1_paddle_x = 2;
-          this.dataT.player1_paddle_y = 50;
-          this.dataT.player2_paddle_x = 200-2;
-          this.dataT.player2_paddle_y = 50;
-          this.dataT.ball_x = 100;
-          this.dataT.ball_y = 50;
-          return this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
-    }
 
 }
