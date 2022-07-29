@@ -81,6 +81,7 @@ code {
 }
 
 .title h1 {
+  width: fit-content;
   margin-left: 35px;
 }
 
@@ -117,6 +118,22 @@ code {
   margin-right: 35px;
   font-size: 30px;
   cursor: pointer;
+}
+
+/* ------------------------------------- */
+/* --------------HOME------------------- */
+/* ------------------------------------- */
+
+.home-container {
+  width: 50%;
+  margin-top: 20px;
+  padding-bottom: 20px;
+  padding-top: 20px;
+  margin-right: 25%;
+  margin-left: 25%;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 10px;
+  background-color: white;
 }
 
 /* ------------------------------------- */
@@ -258,10 +275,10 @@ code {
   color: black;
 }
 
-.channels-single .trashcan:hover, .circlexmark:hover, .arrow:hover {
+/* .channels-single .trashcan:hover, .circlexmark:hover, .arrow:hover {
   transform: scale(1.2);
   transition: all 0.5s ease-out;
-}
+} */
 
 .channels-single-popuptojoin {
   position: absolute;
@@ -428,6 +445,7 @@ cursor: pointer;
 }
 
 .chat-wrapper {
+  background-color: #1dd1a1;
   width: 400px;
   margin: auto;
   border-radius: 10px;
@@ -441,6 +459,8 @@ cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 }
 
 .chat-owner-op input {
@@ -468,8 +488,8 @@ margin-left: 5px;
 .chat-title {
   text-align: left;
   padding: 7px;
-  /* border-top-left-radius: 10px; */
-  /* border-top-right-radius: 10px; */
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
   background-color: #1dd1a1;
 }
 
@@ -482,6 +502,7 @@ margin-left: 5px;
   display: flex;
   flex-direction: column-reverse;
   overflow-y: auto;
+  background-color: white;
 }
 
 .chat-box::-webkit-scrollbar {
@@ -538,6 +559,18 @@ textarea:focus, input:focus{
   outline: none;
   border: 2px solid #1dd1a1;
   transition: all 0.5s ease-out;
+}
+
+/* -------------------------------------------- */
+/* --------------PUBLIC PROFILE---------------- */
+/* -------------------------------------------- */
+
+.profile-public {
+  margin-left: 5px;
+}
+
+.profile-public .eye {
+  margin-right: 5px;
 }
 
 /* ------------------------------------- */
@@ -780,6 +813,8 @@ textarea:focus, input:focus{
   justify-content: center;
   font-size: 20px;
   color: white;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
 }
 
 .ladder-rank h5 {
@@ -789,7 +824,7 @@ textarea:focus, input:focus{
 .ladder-img {
   display: flex;
   align-items: center;
-  width: 15%;
+  width: 20%;
   justify-content: center;
 }
 
@@ -805,7 +840,7 @@ textarea:focus, input:focus{
 .ladder-name {
   display: flex;
   align-items: center;
-  width: 28%;
+  width: 35%;
   margin-left: 5px;
   text-transform: uppercase;
 }
@@ -813,14 +848,7 @@ textarea:focus, input:focus{
 .ladder-victories {
   display: flex;
   align-items: center;
-  width: 28%;
-  margin-left: 5px;
-}
-
-.ladder-defeats {
-  display: flex;
-  align-items: center;
-  width: 28%;
+  width: 35%;
   margin-left: 5px;
 }
 
@@ -883,4 +911,51 @@ textarea:focus, input:focus{
 }
 .debug .key {
   color: red;
+}
+
+/* *[data-tooltip] {
+  position: relative;
+}
+
+*[data-tooltip]::after {
+  content: attr(data-tooltip);
+
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 150px;
+
+  pointer-events: none;
+  opacity: 0;
+  -webkit-transition: opacity .15s ease-in-out;
+  -moz-transition: opacity .15s ease-in-out;
+  -ms-transition: opacity .15s ease-in-out;
+  -o-transition: opacity .15s ease-in-out;
+  transition: opacity .15s ease-in-out;
+
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+  background: #fefdcd;
+  padding: 2px 2px;
+  border: 1px solid #c0c0c0;
+  box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.4);
+}
+
+*[data-tooltip]:hover::after {
+  opacity: 1;
+} */
+
+[data-tooltip] {
+  position: relative;
+}
+
+
+
+[data-tooltip]:hover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 10px;
+  background-color: red;
 }

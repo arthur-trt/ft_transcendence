@@ -100,7 +100,7 @@ export default function Channels() {
         setDatausers(tab);
       });
       socket.on('channelMessage', (msg:any) => {
-        console.log(msg);
+          console.log(msg);
           setMessages(msg);
       });
       socket.on('friendList', (msg:any, tab:any) => {
@@ -259,7 +259,7 @@ export default function Channels() {
                {ChanStatus(i)}
               </div>
               <div style={{'backgroundColor': BgColor}} className='channels-single-actions'>
-                <FontAwesomeIcon icon={faTrashCan} className="trashcan" id={data[i]?.name} onClick={handleDelete} />
+                <FontAwesomeIcon data-tooltip="coucou bg" icon={faTrashCan} className="trashcan" id={data[i]?.name} onClick={handleDelete} />
                 <FontAwesomeIcon icon={faCircleXmark} className="circlexmark" id={data[i]?.name} onClick={handleLeave} />
                 <FontAwesomeIcon icon={faArrowAltCircleRight} className="arrow" id={data[i]?.name} onClick={handleJoin} />
                 {PopUp_PassToJoin(i)}
@@ -389,6 +389,10 @@ export default function Channels() {
 	  socket.emit('banUser', { channel: chan, toBan: id } );
   }
 
+  function handleMuteUser(chan: string, id: string) {
+	  socket.emit('muteUser', { channel: chan, toMute: id } );
+  }
+
 
   function displayChanOp(i:number , tmp:any) {
       if (datame.name == tmp.messages[i]?.sender.name) // si c'est moi-meme j'affiche rien
@@ -412,7 +416,7 @@ export default function Channels() {
               <FontAwesomeIcon icon={faGamepad}></FontAwesomeIcon>
               <FontAwesomeIcon onClick={() => handleSetAdmin(tmp.name, tmp.messages[i]?.sender)} icon={faHandsHoldingCircle}></FontAwesomeIcon>
               <FontAwesomeIcon onClick={() => handleBanUser(tmp.name, tmp.messages[i]?.sender)} icon={faBan}></FontAwesomeIcon>
-              <FontAwesomeIcon icon={faCommentSlash}></FontAwesomeIcon>
+              <FontAwesomeIcon onClick={() => handleMuteUser(tmp.name, tmp.messages[i]?.sender)} icon={faCommentSlash}></FontAwesomeIcon>
             </div>
           );
         }

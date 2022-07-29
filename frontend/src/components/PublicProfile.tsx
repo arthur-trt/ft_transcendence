@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPen } from '@fortawesome/free-solid-svg-icons'
+import { faEye } from '@fortawesome/free-solid-svg-icons'
 import { useParams } from "react-router-dom";
 
 
@@ -36,20 +36,26 @@ export default function PublicProfile() {
 
     return (
         <div className="profile-container">
+            <div className="profile-public">
+            <FontAwesomeIcon icon={faEye} className="eye" />
+            PUBLIC
+            </div>
+
             <div className="profile-img">
                 <img src={data.avatar_url}></img>
             </div>
-            <div className="profile-info">
-                <div className="profile-name">
-                    <h5>PSEUDO PUBLIC : {data.name}</h5>
-                </div>
-                <div className="profile-other">
-                    <h5>FULL NAME : {data.fullname}</h5>
-                    <h5>MAIL : {data.mail}</h5>
-                    <h5>VICTORY : {data.wonMatches}</h5>
-                </div>
+
+            <div className="profile-name">
+                <h5>PSEUDO : <span>{data.name}</span></h5>
             </div>
-        </div >
+
+            <div className="profile-other">
+                <div><h5>FULL NAME</h5><p>{data.fullname}</p></div>
+                <div><h5>MAIL</h5><p>{data.mail}</p></div>
+                <div><h5>VICTORY</h5><p>{data.wonMatches}</p></div>
+            </div>
+
+            </div>
     )
 
 }
