@@ -61,8 +61,7 @@ export class GameRelayService
 		second.join( Match.id);
         this.MatchRooms.push( Match.id);
 		this.gateway.server.to( Match.id).emit('game_countdownStart');
-        this.sendPosition( Match.id);
-
+        //this.sendPosition( Match.id);
 	}
     // async watchMatch(players)
     // {
@@ -73,6 +72,8 @@ export class GameRelayService
     //     first.join(this.MatchRooms[0]);
 	// 	second.join(this.MatchRooms[0]);
     // }
+
+    
 
     @UseGuards(WsJwtAuthGuard)
     @UsePipes(ValidationPipe)
@@ -100,10 +101,10 @@ export class GameRelayService
       //@SubscribeMessage('game_postion')
       async sendPosition(room)
       {
-          this.dataT.player1_paddle_x = 50;
+          this.dataT.player1_paddle_x = 2;
           this.dataT.player1_paddle_y = 50;
-          this.dataT.player2_paddle_x = 50;
-          this.dataT.player2_paddle_y = 150;
+          this.dataT.player2_paddle_x = 200-2;
+          this.dataT.player2_paddle_y = 50;
           this.dataT.ball_x = 100;
           this.dataT.ball_y = 50;
           return this.gateway.server.to(room).emit('game_postion', this.dataT);

@@ -847,11 +847,10 @@ textarea:focus, input:focus{
 .pong-container {
   width: 80%;
   display: flex;
-  border: 10px solid black;
+  border: 7px solid black;
   margin: auto;
   max-width: 1200px;
-  border-radius: 50px;
-
+  border-radius: 5px;
 }
 
 
