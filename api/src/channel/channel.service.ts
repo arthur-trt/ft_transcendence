@@ -8,7 +8,6 @@ import { Repository } from 'typeorm';
 import { validate as isValidUUID } from 'uuid';
 import { Channel } from './channel.entity';
 
-
 @Injectable()
 export class ChannelService {
 

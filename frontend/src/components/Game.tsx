@@ -135,7 +135,7 @@ export default function Game() {
         setUserRight({x : canvas.width - 10, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, score: 0, color: "FIREBRICK"});
       }
 
-      socket.on('game_postion', (pos: dataT) => {
+      socket.on('game_position', (pos: dataT) => {
         console.log("socket.on/game_position");
         setData(adaptToCanvas(pos));
       });
@@ -192,14 +192,16 @@ export default function Game() {
     {
       clearInterval(inter);
       setGameStart(true);
+      //socket.emit('game_start');
     }
     else
       i++;
   }
 
   useEffect(() => {
+    console.log("useEffect/game_start" + gameStart);
     if (gameStart == true)
-      socket.emit("game_start");
+      socket.emit('game_start');
   }, [gameStart]);
 
   useEffect(() => {
