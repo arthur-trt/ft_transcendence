@@ -14,15 +14,32 @@ import { Match } from "../game/game.interface"
 import { dataFront } from "../game/game.interface";
 import { createHistogram } from "perf_hooks";
 
+const speed = 7;
+const velX = 5;
+const velY = 5;
+
+function collision(b,p){
+    p.top = p.y;
+    p.bottom = p.y + p.height;
+    p.left = p.x;
+    p.right = p.x + p.width;
+    
+    b.top = b.y - b.radius;
+    b.bottom = b.y + b.radius;
+    b.left = b.x - b.radius;
+    b.right = b.x + b.radius;
+    
+    return p.left < b.right && p.top < b.bottom && p.right > b.left && p.bottom > b.top;
+}
 
 @Injectable()
 export class GameRelayService
 {
     constructor(
-		protected readonly jwtService: JwtService,
+        protected readonly jwtService: JwtService,
 		protected readonly userService: UserService,
         protected readonly gameService: GameService,
-
+        
         @Inject(forwardRef(() => WSServer)) protected gateway : WSServer
         ) {
         }
@@ -33,7 +50,15 @@ export class GameRelayService
         protected match = {} as Match;
         protected dataT = {} as dataFront;
         
-
+        
+        async resetBall(){
+            this.match.ball.x = 50;
+            this.match.ball.y = 100;
+            //this.match.ball.velocityX = -this.match.ball.velocityX;
+            this.match.ball.velocity.x = 5;
+            this.match.ball.velocity.y = 5;
+            this.match.ball.speed = 7;
+        }
     @UseGuards(WsJwtAuthGuard)
     @UsePipes(ValidationPipe)
     async getInQueue(client : Socket)
@@ -52,7 +77,7 @@ export class GameRelayService
         }
     }
     
-	async startMatch(players)
+	async startMatch(players) //set a boolean to know if a player is already on match
 	{
 		const [first] = players;
 		const[, second] = players;
@@ -62,18 +87,9 @@ export class GameRelayService
 		second.join( Match.id);
         this.MatchRooms.push( Match.id);
 		this.gateway.server.to( Match.id).emit('game_countdownStart');
-        this.sendPosition( Match.id);
+        //this.initGamePosition( Match.id);
 
 	}
-    // async watchMatch(players)
-    // {
-    //     const [first] = players;
-	// 	const[, second] = players;
-
-    //     console.log("watchingMode");
-    //     first.join(this.MatchRooms[0]);
-	// 	second.join(this.MatchRooms[0]);
-    // }
 
     @UseGuards(WsJwtAuthGuard)
     @UsePipes(ValidationPipe)
@@ -84,29 +100,42 @@ export class GameRelayService
 
           
     }
-    
-    // @SubscribeMessage('test')
-    // async test(client: Socket, position: any) {
-    //     this.dataT.player1_paddle_x = 50;
-    //       this.dataT.player1_paddle_y = position;
-    //       this.dataT.player2_paddle_x = 150;
-    //       this.dataT.player2_paddle_y = position;
-    //       this.dataT.ball_x = 50;
-    //       this.dataT.ball_y = 80;
-    //     console.log(client.id + ' position ' + position)
-    //     this.gateway.server.emit('game_postion', position)
-    // }
-      @UseGuards(WsJwtAuthGuard)
-      @UsePipes(ValidationPipe)
-      //@SubscribeMessage('game_postion')
-      async sendPosition(room)
-      {
-          this.dataT.player1_paddle_x = 50;
-          this.dataT.player1_paddle_y = 100;
-          this.dataT.player2_paddle_x = 100;
-          this.dataT.player2_paddle_y = 100;
-          this.dataT.ball_x = 50;
-          this.dataT.ball_y = 80;
-          return this.gateway.server.to(room).emit('game_postion', this.dataT);
-    }
+
+    @UseGuards(WsJwtAuthGuard)
+    @UsePipes(ValidationPipe)
+    @SubscribeMessage('game_start')
+    async initGamePosition(client : Socket)
+    {
+        this.match.speed = speed;
+        this.match.ball.velocity.x = velX;
+        this.match.ball.velocity.y = velY;
+        this.match.ball.x = 50;
+        this.match.ball.y = 80;
+        this.match.player_1.x = 50;
+        this.match.player_1.y = 100;
+        this.match.player_2.x = 50;
+        this.match.player_2.y = 150;
+        this.sendPosition(client);
+    };
+
+    @UseGuards(WsJwtAuthGuard)
+    @UsePipes(ValidationPipe)
+    async sendPosition(room)
+    {
+        this.dataT.player1_paddle_x = this.match.player_1.x;
+        this.dataT.player1_paddle_y = this.match.player_1.y;
+        this.dataT.player2_paddle_x = this.match.player_2.x;
+        this.dataT.player2_paddle_y = this.match.player_2.y;
+        this.dataT.ball_x = this.match.ball.x;
+        this.dataT.ball_y = this.match.ball.y;
+        return this.gateway.server.to(room).emit('game_postion', this.dataT);
+}
+
+    // collision detection
+ 
+
+    //watchmode if a friend is on a match (make a research ), join on watch mode
+    // for (friend in matchhistory)
+    //  if (matchhistory.stoptime == null)
+    // join (matchhistory.uuid) (room)
 }
