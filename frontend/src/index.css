@@ -557,6 +557,7 @@ margin-left: 5px;
 
 .chat-chanOp {
   color: #1dd1a1;
+  cursor: pointer;
 }
 
 .chat-input input {
