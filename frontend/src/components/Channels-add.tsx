@@ -18,7 +18,7 @@ import { faGamepad } from '@fortawesome/free-solid-svg-icons'
 import { faHandsHoldingCircle } from '@fortawesome/free-solid-svg-icons'
 import { faBan } from '@fortawesome/free-solid-svg-icons'
 import { faCommentSlash } from '@fortawesome/free-solid-svg-icons'
-
+import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
 // SOCKET IMPORT FROM THE INDEX.TSX
 import {socketo} from '../index';
 
@@ -259,7 +259,7 @@ export default function Channels() {
                {ChanStatus(i)}
               </div>
               <div style={{'backgroundColor': BgColor}} className='channels-single-actions'>
-                <FontAwesomeIcon data-tooltip="coucou bg" icon={faTrashCan} className="trashcan" id={data[i]?.name} onClick={handleDelete} />
+                <FontAwesomeIcon icon={faTrashCan} className="trashcan" id={data[i]?.name} onClick={handleDelete} />
                 <FontAwesomeIcon icon={faCircleXmark} className="circlexmark" id={data[i]?.name} onClick={handleLeave} />
                 <FontAwesomeIcon icon={faArrowAltCircleRight} className="arrow" id={data[i]?.name} onClick={handleJoin} />
                 {PopUp_PassToJoin(i)}
@@ -404,7 +404,7 @@ export default function Channels() {
         if (isAdmin(tmp.messages[i]?.sender.id, tmp))// si c'est un autre admin j'affiche que le gamepad
         {
           return (
-            <div className='chat-chanOp'>
+            <div style={{display: ellipsis}} className='chat-chanOp'>
               <FontAwesomeIcon icon={faGamepad}></FontAwesomeIcon>
             </div>
           );
@@ -412,7 +412,7 @@ export default function Channels() {
         else // sinon j'affiche tout
         {
           return (
-            <div className='chat-chanOp'>
+            <div style={{display: ellipsis}} className='chat-chanOp'>
               <FontAwesomeIcon icon={faGamepad}></FontAwesomeIcon>
               <FontAwesomeIcon onClick={() => handleSetAdmin(tmp.name, tmp.messages[i]?.sender)} icon={faHandsHoldingCircle}></FontAwesomeIcon>
               <FontAwesomeIcon onClick={() => handleBanUser(tmp.name, tmp.messages[i]?.sender)} icon={faBan}></FontAwesomeIcon>
@@ -424,11 +424,21 @@ export default function Channels() {
       else
       {
         return (
-          <div className='chat-chanOp'>
+          <div style={{display: ellipsis}} className='chat-chanOp'>
             <FontAwesomeIcon icon={faGamepad}></FontAwesomeIcon>
           </div>
         );
       }
+  }
+
+  const [ellipsis, setEllipsis] = useState("none");
+
+  function handleEllipsis() {
+    console.log(ellipsis);
+    if (ellipsis === 'none')
+      setEllipsis('block');
+    else if (ellipsis === 'block')
+      setEllipsis('none');
   }
 
   // DISPLAY MESSAGES IN THE CHAT
@@ -469,6 +479,7 @@ export default function Channels() {
           <div className='chat-message-info'>
           <Link to={profilelink} style={{ textDecoration: 'none', color: 'black' }}><h5>{tmp.messages[i]?.sender.name}</h5></Link>
             <span>{tmp.messages[i]?.sent_at.substr(0, 8)}</span>
+            <FontAwesomeIcon icon={faEllipsisVertical} className="ellipsis" onClick={handleEllipsis} ></FontAwesomeIcon>
             {displayChanOp(i, tmp)}
           </div>
           <p style={{'backgroundColor': msgColor}}>{tmp.messages[i]?.message}</p>
