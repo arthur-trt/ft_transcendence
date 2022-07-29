@@ -107,7 +107,7 @@ export class GameRelayService
           this.dataT.player2_paddle_y = 50;
           this.dataT.ball_x = 100;
           this.dataT.ball_y = 50;
-          return this.gateway.server.to(room).emit('game_postion', this.dataT);
+          return this.gateway.server.to(room).emit('game_position', this.dataT);
     }
 
 }

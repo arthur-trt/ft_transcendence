@@ -32,9 +32,7 @@ export default function Game() {
   }
 
   type dataT = {
-    player1_paddle_x: number,
     player1_paddle_y: number,
-    player2_paddle_x: number,
     player2_paddle_y: number,
     ball_x: number,
     ball_y: number
@@ -135,7 +133,7 @@ export default function Game() {
         setUserRight({x : canvas.width - 10, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, score: 0, color: "FIREBRICK"});
       }
 
-      socket.on('game_postion', (pos: dataT) => {
+      socket.on('game_position', (pos: dataT) => {
         console.log("socket.on/game_position");
         setData(adaptToCanvas(pos));
       });
@@ -191,6 +189,7 @@ export default function Game() {
     if (i == 3)
     {
       clearInterval(inter);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       setGameStart(true);
     }
     else
@@ -199,11 +198,11 @@ export default function Game() {
 
   useEffect(() => {
     if (gameStart == true)
-      socket.emit("game_start");
+      socket.emit('game_start');
   }, [gameStart]);
 
   useEffect(() => {
-    console.log("gourdin");
+    console.log("useEffect/render");
     if (canvas && ctx)
     {
       console.log(net.x);
@@ -300,9 +299,7 @@ export default function Game() {
       {
         console.log("corentin");
         data.player1_paddle_y = data.player1_paddle_y / 100 * canvas.width;
-        data.player1_paddle_x = data.player1_paddle_x / 200 * canvas.height;
         data.player2_paddle_y = data.player2_paddle_y / 100 * canvas.width;
-        data.player2_paddle_x = data.player2_paddle_x / 200 * canvas.height;
         data.ball_y = data.ball_y / 100 * canvas.width;
         data.ball_x = data.ball_x / 200 * canvas.height;
         return (data);
