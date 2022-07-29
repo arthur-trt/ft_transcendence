@@ -3,7 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
 import Auth from './components/Auth';
-import { Navigate, BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Navigate, BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Header } from './components/Header';
 import TwoFactor from './components/TwoFactor';
 import Profile from './components/Profile';
@@ -27,14 +27,15 @@ export const socketo = io();
  */
 function RequireAuth({ children }: { children: JSX.Element }) {
   const [cookies, setCookie] = useCookies();
+  let location = useLocation();
 
   if (!cookies.Authentication) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
   const token: any = jwtDecode(cookies.Authentication)
   const dateNow = new Date();
   if (token.exp * 1000 < dateNow.getTime()) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return children;

@@ -173,8 +173,8 @@ export class ChannelService {
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to delete an user from chan.", HttpStatus.FORBIDDEN);
 
-		if (!this.isInChan(channel, user))
-			throw new HttpException("You must be admin to delete an user from chan.", HttpStatus.FORBIDDEN);
+		//if (!this.isInChan(channel, user))
+			//throw new HttpException("You must be admin to delete an user from chan.", HttpStatus.FORBIDDEN);
 
 		await this.channelsRepo.createQueryBuilder()
 			.relation(Channel, "users")
