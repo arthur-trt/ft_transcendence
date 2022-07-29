@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import 'font-awesome/css/font-awesome.min.css';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useCookies } from "react-cookie";
 
 export const Header = () => {
 
     const [data, setData] = useState<any>([]);
-    const [cookies, setCookie] = useCookies();
     let current_url = window.location.href.substring(21);
+    const [cookies, setCookie, removeCookie] = useCookies();
 
     useEffect(() => {
         const getData = async () => {
+
             const response = await fetch(
                 `/api/user/me`
             );
@@ -19,12 +20,19 @@ export const Header = () => {
                 setData(actualData);
                 localStorage.setItem(actualData.name, cookies.Authentication);
             }
+            else
+            {
+                removeCookie('Authentication');
+                window.location.reload();
+            }
         }
         getData()
     }, [])
     
     return (
-        <div>
+        <>
+
+            <div>
             <div className="header">
                 <div className="title"><h1 style={{borderBottom: current_url==="/" ? '3px solid #1dd1a1' : '', }}><Link to="/" style={{ textDecoration: 'none', color: '#1dd1a1' }}>
                     BABY-PONG</Link></h1>
@@ -44,6 +52,8 @@ export const Header = () => {
             </div>
 
         </div>
+        </>
+
 
     )
 }
