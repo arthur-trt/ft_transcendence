@@ -409,4 +409,12 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.gameRelayService.getInQueue(client)
 	}
 
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('game_start')
+	async startMatch(client : Socket)
+	{
+		await this.gameRelayService.sendPosition(client)
+	}
+
 }
