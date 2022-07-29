@@ -191,12 +191,14 @@ export default function Game() {
       clearInterval(inter);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       setGameStart(true);
+      //socket.emit('game_start');
     }
     else
       i++;
   }
 
   useEffect(() => {
+    console.log("useEffect/game_start" + gameStart);
     if (gameStart == true)
       socket.emit('game_start');
   }, [gameStart]);
