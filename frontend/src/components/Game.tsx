@@ -325,6 +325,10 @@ export default function Game() {
   return (
 
     <div className='game-container'>
+      <div className='game-players'>
+        <h3>NAME PLAYER 1</h3>
+        <h3>NAME PLAYER 2</h3>
+      </div>
       {/*<button type='button' onClick={handleStart}>Start game</button>*/}
       <canvas ref={canvasRef} className="pong-container" onClick={handleClick}/> 
       {/*onMouseMove={updateMousePosition}*/}
