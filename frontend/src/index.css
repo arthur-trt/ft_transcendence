@@ -18,14 +18,22 @@ code {
   color: #1dd1a1;
   display: flex;
   height: 70px;
-  justify-content: left;
   align-items: center;
   background-color: white;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
+/* to be deleted (no more h1) */
 .auth-header h1 {
   margin-left: 35px;
+}
+
+.auth-header img {
+  max-height: 100%;
+  max-width: 100%;
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
 }
 
 .auth-link {
@@ -46,6 +54,11 @@ code {
   max-width: 100%;
   width: 20px;
   height: 20px;
+  margin-right: 5px;
+}
+
+.auth-link a {
+  text-decoration: none;
 }
 
 .auth-link button {
@@ -56,6 +69,8 @@ code {
   font-size: 16px;
   transition-duration: 0.4s;
   cursor: pointer;
+  display: flex;
+  margin: auto;
   margin-top: 20px;
 }
 
@@ -78,8 +93,20 @@ code {
 
 .title {
   width: 30%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.title img {
+  max-height: 100%;
+  max-width: 100%;
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+}
+
+/* to be deleted (no more h1) */
 .title h1 {
   width: fit-content;
   margin-left: 35px;
@@ -134,6 +161,107 @@ code {
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   border-radius: 10px;
   background-color: white;
+  text-align: center;
+}
+
+.home-button span {
+  color: #1dd1a1;
+}
+
+.home-button button, button::after {
+  width: 380px;
+  height: 86px;
+  font-size: 36px;
+  
+  height: 56px;
+  font-size: 26px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+
+  /* font-family: 'Bebas Neue', cursive; */
+  background: linear-gradient(45deg, transparent 5%, #1dd1a1 5%);
+  border: 0;
+  color: #fff;
+  letter-spacing: 3px;
+  line-height: 88px;
+  box-shadow: 6px 0px 0px #00E6F6;
+  outline: transparent;
+  position: relative;
+}
+
+.home-button button::after {
+  --slice-0: inset(50% 50% 50% 50%);
+  --slice-1: inset(80% -6px 0 0);
+  --slice-2: inset(50% -6px 30% 0);
+  --slice-3: inset(10% -6px 85% 0);
+  --slice-4: inset(40% -6px 43% 0);
+  --slice-5: inset(80% -6px 5% 0);
+  
+  content: 'START TO PLAY';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 3%, #00E6F6 3%, #00E6F6 5%, #1dd1a1 5%);
+  text-shadow: -3px -3px 0px #F8F005, 3px 3px 0px #00E6F6;
+  clip-path: var(--slice-0);
+}
+
+.home-button button:hover::after {
+  animation: 1s glitch;
+  animation-timing-function: steps(2, end);
+}
+
+@keyframes glitch {
+  0% {
+    clip-path: var(--slice-1);
+    transform: translate(-20px, -10px);
+  }
+  10% {
+    clip-path: var(--slice-3);
+    transform: translate(10px, 10px);
+  }
+  20% {
+    clip-path: var(--slice-1);
+    transform: translate(-10px, 10px);
+  }
+  30% {
+    clip-path: var(--slice-3);
+    transform: translate(0px, 5px);
+  }
+  40% {
+    clip-path: var(--slice-2);
+    transform: translate(-5px, 0px);
+  }
+  50% {
+    clip-path: var(--slice-3);
+    transform: translate(5px, 0px);
+  }
+  60% {
+    clip-path: var(--slice-4);
+    transform: translate(5px, 10px);
+  }
+  70% {
+    clip-path: var(--slice-2);
+    transform: translate(-10px, 10px);
+  }
+  80% {
+    clip-path: var(--slice-5);
+    transform: translate(20px, -10px);
+  }
+  90% {
+    clip-path: var(--slice-1);
+    transform: translate(-10px, 0px);
+  }
+  100% {
+    clip-path: var(--slice-1);
+    transform: translate(0);
+  }
 }
 
 /* ------------------------------------- */
@@ -260,23 +388,15 @@ code {
   position: relative;
 }
 
-.channels-single .trashcan {
+.channels-single .trashcan, .circlexmark, .arrow {
   cursor: pointer;
   color: black;
-}
-
-.channels-single .circlexmark {
-  cursor: pointer;
-  color: black;
-}
-
-.channels-single .arrow {
-  cursor: pointer;
-  color: black;
+  padding: 4px;
+  border-radius: 5px;
 }
 
 .channels-single .trashcan:hover, .circlexmark:hover, .arrow:hover {
-  transform: scale(1.2);
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   transition: all 0.5s ease-out;
 }
 
@@ -365,6 +485,9 @@ cursor: pointer;
 .users-single-info .paperplane, .gamepad, .userslash, .userxmark ,.userplus {
   color: #1dd1a1;
   cursor: pointer;
+  font-size: 13px;
+  padding: 3px;
+  border-radius: 5px;
 }
 
 .users-single-info .gamepad, .userslash, .userxmark {
@@ -373,12 +496,7 @@ cursor: pointer;
 
 .users-single-info .paperplane:hover, .gamepad:hover, .userslash:hover, .userxmark:hover ,.userplus:hover {
   transition: all 0.5s ease-out;
-  color: #10ac84;
-}
-
-.users-single-info .paperplane:active, .gamepad:active, .userslash:active, .userxmark:active ,.userplus:active {
-  transition: all 0.5s ease-out;
-  transform: scale(0.80);
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
 .friendsrequest-single {
@@ -541,23 +659,39 @@ margin-left: 5px;
   border-radius: 5px;
 }
 
-.chat-message-info .ellipsis {
-  font-size: 14px;
-  margin-left: 5px;
-  cursor: pointer;
-  padding: 3px;
-  border-radius: 50px;
-}
-
 .chat-message-info .ellipsis:hover {
   background-color: #ccc;
   background-color: #1dd1a1;
   transition: all 0.5s ease-out;
 }
 
-.chat-chanOp {
-  color: #1dd1a1;
+.chat-message-info .gamepadpriv {
+  margin-left: 5px;
+  font-size: 12px;
+  padding: 3px;
+  border-radius: 5px;
   cursor: pointer;
+}
+
+.chat-message-info .gamepadpriv:hover {
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  transition: all 0.5s ease-out;
+}
+
+.chat-chanOp {
+  cursor: pointer;
+}
+
+.chat-chanOp .gamepadchan, .handsholding, .ban, .commentslash {
+  margin-left: 5px;
+  font-size: 12px;
+  padding: 3px;
+  border-radius: 5px;
+}
+
+.chat-chanOp .gamepadchan:hover, .handsholding:hover, .ban:hover, .commentslash:hover {
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  transition: all 0.5s ease-out;
 }
 
 .chat-input input {
@@ -878,8 +1012,8 @@ textarea:focus, input:focus{
 .game-container {
   width: 96%;
   height: 30%;
-  display: flex;
   margin-top: 20px;
+  margin-bottom: 20px;
   padding-bottom: 20px;
   padding-top: 20px;
   margin-right: 2%;
@@ -887,6 +1021,15 @@ textarea:focus, input:focus{
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   border-radius: 10px;
   background-color: white;
+}
+
+.game-players {
+  width: 80%;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  color: #1dd1a1;
+  font-size: 1.5vw;
 }
 
 .pong-container {
