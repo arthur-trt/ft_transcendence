@@ -169,10 +169,7 @@ code {
 }
 
 .home-button button, button::after {
-  width: 380px;
-  height: 86px;
-  font-size: 36px;
-  
+  width: 340px;
   height: 56px;
   font-size: 26px;
   cursor: pointer;
@@ -181,7 +178,6 @@ code {
   align-items: center;
   margin: auto;
 
-  /* font-family: 'Bebas Neue', cursive; */
   background: linear-gradient(45deg, transparent 5%, #1dd1a1 5%);
   border: 0;
   color: #fff;
@@ -1003,6 +999,49 @@ textarea:focus, input:focus{
   margin-left: 5px;
 }
 
+
+/* ------------------------------------- */
+/* ---------------404------------------- */
+/* ------------------------------------- */
+
+.notfound-container {
+  position: fixed;
+  height: 250px;
+  width: 400px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.notfound-container img {
+  max-height: 100%;
+  max-width: 100%;
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+}
+
+.notfound-container button {
+  border: solid 2px #1dd1a1;
+  border-radius: 5px;
+  color: black;
+  padding: 15px 15px;
+  font-size: 16px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  display: flex;
+  margin: auto;
+  margin-top: 20px;
+}
+
+.notfound-container button:hover {
+  background-color: #1dd1a1;
+  color: white;
+}
 
 
 /* ------------------------------------- */
