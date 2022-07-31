@@ -260,6 +260,128 @@ code {
   }
 }
 
+.home-mode-button button {
+  margin-top: 10px;
+  width: 200px;
+  padding: 8px;
+  cursor: pointer;
+  /* border-radius: 5px; */
+  border: 2px solid #1dd1a1;
+  font-weight: bold;
+  transition: all 0.5s ease-out;
+}
+
+.home-look-button button {
+  margin-top: 15px;
+  width: 250px;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 2px solid #1dd1a1;
+  font-weight: bold;
+  background-color: white;
+}
+
+.home-look-button button:hover {
+  background-color: #1dd1a1;
+  color: white;
+  transition: all 0.5s ease-out;
+}
+
+.home-look-button .glass {
+  margin-right: 5px;
+}
+
+.home-mode h5 {
+  color: red;
+}
+
+.home-search h2 {
+  margin: 0;
+}
+
+.home-search h3 {
+  margin: 0;
+}
+
+.home-search span {
+  color: #1dd1a1;
+}
+
+.home-play-matchmaking {
+  margin-top: 20px;
+}
+
+.home-play-matchmaking button {
+  width: 306px;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 2px solid #1dd1a1;
+  font-weight: bold;
+  font-size: 16px;
+  background-color: white;
+}
+
+.home-play-matchmaking button:hover {
+  background-color: #1dd1a1;
+  color: white;
+  transition: all 0.5s ease-out;
+}
+
+.home-play-friends {
+  width: 300px;
+  margin: auto;
+  margin-top: 10px;
+  background-color: #1dd1a1;
+  border-radius: 5px;
+  border: 3px solid #1dd1a1;
+}
+
+.home-play-friends h4 {
+  margin: auto;
+  padding: 8px;
+}
+
+.home-search-single-friend {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  background-color: white;
+}
+
+.home-search-single-friend img {
+  max-height: 100%;
+  max-width: 100%;
+  width: 30px;
+  height: 30px;
+  border-radius: 50px;
+  border: 2px solid #1dd1a1;
+  object-fit: cover;
+  margin-left: 5px;
+  margin-right: 10px;
+}
+
+.home-search-single-friend h5 {
+  width: 150px;
+  text-transform: uppercase;
+}
+
+.home-search-single-friend button {
+  cursor: pointer;
+  border-radius: 5px;
+  border: 2px solid #1dd1a1;
+  font-weight: bold;
+  background-color: white;
+}
+
+.home-search-single-friend button:hover {
+  background-color: #1dd1a1;
+  color: white;
+  transition: all 0.5s ease-out;
+}
+
+
 /* ------------------------------------- */
 /* --------------COMMUNITY-------------- */
 /* ------------------------------------- */
