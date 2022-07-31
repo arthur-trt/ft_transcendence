@@ -51,6 +51,7 @@ export default function Home() {
         var indents:any = [];
         let j = 0;
         let i = 0;
+        let online_friends = 0;
         while (j < users?.length)
         {
             i = 0;
@@ -59,6 +60,7 @@ export default function Home() {
                 if (friends?.friends[i].id === users[j].id)
                     if (users[j].status === 'online')
                     {
+                        online_friends = 1;
                         indents.push(
                             <div className='home-search-single-friend' key={i}>
                                 <img src={friends?.friends[i].avatar_url}></img>
@@ -70,6 +72,14 @@ export default function Home() {
                 i++;
             }
             j++;
+        }
+        if (!online_friends)
+        {
+            indents.push(
+                <div className='home-search-single-friend' key={i}>
+                    <h5 style={{textAlign: 'center'}}>No online friends</h5>
+                </div>
+            );
         }
         return indents;
     }
