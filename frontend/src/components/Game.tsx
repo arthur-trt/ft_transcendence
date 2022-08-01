@@ -48,26 +48,45 @@ export default function Game() {
   const [canvas, setCanvas] = useState<any>();
   const [ctx, setCtx] = useState<any>();
   const [matchMaking, setMatchMaking] = useState<boolean>(false);
+  const [countdown, setCountdown] = useState<boolean>(false);
   const [gameStart, setGameStart] = useState<boolean>(false);
 
   const [userLeft, setUserLeft] = useState<userT>({
     x: 10,
     y: 0,
-    width: 70,
-    height: 70,
+    width: 10,
+    height: 30,
     score: 0,
     color: "DEEPSKYBLUE"
   });
   const [userRight, setUserRight] = useState<userT>({
     x: 20,
     y: 0,
-    width: 70,
-    height: 70,
+    width: 10,
+    height: 30,
     score: 0,
     color: "FIREBRICK"
   });
 
-  const [net, setNet] = useState<netT>();
+  const [ball, setBall] = useState<ballT>({
+     x: 0,
+     y: 0,
+    radius: 10,
+    velocityX: 5,
+    velocityY: 5,
+    speed: 7,
+    color: "BLACK"
+  });
+
+  const [net, setNet] = useState<netT>(
+    {
+      x: 0,
+      y: 0,
+      height: 30,
+      width: 15,
+      color: "BLACK"
+    });
+
   const [data, setData] = useState<dataT>();
   const [mouse, setMouse] = React.useState({ x: 120, y: 120 });
 
@@ -89,25 +108,57 @@ export default function Game() {
       setSocket(socket);
       const canvas = canvasRef.current;
       if (canvas) {
-        canvas.height = canvas.clientHeight;
-        canvas.width = canvas.clientWidth;
+        //canvas.height = canvas.clientHeight;
+        canvas.width = window.innerWidth * 0.7; 
+        //canvas.width = canvas.clientWidth;
+        canvas.height = canvas.width * 0.6;
         setCanvas(canvas);
       }
       if (canvas) {
         setCtx(canvas.getContext("2d"));
       }
 
-      socket.on('game_postion', (pos: dataT) => {
-        console.log(pos);
-        setData(pos)
+      if (canvas)
+      {
+        const tmp : ballT = {
+          x: canvas.width/2,
+          y : canvas.height/2,
+          radius:15,
+          velocityX:5,
+          velocityY:5,
+          speed:7,
+          color:"BLACK"
+        }
+        setBall(tmp);
+        setNet({x : canvas.width/2, y : 0, height : 20, width : 5, color : "BLACK"});
+        setUserLeft({x : 10, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, score: 0, color: "DEEPSKYBLUE"});
+        setUserRight({x : canvas.width - 10, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, score: 0, color: "FIREBRICK"});
+      }
+      socket.on('game_position', (pos: dataT) => {
+        console.log(canvas);
+        console.log("socket.on/game_position");
+        setData(adaptToCanvas(pos, canvas));
       });
 
       socket.on('game_countdownStart', () => {
-        console.log("YEAH");
-        setGameStart(true);
+        console.log("socket.on/game_countdown");
+        setCountdown(true);
       })
-    }
+    }, []
   );
+
+  
+
+  // const pos : dataT = {
+  //   player1_paddle_x : userLeft.x,
+  //   player1_paddle_y : userLeft.y,
+  //   player2_paddle_x : userRight.x,
+  //   player2_paddle_y : userRight.y,
+  //   ball_x : ball.x,
+  //   ball_y : ball.y
+  // }
+
+  // setData(pos);
 
   // Wait for context to be ready.
   useEffect(() => {
@@ -120,6 +171,9 @@ export default function Game() {
     }
   }, [ctx])
 
+  let i = 0;
+  let inter : any;
+
   useEffect(() => {
     if (canvas && ctx)
     {
@@ -127,12 +181,36 @@ export default function Game() {
       ctx.font = "48px serif";
       ctx.textAlign = "center"
       ctx.fillText("Le jeu va démarrer dans 3 secondes !", canvas.width / 2, canvas.height / 2);
+      inter = setInterval(count_function, 1000);
     }
-  }, [gameStart])
+  }, [countdown])
+
+  function count_function()
+  {
+    console.log("count");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillText("Le jeu va démarrer dans " + (3 - i) + " secondes !", canvas.width / 2, canvas.height / 2);
+    if (i == 3)
+    {
+      clearInterval(inter);
+      setGameStart(true);
+      //socket.emit('game_start');
+    }
+    else
+      i++;
+  }
 
   useEffect(() => {
+    console.log("useEffect/game_start" + gameStart);
+    if (gameStart == true)
+      socket.emit('game_start');
+  }, [gameStart]);
+
+  useEffect(() => {
+    console.log("gourdin");
     if (canvas && ctx)
     {
+      console.log(net.x);
       console.log("render is triggered")
       if (data)
         render(data);
@@ -150,8 +228,13 @@ export default function Game() {
    */
   function drawRect(x: number, y: number, w: number, h: number, color: string) {
     if (ctx != null) {
+      console.log(" DRAW ME BITCH"); // ????? un peu vnr ?
+      console.log(x + " " + y + " " + w + " " + h);
+      console.log(canvas.height);
+      console.log(canvas.width);
+      console.log(color);
       ctx.fillStyle = color;
-      ctx.fillRect(x, y, w, h);
+      console.log(ctx.fillRect(x, y, w, h));
     }
   }
 
@@ -174,44 +257,67 @@ export default function Game() {
 
   function drawNet() {
     if (net) {
-      for (let i = 0; i <= canvas.height; i += 15) {
+      for (let i = 0; i <= canvas.height; i += 15 + net.height) {
         drawRect(net.x, net.y + i, net.width, net.height, net.color);
       }
     }
   }
 
-  function drawText(text: string, x: number, y: number, color: string) {
+  function drawText(text: string, x: number, y: number, color: string, font: string) {
     console.log(ctx);
     if (ctx != null) {
       ctx.fillStyle = color;
-      ctx.font = "48px serif";
+      ctx.font = font;
       ctx.fillText(text, x, y);
     }
   }
 
   function render(data: dataT) {
     if (ctx) {
-      // Clear the canva
-      ctx.clearRect(0, 0, canvas.height, canvas.width);
+      // Clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       // Draw score for userLeft
-      drawNet();
-      // Draw Paddle
-      drawRect(data.player1_paddle_x, data.player1_paddle_y, userLeft.width, userLeft.height, userLeft.color);
-      drawRect(data.player2_paddle_x, data.player2_paddle_y, userRight.width, userRight.height, userRight.color);
-      drawText("PLAYER 1", canvas.width * 0.12, canvas.height * 0.1, '#00000080');
-      drawText(userLeft.score.toString(), canvas.width / 4, canvas.height / 5, '#00000080');
+      drawText("PLAYER 1", canvas.width * 0.2, canvas.height * 0.1, '#00000080', "48px serif");
+      drawText(userLeft.score.toString(), canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
+
       // Draw score for userRight
-      drawText("PLAYER 2", canvas.width * 0.62, canvas.height * 0.1, '#00000080');
-      drawText(userRight.score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080');
+      drawText("PLAYER 2", canvas.width * 0.8, canvas.height * 0.1, '#00000080', "48px serif");
+      drawText(userRight.score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
+
       // Draw net
+      drawNet();
+
+      //Draw paddles
+      drawRect(userLeft.x, data.player1_paddle_y, userLeft.width, userLeft.height, userLeft.color);
+      drawRect(userRight.x, data.player2_paddle_y, userRight.width, userRight.height, userRight.color);
+      
+      //Draw the ball
+      //drawArc(ball.x, ball.y, ball.radius, ball.color);
     }
   }
+    
+  function adaptToCanvas(data: dataT, canvas:any)
+    {
+      console.log("issou");
+      if (canvas)
+      {
+        console.log("corentin");
+        data.player1_paddle_y = data.player1_paddle_y / 100 * canvas.width;
+        data.player1_paddle_x = data.player1_paddle_x / 200 * canvas.height;
+        data.player2_paddle_y = data.player2_paddle_y / 100 * canvas.width;
+        data.player2_paddle_x = data.player2_paddle_x / 200 * canvas.height;
+        data.ball_y = data.ball_y / 100 * canvas.width;
+        data.ball_x = data.ball_x / 200 * canvas.height;
+        return (data);
+      }
+    }
 
   function handleClick(e: any) {
     if (!matchMaking)
     {
       socket.emit('game_inQueue');
-      ctx.clearRect(0, 0, canvas.height, canvas.width);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       setMatchMaking(true);
     }
   }
@@ -219,6 +325,10 @@ export default function Game() {
   return (
 
     <div className='game-container'>
+      <div className='game-players'>
+        <h3>NAME PLAYER 1</h3>
+        <h3>NAME PLAYER 2</h3>
+      </div>
       {/*<button type='button' onClick={handleStart}>Start game</button>*/}
       <canvas ref={canvasRef} className="pong-container" onClick={handleClick}/> 
       {/*onMouseMove={updateMousePosition}*/}

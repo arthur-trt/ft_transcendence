@@ -18,6 +18,7 @@ import { faGamepad } from '@fortawesome/free-solid-svg-icons'
 import { faHandsHoldingCircle } from '@fortawesome/free-solid-svg-icons'
 import { faBan } from '@fortawesome/free-solid-svg-icons'
 import { faCommentSlash } from '@fortawesome/free-solid-svg-icons'
+// import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
 
 // SOCKET IMPORT FROM THE INDEX.TSX
 import {socketo} from '../index';
@@ -121,7 +122,7 @@ export default function Channels() {
   // FUNCTIONS TO HANDLE ACTIONS ON CHANNELS
   let handleCreate = (e: any) => {
       e.preventDefault();
-      if (publicChan == 1)
+      if (publicChan === 1)
       {
         if (!password)
           socket.emit('createRoom', {chanName : name});
@@ -141,7 +142,7 @@ export default function Channels() {
     {
       if (data[i]?.name === e.currentTarget.id)
       {
-        if (data[i]?.password_protected == true)
+        if (data[i]?.password_protected === true)
           setChanToJoin(e.currentTarget.id);
         else
           socket.emit('joinRoom', {chanName : e.currentTarget.id});
@@ -166,7 +167,7 @@ export default function Channels() {
       setDisplayChat(0);
   }
   let handleOpen = (e:any) => {
-    if (isInChan(e.currentTarget.id) == 0)
+    if (isInChan(e.currentTarget.id) === 0)
       return(0);
     socket.emit('getChannelMessages', e.currentTarget.id);
     setDisplayChat(1);
@@ -208,12 +209,12 @@ export default function Channels() {
   }
 
   function ChanStatus(i: number) {
-    if (data[i]?.private == false)
+    if (data[i]?.private === false)
     {
-      if (data[i]?.password_protected == true)
+      if (data[i]?.password_protected === true)
         return (<FontAwesomeIcon icon={faLock} className="lock"/>)
     }
-    else if (data[i]?.private == true)
+    else if (data[i]?.private === true)
       return (<FontAwesomeIcon icon={faMask} className="mask"/>)
   }
 
@@ -246,7 +247,7 @@ export default function Channels() {
         let j = 0;
         while (j < data[i]?.users.length)
         {
-          if (datame.name == data[i].users[j]?.name) {BgColor = '#1dd1a1';}
+          if (datame.name === data[i].users[j]?.name) {BgColor = '#1dd1a1';}
           j++;
         }
 
@@ -313,7 +314,7 @@ export default function Channels() {
 
         indents.push(<div className="users-single" key={i}>
             <div className='users-single-img'>
-              <Link to={profilelink}><img style={{'borderColor': borderStatus}} src={datausers[i]?.avatar_url}></img></Link>
+              <Link to={profilelink}><img style={{'borderColor': borderStatus}} src={datausers[i]?.avatar_url} alt="users"></img></Link>
             </div>
             <div className='users-single-info'>
               <h5>{datausers[i]?.name}</h5>
@@ -330,7 +331,7 @@ export default function Channels() {
       {
         indents.push(<div className='friendsrequest-single' key={i + 111}>
               <div className='friendsrequest-single-img'>
-                <img src={friendsrequest[i].sender.avatar_url}></img>
+                <img src={friendsrequest[i].sender.avatar_url} alt="friends requests"></img>
               </div>
               <div className='friendsrequest-single-name'>
                 <p>{friendsrequest[i]?.sender.name}</p>
@@ -351,7 +352,7 @@ export default function Channels() {
     e.preventDefault();
     if (!privMsgChat)
     {
-      if (isInChan(e.currentTarget.id) == 0)
+      if (isInChan(e.currentTarget.id) === 0)
       return(0);
       socket.emit('sendChannelMessages', {chan: e.currentTarget.id, msg: message});
     }
@@ -369,6 +370,7 @@ export default function Channels() {
     setMessage("");
   }
 
+  // TO CHECK IS A USER IS A CHANNEL ADMIN
   function isAdmin(id:string, tmp:any) {
     let i = 0;
     while (i < tmp.adminsId.length)
@@ -380,15 +382,34 @@ export default function Channels() {
     return (0);
   }
 
-  function handleSetAdmin(chan: string, id: string) {
-    console.log(chan);
-    console.log(id);
-	  socket.emit('setAdmin', { channel: chan, toSetAdmin: id } );
+  function isOnline(id:string) {
+    let i = 0;
+    while (i < datausers?.length)
+    {
+      if (datausers[i]?.id === id)
+      {
+        if (datausers[i]?.status === 'online')
+          return (1);
+      }
+      i++;
+    }
+    return (0);
   }
 
+  // HANDLE FUNCTIONS FOR CHANNEL OPERATIONS
+  function handleSetAdmin(chan: string, id: string) {
+	  socket.emit('setAdmin', { channel: chan, toSetAdmin: id } );
+  }
+  function handleBanUser(chan: string, id: string) {
+	  socket.emit('banUser', { channel: chan, toBan: id } );
+  }
+  function handleMuteUser(chan: string, id: string) {
+	  socket.emit('muteUser', { channel: chan, toMute: id } );
+  }
 
+  // DISPLAY CHANNEL OPERATIONS NEXT TO PSEUDO/HOURS
   function displayChanOp(i:number , tmp:any) {
-      if (datame.name == tmp.messages[i]?.sender.name) // si c'est moi-meme j'affiche rien
+      if (datame.name === tmp.messages[i]?.sender.name) // si c'est moi-meme j'affiche rien
       {
         return ("");
       }
@@ -398,7 +419,7 @@ export default function Channels() {
         {
           return (
             <div className='chat-chanOp'>
-              <FontAwesomeIcon icon={faGamepad}></FontAwesomeIcon>
+              {isOnline(tmp.messages[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadchan"></FontAwesomeIcon>}
             </div>
           );
         }
@@ -406,10 +427,10 @@ export default function Channels() {
         {
           return (
             <div className='chat-chanOp'>
-              <FontAwesomeIcon icon={faGamepad}></FontAwesomeIcon>
-              <FontAwesomeIcon onClick={() => handleSetAdmin(tmp.name, tmp.messages[i]?.sender)} icon={faHandsHoldingCircle}></FontAwesomeIcon>
-              <FontAwesomeIcon icon={faBan}></FontAwesomeIcon>
-              <FontAwesomeIcon icon={faCommentSlash}></FontAwesomeIcon>
+              {isOnline(tmp.messages[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadchan"></FontAwesomeIcon>}
+              <FontAwesomeIcon onClick={() => handleSetAdmin(tmp.name, tmp.messages[i]?.sender)} icon={faHandsHoldingCircle} className="handsholding"></FontAwesomeIcon>
+              <FontAwesomeIcon onClick={() => handleBanUser(tmp.name, tmp.messages[i]?.sender)} icon={faBan} className="ban"></FontAwesomeIcon>
+              <FontAwesomeIcon onClick={() => handleMuteUser(tmp.name, tmp.messages[i]?.sender)} icon={faCommentSlash} className="commentslash"></FontAwesomeIcon>
             </div>
           );
         }
@@ -418,7 +439,7 @@ export default function Channels() {
       {
         return (
           <div className='chat-chanOp'>
-            <FontAwesomeIcon icon={faGamepad}></FontAwesomeIcon>
+           {isOnline(tmp.messages[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadchan"></FontAwesomeIcon>}
           </div>
         );
       }
@@ -436,12 +457,12 @@ export default function Channels() {
 
     if (messages)
     {
-      if (chanName == messages.name)
+      if (chanName === messages.name)
       {
         tmp = messages;
         ispriv = 0;
       }
-      else if (chanName == privTarget[0] || chanName == privTarget[1])
+      else if (chanName === privTarget[0] || chanName === privTarget[1])
       {
         tmp = messagesPriv;
         ispriv = 1;
@@ -455,7 +476,7 @@ export default function Channels() {
       {
         profilelink = "/profile/" + tmp.messages[i]?.sender.id;
 
-        if (datame.name == tmp.messages[i]?.sender.name)
+        if (datame.name === tmp.messages[i]?.sender.name)
           msgColor = 'lightskyblue';
 
         indents.push(<div className='chat-message' key={i}>
@@ -477,13 +498,14 @@ export default function Channels() {
       while (i >= 0)
       {
         profilelink = "/profile/" + tmp[i]?.sender.id;
-        if (datame.name == tmp[i]?.sender.name)
+        if (datame.name === tmp[i]?.sender.name)
           msgColor = 'lightskyblue';
 
         indents.push(<div className='chat-message' key={i}>
           <div className='chat-message-info'>
             <Link to={profilelink} style={{ textDecoration: 'none', color: 'black' }}><h5>{tmp[i]?.sender.name}</h5></Link>
             <span>{tmp[i]?.sent_at.substr(0, 8)}</span>
+            {isOnline(tmp[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadpriv"></FontAwesomeIcon>}
           </div>
           <p style={{'backgroundColor': msgColor}}>{tmp[i]?.message}</p>
         </div>);
@@ -503,8 +525,8 @@ export default function Channels() {
       let j = 0;
       while (j < data[i]?.users.length)
       {
-        if (datame.name == data[i].users[j]?.name)
-          if (str == data[i]?.name)
+        if (datame.name === data[i].users[j]?.name)
+          if (str === data[i]?.name)
             return (1);
         j++;
       }
@@ -522,6 +544,13 @@ export default function Channels() {
   let handleUnsetPass = (e:any) => {
     e.preventDefault();
     socket.emit('modifyChanSettings', {chanName : chanName});
+    setChanOpPass("");
+  }
+
+  let handleAddMembersPrivate = (e:any) => {
+    e.preventDefault();
+    // need to emit on a new JoinRoom event where i can emit the name/id of the user
+    // who will join the private room
     setChanOpPass("");
   }
 
@@ -571,7 +600,7 @@ export default function Channels() {
           {
             return (
               <div className='chat-owner-op'>
-                <form>
+                <form onSubmit={handleAddMembersPrivate}>
                   <input
                   type="text"
                   value={chanOpPass}
@@ -634,7 +663,7 @@ export default function Channels() {
 
   function display_ChanCreation() {
 
-    if (publicChan == 2)
+    if (publicChan === 2)
     {
       return (
         <div className='channels-creation-selection'>
@@ -643,7 +672,7 @@ export default function Channels() {
         </div>
       )
     }
-    else if (publicChan == 1)
+    else if (publicChan === 1)
     {
       return (
         <div className='channels-creation-selection'>
@@ -665,7 +694,7 @@ export default function Channels() {
         </div>
       )
     }
-    else if (publicChan == 0)
+    else if (publicChan === 0)
     {
       return (
         <div className='channels-creation-selection'>
