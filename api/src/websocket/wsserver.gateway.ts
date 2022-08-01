@@ -431,6 +431,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async MoveUp(client : Socket)
 	{
 		console.log("MoveUP " + client.id);
+		await this.gameRelayService.MoveUp(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -439,23 +440,24 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async MoveDown(client : Socket)
 	{
 		console.log("MoveDOWN " + client.id);
+		await this.gameRelayService.MoveDown(client);
 	}
 
-	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
-	@SubscribeMessage('StopUp')
-	async StopUp(client : Socket)
-	{
-		console.log("STOPUp " + client.id);
-	}
+	// @UseGuards(WsJwtAuthGuard)
+	// @UsePipes(ValidationPipe)
+	// @SubscribeMessage('StopUp')
+	// async StopUp(client : Socket)
+	// {
+	// 	console.log("STOPUp " + client.id);
+	// }
 
-	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
-	@SubscribeMessage('StopDown')
-	async StopDown(client : Socket)
-	{
-		console.log("STOPDown " + client.id);
-	}
+	// @UseGuards(WsJwtAuthGuard)
+	// @UsePipes(ValidationPipe)
+	// @SubscribeMessage('StopDown')
+	// async StopDown(client : Socket)
+	// {
+	// 	console.log("STOPDown " + client.id);
+	// }
 
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
@@ -463,6 +465,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async StopMove(client : Socket)
 	{
 		console.log("STOPMove " + client.id);
+		await this.gameRelayService.StopMove(client);
 	}
 
 }

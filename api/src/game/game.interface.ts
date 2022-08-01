@@ -59,5 +59,5 @@ export interface Paddle {
     y : number;
     height : number;
     width : number;
-    id : Socket;
+    socket : Socket;
 }

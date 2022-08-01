@@ -10,7 +10,6 @@ export default function Game() {
     y: number,
     width: number,
     height: number,
-    score: number,
     color: string
   }
 
@@ -55,7 +54,6 @@ export default function Game() {
     y: 0,
     width: 10,
     height: 30,
-    score: 0,
     color: "DEEPSKYBLUE"
   });
   const [userRight, setUserRight] = useState<userT>({
@@ -63,7 +61,6 @@ export default function Game() {
     y: 0,
     width: 10,
     height: 30,
-    score: 0,
     color: "FIREBRICK"
   });
 
@@ -76,6 +73,9 @@ export default function Game() {
     speed: 7,
     color: "BLACK"
   });
+
+  let [P1score, setP1Score] = useState(0);
+  let [P2score, setP2Score] = useState(0);
 
   const [net, setNet] = useState<netT>(
     {
@@ -117,12 +117,12 @@ export default function Game() {
         }
         setBall(tmp);
         setNet({x : canvas.width/2, y : 0, height : 20, width : 5, color : "BLACK"});
-        setUserLeft({x : canvas.width * 0.01, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, score: 0, color: "DEEPSKYBLUE"});
-        setUserRight({x : canvas.width * 0.98, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, score: 0, color: "FIREBRICK"});
+        setUserLeft({x : canvas.width * 0.01, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "DEEPSKYBLUE"});
+        setUserRight({x : canvas.width * 0.98, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "FIREBRICK"});
       }
       socket.on('game_position', (pos: dataT) => {
         //console.log(canvas);
-        console.log("socket.on/game_position");
+        //console.log("socket.on/game_position");
         setData(adaptToCanvas(pos, canvas));
       });
 
@@ -130,20 +130,21 @@ export default function Game() {
         console.log("socket.on/game_countdown");
         setCountdown(true);
       })
+
+      socket.on('update_score', (res : Boolean) => {
+        console.log(res + " " + P1score);
+        if (res == true)
+        {
+          setP1Score(P1score + 1);
+          P1score++;
+        }
+        else
+        {
+          setP2Score(P2score + 1);
+          P2score++;
+        }
+      })
     }, []);
-
-  
-
-  // const pos : dataT = {
-  //   player1_paddle_x : userLeft.x,
-  //   player1_paddle_y : userLeft.y,
-  //   player2_paddle_x : userRight.x,
-  //   player2_paddle_y : userRight.y,
-  //   ball_x : ball.x,
-  //   ball_y : ball.y
-  // }
-
-  // setData(pos);
 
   // Wait for context to be ready.
   useEffect(() => {
@@ -192,11 +193,10 @@ export default function Game() {
   }, [gameStart]);
 
   useEffect(() => {
-    console.log("useEffect/render");
+    //console.log("useEffect/render");
     if (canvas && ctx)
     {
-      console.log(net.x);
-      console.log("render is triggered")
+      //console.log("render is triggered")
       if (data)
         render(data);
       //blabla les fonctions
@@ -304,11 +304,11 @@ export default function Game() {
 
       // Draw score for userLeft
       // drawText("PLAYER 1", canvas.width * 0.2, canvas.height * 0.1, '#00000080', "48px serif");
-      drawText(userLeft.score.toString(), canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
+      drawText(P1score.toString(), canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
 
       // Draw score for userRight
       // drawText("PLAYER 2", canvas.width * 0.8, canvas.height * 0.1, '#00000080', "48px serif");
-      drawText(userRight.score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
+      drawText(P2score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
 
       // Draw net
       drawNet();
@@ -327,9 +327,8 @@ export default function Game() {
       //console.log("issou");
       if (canvas)
       {
-        //console.log("corentin");
         data.player1_paddle_y = data.player1_paddle_y / 100 * canvas.height;
-        //console.log(data.player1_paddle_y);
+        //console.log("PAD1 Y = " + data.player1_paddle_y);
         data.player2_paddle_y = data.player2_paddle_y / 100 * canvas.height;
         data.ball_y = data.ball_y / 100 * canvas.height;
         data.ball_x = data.ball_x / 200 * canvas.width;

@@ -57,6 +57,11 @@ export class GameRelayService
         protected p1_score = 0;
         protected p2_score = 0;
         protected loop_stop : any;
+
+        protected P1_MoveUP : boolean;
+        protected P1_MoveDOWN : boolean;
+        protected P2_MoveUP : boolean;
+        protected P2_MoveDOWN : boolean;
         
         // async resetBall(){
         //     this.match.ball.x = 50;
@@ -112,30 +117,43 @@ export class GameRelayService
         this.loop_stop = setInterval(() => this.loop(), 1000/60);
     }
 
+    async end_game()
+    {
+        clearInterval(this.loop_stop);
+    }
+
     @UseGuards(WsJwtAuthGuard)
     @UsePipes(ValidationPipe)
     async loop() {
-        // change the score of players, if the ball goes to the left "ball.x<0" computer win, else if "ball.x > canvas.width" the user win
-        // if (this.ball.x - this.ball.radius < 0) {
-        //     this.p2_score++;
-        //     if (this.p2_score >= 1) {
-        //         end_game(false);
-        //         return;
-        //     }
-        //     else
-        //         resetBall();
-        // }
-        // else if (ball.x + ball.radius > canvas.width) {
-        //     user.score++;
-        //     if (user.score >= 1) {
-        //         end_game(true);
-        //         return;
-        //     }
-        //     else
-        //         resetBall();
-        // }
         if (this.ball && this.player1 && this.player2)
         {
+            // change the score of players, if the ball goes to the left "ball.x<0" computer win, else if "ball.x > canvas.width" the user win
+            if (this.ball.x - this.ball.radius < 0) {
+                this.p2_score++;
+                this.gateway.server.to(this.match.id).emit('update_score', false);
+                if (this.p2_score >= 5) {
+                    this.end_game();
+                    console.log("P2 WINS");
+                    return;
+                }
+                else
+                    this.resetBall();
+            }
+            else if (this.ball.x + this.ball.radius > 200) {
+                this.p1_score++;
+                this.gateway.server.to(this.match.id).emit('update_score', true);
+                if (this.p1_score >= 5) {
+                    this.end_game();
+                    console.log("P1 WINS");
+                    return;
+                }
+                else
+                    this.resetBall();
+            }
+
+            this.calculateP1Pad();
+            this.calculateP2Pad();
+
             // the ball has a velocity
             this.ball.x += this.ball.velocityX;
             this.ball.y += this.ball.velocityY;
@@ -190,8 +208,8 @@ export class GameRelayService
         //@SubscribeMessage('game_start')
         async sendPosition(client: Socket)
         {
-            console.log("ooooooooooooooo")
-            console.log("game_start")
+            // console.log("ooooooooooooooo")
+            // console.log("game_start")
             this.dataT.player1_paddle_x = this.player1.x;
             this.dataT.player1_paddle_y = this.player1.y;
             this.dataT.player2_paddle_x = this.player2.x;
@@ -205,8 +223,8 @@ export class GameRelayService
         {
             const [first] = players;
             const[, second] = players;
-            this.player1.id = first;
-            this.player2.id = second;
+            this.player1.socket = first;
+            this.player2.socket = second;
             console.log("starting match");
             var Match = await this.gameService.createMatch(first.data.user, second.data.user);
             first.join( Match.id);
@@ -240,7 +258,88 @@ export class GameRelayService
             this.player2.height = 10;
             this.player2.width = 2;
         }
+
+        @UseGuards(WsJwtAuthGuard)
+        @UsePipes(ValidationPipe)
+        async MoveUp(client : Socket)
+        {
+            if (client.id == this.player1.socket.id)
+                this.P1_MoveUP = true;
+            else
+                this.P2_MoveUP = true;
+        }
+
+        @UseGuards(WsJwtAuthGuard)
+        @UsePipes(ValidationPipe)
+        async MoveDown(client : Socket)
+        {
+            if (client.id == this.player1.socket.id)
+                this.P1_MoveDOWN = true;
+            else
+                this.P2_MoveDOWN = true;
+        }
+
+        @UseGuards(WsJwtAuthGuard)
+        @UsePipes(ValidationPipe)
+        async StopMove(client : Socket)
+        {
+            if (client.id == this.player1.socket.id)
+            {
+                this.P1_MoveUP = false;
+                this.P1_MoveDOWN = false;
+            }
+            else
+            {
+                this.P2_MoveUP = false;
+                this.P2_MoveDOWN = false;
+            }
+        }
+
+        async calculateP1Pad()
+        {
+            if (this.P1_MoveUP === true)
+            {
+                if (this.player1.y - 2 < 0)
+                    this.player1.y = 0;
+                else
+                    this.player1.y -= 2;
+            }
+            if (this.P1_MoveDOWN === true) {
+
+                if (this.player1.y + 2 > 100 - this.player1.height)
+                    this.player1.y = 100 - this.player1.height;
+                else
+                    this.player1.y += 2;
+            }
+        }
+
+        async calculateP2Pad()
+        {
+            if (this.P2_MoveUP === true)
+            {
+                if (this.player2.y - 2 < 0)
+                    this.player2.y = 0;
+                else
+                    this.player2.y -= 2;
+            }
+            if (this.P2_MoveDOWN === true) {
+
+                if (this.player2.y + 2 > 100 - this.player2.height)
+                    this.player2.y = 100 - this.player2.height;
+                else
+                    this.player2.y += 2;
+            }
+        }
     
+        async resetBall()
+        {
+            this.ball.speed = 1;
+            this.ball.velocityX = .5;
+            this.ball.velocityY = .5;
+            this.ball.x = 100;
+            this.ball.y = 50;
+        }
+
         // async MovementUp(client : Socket)
         // {
         //     if (this.player1.id.id == client.id)
