@@ -148,6 +148,9 @@ export class UserService {
 	public async joinChannel(user: User, channelname: string, password: string = null): Promise<boolean>
 	{
 		const channel: Channel = await this.chanService.getChannelByIdentifier(channelname);
+		if (await this.chanService.isInChan(channel, user) == true) {
+			throw new HttpException('You are already in chan', HttpStatus.BAD_REQUEST)
+		}
 		if (channel.bannedId.includes(user.id))
 			throw new HttpException('You are banned', HttpStatus.FORBIDDEN)
 		if (channel.password_protected)
@@ -158,6 +161,7 @@ export class UserService {
 			}
 		}
 		user.channels = [...user.channels, channel]; /* if pb of is not iterable, it is because we did not get the realtions in the find one */
+		console.log(user.channels);
 		await user.save();
 		return (true);
 	}
@@ -172,7 +176,6 @@ export class UserService {
 			.relation(Channel, "users")
 			.of(user)
 			.remove(chan);
-
 
 		if (chan.ownerId == user.id)
 		{
