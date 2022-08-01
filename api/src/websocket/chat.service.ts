@@ -3,6 +3,7 @@ import { JwtService } from "@nestjs/jwt";
 import { Socket } from "socket.io";
 import { Channel } from "src/channel/channel.entity";
 import { ChannelService } from "src/channel/channel.service";
+import { addToPrivateRoomDto } from "src/dtos/addToPrivateRoom.dto";
 import { ModifyChannelDto } from "src/dtos/modifyChannel.dto";
 import { newChannelDto } from "src/dtos/newChannel.dto";
 import { sendChannelMessageDto } from "src/dtos/sendChannelMessageDto.dto";
@@ -46,9 +47,14 @@ export class ChatService {
 
 	async getRooms(client? : Socket)
 	{
-		console.log("POPOPO")
 		for (let [allUsers, socket] of this.gateway.activeUsers.entries())
 			this.gateway.server.to(socket.id).emit('rooms', " get rooms ", await this.channelService.getChannelsForUser(allUsers));
+	}
+
+	async refreshChanMessage(channelName: string)
+	{
+		for (let [allUsers, socket] of this.gateway.activeUsers.entries())
+			this.gateway.server.to(socket.id).emit('channelMessage', await this.messageService.getMessage(channelName, allUsers));
 	}
 
 	async createRoom(client: Socket, channel: newChannelDto)
@@ -63,6 +69,17 @@ export class ChatService {
 		await this.userService.joinChannel(client.data.user, joinRoom.chanName, joinRoom.password)
 		.then(async () =>  {
 			client.join(joinRoom.chanName);
+			await this.getRooms();
+		})
+	}
+
+
+	async addUser(client: Socket, userToAdd : addToPrivateRoomDto)
+	{
+		const userSocket : Socket = await this.findSocketId(userToAdd.user);
+		await this.userService.joinChannel(userToAdd.user, userToAdd.chanName)
+		.then(async () =>  {
+			userSocket.join(userToAdd.chanName);
 			await this.getRooms();
 		})
 	}
@@ -83,8 +100,17 @@ export class ChatService {
 
 	async ban(client: Socket, data : { channel: string, toBan: User })
 	{
+		console.log("chat service");
 		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
 		await this.channelService.temporaryBanUser(client.data.user, chan, data.toBan);
+		await this.refreshChanMessage(data.channel);
+		await this.getRooms();
+	}
+
+	async mute(client: Socket, data : { channel: string, toMute: User })
+	{
+		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
+		await this.channelService.temporaryMuteUser(client.data.user, chan, data.toMute);
 		await this.getRooms();
 	}
 
@@ -92,7 +118,7 @@ export class ChatService {
 	{
 		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
 		await this.channelService.setNewAdmin(client.data.user, chan, data.toSetAdmin);
-		await this.getRooms();
+		await this.refreshChanMessage(data.channel);
 	}
 
 	async modifyChanSettings(client: Socket, changes: ModifyChannelDto)
