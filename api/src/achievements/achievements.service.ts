@@ -12,7 +12,7 @@ export class AchievementsService {
 
 	public async createAchievements(user: User, type : Achievements_types)
 	{
-		this.successRepo.save({
+		await this.successRepo.save({
 			user: user,
 			achievement_name: type
 		});

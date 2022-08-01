@@ -159,7 +159,7 @@ export class UserController {
 		if (!user)
 			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
 		user.avatar_url = "/public/" + file.filename;
-		user.save();
+		await user.save();
 		return user;
 	}
 

@@ -138,7 +138,7 @@ export class ChannelService {
 		{
 			chan.password_protected = false;
 		}
-		return this.channelsRepo.save(chan);
+		return await this.channelsRepo.save(chan);
 	}
 
 
@@ -189,10 +189,7 @@ export class ChannelService {
 		channel.banned = channel.banned.filter((banned) => {
 			return banned.id !== toUnBan.id
 		})
-		channel.mutedId = channel.mutedId.filter((muted) => {
-			return muted !== toUnBan.id
-		}) // See how it is possible that relationId are not updated aut
-		channel.save();
+		await channel.save();
 		return channel;
 	}
 
@@ -202,10 +199,7 @@ export class ChannelService {
 		channel.muted = channel.muted.filter((muted) => {
 			return muted.id !== toUnMute.id
 		})
-		channel.mutedId = channel.mutedId.filter((muted) => {
-			return muted !== toUnMute.id
-		}) // See how it is possible that relationId are not updated automatically and i have to do it manually;
-		channel.save();
+		await channel.save();
 		console.log("Muted" + channel.muted)
 		console.log( "Id " + channel.mutedId)
 		return channel;
