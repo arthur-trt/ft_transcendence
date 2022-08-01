@@ -1,3 +1,4 @@
+import { getKeyEventProps } from '@testing-library/user-event/dist/types/utils';
 import React, { useState, useEffect } from 'react';
 
 import { socketo } from '..';
@@ -164,7 +165,7 @@ export default function Game() {
       ctx.fillStyle = "RED";
       ctx.font = "48px serif";
       ctx.textAlign = "center"
-      //ctx.fillText("Le jeu va démarrer dans 3 secondes !", canvas.width / 2, canvas.height / 2);
+      ctx.fillText("Le jeu va démarrer dans 4 secondes !", canvas.width / 2, canvas.height / 2);
       inter = setInterval(count_function, 1000);
     }
   }, [countdown])
@@ -202,70 +203,45 @@ export default function Game() {
     }
   }, [data])
 
-  let keyPressed = {} as any;
-
   const [MoveUp, setMoveUp] = useState<boolean>(false);
   const [MoveDown, setMoveDown] = useState<boolean>(false);
 
   document.addEventListener('keydown', (e) => {
+    if (gameStart) {
+      if (e.key === 'w' && MoveUp === false)
+        setMoveUp(true);
 
-    if (e.key === 'w')
-      setMoveUp(true);
-
-    if (e.key === 's')
-      setMoveDown(true);
-
-    // if (keyPressed['w'] === true) {
-    //   console.log("front MoveUp");
-    //   socket.emit('MoveUp');
-    // }
-    // if (keyPressed['s'] == true) {
-    //   console.log("front MoveDown");
-    //   socket.emit('MoveDown');
-    // }
-  });
+      if (e.key === 's' && MoveDown === false)
+        setMoveDown(true);
+    }
+  }, {once : true});
 
   document.addEventListener('keyup', (e) => {
-      // if (e.key === 'w')
-      // {
-      //   console.log("front StopUP");
-      //   socket.emit('StopUp');
-      // }
-      // else if (e.key === 's')
-      // {
-      //   socket.emit('StopDown');
-      //   console.log("front STOPDown");
-      // }
-      // delete keyPressed[e.key];
-    if (e.key === 'w')
-      setMoveUp(false);
+    if (gameStart) {
+      if (e.key === 'w' && MoveUp === true)
+        setMoveUp(false);
 
-    if (e.key === 's')
-      setMoveDown(false);
-  });
+      if (e.key === 's' && MoveDown === true)
+        setMoveDown(false);
+    }
+  }, {once : true});
 
   useEffect(() => {
-    if (MoveUp === true) {
-      console.log("front MoveUp");
-      socket.emit('MoveUp')
+    if (gameStart) {
+      if (MoveUp === true) {
+        console.log("front MoveUp");
+        socket.emit('MoveUp')
+      }
+      if (MoveDown === true) {
+        console.log("front MoveUDown");
+        socket.emit('MoveDown')
+      }
+      if (MoveUp === false && MoveDown === false) {
+        socket.emit('StopMove');
+        console.log("front STOP move");
+      }
     }
-    if (MoveDown === true) {
-      console.log("front MoveUDown");
-      socket.emit('MoveDown')
-    }
-    if (MoveUp === false && MoveDown === false)
-    {
-      socket.emit('StopMove');
-      console.log("front STOP move");
-    }
-  }, [MoveUp, MoveDown])
-
-  // useEffect(() => {
-  //   if (keyPressed['w'] === true)
-  //     socket.emit('MoveUp');
-  //   if (keyPressed['s'] === true)
-  //     socket.emit('MoveDown');
-  // }, [keyPressed])
+  }, [MoveUp, MoveDown]);
 
   /**
    * Draw a rectangle on the canva
