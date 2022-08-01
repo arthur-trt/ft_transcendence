@@ -6,6 +6,7 @@ import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { validate as isValidUUID } from 'uuid';
+import { DefaultSerializer } from 'v8';
 import { Channel } from './channel.entity';
 
 @Injectable()
@@ -15,14 +16,14 @@ export class ChannelService {
 	@Inject(forwardRef(() => UserService)) private readonly userService: UserService)
 	{ }
 
-	public async isInChan(chanName: string, user: User)
+	public async isInChan(chan: Channel, user: User) : Promise<Boolean>
 	{
-		const Chan : Channel = await this.channelsRepo.findOneOrFail({
-			where : { name : chanName, users : { id : user.id } }
+		const foundChan : Channel = await this.channelsRepo.findOne({
+			where : { name : chan.name, users : { id : user.id } }
 		})
-		if (!Chan)
-			return false;
-		return true;
+		if (foundChan != null)
+			return true;
+		return false;
 	}
 
 
@@ -54,10 +55,10 @@ export class ChannelService {
 
 	public async setNewAdmin(user: User, channel : Channel, toBeAdmin: User)
 	{
-		console.log('kiki')
+		if (!await this.isInChan(channel, toBeAdmin))
+			throw new HttpException("User " + toBeAdmin.name + " is not in channel", HttpStatus.FORBIDDEN);
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to name another admin.", HttpStatus.FORBIDDEN);
-			console.log('toto')
 		channel.admins = [...channel.admins, toBeAdmin];
 		channel.adminsId = [...channel.adminsId, toBeAdmin.id]
 		await this.channelsRepo.save(channel);
@@ -171,9 +172,8 @@ export class ChannelService {
 	{
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to delete an user from chan.", HttpStatus.FORBIDDEN);
-
-		//if (!this.isInChan(channel, user))
-			//throw new HttpException("You must be admin to delete an user from chan.", HttpStatus.FORBIDDEN);
+		if (!await this.isInChan(channel, user))
+			throw new HttpException("User " + toBan.name + " is not in channel", HttpStatus.FORBIDDEN);
 
 		await this.channelsRepo.createQueryBuilder()
 			.relation(Channel, "users")
@@ -233,6 +233,8 @@ export class ChannelService {
 
 	public async temporaryMuteUser(user: User, channel: Channel, toMute: User)
 	{
+		if (!await this.isInChan(channel, toMute))
+			throw new HttpException("User " + toMute.name + " is not in channel", HttpStatus.FORBIDDEN);
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to mute an user from chan.", HttpStatus.FORBIDDEN);
 		console.log("Mute");

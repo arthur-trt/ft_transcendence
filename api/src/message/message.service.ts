@@ -40,6 +40,8 @@ export class MessageService {
 		const channel : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier);
 		if (channel.mutedId.includes(user.id))
 			throw (new HttpException('You are mute and cannot send message to channel.', HttpStatus.FORBIDDEN))
+		if (channel.bannedId.includes(user.id))
+			throw (new HttpException('You are banned and cannot temporary send message to channel.', HttpStatus.FORBIDDEN))
 		const newMessage = await this.chatRepo.save
 		(
 			{
