@@ -177,6 +177,7 @@ export class UserService {
 			.of(user)
 			.remove(chan);
 
+
 		if (chan.adminsId.includes(user.id)) {
 			chan.admins = chan.admins.filter((admins) => {
 				return admins.id !== user.id
@@ -184,7 +185,7 @@ export class UserService {
 			await chan.save();
 			console.log(chan);
 		}
-
+   
 		if (chan.ownerId == user.id)
 		{
 			await this.channelsRepo

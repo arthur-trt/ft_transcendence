@@ -40,8 +40,7 @@ export class UserController {
 	@ApiCookieAuth()
 	@UseGuards(JwtAuthGuard)
 	async getMe(@Req() req: Request): Promise<User> {
-		const user: User = await this.userService.getUserByRequest(req);
-		return this.userService.getUserByIdentifier(user.id);
+		return await this.userService.getUserByRequest(req);
 	}
 
 	/**
