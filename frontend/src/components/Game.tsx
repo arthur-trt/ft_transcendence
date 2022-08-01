@@ -132,10 +132,10 @@ export default function Game() {
         setUserLeft({x : 10, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, score: 0, color: "DEEPSKYBLUE"});
         setUserRight({x : canvas.width - 10, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, score: 0, color: "FIREBRICK"});
       }
-
       socket.on('game_position', (pos: dataT) => {
+        console.log(canvas);
         console.log("socket.on/game_position");
-        setData(adaptToCanvas(pos));
+        setData(adaptToCanvas(pos, canvas));
       });
 
       socket.on('game_countdownStart', () => {
@@ -144,6 +144,8 @@ export default function Game() {
       })
     }, []
   );
+
+  
 
   // const pos : dataT = {
   //   player1_paddle_x : userLeft.x,
@@ -294,7 +296,7 @@ export default function Game() {
     }
   }
     
-  function adaptToCanvas(data: dataT)
+  function adaptToCanvas(data: dataT, canvas:any)
     {
       console.log("issou");
       if (canvas)
@@ -320,6 +322,10 @@ export default function Game() {
   return (
 
     <div className='game-container'>
+      <div className='game-players'>
+        <h3>NAME PLAYER 1</h3>
+        <h3>NAME PLAYER 2</h3>
+      </div>
       {/*<button type='button' onClick={handleStart}>Start game</button>*/}
       <canvas ref={canvasRef} className="pong-container" onClick={handleClick}/> 
       {/*onMouseMove={updateMousePosition}*/}
