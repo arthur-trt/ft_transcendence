@@ -128,20 +128,20 @@ export class UserService {
 		user.name = changes.name;
 		user.avatar_url = changes.avatar_url;
 		user.fullname = changes.fullname;
-		return this.userRepo.save(user);
+		return await this.userRepo.save(user);
 	}
 
 	public async setTwoFactorAuthenticationSecret (user: User, secret: string)
 	{
 		user.TwoFA_secret = secret;
-		return this.userRepo.save(user);
+		return await this.userRepo.save(user);
 	}
 
 	public async turnOnTwoFactorAuthentication (req: Request)
 	{
 		const user = await this.getUserByRequest(req);
 		user.TwoFA_enable = true;
-		return this.userRepo.save(user);
+		return await this.userRepo.save(user);
 	}
 
 
@@ -177,6 +177,14 @@ export class UserService {
 			.of(user)
 			.remove(chan);
 
+		if (chan.adminsId.includes(user.id)) {
+			chan.admins = chan.admins.filter((admins) => {
+				return admins.id !== user.id
+			})
+			await chan.save();
+			console.log(chan);
+		}
+
 		if (chan.ownerId == user.id)
 		{
 			await this.channelsRepo
@@ -186,8 +194,6 @@ export class UserService {
 				.set(null);
 			chan.ownerId = ""; // See how possible to not do it manually
 		}
-
-
 		return await this.chanService.getUsersOfChannels();
 	}
 
@@ -204,7 +210,7 @@ export class UserService {
 	public async block(user: User, toBan: User) :  Promise<User>
 	{
 		user.blocked.push(toBan.id);
-		user.save();
+		await user.save();
 		return user;
 	}
 
@@ -213,7 +219,7 @@ export class UserService {
 		if (index > -1) {
 			user.blocked.splice(index, 1);
 		}
-		user.save();
+		await user.save();
 		return user;
 	}
 
