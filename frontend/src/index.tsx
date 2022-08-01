@@ -1,5 +1,4 @@
 import "./index.css"
-import React from 'react';
 import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
 import Auth from './components/Auth';
@@ -16,6 +15,7 @@ import PublicProfile from './components/PublicProfile';
 import jwtDecode from 'jwt-decode';
 import Ladder from "./components/Ladder";
 import Home from "./components/Home";
+import NotFound from "./components/NotFound";
 
 export const socketo = io();
 
@@ -53,13 +53,13 @@ root.render(
         <Route path="/login" element={<Auth />} />
         <Route path="/" element={<><Header /><RequireAuth><Home /></RequireAuth></>} />
         <Route path="/2fa" element={<><RequireAuth><TwoFactor /></RequireAuth></>} />
-          <Route path="/profile/me" element={<><Header /><RequireAuth><Profile /></RequireAuth></>} />
-          <Route path="/profile/:uuid" element={<><Header /><RequireAuth><PublicProfile /></RequireAuth></>} />
+        <Route path="/profile/me" element={<><Header /><RequireAuth><Profile /></RequireAuth></>} />
+        <Route path="/profile/:uuid" element={<><Header /><RequireAuth><PublicProfile /></RequireAuth></>} />
         <Route path="/community" element={<><Header /><RequireAuth><Channels /></RequireAuth></>} />
         <Route path="/ladder" element={<><Header /><RequireAuth><Ladder /></RequireAuth></>} />
         <Route path="/debug" element={<><Header /><RequireAuth><Debug /></RequireAuth></>} />
         <Route path="/game" element={<><Header /><Game/></>} />
-
+        <Route path="*" element={<NotFound/>}/>
       </Routes>
     </BrowserRouter>
   </CookiesProvider>

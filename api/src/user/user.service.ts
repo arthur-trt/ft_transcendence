@@ -200,8 +200,6 @@ export class UserService {
 
 	public async block(user: User, toBan: User) :  Promise<User>
 	{
-		if (user.blocked == null)
-			user.blocked = [];
 		user.blocked.push(toBan.id);
 		user.save();
 		return user;
