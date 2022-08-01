@@ -148,7 +148,7 @@ export class UserService {
 	public async joinChannel(user: User, channelname: string, password: string = null): Promise<boolean>
 	{
 		const channel: Channel = await this.chanService.getChannelByIdentifier(channelname);
-		if (channel.banned.includes(user))
+		if (channel.bannedId.includes(user.id))
 			throw new HttpException('You are banned', HttpStatus.FORBIDDEN)
 		if (channel.password_protected)
 		{
@@ -200,8 +200,6 @@ export class UserService {
 
 	public async block(user: User, toBan: User) :  Promise<User>
 	{
-		if (user.blocked == null)
-			user.blocked = [];
 		user.blocked.push(toBan.id);
 		user.save();
 		return user;
