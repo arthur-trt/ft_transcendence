@@ -56,7 +56,7 @@ export class ConnectService {
 			this.gateway.activeUsers.set(user, client);
 		}
 
-		this.gateway.activeUsers.forEach((socket: Socket, user: User) => {
+		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
 				this.listConnectedUser(socket, this.all_users, this.gateway.activeUsers, false)
@@ -84,7 +84,7 @@ export class ConnectService {
 		catch (err) {
 			console.log("Don't know what happened");
 		}
-		this.gateway.activeUsers.forEach((socket: Socket, user: User) => {
+		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
 				this.listConnectedUser(socket, this.all_users, this.gateway.activeUsers, false)
