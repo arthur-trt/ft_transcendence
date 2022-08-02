@@ -147,13 +147,25 @@ export class ChatService {
 
 	async sendChannelMessage(client: Socket, data: sendChannelMessageDto)
 	{
+		console.log("SALUT " + data.chan)
 		await this.messageService.sendMessageToChannel(data.chan, client.data.user, data.msg);
-		this.gateway.server.to(data.chan).emit('channelMessage', await this.messageService.getMessage(data.chan, client.data.user));
+		//this.gateway.server.to(data.chan).emit('channelMessage', await this.messageService.getMessage(data.chan, client.data.user));
+		await this.getChannelMessages(client, data.chan);
 	}
+
 
 	async getChannelMessages(client : Socket, channelName: string)
 	{
-		this.gateway.server.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName, client.data.user));
+		const sockets = await this.gateway.server.in(channelName).allSockets();
+        console.log( " GET MESSAGE of  " + channelName);
+        for (let [k] of sockets.entries()) {
+
+         let u = await this.userService.getUserByIdentifier((await this.findUserbySocket(k)).id);
+         console.log("IN "+ channelName + " "+ u.name + " socket " + k);
+         this.gateway.server.to((await this.findSocketId(u)).id).emit('channelMessage', await this.messageService.getMessage(channelName, u));
+        }
+
+		//this.gateway.server.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName, client.data.user));
 	}
 
 	/** Friendships */
@@ -197,6 +209,7 @@ export class ChatService {
 
 	async block(client: Socket, toBlock: User)
 	{
+		console.log("Block " + toBlock.id + " " + toBlock.name);
 		await this.userService.block(client.data.user, toBlock);
 		this.gateway.server.to(client.id).emit('blocked', toBlock.name + " has been blocked");
 	}
