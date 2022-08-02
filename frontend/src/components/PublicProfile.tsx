@@ -44,7 +44,7 @@ export default function PublicProfile() {
             </div>
 
             <div className="profile-img">
-                <img src={data.avatar_url}></img>
+                <img src={data.avatar_url} alt="avatar"></img>
             </div>
 
             <div className="profile-name">

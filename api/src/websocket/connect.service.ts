@@ -35,7 +35,7 @@ export class ConnectService {
 				secret: jwtConstants.secret
 			}
 			const jwtPayload = await this.jwtService.verify(authToken, jwtOptions);
-			const user: any = await this.userService.getUserByIdentifierLight(jwtPayload.sub);
+			const user: User = await this.userService.getUserByIdentifierLight(jwtPayload.sub);
 			return user;
 		} catch (err) {
 			console.log("Guard error :");
@@ -56,15 +56,15 @@ export class ConnectService {
 			this.gateway.activeUsers.set(user, client);
 		}
 
-		this.gateway.activeUsers.forEach((socket: Socket, user: User) => {
+		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
 				this.listConnectedUser(socket, this.all_users, this.gateway.activeUsers, false)
 			);
 		});
 
-		let chan: Channel[] = await this.userService.getChannelsForUser(user);
-		for (let c of chan) {
+		const chan: Channel[] = await this.userService.getChannelsForUser(user);
+		for (const c of chan) {
 			client.join(c.name);
 		}
 	}
@@ -72,7 +72,7 @@ export class ConnectService {
 
 	async handleDisconnect(client: Socket) {
 		try {
-			for (let [entries, socket] of this.gateway.activeUsers.entries())
+			for (const entries of this.gateway.activeUsers.keys())
 			{
 				if (entries.id == client.data.user.id)
 				{
@@ -84,7 +84,7 @@ export class ConnectService {
 		catch (err) {
 			console.log("Don't know what happened");
 		}
-		this.gateway.activeUsers.forEach((socket: Socket, user: User) => {
+		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
 				this.listConnectedUser(socket, this.all_users, this.gateway.activeUsers, false)
@@ -96,10 +96,10 @@ export class ConnectService {
 
 
 	public listConnectedUser(client: Socket, all_users: User[] ,active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
-		let data: User[] = [];
+		const data: User[] = [];
 		let i = 0;
 
-		for (let user of active_user.keys()) {
+		for (const user of active_user.keys()) {
 			user.status = "online";
 			if (client.data.user.id == user.id && withCurrentUser) {
 				data[i] = user;
@@ -112,7 +112,7 @@ export class ConnectService {
 		}
 		if (all_users)
 		{
-			for (let user of all_users)
+			for (const user of all_users)
 			{
 				if (!data.find(element => element.id == user.id) && client.data.user.id != user.id)
 				{

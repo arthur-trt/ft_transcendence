@@ -18,7 +18,6 @@ import { faGamepad } from '@fortawesome/free-solid-svg-icons'
 import { faHandsHoldingCircle } from '@fortawesome/free-solid-svg-icons'
 import { faBan } from '@fortawesome/free-solid-svg-icons'
 import { faCommentSlash } from '@fortawesome/free-solid-svg-icons'
-// import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
 
 // SOCKET IMPORT FROM THE INDEX.TSX
 import {socketo} from '../index';
@@ -113,8 +112,9 @@ export default function Channels() {
         setPrivTarget(msg.split(' '));
         setMessagesPriv(tab);
       });
-      socket.on('error', (tab:any) => {
-        // console.log(tab);
+      socket.on('error', (msg: any) => {
+        // console.log(msg);
+			// alert(msg.event);
       });
 
   }, []);
@@ -194,6 +194,9 @@ export default function Channels() {
         socket.emit('removeFriend', datausers[i]);
       i++;
     }
+  }
+  let handleBlockFriend = (e:any) => {
+    socket.emit('block', {toBlock : friends.friends[parseInt(e.currentTarget.id)]});
   }
   let handleOpenPrivate = (e:any) => {
     let j = 0;
@@ -281,7 +284,7 @@ export default function Channels() {
         return (<div className='users-single-info-friends'>
                   <FontAwesomeIcon className='paperplane' icon={faPaperPlane} id={datausers[i]?.name} onClick={handleOpenPrivate} ></FontAwesomeIcon>
                   {datausers[i]?.status === 'online' && <FontAwesomeIcon className='gamepad' icon={faGamepad} ></FontAwesomeIcon>}
-                  <FontAwesomeIcon className='userslash' icon={faUserSlash} ></FontAwesomeIcon>
+                  <FontAwesomeIcon className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleBlockFriend}></FontAwesomeIcon>
                   <FontAwesomeIcon className='userxmark' icon={faUserXmark} id={j.toString()} onClick={handleRemoveFriend} ></FontAwesomeIcon>
                 </div>
         );
@@ -549,8 +552,13 @@ export default function Channels() {
 
   let handleAddMembersPrivate = (e:any) => {
     e.preventDefault();
-    // need to emit on a new JoinRoom event where i can emit the name/id of the user
-    // who will join the private room
+    let i = 0;
+    while (i < friends?.friends?.length)
+    {
+      if (friends?.friends[i]?.name === chanOpPass)
+        socket.emit('addUser', {user: friends.friends[i], chanName: chanName});
+      i++;
+    }
     setChanOpPass("");
   }
 

@@ -150,7 +150,7 @@ export default function Profile() {
                 return (
                     <div className="profile-2fa-enable">
                         <FontAwesomeIcon icon={faXmark} className="xmark" onClick={handleDisplayTwoFa} />
-                        <img src={twoFadata.qrcode}/>
+                        <img src={twoFadata.qrcode} alt="qrcode"/>
                         <p>{twoFadata.secret}</p>
                         <form onSubmit={handleTurnOnTwoFa}>
                             <input
@@ -180,7 +180,7 @@ export default function Profile() {
         <div className="profile-container">
 
             <div className="profile-img">
-                <img src={data.avatar_url}></img>
+                <img src={data.avatar_url} alt="avatar"></img>
             </div>
             <div className="profile-upload-img">
                 <form onSubmit={handleSubmitAvatar}>
