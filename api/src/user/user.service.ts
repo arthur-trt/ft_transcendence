@@ -185,7 +185,7 @@ export class UserService {
 			await chan.save();
 			console.log(chan);
 		}
-   
+
 		if (chan.ownerId == user.id)
 		{
 			await this.channelsRepo
@@ -212,6 +212,7 @@ export class UserService {
 	{
 		user.blocked.push(toBan.id);
 		await user.save();
+		console.log("BLOCKED = "+ user.blocked)
 		return user;
 	}
 

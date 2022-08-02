@@ -195,8 +195,9 @@ export default function Channels() {
       i++;
     }
   }
-  let handleBlockFriend = (e:any) => {
-    socket.emit('block', {toBlock : friends.friends[parseInt(e.currentTarget.id)]});
+	let handleBlockFriend = (e: any) => {
+	  console.log()
+    socket.emit('block', friends.friends[parseInt(e.currentTarget.id)]);
   }
   let handleOpenPrivate = (e:any) => {
     let j = 0;
