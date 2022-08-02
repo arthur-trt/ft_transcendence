@@ -73,11 +73,11 @@ export class ChatService {
 		})
 	}
 
-
 	async addUser(client: Socket, userToAdd : addToPrivateRoomDto)
 	{
-		const userSocket : Socket = await this.findSocketId(userToAdd.user);
-		await this.userService.joinChannel(userToAdd.user, userToAdd.chanName)
+		const userSocket: Socket = await this.findSocketId(userToAdd.user);
+		const user: User = await this.userService.getUserByIdentifier(userToAdd.user.id);
+		await this.userService.joinChannel(user, userToAdd.chanName)
 		.then(async () =>  {
 			userSocket.join(userToAdd.chanName);
 			await this.getRooms();

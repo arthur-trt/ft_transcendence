@@ -84,8 +84,6 @@ export class MessageService {
 			.leftJoinAndSelect("messages.sender", "sender")
 			.getOne()
 		}
-
-		console.log("FOUND: "+ msgs.name)
 		return msgs;
 	}
 
