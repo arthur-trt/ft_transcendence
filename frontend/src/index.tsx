@@ -38,6 +38,12 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   if (token.exp * 1000 < dateNow.getTime()) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
+  if (token.isSecondFactorAuthenticated === false && location.pathname !== '/2fa') {
+    return <Navigate to="/2fa" state={{ from: location }} replace />;
+  }
+  if (token.isSecondFactorAuthenticated === true && location.pathname === '/2fa') {
+    return <Navigate to="/" />;
+  }
 
   return children;
 }
@@ -58,8 +64,8 @@ root.render(
         <Route path="/community" element={<><Header /><RequireAuth><Channels /></RequireAuth></>} />
         <Route path="/ladder" element={<><Header /><RequireAuth><Ladder /></RequireAuth></>} />
         <Route path="/debug" element={<><Header /><RequireAuth><Debug /></RequireAuth></>} />
-        <Route path="/game" element={<><Header /><RequireAuth><Game/></RequireAuth></>} />
-        <Route path="*" element={<NotFound/>}/>
+        <Route path="/game" element={<><Header /><RequireAuth><Game /></RequireAuth></>} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   </CookiesProvider>
