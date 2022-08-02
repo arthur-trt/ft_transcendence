@@ -31,7 +31,7 @@ export class ChatService {
 
 	async findSocketId(user: User) : Promise<Socket>
 	{
-		for (let [allUsers, socket] of this.gateway.activeUsers.entries()) {
+		for (const [allUsers, socket] of this.gateway.activeUsers.entries()) {
   			if (allUsers.id == user.id)
     			return socket;
 		}
@@ -39,7 +39,7 @@ export class ChatService {
 
 	async findUserbySocket(askedsocket: string): Promise<User>
 	{
-		for (let [allUsers, socket] of this.gateway.activeUsers.entries()) {
+		for (const [allUsers, socket] of this.gateway.activeUsers.entries()) {
   			if (socket.id == askedsocket)
     			return allUsers;
 		}
@@ -47,13 +47,13 @@ export class ChatService {
 
 	async getRooms(client? : Socket)
 	{
-		for (let [allUsers, socket] of this.gateway.activeUsers.entries())
+		for (const [allUsers, socket] of this.gateway.activeUsers.entries())
 			this.gateway.server.to(socket.id).emit('rooms', " get rooms ", await this.channelService.getChannelsForUser(allUsers));
 	}
 
 	async refreshChanMessage(channelName: string)
 	{
-		for (let [allUsers, socket] of this.gateway.activeUsers.entries())
+		for (const [allUsers, socket] of this.gateway.activeUsers.entries())
 			this.gateway.server.to(socket.id).emit('channelMessage', await this.messageService.getMessage(channelName, allUsers));
 	}
 
@@ -158,9 +158,9 @@ export class ChatService {
 	{
 		const sockets = await this.gateway.server.in(channelName).allSockets();
         console.log( " GET MESSAGE of  " + channelName);
-        for (let [k] of sockets.entries()) {
+        for (const [k] of sockets.entries()) {
 
-         let u = await this.userService.getUserByIdentifier((await this.findUserbySocket(k)).id);
+         const u = await this.userService.getUserByIdentifier((await this.findUserbySocket(k)).id);
          console.log("IN "+ channelName + " "+ u.name + " socket " + k);
          this.gateway.server.to((await this.findSocketId(u)).id).emit('channelMessage', await this.messageService.getMessage(channelName, u));
         }
