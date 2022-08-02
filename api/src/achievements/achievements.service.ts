@@ -28,5 +28,14 @@ export class AchievementsService {
 			relations: ['user']
 		});
 	}
+	public async hasAchievement(achievement: Achievements_types, user: User)
+	{
+		for (var i in Achievements_types)
+		{
+			if (Achievements_types[i] == achievement)
+				return true;
+		}
+		return false;
+	}
 
 }

@@ -7,11 +7,13 @@ import { GameController } from './game.controller';
 import { MatchHistory } from './game.entity';
 //import { GameGateway } from './game.gateway';
 import { GameService } from './game.service';
+import { AchievementsService } from 'src/achievements/achievements.service';
+import { AchievementsModule } from 'src/achievements/achievements.module';
 
 @Module({
   	controllers: [GameController],
 	providers: [GameService],
-	imports: [UserModule, TypeOrmModule.forFeature([MatchHistory, User]), JwtModule,],
+	imports: [UserModule, TypeOrmModule.forFeature([MatchHistory, User]), JwtModule, AchievementsModule],
 	exports:[GameService]
 })
 export class GameModule {}
