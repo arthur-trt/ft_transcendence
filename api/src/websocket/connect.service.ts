@@ -72,7 +72,7 @@ export class ConnectService {
 
 	async handleDisconnect(client: Socket) {
 		try {
-			for (const [entries, socket] of this.gateway.activeUsers.entries())
+			for (const entries of this.gateway.activeUsers.keys())
 			{
 				if (entries.id == client.data.user.id)
 				{
