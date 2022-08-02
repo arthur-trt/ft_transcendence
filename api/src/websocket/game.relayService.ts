@@ -10,7 +10,7 @@ import { GameService } from '../game/game.service';
 import { MatchHistory } from "src/game/game.entity";
 import { GameModule } from "../game/game.module";
 import { UserModule } from "../user/user.module";
-import { Ball, Match, Paddle } from "../game/game.interface"
+import { Ball, Match, Paddle, Names } from "../game/game.interface"
 import { dataFront } from "../game/game.interface";
 import { createHistogram } from "perf_hooks";
 import { Client } from "socket.io/dist/client";
@@ -63,6 +63,8 @@ export class GameRelayService
         protected P1_MoveDOWN : boolean;
         protected P2_MoveUP : boolean;
         protected P2_MoveDOWN : boolean;
+
+        protected names = {} as Names;
         
         // async resetBall(){
         //     this.match.ball.x = 50;
@@ -93,7 +95,13 @@ export class GameRelayService
     async start_gameloop()
     {
         if (this.players_ready == 1)
+        {
+            this.names.p1_name = this.player1.socket.data.name;
+            this.names.p2_name = this.player2.socket.data.name;
+            this.gateway.server.to(this.player1.socket.id).emit('set_names', this.names); //p1_name = left_name
+            this.gateway.server.to(this.player2.socket.id).emit('set_names', this.names);
             this.loop_stop = setInterval(() => this.loop(), 1000/60);
+        }
         else
             this.players_ready++;
     }
@@ -116,8 +124,8 @@ export class GameRelayService
                 if (this.p2_score >= 1) {
                     this.end_game();
                     console.log("P2 WINS");
-                    //this.gateway.server.to(this.match.id).emit('end_game');
-                    this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
+                    this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
+                    this.gateway.server.to(this.player2.socket.id).emit('game_end', true);
                     return;
                 }
                 else
@@ -129,7 +137,8 @@ export class GameRelayService
                 if (this.p1_score >= 1) {
                     this.end_game();
                     console.log("P1 WINS");
-                    this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
+                    this.gateway.server.to(this.player1.socket.id).emit('game_end', true);
+                    this.gateway.server.to(this.player2.socket.id).emit('game_end', false);
                     return;
                 }
                 else

@@ -1,6 +1,11 @@
+import { computeHeadingLevel } from '@testing-library/react';
 import React, { useState, useEffect } from 'react';
 
 import { socketo } from '..';
+
+import coupe from "./coupe.png";
+import first from "./1st.png";
+import second from "./2nd.png";
 
 export default function Game() {
   // DEFINE TYPE
@@ -37,16 +42,31 @@ export default function Game() {
     ball_y: number
   }
 
+  type nameT = {
+    P1_name: string;
+    P2_name: string
+  }
+
   const [socket, setSocket] = useState<any>([]);
 
   // GAME VARIABLE
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
+
+  const imgRef = React.useRef<HTMLImageElement>(null);
+  const firstRef = React.useRef<HTMLImageElement>(null);
+  const secondRef = React.useRef<HTMLImageElement>(null);
 
   const [canvas, setCanvas] = useState<any>();
   const [ctx, setCtx] = useState<any>();
   const [matchMaking, setMatchMaking] = useState<boolean>(false);
   const [countdown, setCountdown] = useState<boolean>(false);
   const [gameStart, setGameStart] = useState<boolean>(false);
+
+  let [P1score, setP1Score] = useState(0);
+  let [P2score, setP2Score] = useState(0);
+
+  const [P1Name, setP1Name] = useState<string>();
+  const [P2Name, setP2Name] = useState<string>();
 
   const [userLeft, setUserLeft] = useState<userT>({
     x: 10,
@@ -72,9 +92,6 @@ export default function Game() {
     speed: 7,
     color: "BLACK"
   });
-
-  let [P1score, setP1Score] = useState(0);
-  let [P2score, setP2Score] = useState(0);
 
   const [net, setNet] = useState<netT>(
     {
@@ -119,6 +136,13 @@ export default function Game() {
         setUserLeft({x : canvas.width * 0.01, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "DEEPSKYBLUE"});
         setUserRight({x : canvas.width * 0.98, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "FIREBRICK"});
       }
+
+      socket.on('set_names', (n: nameT) => {
+        console.log("set_names");
+        setP1Name(n.P1_name);
+        setP2Name(n.P2_name);
+      });
+
       socket.on('game_position', (pos: dataT) => {
         //console.log(canvas);
         //console.log("socket.on/game_position");
@@ -131,7 +155,6 @@ export default function Game() {
       })
 
       socket.on('update_score', (res : Boolean) => {
-        console.log(res + " " + P1score);
         if (res === true)
         {
           setP1Score(P1score + 1);
@@ -142,6 +165,10 @@ export default function Game() {
           setP2Score(P2score + 1);
           P2score++;
         }
+      })
+
+      socket.on('game_end', (res : boolean) => {
+        render_game_end(res, canvas);
       })
     }, []);
 
@@ -192,13 +219,10 @@ export default function Game() {
   }, [gameStart]);
 
   useEffect(() => {
-    //console.log("useEffect/render");
     if (canvas && ctx)
     {
-      //console.log("render is triggered")
       if (data)
         render(data);
-      //blabla les fonctions
     }
   }, [data])
 
@@ -288,7 +312,7 @@ export default function Game() {
   }
 
   function drawText(text: string, x: number, y: number, color: string, font: string) {
-    //console.log(ctx);
+    //console.log("drawText " + ctx);
     if (ctx != null) {
       ctx.fillStyle = color;
       ctx.font = font;
@@ -321,19 +345,31 @@ export default function Game() {
     }
   }
 
-  // function render_game_end(winner : boolean)
-  // {
-  //   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  //   if(winner === true) //left/P1 won
-  //   {
+  function render_game_end(winner : boolean, canvas : any)
+  {
+    console.log("rener_game_end");
+    //setCtx(canvas.getContext("2d"));
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(imgRef.current, canvas.width * 0.35, canvas.height * 0.3, canvas.width * 0.3, canvas.height * 0.6);
+      ctx.fillStyle = '#1dd1a1';
+      ctx.font = "30px serif";
+      ctx.fillText(P1score + " - " + P2score, canvas.width * 0.5, canvas.height * 0.25);
+      ctx.font = "48px serif";
 
-  //   }
-  //   else
-  //   {
-
-  //   }
-
-  // }
+      if(winner === true) //I won
+      {
+        ctx.fillText("CONGRATULATIONS, YOU WON !", canvas.width * 0.5, canvas.height * 0.1);
+        ctx.drawImage(firstRef.current, canvas.width * 0.45, canvas.height * 0.45, canvas.width * 0.1, canvas.height * 0.1);
+      }
+      else //Opponent won
+      {
+        ctx.fillText("MAYBE NEXT TIME... !", canvas.width * 0.5, canvas.height * 0.1);
+        ctx.drawImage(secondRef.current, canvas.width * 0.45, canvas.height * 0.45, canvas.width * 0.1, canvas.height * 0.1);
+      }
+    }
+  }
     
   function adaptToCanvas(data: dataT, canvas:any)
     {
@@ -362,11 +398,14 @@ export default function Game() {
 
     <div className='game-container'>
       <div className='game-players'>
-        <h3>NAME PLAYER 1</h3>
-        <h3>NAME PLAYER 2</h3>
+        <h3>P1 NAME</h3>
+        <h3>P2 NAME</h3>
       </div>
       {/*<button type='button' onClick={handleStart}>Start game</button>*/}
-      <canvas ref={canvasRef} className="pong-container" onClick={handleClick}/> 
+      <canvas ref={canvasRef} className="pong-container" onClick={handleClick}/>
+      <img ref={imgRef} src={coupe} className="hidden" />
+      <img ref={firstRef} src={first} className="hidden" />
+      <img ref={secondRef} src={second} className="hidden" />
       {/*onMouseMove={updateMousePosition}*/}
     </div>
   )

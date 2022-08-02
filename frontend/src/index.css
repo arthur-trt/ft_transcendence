@@ -1202,6 +1202,10 @@ textarea:focus, input:focus{
   border-radius: 5px;
 }
 
+.hidden {
+  display: none;
+}
+
 
 /*
 ** DEBUG

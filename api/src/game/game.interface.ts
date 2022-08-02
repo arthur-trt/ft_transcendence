@@ -61,3 +61,8 @@ export interface Paddle {
     width : number;
     socket : Socket;
 }
+
+export interface Names {
+    p1_name : string;
+    p2_name : string;
+}
