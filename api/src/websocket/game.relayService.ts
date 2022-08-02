@@ -56,7 +56,7 @@ export class GameRelayService
         protected player2 = {} as Paddle;
         protected p1_score = 0;
         protected p2_score = 0;
-        protected loop_stop : any;
+        protected loop_stop : number;
         protected players_ready = 0;
 
         protected P1_MoveUP : boolean;
