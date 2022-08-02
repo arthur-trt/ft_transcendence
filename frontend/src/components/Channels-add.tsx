@@ -113,8 +113,8 @@ export default function Channels() {
         setPrivTarget(msg.split(' '));
         setMessagesPriv(tab);
       });
-      socket.on('error', (tab:any) => {
-        // console.log(tab);
+      socket.on('error', (msg: any) => {
+			alert(msg.event);
       });
 
   }, []);

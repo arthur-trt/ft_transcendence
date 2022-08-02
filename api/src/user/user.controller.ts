@@ -40,8 +40,7 @@ export class UserController {
 	@ApiCookieAuth()
 	@UseGuards(JwtAuthGuard)
 	async getMe(@Req() req: Request): Promise<User> {
-		const user: User = await this.userService.getUserByRequest(req);
-		return this.userService.getUserByIdentifier(user.id);
+		return await this.userService.getUserByRequest(req);
 	}
 
 	/**
@@ -160,7 +159,7 @@ export class UserController {
 		if (!user)
 			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
 		user.avatar_url = "/public/" + file.filename;
-		user.save();
+		await user.save();
 		return user;
 	}
 

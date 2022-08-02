@@ -3,6 +3,7 @@ import { JwtService } from "@nestjs/jwt";
 import { Socket } from "socket.io";
 import { Channel } from "src/channel/channel.entity";
 import { ChannelService } from "src/channel/channel.service";
+import { addToPrivateRoomDto } from "src/dtos/addToPrivateRoom.dto";
 import { ModifyChannelDto } from "src/dtos/modifyChannel.dto";
 import { newChannelDto } from "src/dtos/newChannel.dto";
 import { sendChannelMessageDto } from "src/dtos/sendChannelMessageDto.dto";
@@ -46,7 +47,6 @@ export class ChatService {
 
 	async getRooms(client? : Socket)
 	{
-		console.log("POPOPO")
 		for (let [allUsers, socket] of this.gateway.activeUsers.entries())
 			this.gateway.server.to(socket.id).emit('rooms', " get rooms ", await this.channelService.getChannelsForUser(allUsers));
 	}
@@ -69,6 +69,17 @@ export class ChatService {
 		await this.userService.joinChannel(client.data.user, joinRoom.chanName, joinRoom.password)
 		.then(async () =>  {
 			client.join(joinRoom.chanName);
+			await this.getRooms();
+		})
+	}
+
+
+	async addUser(client: Socket, userToAdd : addToPrivateRoomDto)
+	{
+		const userSocket : Socket = await this.findSocketId(userToAdd.user);
+		await this.userService.joinChannel(userToAdd.user, userToAdd.chanName)
+		.then(async () =>  {
+			userSocket.join(userToAdd.chanName);
 			await this.getRooms();
 		})
 	}

@@ -128,26 +128,29 @@ export class UserService {
 		user.name = changes.name;
 		user.avatar_url = changes.avatar_url;
 		user.fullname = changes.fullname;
-		return this.userRepo.save(user);
+		return await this.userRepo.save(user);
 	}
 
 	public async setTwoFactorAuthenticationSecret (user: User, secret: string)
 	{
 		user.TwoFA_secret = secret;
-		return this.userRepo.save(user);
+		return await this.userRepo.save(user);
 	}
 
 	public async turnOnTwoFactorAuthentication (req: Request)
 	{
 		const user = await this.getUserByRequest(req);
 		user.TwoFA_enable = true;
-		return this.userRepo.save(user);
+		return await this.userRepo.save(user);
 	}
 
 
 	public async joinChannel(user: User, channelname: string, password: string = null): Promise<boolean>
 	{
 		const channel: Channel = await this.chanService.getChannelByIdentifier(channelname);
+		if (await this.chanService.isInChan(channel, user) == true) {
+			throw new HttpException('You are already in chan', HttpStatus.BAD_REQUEST)
+		}
 		if (channel.bannedId.includes(user.id))
 			throw new HttpException('You are banned', HttpStatus.FORBIDDEN)
 		if (channel.password_protected)
@@ -158,6 +161,7 @@ export class UserService {
 			}
 		}
 		user.channels = [...user.channels, channel]; /* if pb of is not iterable, it is because we did not get the realtions in the find one */
+		console.log(user.channels);
 		await user.save();
 		return (true);
 	}
@@ -174,6 +178,14 @@ export class UserService {
 			.remove(chan);
 
 
+		if (chan.adminsId.includes(user.id)) {
+			chan.admins = chan.admins.filter((admins) => {
+				return admins.id !== user.id
+			})
+			await chan.save();
+			console.log(chan);
+		}
+   
 		if (chan.ownerId == user.id)
 		{
 			await this.channelsRepo
@@ -183,8 +195,6 @@ export class UserService {
 				.set(null);
 			chan.ownerId = ""; // See how possible to not do it manually
 		}
-
-
 		return await this.chanService.getUsersOfChannels();
 	}
 
@@ -200,10 +210,8 @@ export class UserService {
 
 	public async block(user: User, toBan: User) :  Promise<User>
 	{
-		if (user.blocked == null)
-			user.blocked = [];
 		user.blocked.push(toBan.id);
-		user.save();
+		await user.save();
 		return user;
 	}
 
@@ -212,7 +220,7 @@ export class UserService {
 		if (index > -1) {
 			user.blocked.splice(index, 1);
 		}
-		user.save();
+		await user.save();
 		return user;
 	}
 
