@@ -174,7 +174,7 @@ export class GameRelayService
             }
 
             // we check if the paddle hit the user or the com paddle
-            let player = (this.ball.x + this.ball.radius < 200 / 2) ? this.player1 : this.player2;
+            const player = (this.ball.x + this.ball.radius < 200 / 2) ? this.player1 : this.player2;
 
             // if the ball hits a paddle
             if (collision(this.ball, player)) {
@@ -188,10 +188,10 @@ export class GameRelayService
                 // when the ball hits the center of the paddle we want the ball to take a 0degrees angle
                 // when the ball hits the bottom of the paddle we want the ball to take a 45degrees
                 // Math.PI/4 = 45degrees
-                let angleRad = (Math.PI / 4) * collidePoint;
+                const angleRad = (Math.PI / 4) * collidePoint;
 
                 // change the X and Y velocity direction
-                let direction = (this.ball.x + this.ball.radius < 200 / 2) ? 1 : -1;
+                const direction = (this.ball.x + this.ball.radius < 200 / 2) ? 1 : -1;
                 this.ball.velocityX = direction * this.ball.speed * Math.cos(angleRad);
                 this.ball.velocityY = this.ball.speed * Math.sin(angleRad);
 
