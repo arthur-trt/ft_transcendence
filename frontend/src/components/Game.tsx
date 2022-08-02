@@ -1,4 +1,3 @@
-import { getKeyEventProps } from '@testing-library/user-event/dist/types/utils';
 import React, { useState, useEffect } from 'react';
 
 import { socketo } from '..';
