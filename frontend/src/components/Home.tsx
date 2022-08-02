@@ -63,7 +63,7 @@ export default function Home() {
                         online_friends = 1;
                         indents.push(
                             <div className='home-search-single-friend' key={i}>
-                                <img src={friends?.friends[i].avatar_url}></img>
+                                <img src={friends?.friends[i].avatar_url} alt="avatar"></img>
                                 <h5>{friends?.friends[i].name}</h5>
                                 <button>PLAY</button>
                             </div>
