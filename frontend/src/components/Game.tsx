@@ -320,6 +320,20 @@ export default function Game() {
       drawArc(data.ball_x, data.ball_y, ball.radius, ball.color);
     }
   }
+
+  // function render_game_end(winner : boolean)
+  // {
+  //   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //   if(winner === true) //left/P1 won
+  //   {
+
+  //   }
+  //   else
+  //   {
+
+  //   }
+
+  // }
     
   function adaptToCanvas(data: dataT, canvas:any)
     {

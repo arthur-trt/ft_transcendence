@@ -56,7 +56,7 @@ export class GameRelayService
         protected player2 = {} as Paddle;
         protected p1_score = 0;
         protected p2_score = 0;
-        protected loop_stop : number;
+        protected loop_stop : NodeJS.Timer;
         protected players_ready = 0;
 
         protected P1_MoveUP : boolean;
@@ -87,39 +87,13 @@ export class GameRelayService
                 this.players.clear();
             }
         }
-
-//         function end_game(winner)
-// {
-//     clearInterval(loop);
-
-//     if (winner == false)
-//     {
-//         drawRect(0, 0, canvas.width, canvas.height, "FIREBRICK");
-//         drawText("PLAYER 2 WON !", canvas.width * 0.25, canvas.height * 0.2, '#D0AF0A');
-//     }
-//     else
-//     {
-//         drawRect(0, 0, canvas.width, canvas.height, "DEEPSKYBLUE");
-//         drawText("PLAYER 1 WON !", canvas.width * 0.25, canvas.height * 0.2, '#D0AF0A');
-//     }
-
-// }
-
-// update function, the function that does all calculations
-// function update(){
-    
-    
-// }
         
     @UseGuards(WsJwtAuthGuard)
     @UsePipes(ValidationPipe)
     async start_gameloop()
     {
         if (this.players_ready == 1)
-        {
             this.loop_stop = setInterval(() => this.loop(), 1000/60);
-            console.log("inter = " + this.loop_stop);
-        }
         else
             this.players_ready++;
     }
@@ -142,6 +116,7 @@ export class GameRelayService
                 if (this.p2_score >= 1) {
                     this.end_game();
                     console.log("P2 WINS");
+                    //this.gateway.server.to(this.match.id).emit('end_game');
                     this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
                     return;
                 }
@@ -196,7 +171,7 @@ export class GameRelayService
                 this.ball.velocityY = this.ball.speed * Math.sin(angleRad);
 
                 // speed up the ball everytime a paddle hits it.
-                this.ball.speed += 0.5;
+                this.ball.speed += 0.1;
             }
             this.createData();
             this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
@@ -213,22 +188,6 @@ export class GameRelayService
         this.dataT.ball_y = this.ball.y;
     }
 
-        @UseGuards(WsJwtAuthGuard)
-        @UsePipes(ValidationPipe)
-        //@SubscribeMessage('game_start')
-        async sendPosition(client: Socket)
-        {
-            // console.log("ooooooooooooooo")
-            // console.log("game_start")
-            this.dataT.player1_paddle_x = this.player1.x;
-            this.dataT.player1_paddle_y = this.player1.y;
-            this.dataT.player2_paddle_x = this.player2.x;
-            this.dataT.player2_paddle_y = this.player2.y;
-            this.dataT.ball_x = this.ball.x;
-            this.dataT.ball_y = this.ball.y;
-            // this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
-            this.gateway.server.to(client.id).emit('game_position', this.dataT);
-      }
         async startMatch(players) //set a boolean to know if a player is already on match
         {
             const [first] = players;
@@ -349,14 +308,6 @@ export class GameRelayService
             this.ball.x = 100;
             this.ball.y = 50;
         }
-
-        // async MovementUp(client : Socket)
-        // {
-        //     if (this.player1.id.id == client.id)
-        //     {
-
-        //     }
-        // }
 
         // @UseGuards(WsJwtAuthGuard)
         // @UsePipes(ValidationPipe)
