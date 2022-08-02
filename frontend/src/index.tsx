@@ -1,9 +1,8 @@
 import "./index.css"
-import React from 'react';
 import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
 import Auth from './components/Auth';
-import { Navigate, BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Navigate, BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Header } from './components/Header';
 import TwoFactor from './components/TwoFactor';
 import Profile from './components/Profile';
@@ -15,7 +14,8 @@ import Debug from './components/Debug';
 import PublicProfile from './components/PublicProfile';
 import jwtDecode from 'jwt-decode';
 import Ladder from "./components/Ladder";
-import { TestClair } from "./components/TestClair";
+import Home from "./components/Home";
+import NotFound from "./components/NotFound";
 
 export const socketo = io();
 
@@ -28,14 +28,15 @@ export const socketo = io();
  */
 function RequireAuth({ children }: { children: JSX.Element }) {
   const [cookies, setCookie] = useCookies();
+  let location = useLocation();
 
   if (!cookies.Authentication) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
   const token: any = jwtDecode(cookies.Authentication)
   const dateNow = new Date();
   if (token.exp * 1000 < dateNow.getTime()) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return children;
@@ -50,17 +51,15 @@ root.render(
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Auth />} />
-        <Route path="/" element={<RequireAuth><Header /></RequireAuth>} />
+        <Route path="/" element={<><Header /><RequireAuth><Home /></RequireAuth></>} />
         <Route path="/2fa" element={<><RequireAuth><TwoFactor /></RequireAuth></>} />
-        <Route path="profile">
-          <Route path="me" element={<><Header /><RequireAuth><Profile /></RequireAuth></>} />
-          <Route path=":uuid" element={<><Header /><RequireAuth><PublicProfile /></RequireAuth></>} />
-        </Route>
+        <Route path="/profile/me" element={<><Header /><RequireAuth><Profile /></RequireAuth></>} />
+        <Route path="/profile/:uuid" element={<><Header /><RequireAuth><PublicProfile /></RequireAuth></>} />
         <Route path="/community" element={<><Header /><RequireAuth><Channels /></RequireAuth></>} />
         <Route path="/ladder" element={<><Header /><RequireAuth><Ladder /></RequireAuth></>} />
         <Route path="/debug" element={<><Header /><RequireAuth><Debug /></RequireAuth></>} />
-        <Route path="/game" element={<><Header /><TestClair/></>} />
-
+        <Route path="/game" element={<><Header /><RequireAuth><Game/></RequireAuth></>} />
+        <Route path="*" element={<NotFound/>}/>
       </Routes>
     </BrowserRouter>
   </CookiesProvider>

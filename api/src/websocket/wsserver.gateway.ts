@@ -4,6 +4,7 @@ import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessa
 import { Server, Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
 import { ChannelService } from 'src/channel/channel.service';
+import { addToPrivateRoomDto } from 'src/dtos/addToPrivateRoom.dto';
 import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
 import { newChannelDto } from 'src/dtos/newChannel.dto';
 import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto.dto';
@@ -200,6 +201,12 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	async onLeaveRoom(client: Socket, channel: string) {
 		await this.chatService.leaveRoom(client, channel)
+	}
+
+	@SubscribeMessage('addUser')
+	@UseGuards(WsJwtAuthGuard)
+	async onAddUser(client: Socket, data : addToPrivateRoomDto) {
+		await this.chatService.addUser(client, data)
 	}
 
 	@SubscribeMessage('banUser')
@@ -407,6 +414,14 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async getInQueue(client : Socket)
 	{
 		await this.gameRelayService.getInQueue(client)
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('game_start')
+	async startMatch(client : Socket)
+	{
+		await this.gameRelayService.sendPosition(client)
 	}
 
 }

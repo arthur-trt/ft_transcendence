@@ -6,8 +6,8 @@ import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { validate as isValidUUID } from 'uuid';
+import { DefaultSerializer } from 'v8';
 import { Channel } from './channel.entity';
-
 
 @Injectable()
 export class ChannelService {
@@ -15,6 +15,17 @@ export class ChannelService {
 	constructor(@InjectRepository(Channel) private channelsRepo: Repository<Channel>,
 	@Inject(forwardRef(() => UserService)) private readonly userService: UserService)
 	{ }
+
+	public async isInChan(chan: Channel, user: User) : Promise<Boolean>
+	{
+		const foundChan : Channel = await this.channelsRepo.findOne({
+			where : { name : chan.name, users : { id : user.id } }
+		})
+		if (foundChan != null)
+			return true;
+		return false;
+	}
+
 
 	/**
 	 * @brief Create channel
@@ -44,10 +55,10 @@ export class ChannelService {
 
 	public async setNewAdmin(user: User, channel : Channel, toBeAdmin: User)
 	{
-		console.log('kiki')
+		if (!await this.isInChan(channel, toBeAdmin))
+			throw new HttpException("User " + toBeAdmin.name + " is not in channel", HttpStatus.FORBIDDEN);
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to name another admin.", HttpStatus.FORBIDDEN);
-			console.log('toto')
 		channel.admins = [...channel.admins, toBeAdmin];
 		channel.adminsId = [...channel.adminsId, toBeAdmin.id]
 		await this.channelsRepo.save(channel);
@@ -127,7 +138,7 @@ export class ChannelService {
 		{
 			chan.password_protected = false;
 		}
-		return this.channelsRepo.save(chan);
+		return await this.channelsRepo.save(chan);
 	}
 
 
@@ -161,6 +172,9 @@ export class ChannelService {
 	{
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to delete an user from chan.", HttpStatus.FORBIDDEN);
+		if (!await this.isInChan(channel, user))
+			throw new HttpException("User " + toBan.name + " is not in channel", HttpStatus.FORBIDDEN);
+
 		await this.channelsRepo.createQueryBuilder()
 			.relation(Channel, "users")
 			.of({ id: toBan.id })
@@ -170,10 +184,12 @@ export class ChannelService {
 
 	public async unban(channel: Channel, toUnBan: User)
 	{
+		console.log("Un Ban")
+
 		channel.banned = channel.banned.filter((banned) => {
 			return banned.id !== toUnBan.id
 		})
-		channel.save();
+		await channel.save();
 		return channel;
 	}
 
@@ -183,10 +199,7 @@ export class ChannelService {
 		channel.muted = channel.muted.filter((muted) => {
 			return muted.id !== toUnMute.id
 		})
-		channel.mutedId = channel.mutedId.filter((muted) => {
-			return muted !== toUnMute.id
-		}) // See how it is possible that relationId are not updated automatically and i have to do it manually;
-		channel.save();
+		await channel.save();
 		console.log("Muted" + channel.muted)
 		console.log( "Id " + channel.mutedId)
 		return channel;
@@ -196,12 +209,15 @@ export class ChannelService {
 	{
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to ban an user from chan.", HttpStatus.FORBIDDEN);
+		if (channel.bannedId.includes(toBan.id))
+			throw new HttpException("This user is already banned.", HttpStatus.FORBIDDEN);
 		console.log("Bannishement");
 		/** Step one : Deleting user from channel */
 		await this.deleteUserFromChannel(user, channel, toBan);
 		/** Step two : add it to ban list  */
 		console.log(channel.banned);
 		channel.banned = [...channel.banned, toBan];
+		console.log(channel.banned);
 		await channel.save();
 		/** Step three : set timeout to remove from ban list */
 		setTimeout(() => { this.unban(channel, toBan)}, 30000);
@@ -211,6 +227,8 @@ export class ChannelService {
 
 	public async temporaryMuteUser(user: User, channel: Channel, toMute: User)
 	{
+		if (!await this.isInChan(channel, toMute))
+			throw new HttpException("User " + toMute.name + " is not in channel", HttpStatus.FORBIDDEN);
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to mute an user from chan.", HttpStatus.FORBIDDEN);
 		console.log("Mute");

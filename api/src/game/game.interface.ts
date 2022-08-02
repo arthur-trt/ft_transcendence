@@ -1,31 +1,25 @@
-// import { ConsoleLogger, HttpCode, HttpException, HttpStatus, Injectable } from '@nestjs/common';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { CreateMatchDto, endMatchDto } from 'src/dtos/match.dto';
-    import { User } from 'src/user/user.entity';
-    import { UserModule } from 'src/user/user.module';
-// import { UserService } from 'src/user/user.service';
-// import { Brackets, Repository } from 'typeorm';
- import { MatchHistory } from './game.entity';
-// import { Socket, Server } from 'socket.io'
+import { User } from 'src/user/user.entity';
+import { UserModule } from 'src/user/user.module';
+import { MatchHistory } from './game.entity';
 
 
 interface Player extends User
 {
-    pos_X: number;
-    pos_Y: number;
-    paddle: Paddle;
+    x: number;
+    y: number;
 }
 
+interface velocity
+{
+    x: number;
+    y: number;
+}
 interface Ball
 {
-    pos_X: number;
-    pos_Y: number;
-}
-
-interface Paddle
-{
-    pos_X: number;
-    pos_Y: number;
+    speed: number;
+    x: number;
+    y: number;
+    velocity: velocity;
 }
 
 interface Canvas
@@ -36,11 +30,15 @@ interface Canvas
 
 export interface Match
 {
-    Canvas;
-    Ball;
+    id: string;
+    canvas: Canvas;
+    ball :Ball;
     player_1: Player;
     player_2: Player;
+    x: number;
+    y: number;
     watcher : User;
+   
 }
 export interface dataFront {
     player1_paddle_x: number;
