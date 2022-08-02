@@ -22,11 +22,15 @@ export class FortyTwoService extends AuthService {
 	 * @returns redirection
 	 */
 	public login (user: User, @Res() res: Response) {
-		res.header('Set-Cookie', this.generateCookie(user));
-		if (user.TwoFA_enable)
+		if (user)
 		{
-			return res.redirect('/2fa');
+			res.header('Set-Cookie', this.generateCookie(user));
+			if (user.TwoFA_enable)
+			{
+				return res.redirect('/2fa');
+			}
+			return res.redirect('/');
 		}
-		return res.redirect('/');
+		return res.redirect('/login');
 	}
 }

@@ -1,3 +1,5 @@
+// import { Socket } from 'dgram';
+import { Socket } from 'socket.io';
 import { User } from 'src/user/user.entity';
 import { UserModule } from 'src/user/user.module';
 import { MatchHistory } from './game.entity';
@@ -14,12 +16,15 @@ interface velocity
     x: number;
     y: number;
 }
-interface Ball
+export interface Ball
 {
     speed: number;
     x: number;
     y: number;
-    velocity: velocity;
+    // velocity: velocity;
+    radius: number;
+    velocityX: number;
+    velocityY: number;
 }
 
 interface Canvas
@@ -47,4 +52,12 @@ export interface dataFront {
     player2_paddle_y: number;
     ball_x: number;
     ball_y: number;
-  }
+}
+
+export interface Paddle {
+    x : number;
+    y : number;
+    height : number;
+    width : number;
+    socket : Socket;
+}
