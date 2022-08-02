@@ -133,7 +133,7 @@ export default function Game() {
 
       socket.on('update_score', (res : Boolean) => {
         console.log(res + " " + P1score);
-        if (res == true)
+        if (res === true)
         {
           setP1Score(P1score + 1);
           P1score++;
