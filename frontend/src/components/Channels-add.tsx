@@ -114,7 +114,7 @@ export default function Channels() {
       });
       socket.on('error', (msg: any) => {
         // console.log(msg);
-			// alert(msg.event);
+			alert(msg.event);
       });
 
   }, []);
@@ -196,7 +196,7 @@ export default function Channels() {
     }
   }
   let handleBlockFriend = (e:any) => {
-    socket.emit('block', {toBlock : friends.friends[parseInt(e.currentTarget.id)]});
+    socket.emit('block', friends.friends[parseInt(e.currentTarget.id)]);
   }
   let handleOpenPrivate = (e:any) => {
     let j = 0;
