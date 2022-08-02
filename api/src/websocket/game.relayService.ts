@@ -57,6 +57,7 @@ export class GameRelayService
         protected p1_score = 0;
         protected p2_score = 0;
         protected loop_stop : any;
+        protected players_ready = 0;
 
         protected P1_MoveUP : boolean;
         protected P1_MoveDOWN : boolean;
@@ -114,12 +115,19 @@ export class GameRelayService
     @UsePipes(ValidationPipe)
     async start_gameloop()
     {
-        this.loop_stop = setInterval(() => this.loop(), 1000/60);
+        if (this.players_ready == 1)
+        {
+            this.loop_stop = setInterval(() => this.loop(), 1000/60);
+            console.log("inter = " + this.loop_stop);
+        }
+        else
+            this.players_ready++;
     }
 
     async end_game()
     {
         clearInterval(this.loop_stop);
+        this.players_ready = 0;
     }
 
     @UseGuards(WsJwtAuthGuard)
@@ -131,9 +139,10 @@ export class GameRelayService
             if (this.ball.x - this.ball.radius < 0) {
                 this.p2_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', false);
-                if (this.p2_score >= 5) {
+                if (this.p2_score >= 1) {
                     this.end_game();
                     console.log("P2 WINS");
+                    this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
                     return;
                 }
                 else
@@ -142,9 +151,10 @@ export class GameRelayService
             else if (this.ball.x + this.ball.radius > 200) {
                 this.p1_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', true);
-                if (this.p1_score >= 5) {
+                if (this.p1_score >= 1) {
                     this.end_game();
                     console.log("P1 WINS");
+                    this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
                     return;
                 }
                 else
