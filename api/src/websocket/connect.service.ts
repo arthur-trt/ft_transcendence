@@ -35,7 +35,7 @@ export class ConnectService {
 				secret: jwtConstants.secret
 			}
 			const jwtPayload = await this.jwtService.verify(authToken, jwtOptions);
-			const user: any = await this.userService.getUserByIdentifierLight(jwtPayload.sub);
+			const user: User = await this.userService.getUserByIdentifierLight(jwtPayload.sub);
 			return user;
 		} catch (err) {
 			console.log("Guard error :");
@@ -56,7 +56,7 @@ export class ConnectService {
 			this.gateway.activeUsers.set(user, client);
 		}
 
-		this.gateway.activeUsers.forEach((socket: Socket, user: User) => {
+		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
 				this.listConnectedUser(socket, this.all_users, this.gateway.activeUsers, false)
@@ -72,7 +72,7 @@ export class ConnectService {
 
 	async handleDisconnect(client: Socket) {
 		try {
-			for (const [entries, socket] of this.gateway.activeUsers.entries())
+			for (const entries of this.gateway.activeUsers.keys())
 			{
 				if (entries.id == client.data.user.id)
 				{
@@ -84,7 +84,7 @@ export class ConnectService {
 		catch (err) {
 			console.log("Don't know what happened");
 		}
-		this.gateway.activeUsers.forEach((socket: Socket, user: User) => {
+		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
 				this.listConnectedUser(socket, this.all_users, this.gateway.activeUsers, false)
