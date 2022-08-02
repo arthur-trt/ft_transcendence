@@ -63,8 +63,8 @@ export class ConnectService {
 			);
 		});
 
-		let chan: Channel[] = await this.userService.getChannelsForUser(user);
-		for (let c of chan) {
+		const chan: Channel[] = await this.userService.getChannelsForUser(user);
+		for (const c of chan) {
 			client.join(c.name);
 		}
 	}
@@ -72,7 +72,7 @@ export class ConnectService {
 
 	async handleDisconnect(client: Socket) {
 		try {
-			for (let [entries, socket] of this.gateway.activeUsers.entries())
+			for (const [entries, socket] of this.gateway.activeUsers.entries())
 			{
 				if (entries.id == client.data.user.id)
 				{
@@ -96,10 +96,10 @@ export class ConnectService {
 
 
 	public listConnectedUser(client: Socket, all_users: User[] ,active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
-		let data: User[] = [];
+		const data: User[] = [];
 		let i = 0;
 
-		for (let user of active_user.keys()) {
+		for (const user of active_user.keys()) {
 			user.status = "online";
 			if (client.data.user.id == user.id && withCurrentUser) {
 				data[i] = user;
@@ -112,7 +112,7 @@ export class ConnectService {
 		}
 		if (all_users)
 		{
-			for (let user of all_users)
+			for (const user of all_users)
 			{
 				if (!data.find(element => element.id == user.id) && client.data.user.id != user.id)
 				{
