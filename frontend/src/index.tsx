@@ -14,8 +14,12 @@ import Debug from './components/Debug';
 import PublicProfile from './components/PublicProfile';
 import jwtDecode from 'jwt-decode';
 import Ladder from "./components/Ladder";
+<<<<<<< HEAD
 import Home from "./components/Home";
 import NotFound from "./components/NotFound";
+=======
+import { TestClair } from "./components/TestClair";
+>>>>>>> main
 
 export const socketo = io();
 
