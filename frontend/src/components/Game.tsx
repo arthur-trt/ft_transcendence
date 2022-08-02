@@ -9,7 +9,6 @@ export default function Game() {
     y: number,
     width: number,
     height: number,
-    score: number,
     color: string
   }
 
@@ -32,9 +31,7 @@ export default function Game() {
   }
 
   type dataT = {
-    player1_paddle_x: number,
     player1_paddle_y: number,
-    player2_paddle_x: number,
     player2_paddle_y: number,
     ball_x: number,
     ball_y: number
@@ -56,7 +53,6 @@ export default function Game() {
     y: 0,
     width: 10,
     height: 30,
-    score: 0,
     color: "DEEPSKYBLUE"
   });
   const [userRight, setUserRight] = useState<userT>({
@@ -64,7 +60,6 @@ export default function Game() {
     y: 0,
     width: 10,
     height: 30,
-    score: 0,
     color: "FIREBRICK"
   });
 
@@ -78,6 +73,9 @@ export default function Game() {
     color: "BLACK"
   });
 
+  let [P1score, setP1Score] = useState(0);
+  let [P2score, setP2Score] = useState(0);
+
   const [net, setNet] = useState<netT>(
     {
       x: 0,
@@ -88,20 +86,7 @@ export default function Game() {
     });
 
   const [data, setData] = useState<dataT>();
-  const [mouse, setMouse] = React.useState({ x: 120, y: 120 });
 
-  // const updateMousePosition = (ev: any) => {
-  //   console.log('coucou')
-  //   //const rect = canvas.getBoundingClientRect();
-  //   if (canvasRef.current) {
-  //       const context = canvasRef.current.getContext("2d")
-  //       if (context) {
-  //           setMouse({ x: ev.clientX - context.canvas.getBoundingClientRect().left, y: ev.clientY - context.canvas.getBoundingClientRect().top })
-  //           console.log(mouse.x + ' et ' + mouse.y)
-  //       }
-  //   }
-  //   socket.emit('test', mouse.y);
-//}
   useEffect(
     () => {
       const socket = socketo;
@@ -123,7 +108,7 @@ export default function Game() {
         const tmp : ballT = {
           x: canvas.width/2,
           y : canvas.height/2,
-          radius:15,
+          radius: canvas.height * 0.01,
           velocityX:5,
           velocityY:5,
           speed:7,
@@ -131,12 +116,12 @@ export default function Game() {
         }
         setBall(tmp);
         setNet({x : canvas.width/2, y : 0, height : 20, width : 5, color : "BLACK"});
-        setUserLeft({x : 10, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, score: 0, color: "DEEPSKYBLUE"});
-        setUserRight({x : canvas.width - 10, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, score: 0, color: "FIREBRICK"});
+        setUserLeft({x : canvas.width * 0.01, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "DEEPSKYBLUE"});
+        setUserRight({x : canvas.width * 0.98, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "FIREBRICK"});
       }
       socket.on('game_position', (pos: dataT) => {
-        console.log(canvas);
-        console.log("socket.on/game_position");
+        //console.log(canvas);
+        //console.log("socket.on/game_position");
         setData(adaptToCanvas(pos, canvas));
       });
 
@@ -144,21 +129,21 @@ export default function Game() {
         console.log("socket.on/game_countdown");
         setCountdown(true);
       })
-    }, []
-  );
 
-  
-
-  // const pos : dataT = {
-  //   player1_paddle_x : userLeft.x,
-  //   player1_paddle_y : userLeft.y,
-  //   player2_paddle_x : userRight.x,
-  //   player2_paddle_y : userRight.y,
-  //   ball_x : ball.x,
-  //   ball_y : ball.y
-  // }
-
-  // setData(pos);
+      socket.on('update_score', (res : Boolean) => {
+        console.log(res + " " + P1score);
+        if (res === true)
+        {
+          setP1Score(P1score + 1);
+          P1score++;
+        }
+        else
+        {
+          setP2Score(P2score + 1);
+          P2score++;
+        }
+      })
+    }, []);
 
   // Wait for context to be ready.
   useEffect(() => {
@@ -180,7 +165,7 @@ export default function Game() {
       ctx.fillStyle = "RED";
       ctx.font = "48px serif";
       ctx.textAlign = "center"
-      ctx.fillText("Le jeu va démarrer dans 3 secondes !", canvas.width / 2, canvas.height / 2);
+      ctx.fillText("Le jeu va démarrer dans 4 secondes !", canvas.width / 2, canvas.height / 2);
       inter = setInterval(count_function, 1000);
     }
   }, [countdown])
@@ -190,11 +175,11 @@ export default function Game() {
     console.log("count");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillText("Le jeu va démarrer dans " + (3 - i) + " secondes !", canvas.width / 2, canvas.height / 2);
-    if (i == 3)
+    if (i === 3)
     {
       clearInterval(inter);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       setGameStart(true);
-      //socket.emit('game_start');
     }
     else
       i++;
@@ -202,21 +187,60 @@ export default function Game() {
 
   useEffect(() => {
     console.log("useEffect/game_start" + gameStart);
-    if (gameStart == true)
+    if (gameStart === true)
       socket.emit('game_start');
   }, [gameStart]);
 
   useEffect(() => {
-    console.log("gourdin");
+    //console.log("useEffect/render");
     if (canvas && ctx)
     {
-      console.log(net.x);
-      console.log("render is triggered")
+      //console.log("render is triggered")
       if (data)
         render(data);
       //blabla les fonctions
     }
   }, [data])
+
+  const [MoveUp, setMoveUp] = useState<boolean>(false);
+  const [MoveDown, setMoveDown] = useState<boolean>(false);
+
+  document.addEventListener('keydown', (e) => {
+    if (gameStart) {
+      if (e.key === 'w' && MoveUp === false)
+        setMoveUp(true);
+
+      if (e.key === 's' && MoveDown === false)
+        setMoveDown(true);
+    }
+  }, {once : true});
+
+  document.addEventListener('keyup', (e) => {
+    if (gameStart) {
+      if (e.key === 'w' && MoveUp === true)
+        setMoveUp(false);
+
+      if (e.key === 's' && MoveDown === true)
+        setMoveDown(false);
+    }
+  }, {once : true});
+
+  useEffect(() => {
+    if (gameStart) {
+      if (MoveUp === true) {
+        console.log("front MoveUp");
+        socket.emit('MoveUp')
+      }
+      if (MoveDown === true) {
+        console.log("front MoveUDown");
+        socket.emit('MoveDown')
+      }
+      if (MoveUp === false && MoveDown === false) {
+        socket.emit('StopMove');
+        console.log("front STOP move");
+      }
+    }
+  }, [MoveUp, MoveDown]);
 
   /**
    * Draw a rectangle on the canva
@@ -228,13 +252,13 @@ export default function Game() {
    */
   function drawRect(x: number, y: number, w: number, h: number, color: string) {
     if (ctx != null) {
-      console.log(" DRAW ME BITCH"); // ????? un peu vnr ?
-      console.log(x + " " + y + " " + w + " " + h);
-      console.log(canvas.height);
-      console.log(canvas.width);
-      console.log(color);
+      // console.log(" DRAW ME BITCH"); // ????? un peu vnr ?
+      // console.log(x + " " + y + " " + w + " " + h);
+      // console.log(canvas.height);
+      // console.log(canvas.width);
+      // console.log(color);
       ctx.fillStyle = color;
-      console.log(ctx.fillRect(x, y, w, h));
+      ctx.fillRect(x, y, w, h);
     }
   }
 
@@ -264,7 +288,7 @@ export default function Game() {
   }
 
   function drawText(text: string, x: number, y: number, color: string, font: string) {
-    console.log(ctx);
+    //console.log(ctx);
     if (ctx != null) {
       ctx.fillStyle = color;
       ctx.font = font;
@@ -278,12 +302,12 @@ export default function Game() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Draw score for userLeft
-      drawText("PLAYER 1", canvas.width * 0.2, canvas.height * 0.1, '#00000080', "48px serif");
-      drawText(userLeft.score.toString(), canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
+      // drawText("PLAYER 1", canvas.width * 0.2, canvas.height * 0.1, '#00000080', "48px serif");
+      drawText(P1score.toString(), canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
 
       // Draw score for userRight
-      drawText("PLAYER 2", canvas.width * 0.8, canvas.height * 0.1, '#00000080', "48px serif");
-      drawText(userRight.score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
+      // drawText("PLAYER 2", canvas.width * 0.8, canvas.height * 0.1, '#00000080', "48px serif");
+      drawText(P2score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
 
       // Draw net
       drawNet();
@@ -293,22 +317,20 @@ export default function Game() {
       drawRect(userRight.x, data.player2_paddle_y, userRight.width, userRight.height, userRight.color);
       
       //Draw the ball
-      //drawArc(ball.x, ball.y, ball.radius, ball.color);
+      drawArc(data.ball_x, data.ball_y, ball.radius, ball.color);
     }
   }
     
   function adaptToCanvas(data: dataT, canvas:any)
     {
-      console.log("issou");
+      //console.log("issou");
       if (canvas)
       {
-        console.log("corentin");
-        data.player1_paddle_y = data.player1_paddle_y / 100 * canvas.width;
-        data.player1_paddle_x = data.player1_paddle_x / 200 * canvas.height;
-        data.player2_paddle_y = data.player2_paddle_y / 100 * canvas.width;
-        data.player2_paddle_x = data.player2_paddle_x / 200 * canvas.height;
-        data.ball_y = data.ball_y / 100 * canvas.width;
-        data.ball_x = data.ball_x / 200 * canvas.height;
+        data.player1_paddle_y = data.player1_paddle_y / 100 * canvas.height;
+        //console.log("PAD1 Y = " + data.player1_paddle_y);
+        data.player2_paddle_y = data.player2_paddle_y / 100 * canvas.height;
+        data.ball_y = data.ball_y / 100 * canvas.height;
+        data.ball_x = data.ball_x / 200 * canvas.width;
         return (data);
       }
     }

@@ -421,7 +421,51 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('game_start')
 	async startMatch(client : Socket)
 	{
-		await this.gameRelayService.sendPosition(client)
+		//await this.gameRelayService.sendPosition(client)
+		await this.gameRelayService.start_gameloop();
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('MoveUp')
+	async MoveUp(client : Socket)
+	{
+		console.log("MoveUP " + client.id);
+		await this.gameRelayService.MoveUp(client);
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('MoveDown')
+	async MoveDown(client : Socket)
+	{
+		console.log("MoveDOWN " + client.id);
+		await this.gameRelayService.MoveDown(client);
+	}
+
+	// @UseGuards(WsJwtAuthGuard)
+	// @UsePipes(ValidationPipe)
+	// @SubscribeMessage('StopUp')
+	// async StopUp(client : Socket)
+	// {
+	// 	console.log("STOPUp " + client.id);
+	// }
+
+	// @UseGuards(WsJwtAuthGuard)
+	// @UsePipes(ValidationPipe)
+	// @SubscribeMessage('StopDown')
+	// async StopDown(client : Socket)
+	// {
+	// 	console.log("STOPDown " + client.id);
+	// }
+
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('StopMove')
+	async StopMove(client : Socket)
+	{
+		console.log("STOPMove " + client.id);
+		await this.gameRelayService.StopMove(client);
 	}
 
 }
