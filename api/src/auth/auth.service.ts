@@ -1,15 +1,8 @@
-import { Injectable, Res } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { access } from 'fs';
-import { authenticator } from 'otplib';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
-import { Request, Response } from 'express';
-import { toDataURL } from 'qrcode';
 import { jwtConstants } from './jwt/jwt.constants';
-import { TransformStreamDefaultController } from 'stream/web';
-import { useContainer } from 'class-validator';
-import { userInfo } from 'os';
 
 @Injectable()
 export class AuthService {
