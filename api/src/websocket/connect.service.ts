@@ -35,7 +35,7 @@ export class ConnectService {
 				secret: jwtConstants.secret
 			}
 			const jwtPayload = await this.jwtService.verify(authToken, jwtOptions);
-			const user: any = await this.userService.getUserByIdentifierLight(jwtPayload.sub);
+			const user: User = await this.userService.getUserByIdentifierLight(jwtPayload.sub);
 			return user;
 		} catch (err) {
 			console.log("Guard error :");
