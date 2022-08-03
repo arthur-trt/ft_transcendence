@@ -1,5 +1,5 @@
 // REACT TOOLS IMPORT
-import React, { useState, useEffect, useTransition } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLocation } from "react-router-dom";
 
@@ -34,7 +34,7 @@ export default function Channels() {
   // TO DETECT ROUTE CHANGE
   const location = useLocation();
   const navigate = useNavigate();
-  const [cookies, setCookie, removeCookie] = useCookies();
+  const [, , removeCookie] = useCookies();
 
   // VARIABLE DECLARATIONS
   const [socket, setSocket] = useState<any>([]);
