@@ -51,7 +51,7 @@ export class MessageController {
 	@ApiOperation({ summary: "Get all messages from a channel" })
 	@Get('channel/getMsg/:identifier')
 	@UseGuards(JwtAuthGuard)
-	public async getMessages(@Req() req : Request, @Param('identifier') chanIdentifier : string)
+	public async getMessages(@Req() req : Request, @Param('identifier') chanIdentifier : string): Promise<import("/Users/clairecommissaire/Documents/42/Cursus42/ft_transcendence/api/src/channel/channel.entity").Channel>
 	{
 		const user : User = await this.userService.getUserByRequest(req);
 		const messages = await this.messageService.getMessage(chanIdentifier, user)
