@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import 'font-awesome/css/font-awesome.min.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCookies } from "react-cookie";
-import bplogo from './bplogo.png';
 
 export const Header = () => {
 
@@ -34,7 +33,7 @@ export const Header = () => {
     return (
             <div className="header">
                 <div className="title">
-                    <Link to="/" style={{ textDecoration: 'none' }}><img src={bplogo} alt="bp logo"></img></Link>
+                    <Link to="/" style={{ textDecoration: 'none' }}><img src="bplogo.png" alt="bp logo"></img></Link>
                 </div>
                 <div className="onglets">
                     <h3 style={{borderBottom: current_url==="/community" ? '3px solid #1dd1a1' : '', }}><Link to="/community" style={{ textDecoration: 'none', color: 'black' }}>COMMUNITY</Link></h3>
