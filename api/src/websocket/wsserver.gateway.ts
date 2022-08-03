@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
 import { ChannelService } from 'src/channel/channel.service';
@@ -79,7 +79,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		this.connectService.handleConnection(client);
 	}
 
-	afterInit(server: Server) {
+	afterInit() {
 		this.logger.log("Start listenning");
 	}
 
@@ -408,24 +408,18 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
 	@SubscribeMessage('game_inQueue')
-	async getInQueue(client : Socket)
-	{
+	async getInQueue(client : Socket) {
 		await this.gameRelayService.getInQueue(client)
 	}
 
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
 	@SubscribeMessage('game_start')
-	async startMatch(client : Socket)
-	{
-		//await this.gameRelayService.sendPosition(client)
+	async startMatch() {
 		await this.gameRelayService.start_gameloop();
 	}
 
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
 	@SubscribeMessage('MoveUp')
 	async MoveUp(client : Socket)
 	{
