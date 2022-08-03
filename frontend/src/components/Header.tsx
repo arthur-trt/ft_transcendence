@@ -25,7 +25,7 @@ export const Header = () => {
             else
             {
                 removeCookie('Authentication');
-                navigate('/');
+                navigate('/login');
             }
         }
         getData()

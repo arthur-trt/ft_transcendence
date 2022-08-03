@@ -83,7 +83,7 @@ export default function Channels() {
       );
       if (!response.ok) {
         removeCookie('Authentication');
-        navigate('/');
+        navigate('/login');
       }
       let actualData = await response.json();
       setDatame(actualData);
