@@ -161,7 +161,6 @@ export class UserService {
 			}
 		}
 		user.channels = [...user.channels, channel]; /* if pb of is not iterable, it is because we did not get the realtions in the find one */
-		console.log(user.channels);
 		await user.save();
 		return (true);
 	}
@@ -183,9 +182,8 @@ export class UserService {
 				return admins.id !== user.id
 			})
 			await chan.save();
-			console.log(chan);
 		}
-   
+
 		if (chan.ownerId == user.id)
 		{
 			await this.channelsRepo

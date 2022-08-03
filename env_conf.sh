@@ -38,7 +38,7 @@ function	build_fortytwo() {
 		# DB CONFIG
 		DB_PATH=${HOME}/goinfre/db
 		POSTGRES_USER=${USER}
-		POSTGRES_PASSWORD=`openssl rand -hex 20`
+		POSTGRES_PASSWORD=$(openssl rand -hex 20)
 		POSTGRES_DB=${USER}
 
 		# PG ADMIN
@@ -53,7 +53,7 @@ function	build_fortytwo() {
 		API_42_CALLBACK=http://localhost:8080/api/auth/42/callback
 
 		# JWT
-		JWT_SECRET=`openssl rand -hex 32`
+		JWT_SECRET=$(openssl rand -hex 32)
 
 		# 2FA
 		TWO_FACTOR_AUTHENTICATION_APP_NAME=TRANSCENDANCE
@@ -70,7 +70,7 @@ function	build_other() {
 		# DB CONFIG
 		DB_PATH=./private/db
 		POSTGRES_USER=${USER}
-		POSTGRES_PASSWORD=`openssl rand -hex 20`
+		POSTGRES_PASSWORD=$(openssl rand -hex 20)
 		POSTGRES_DB=${USER}
 
 		# PG ADMIN
@@ -78,14 +78,14 @@ function	build_other() {
 		PGADMIN_DEFAULT_EMAIL=${USER}@mail.fr
 		PGADMIN_DEFAULT_PASSWORD=password_nul
 		GUNICORN_ACCESS_LOGFILE=/dev/null
-		
+
 		# OAUTH42
 		API_42_UID=${UID42}
 		API_42_SECRET=${SECRET42}
 		API_42_CALLBACK=http://localhost:8080/api/auth/42/callback
 
 		# JWT
-		JWT_SECRET=`openssl rand -hex 32`
+		JWT_SECRET=$(openssl rand -hex 32)
 
 		# 2FA
 		TWO_FACTOR_AUTHENTICATION_APP_NAME=TRANSCENDANCE
