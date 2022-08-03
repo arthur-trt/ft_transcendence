@@ -40,10 +40,10 @@ export class TwoFAAuthController {
 	@UseGuards(JwtAuthGuard)
 	async generate (@Req() req: Request) {
 		const user: User = await (await this.userService.getUserByRequest(req));
-		const {
+		const [
 			secret,
 			optAuthUrl
-		} = await this.twoFaService.generateTwoFactorAuthtificationSecret(user);
+		 ] = await this.twoFaService.generateTwoFactorAuthtificationSecret(user);
 		const qrcode = await this.twoFaService.pipeQrCodeURL(optAuthUrl);
 
 		return {
