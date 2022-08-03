@@ -10,7 +10,7 @@ import { GameService } from '../game/game.service';
 import { MatchHistory } from "src/game/game.entity";
 import { GameModule } from "../game/game.module";
 import { UserModule } from "../user/user.module";
-import { Ball, Match, Paddle } from "../game/game.interface"
+import { Ball, Match, Paddle, Names } from "../game/game.interface"
 import { dataFront } from "../game/game.interface";
 import { createHistogram } from "perf_hooks";
 import { Client } from "socket.io/dist/client";
@@ -64,6 +64,8 @@ export class GameRelayService
         protected P1_MoveDOWN : boolean;
         protected P2_MoveUP : boolean;
         protected P2_MoveDOWN : boolean;
+
+        protected names = {} as Names;
         
         // async resetBall(){
         //     this.match.ball.x = 50;
@@ -83,34 +85,11 @@ export class GameRelayService
             console.log(this.players.size);
             if (this.players.size == 2)
             {
-                console.log("starting match");
+                console.log("starting match/getInQueue");
                 const Match = this.startMatch(this.players);
                 this.players.clear();
             }
         }
-
-//         function end_game(winner)
-// {
-//     clearInterval(loop);
-
-//     if (winner == false)
-//     {
-//         drawRect(0, 0, canvas.width, canvas.height, "FIREBRICK");
-//         drawText("PLAYER 2 WON !", canvas.width * 0.25, canvas.height * 0.2, '#D0AF0A');
-//     }
-//     else
-//     {
-//         drawRect(0, 0, canvas.width, canvas.height, "DEEPSKYBLUE");
-//         drawText("PLAYER 1 WON !", canvas.width * 0.25, canvas.height * 0.2, '#D0AF0A');
-//     }
-
-// }
-
-// update function, the function that does all calculations
-// function update(){
-    
-    
-// }
         
     @UseGuards(WsJwtAuthGuard)
     @UsePipes(ValidationPipe)
@@ -119,7 +98,6 @@ export class GameRelayService
         if (this.players_ready == 1)
         {
             this.loop_stop = setInterval(() => this.loop(), 1000/60);
-            console.log("inter = " + this.loop_stop);
         }
         else
             this.players_ready++;
@@ -145,7 +123,8 @@ export class GameRelayService
                 if (this.p2_score >= VICTORY) {
                     await this.end_game();
                     console.log("P2 WINS");
-                    this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
+                    this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
+                    this.gateway.server.to(this.player2.socket.id).emit('game_end', true);
                     return;
                 }
                 else
@@ -157,7 +136,8 @@ export class GameRelayService
                 if (this.p1_score >= VICTORY) {
                     await this.end_game();
                     console.log("P1 WINS");
-                    this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
+                    this.gateway.server.to(this.player1.socket.id).emit('game_end', true);
+                    this.gateway.server.to(this.player2.socket.id).emit('game_end', false);
                     return;
                 }
                 else
@@ -199,7 +179,7 @@ export class GameRelayService
                 this.ball.velocityY = this.ball.speed * Math.sin(angleRad);
 
                 // speed up the ball everytime a paddle hits it.
-                this.ball.speed += 0.5;
+                this.ball.speed += 0.1;
             }
             this.createData();
             this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
@@ -216,29 +196,24 @@ export class GameRelayService
         this.dataT.ball_y = this.ball.y;
     }
 
-        @UseGuards(WsJwtAuthGuard)
-        @UsePipes(ValidationPipe)
-        async sendPosition(client: Socket)
-        {
-            this.dataT.player1_paddle_x = this.player1.x;
-            this.dataT.player1_paddle_y = this.player1.y;
-            this.dataT.player2_paddle_x = this.player2.x;
-            this.dataT.player2_paddle_y = this.player2.y;
-            this.dataT.ball_x = this.ball.x;
-            this.dataT.ball_y = this.ball.y;
-            this.gateway.server.to(client.id).emit('game_position', this.dataT);
-        }
-        async startMatch(players) 
+        async startMatch(players) //set a boolean to know if a player is already on match
         {
             const [first] = players;
             const[, second] = players;
+
+            //send player names to front
             this.player1.socket = first;
             this.player2.socket = second;
-            console.log("starting match");
+            this.names.p1_name = this.player1.socket.data.user.name;
+            this.names.p2_name = this.player2.socket.data.user.name;
+            this.gateway.server.to(this.player1.socket.id).emit('set_names', this.names); //p1_name = left_name
+            this.gateway.server.to(this.player2.socket.id).emit('set_names', this.names);
+
+            console.log("starting match/startMatch");
             const Match = await this.gameService.createMatch(first.data.user, second.data.user);
-            first.join(Match.id);
-            second.join(Match.id);
-            this.MatchRooms.push(Match.id);
+            first.join( Match.id);
+            second.join( Match.id);
+            this.MatchRooms.push( Match.id);
             this.initPositions();
             this.gateway.server.to( Match.id).emit('game_countdownStart');
             this.match.id = Match.id;
@@ -344,14 +319,6 @@ export class GameRelayService
             this.ball.x = 100;
             this.ball.y = 50;
         }
-
-        // async MovementUp(client : Socket)
-        // {
-        //     if (this.player1.id.id == client.id)
-        //     {
-
-        //     }
-        // }
 
         // @UseGuards(WsJwtAuthGuard)
         // @UsePipes(ValidationPipe)

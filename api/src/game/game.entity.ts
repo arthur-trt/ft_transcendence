@@ -1,6 +1,4 @@
-import { uuidDto } from "src/dtos/uuid.dto";
 import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
 @Entity('MatchHistory') /** table name */
 export class MatchHistory extends BaseEntity {

@@ -1,19 +1,30 @@
-import { uuidDto } from "src/dtos/uuid.dto";
-import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity('Friendships') /** table name */
+@Entity('Friendships')
 export class Friendships extends BaseEntity {
 
-	@PrimaryGeneratedColumn("uuid")  // id du match
+	/**
+	 * Match id
+	 */
+	@PrimaryGeneratedColumn("uuid")
 	id: string;
 
+	/**
+	 * Sender id
+	 */
 	@Column("uuid")
-	sender: string; // uuid de l'initiateurice de la req
+	sender: string;
 
+	/**
+	 * Target id
+	 */
 	@Column("uuid")
-	target: string; // uuid de la personne avec qui on veut etre poto
+	target: string;
 
+	/**
+	 * Status
+	 * @details will be set to "pending" or "accepted"
+	 */
 	@Column()
-	status: string; // on mettra "PENDING" ou "ACCEPTED"
+	status: string;
 }

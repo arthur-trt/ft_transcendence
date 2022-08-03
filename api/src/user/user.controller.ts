@@ -1,17 +1,16 @@
-import { Req, Controller, Patch, UseGuards, UploadedFile, UseInterceptors, flatten, HttpException, HttpStatus } from '@nestjs/common';
-import { Get, Post, Body, Param } from '@nestjs/common';
-import { UserService } from './user.service';
-import { User } from './user.entity';
-import { joinChannelDto } from 'src/dtos/joinChannel.dto';
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Patch, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes, ApiCookieAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { ApiOperation, ApiTags, ApiResponse, ApiCookieAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { uuidDto } from 'src/dtos/uuid.dto';
-import { ModifyUserDto } from 'src/dtos/user.dto';
-import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
-import { v4 as uuidv4 } from 'uuid';
 import { diskStorage } from 'multer';
 import { resolve } from 'path';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { joinChannelDto } from 'src/dtos/joinChannel.dto';
+import { ModifyUserDto } from 'src/dtos/user.dto';
+import { uuidDto } from 'src/dtos/uuid.dto';
+import { v4 as uuidv4 } from 'uuid';
+import { User } from './user.entity';
+import { UserService } from './user.service';
 
 
 /** https://stackoverflow.com/questions/54958244/how-to-use-query-parameters-in-nest-js?answertab=trending#tab-top PARMAS AND TOUTES  */
