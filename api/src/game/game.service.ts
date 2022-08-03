@@ -111,7 +111,7 @@ export class GameService {
 
 	async checkForAchievements(user: User)
 	{
-		let ladder = await this.ladder();
+		const ladder = await this.ladder();
 		if (user.wonMatches == 1)
 			this.achievementsService.createAchievements(user, Achievements_types.FIRST);
 		else if (user.wonMatches == user.lostMatches)
