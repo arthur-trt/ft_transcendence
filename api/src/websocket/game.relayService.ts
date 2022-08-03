@@ -84,7 +84,7 @@ export class GameRelayService
             console.log(this.players.size);
             if (this.players.size == 2)
             {
-                console.log("starting match");
+                console.log("starting match/getInQueue");
                 const Match = this.startMatch(this.players);
                 this.players.clear();
             }
@@ -96,10 +96,6 @@ export class GameRelayService
     {
         if (this.players_ready == 1)
         {
-            this.names.p1_name = this.player1.socket.data.name;
-            this.names.p2_name = this.player2.socket.data.name;
-            this.gateway.server.to(this.player1.socket.id).emit('set_names', this.names); //p1_name = left_name
-            this.gateway.server.to(this.player2.socket.id).emit('set_names', this.names);
             this.loop_stop = setInterval(() => this.loop(), 1000/60);
         }
         else
@@ -203,7 +199,13 @@ export class GameRelayService
             const[, second] = players;
             this.player1.socket = first;
             this.player2.socket = second;
-            console.log("starting match");
+            this.names.p1_name = this.player1.socket.data.user.name;
+            this.names.p2_name = this.player2.socket.data.user.name;
+            console.log("P1 : " + this.names.p1_name);
+            console.log("P2 : " + this.names.p2_name);
+            this.gateway.server.to(this.player1.socket.id).emit('set_names', this.names); //p1_name = left_name
+            this.gateway.server.to(this.player2.socket.id).emit('set_names', this.names);
+            console.log("starting match/startMatch");
             var Match = await this.gameService.createMatch(first.data.user, second.data.user);
             first.join( Match.id);
             second.join( Match.id);

@@ -43,8 +43,8 @@ export default function Game() {
   }
 
   type nameT = {
-    P1_name: string;
-    P2_name: string
+    p1_name: string;
+    p2_name: string
   }
 
   const [socket, setSocket] = useState<any>([]);
@@ -65,8 +65,8 @@ export default function Game() {
   let [P1score, setP1Score] = useState(0);
   let [P2score, setP2Score] = useState(0);
 
-  const [P1Name, setP1Name] = useState<string>();
-  const [P2Name, setP2Name] = useState<string>();
+  let [P1Name, setP1Name] = useState<string>("test1");
+  let [P2Name, setP2Name] = useState<string>("test2");
 
   const [userLeft, setUserLeft] = useState<userT>({
     x: 10,
@@ -138,9 +138,8 @@ export default function Game() {
       }
 
       socket.on('set_names', (n: nameT) => {
-        console.log("set_names");
-        setP1Name(n.P1_name);
-        setP2Name(n.P2_name);
+        setP1Name(n.p1_name);
+        setP2Name(n.p2_name);
       });
 
       socket.on('game_position', (pos: dataT) => {
@@ -398,8 +397,8 @@ export default function Game() {
 
     <div className='game-container'>
       <div className='game-players'>
-        <h3>P1 NAME</h3>
-        <h3>P2 NAME</h3>
+        <h3>{P1Name}</h3>
+        <h3>{P2Name}</h3>
       </div>
       {/*<button type='button' onClick={handleStart}>Start game</button>*/}
       <canvas ref={canvasRef} className="pong-container" onClick={handleClick}/>
