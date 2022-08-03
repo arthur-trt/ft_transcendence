@@ -157,7 +157,7 @@ export class ChatService {
         for (const [k] of sockets.entries())
 		{
         	const u = await this.userService.getUserByIdentifier((await this.findUserbySocket(k)).id);
-        	this.gateway.server.to((await this.findSocketId(u)).id).emit('channelMessage', await this.messageService.getMessage(channelName, u));
+			this.gateway.server.to((await this.findSocketId(u)).id).emit('channelMessage', await this.messageService.getMessage(channelName, u));
         }
 	}
 

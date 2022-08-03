@@ -70,18 +70,18 @@ export class MessageService {
 				.where("chan.name = :chanName", { chanName: chanIdentifier })
 				.leftJoinAndSelect("chan.messages", "messages")
 				.leftJoinAndSelect("messages.sender", "sender")
-				.andWhere(new Brackets(qb => {
-					qb.where("sender.id NOT IN (:...blocked)", { blocked: user.blocked })
-				}))
+				.andWhere("sender.id NOT IN (:...blocked)", { blocked: user.blocked }) // make the query null if no messages
 				.getOne()
+
+			if (msgs == null) msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier }).getOne();
 
 		}
 		else
 		{
-			msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
-			.leftJoinAndSelect("chan.messages", "messages")
-			.leftJoinAndSelect("messages.sender", "sender")
-			.getOne()
+		 	msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
+		 		.leftJoinAndSelect("chan.messages", "messages")
+		 		.leftJoinAndSelect("messages.sender", "sender")
+				.getOne()
 		}
 		return msgs;
 	}
