@@ -148,9 +148,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@SubscribeMessage('getRooms')
 	@UseGuards(WsJwtAuthGuard)
-	async getRooms(client: Socket)
-	{
-		await this.chatService.getRooms().catch((err) => { throw new WsException ('puree')});
+	async getRooms() {
+		await this.chatService.getRooms();
 	}
 
 	/**
