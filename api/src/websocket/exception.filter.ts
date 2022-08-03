@@ -16,9 +16,8 @@ export class WebsocketExceptionsFilter extends BaseWsExceptionFilter {
 		else if (exception instanceof BadRequestException) // pour les DTO
 		{
 			error = exception.getResponse();
-			if (typeof (error) == 'object') {
-				error = JSON.parse(JSON.stringify(error)).message[0];// a chaque fois on prend juste le premier pour assurere un meilleur formatage
-			}
+			if (typeof (error) == 'object')
+				error = JSON.parse(JSON.stringify(error)).message[0]; // a chaque fois on prend juste le premier pour assurere un meilleur formatage
 		}
 		else if (exception instanceof HttpException)
 			error = exception.getResponse();
