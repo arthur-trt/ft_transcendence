@@ -235,7 +235,7 @@ export class GameRelayService
             this.player1.socket = first;
             this.player2.socket = second;
             console.log("starting match");
-            let Match = await this.gameService.createMatch(first.data.user, second.data.user);
+            const Match = await this.gameService.createMatch(first.data.user, second.data.user);
             first.join(Match.id);
             second.join(Match.id);
             this.MatchRooms.push(Match.id);

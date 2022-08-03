@@ -1,6 +1,6 @@
 // select canvas element
-let canvas = document.getElementById("pong");
-let start = document.getElementById("start");
+const canvas = document.getElementById("pong");
+const start = document.getElementById("start");
 
 canvas.width = window.innerWidth * 0.7;
 
@@ -165,7 +165,7 @@ function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-let client = {};
+const client = {};
 client.socket = io.connect();
 
 const framePerSecond = 60;
@@ -175,7 +175,7 @@ async function game_start()
 {
     let i = 3;
     let seconds_left = document.createTextNode(i.toString());
-    let EOS = document.createTextNode(' seconds ...');
+    const EOS = document.createTextNode(' seconds ...');
     start.innerHTML = "The game starts in ";
 
     render();
