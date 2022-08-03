@@ -65,8 +65,8 @@ export default function Game() {
   let [P1score, setP1Score] = useState(0);
   let [P2score, setP2Score] = useState(0);
 
-  let [P1Name, setP1Name] = useState<string>("test1");
-  let [P2Name, setP2Name] = useState<string>("test2");
+  let [P1Name, setP1Name] = useState<string>("");
+  let [P2Name, setP2Name] = useState<string>("");
 
   const [userLeft, setUserLeft] = useState<userT>({
     x: 10,

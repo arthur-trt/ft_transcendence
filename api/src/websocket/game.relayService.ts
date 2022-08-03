@@ -18,6 +18,7 @@ import { Client } from "socket.io/dist/client";
 const MIN_SPEED = 7;
 const VEL_X= 5;
 const VEL_Y = 5;
+const VICTORY = 3;
 
 function collision(b : Ball, p : Paddle){
     const pad_top = p.y;
@@ -106,6 +107,8 @@ export class GameRelayService
     {
         clearInterval(this.loop_stop);
         this.players_ready = 0;
+        await this.gameService.endMatch({id : this.match.id, scoreUser1: this.p1_score, scoreUser2 : this.p2_score})
+        
     }
 
     @UseGuards(WsJwtAuthGuard)
@@ -117,8 +120,8 @@ export class GameRelayService
             if (this.ball.x - this.ball.radius < 0) {
                 this.p2_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', false);
-                if (this.p2_score >= 1) {
-                    this.end_game();
+                if (this.p2_score >= VICTORY) {
+                    await this.end_game();
                     console.log("P2 WINS");
                     this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
                     this.gateway.server.to(this.player2.socket.id).emit('game_end', true);
@@ -130,8 +133,8 @@ export class GameRelayService
             else if (this.ball.x + this.ball.radius > 200) {
                 this.p1_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', true);
-                if (this.p1_score >= 1) {
-                    this.end_game();
+                if (this.p1_score >= VICTORY) {
+                    await this.end_game();
                     console.log("P1 WINS");
                     this.gateway.server.to(this.player1.socket.id).emit('game_end', true);
                     this.gateway.server.to(this.player2.socket.id).emit('game_end', false);
@@ -197,14 +200,15 @@ export class GameRelayService
         {
             const [first] = players;
             const[, second] = players;
+
+            //send player names to front
             this.player1.socket = first;
             this.player2.socket = second;
             this.names.p1_name = this.player1.socket.data.user.name;
             this.names.p2_name = this.player2.socket.data.user.name;
-            console.log("P1 : " + this.names.p1_name);
-            console.log("P2 : " + this.names.p2_name);
             this.gateway.server.to(this.player1.socket.id).emit('set_names', this.names); //p1_name = left_name
             this.gateway.server.to(this.player2.socket.id).emit('set_names', this.names);
+
             console.log("starting match/startMatch");
             var Match = await this.gameService.createMatch(first.data.user, second.data.user);
             first.join( Match.id);
@@ -212,11 +216,7 @@ export class GameRelayService
             this.MatchRooms.push( Match.id);
             this.initPositions();
             this.gateway.server.to( Match.id).emit('game_countdownStart');
-            //console.log(this.match.id)
             this.match.id = Match.id;
-
-            
-            //this.initGamePosition();
         }
 
         async initPositions()

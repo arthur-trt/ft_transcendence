@@ -16,7 +16,7 @@ export class ChannelService {
 	@Inject(forwardRef(() => UserService)) private readonly userService: UserService)
 	{ }
 
-	public async isInChan(chan: Channel, user: User) : Promise<Boolean>
+	public async isInChan(chan: Channel, user: User) : Promise<boolean>
 	{
 		const foundChan : Channel = await this.channelsRepo.findOne({
 			where : { name : chan.name, users : { id : user.id } }
@@ -102,7 +102,7 @@ export class ChannelService {
 	 */
 	public async getChannelByIdentifier(channelIdentifier : string) : Promise<Channel>
 	{
-		let chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages', 'banned', 'admins', 'muted'] });
+		const chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages', 'banned', 'admins', 'muted'] });
 		if (!chan && isValidUUID(channelIdentifier))
 			await this.channelsRepo.findOne({ where: { id: channelIdentifier }, relations: ['messages', 'banned', 'admins', 'muted'] })
 		if (!chan)
@@ -168,7 +168,7 @@ export class ChannelService {
  	* @param toBan
  	* @returns
  	*/
-	public async deleteUserFromChannel(user: User, channel : Channel, toBan: User) : Promise<Channel[]>
+	public async deleteUserFromChannel(user: User, channel : Channel, toBan: User) //: Promise<Channel[]>
 	{
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to delete an user from chan.", HttpStatus.FORBIDDEN);
@@ -179,18 +179,15 @@ export class ChannelService {
 			.relation(Channel, "users")
 			.of({ id: toBan.id })
 			.remove({ id: channel.id });
-		return this.getUsersOfChannels();
 	}
 
 	public async unban(channel: Channel, toUnBan: User)
 	{
 		console.log("Un Ban")
-
 		channel.banned = channel.banned.filter((banned) => {
 			return banned.id !== toUnBan.id
 		})
 		await channel.save();
-		return channel;
 	}
 
 	public async unmute(channel: Channel, toUnMute: User)
@@ -202,7 +199,6 @@ export class ChannelService {
 		await channel.save();
 		console.log("Muted" + channel.muted)
 		console.log( "Id " + channel.mutedId)
-		return channel;
 	}
 
 	public async temporaryBanUser(user: User, channel: Channel, toBan: User)
@@ -221,7 +217,6 @@ export class ChannelService {
 		await channel.save();
 		/** Step three : set timeout to remove from ban list */
 		setTimeout(() => { this.unban(channel, toBan)}, 30000);
-		return channel;
 	}
 
 
@@ -237,6 +232,5 @@ export class ChannelService {
 		console.log("Muted" + channel.muted)
 		console.log( "Id " + channel.mutedId)
 		setTimeout(() => { this.unmute(channel, toMute)}, 30000);
-		return channel;
 	}
 }

@@ -24,7 +24,7 @@ function TwoFactor() {
         setMessage("2FA created successfully");
         return (navigate("/")); //redirection to home if success
       } else {
-        setMessage("Some error occured");
+        setMessage("Wrong code");
 
       }
     } catch (err) {

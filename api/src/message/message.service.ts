@@ -35,7 +35,7 @@ export class MessageService {
 	 * @param msg
 	 * @returns the Channel object containing its new message in its messages relationship
 	 */
-	public async sendMessageToChannel(chanIdentifier : string, user : User, msg : string) : Promise<Channel>
+	public async sendMessageToChannel(chanIdentifier : string, user : User, msg : string) //: Promise<Channel>
 	{
 		const channel : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier);
 		if (channel.mutedId.includes(user.id))
@@ -51,7 +51,7 @@ export class MessageService {
 		)
 		channel.messages = [...channel.messages, newMessage]; /* if pb of is not iterable, it is because we did not get the
 		 ealtions in the find one */
-		return await channel.save();
+		await channel.save();
 	}
 
 
@@ -63,23 +63,25 @@ export class MessageService {
 	public async getMessage(chanIdentifier: string, user: User) : Promise<Channel>
 	{
 		const chan: Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
-
-		let msgs : Channel;
-		if (user.blocked && user.blocked.length > 0) {
-			msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
+		let msgs: Channel;
+		if (user.blocked.length > 0)
+		{
+			msgs = await this.chanRepo.createQueryBuilder("chan")
+				.where("chan.name = :chanName", { chanName: chanIdentifier })
 				.leftJoinAndSelect("chan.messages", "messages")
 				.leftJoinAndSelect("messages.sender", "sender")
-				.where(new Brackets(qb => {
-					qb.where("sender.id NOT IN (:...blocked)", { blocked: user.blocked })
-				}))
+				.andWhere("sender.id NOT IN (:...blocked)", { blocked: user.blocked }) // make the query null if no messages
 				.getOne()
+
+			if (msgs == null) msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier }).getOne();
+
 		}
 		else
 		{
-			msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
-			.leftJoinAndSelect("chan.messages", "messages")
-			.leftJoinAndSelect("messages.sender", "sender")
-			.getOne()
+		 	msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
+		 		.leftJoinAndSelect("chan.messages", "messages")
+		 		.leftJoinAndSelect("messages.sender", "sender")
+				.getOne()
 		}
 		return msgs;
 	}
@@ -93,7 +95,7 @@ export class MessageService {
 	 */
 	public async 	getChannelMessagesOfUser(chanIdentifier: string, user : User) //: Promise<User>
 	{
-		let chan : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
+		const chan : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
 		const msgs = this.chatRepo.createQueryBuilder("msg")
 			.where("msg.sender = :sendername", { sendername: user.id })
 			.leftJoinAndSelect("msg.sender", "sender")
@@ -112,9 +114,12 @@ export class MessageService {
 	 * @param msg
 	 * @returns array of all private messages
 	 */
-	public async sendPrivateMessage(src: User, target: User, msg: string) : Promise<privateMessage[]> {
+	public async sendPrivateMessage(src: User, target: User, msg: string)// : Promise<privateMessage[]>
+	{
 
 		const user2 = await this.userService.getUserByIdentifier(target.name);
+		if (user2.blocked.includes(src.id))
+			throw new HttpException('This user blocked you.', HttpStatus.FORBIDDEN)
 		const newMessage : privateMessage = await this.pmRepo.save(
 		{
 			sender: src.id,
@@ -122,7 +127,6 @@ export class MessageService {
 			message : msg,
 		}
 		)
-		return await this.pmRepo.find();
 	}
 
 

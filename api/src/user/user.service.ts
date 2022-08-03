@@ -78,7 +78,7 @@ export class UserService {
 
 	public async findOrCreateUser(intra_id: number, fullname: string, username: string, avatar: string, mail: string)
 	{
-		let user = await this.getUserByIntraId(intra_id);
+		const user = await this.getUserByIntraId(intra_id);
 		if (user)
 		{
 			return (user);
@@ -161,7 +161,6 @@ export class UserService {
 			}
 		}
 		user.channels = [...user.channels, channel]; /* if pb of is not iterable, it is because we did not get the realtions in the find one */
-		console.log(user.channels);
 		await user.save();
 		return (true);
 	}
@@ -177,15 +176,12 @@ export class UserService {
 			.of(user)
 			.remove(chan);
 
-
 		if (chan.adminsId.includes(user.id)) {
 			chan.admins = chan.admins.filter((admins) => {
 				return admins.id !== user.id
 			})
 			await chan.save();
-			console.log(chan);
 		}
-   
 		if (chan.ownerId == user.id)
 		{
 			await this.channelsRepo
@@ -195,7 +191,6 @@ export class UserService {
 				.set(null);
 			chan.ownerId = ""; // See how possible to not do it manually
 		}
-		return await this.chanService.getUsersOfChannels();
 	}
 
 	public async getChannelsForUser(user: User) :  Promise<Channel[]>
@@ -208,20 +203,19 @@ export class UserService {
 		return chans;
 	}
 
-	public async block(user: User, toBan: User) :  Promise<User>
+	public async block(user: User, toBan: User) //:  Promise<User>
 	{
 		user.blocked.push(toBan.id);
 		await user.save();
-		return user;
 	}
 
-	public async unblock(user: User, toUnBan: User): Promise<User> {
+	public async unblock(user: User, toUnBan: User)//: Promise<User>
+	{
 		const index = user.blocked.indexOf(toUnBan.id);
 		if (index > -1) {
 			user.blocked.splice(index, 1);
 		}
 		await user.save();
-		return user;
 	}
 
 	public async	setUserActive (user: User) {
