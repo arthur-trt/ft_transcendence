@@ -45,6 +45,12 @@ export class User extends BaseEntity {
 	wonMatches: number;
 
 	@Column({
+		type: 'int',
+		default: 0
+	})
+	lostMatches: number;
+	
+	@Column({
 		nullable: true,
 		select: false
 	})

@@ -2,7 +2,6 @@ import { Injectable, Res } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/user.entity';
 import { Response } from 'express';
-import { jwtConstants } from '../jwt/jwt.constants';
 import { AuthService } from '../auth.service';
 import { UserService } from 'src/user/user.service';
 
@@ -24,11 +23,12 @@ export class FortyTwoService extends AuthService {
 	public login (user: User, @Res() res: Response) {
 		if (user)
 		{
-			res.header('Set-Cookie', this.generateCookie(user));
 			if (user.TwoFA_enable)
 			{
+				res.header('Set-Cookie', this.generateCookie(user));
 				return res.redirect('/2fa');
 			}
+			res.header('Set-Cookie', this.generateCookie(user, true));
 			return res.redirect('/');
 		}
 		return res.redirect('/login');

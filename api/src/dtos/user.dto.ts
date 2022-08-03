@@ -1,6 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsEmpty, isNotEmpty, Length } from "class-validator";
-import {v4 as uuidv4} from 'uuid';
+import { IsEmail, IsNotEmpty, Length } from "class-validator";
 
 export class ModifyUserDto {
 

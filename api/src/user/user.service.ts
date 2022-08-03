@@ -78,7 +78,7 @@ export class UserService {
 
 	public async findOrCreateUser(intra_id: number, fullname: string, username: string, avatar: string, mail: string)
 	{
-		let user = await this.getUserByIntraId(intra_id);
+		const user = await this.getUserByIntraId(intra_id);
 		if (user)
 		{
 			return (user);

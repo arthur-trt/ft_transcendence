@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { jwtConstants } from './jwt/jwt.constants';
+import { JwtPayload } from './payload.type';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,7 @@ export class AuthService {
 
 	protected	generateCookie(user: User, isSecondFactorAuthenticated:boolean = false)
 	{
-		const payload = {
+		const payload: JwtPayload = {
 			sub: user.id,
 			isSecondFactorAuthenticated
 		}

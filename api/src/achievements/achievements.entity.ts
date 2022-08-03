@@ -4,14 +4,10 @@ import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGen
 
 export enum Achievements_types {
     TOP1 = "Top 1",
-    TOP3 = "Top 3",
-	TOP10 = "Top 10",
 	WINNER = "Winner - Won all matches",
-	LOSER = "Loser - Lost all matches",
-	ROW3 = "Row 3 - Won three times in a row",
-	ROW5 = "Row 5 - Won five times in a row",
+	FIRST = "First victory",
+	HALFHALF = "50/50 : Perfect balance between loss and success",
 	CHANNELLEADER = "Channel Leader - Is owner of at least three channels",
-	HALFHALF = "50/50 : Perfeect balance between loss and successds",
 	NOBODYLOVESYOU = "Nobody Loves You - Banned from a channel"
 }
 

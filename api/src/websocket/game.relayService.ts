@@ -18,6 +18,7 @@ import { Client } from "socket.io/dist/client";
 const MIN_SPEED = 7;
 const VEL_X= 5;
 const VEL_Y = 5;
+const VICTORY = 3;
 
 function collision(b : Ball, p : Paddle){
     const pad_top = p.y;
@@ -128,6 +129,8 @@ export class GameRelayService
     {
         clearInterval(this.loop_stop);
         this.players_ready = 0;
+        await this.gameService.endMatch({id : this.match.id, scoreUser1: this.p1_score, scoreUser2 : this.p2_score})
+        
     }
 
     @UseGuards(WsJwtAuthGuard)
@@ -139,8 +142,8 @@ export class GameRelayService
             if (this.ball.x - this.ball.radius < 0) {
                 this.p2_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', false);
-                if (this.p2_score >= 1) {
-                    this.end_game();
+                if (this.p2_score >= VICTORY) {
+                    await this.end_game();
                     console.log("P2 WINS");
                     this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
                     return;
@@ -151,8 +154,8 @@ export class GameRelayService
             else if (this.ball.x + this.ball.radius > 200) {
                 this.p1_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', true);
-                if (this.p1_score >= 1) {
-                    this.end_game();
+                if (this.p1_score >= VICTORY) {
+                    await this.end_game();
                     console.log("P1 WINS");
                     this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
                     return;
@@ -215,38 +218,30 @@ export class GameRelayService
 
         @UseGuards(WsJwtAuthGuard)
         @UsePipes(ValidationPipe)
-        //@SubscribeMessage('game_start')
         async sendPosition(client: Socket)
         {
-            // console.log("ooooooooooooooo")
-            // console.log("game_start")
             this.dataT.player1_paddle_x = this.player1.x;
             this.dataT.player1_paddle_y = this.player1.y;
             this.dataT.player2_paddle_x = this.player2.x;
             this.dataT.player2_paddle_y = this.player2.y;
             this.dataT.ball_x = this.ball.x;
             this.dataT.ball_y = this.ball.y;
-            // this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
             this.gateway.server.to(client.id).emit('game_position', this.dataT);
-      }
-        async startMatch(players) //set a boolean to know if a player is already on match
+        }
+        async startMatch(players) 
         {
             const [first] = players;
             const[, second] = players;
             this.player1.socket = first;
             this.player2.socket = second;
             console.log("starting match");
-            var Match = await this.gameService.createMatch(first.data.user, second.data.user);
-            first.join( Match.id);
-            second.join( Match.id);
-            this.MatchRooms.push( Match.id);
+            const Match = await this.gameService.createMatch(first.data.user, second.data.user);
+            first.join(Match.id);
+            second.join(Match.id);
+            this.MatchRooms.push(Match.id);
             this.initPositions();
             this.gateway.server.to( Match.id).emit('game_countdownStart');
-            //console.log(this.match.id)
             this.match.id = Match.id;
-
-            
-            //this.initGamePosition();
         }
 
         async initPositions()
