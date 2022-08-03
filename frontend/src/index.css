@@ -600,8 +600,15 @@ cursor: pointer;
   font-size: 11px;
 }
 
-.users-single-info .paperplane, .gamepad, .userslash, .userxmark ,.userplus {
+.users-single-info .paperplane, .gamepad, .userxmark ,.userplus {
   color: #1dd1a1;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 3px;
+  border-radius: 5px;
+}
+
+.users-single-info .userslash {
   cursor: pointer;
   font-size: 13px;
   padding: 3px;
