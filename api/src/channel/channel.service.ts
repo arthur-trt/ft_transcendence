@@ -16,7 +16,7 @@ export class ChannelService {
 	@Inject(forwardRef(() => UserService)) private readonly userService: UserService)
 	{ }
 
-	public async isInChan(chan: Channel, user: User) : Promise<Boolean>
+	public async isInChan(chan: Channel, user: User) : Promise<boolean>
 	{
 		const foundChan : Channel = await this.channelsRepo.findOne({
 			where : { name : chan.name, users : { id : user.id } }
