@@ -50,14 +50,13 @@ export class FriendshipsService {
 			.getOne();
 		friendship.status = "accepted";
 		await this.friendRepo.save(friendship);
-		const first : User = await this.userservice.getUserByIdentifier(user1.id);
-		const second : User = await this.userservice.getUserByIdentifier(user2.id);
 
-		first.friends = [...first.friends, user2];
-		second.friends = [...second.friends, user1];
+		user1.friends = [...user1.friends, user2];
+		user2.friends = [...user2.friends, user1];
 
-		await first.save();
-		await second.save();
+
+		await this.userRepo.save(user1);//.save();
+		await this.userRepo.save(user2);
 
 		return ;
 	}

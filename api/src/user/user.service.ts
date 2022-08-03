@@ -208,8 +208,11 @@ export class UserService {
 
 	public async block(user: User, toBan: User) :  Promise<User>
 	{
+		if (user.blocked.includes(toBan.id))
+			return;
 		user.blocked.push(toBan.id);
 		await user.save();
+		console.log("NEW BLOCKED " + user.blocked)
 		return user;
 	}
 

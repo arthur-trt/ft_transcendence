@@ -76,7 +76,7 @@ export class ChatService {
 	async addUser(client: Socket, userToAdd : addToPrivateRoomDto)
 	{
 		const userSocket: Socket = await this.findSocketId(userToAdd.user);
-		const user: User = await this.userService.getUserByIdentifier(userToAdd.user.id);
+		const user : User = await this.userService.getUserByIdentifier(userToAdd.user.id)
 		await this.userService.joinChannel(user, userToAdd.chanName)
 		.then(async () =>  {
 			userSocket.join(userToAdd.chanName);
@@ -156,8 +156,10 @@ export class ChatService {
 		const sockets = await this.gateway.server.in(channelName).allSockets();
         for (const [k] of sockets.entries())
 		{
-        	const u = await this.userService.getUserByIdentifier((await this.findUserbySocket(k)).id);
-        	this.gateway.server.to((await this.findSocketId(u)).id).emit('channelMessage', await this.messageService.getMessage(channelName, u));
+			const u: User = await this.findUserbySocket(k);
+			const msgs = await this.messageService.getMessage(channelName, u)
+			console.log("huhu "  + u.name);
+        	this.gateway.server.to(k).emit('channelMessage', msgs);
         }
 	}
 
@@ -166,6 +168,9 @@ export class ChatService {
 	async addFriend(client: Socket, friend: User)
 	{
 		const friendSocket: Socket = await this.findSocketId(friend)
+		console.log("FRIEND");
+		console.log(friend)
+
 		await this.friendService.sendFriendRequest(client.data.user, friend);
 		if (friendSocket)
 			this.gateway.server.to(friendSocket.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(friend))
@@ -202,8 +207,17 @@ export class ChatService {
 
 	async block(client: Socket, toBlock: User)
 	{
+		console.log("BLOCK")
 		await this.userService.block(client.data.user, toBlock);
 		this.gateway.server.to(client.id).emit('blocked', toBlock.name + " has been blocked");
+
+
+		this.gateway.activeUsers.forEach((socket: Socket) => {
+			this.gateway.server.to(socket.id).emit(
+				'listUsers',
+				this.gateway.listConnectedUser(socket, this.gateway.allUsers, this.gateway.activeUsers, false)
+			);
+		});
 	}
 
 	async unblock(client: Socket, toUnBlock: User)

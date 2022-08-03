@@ -1,4 +1,4 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ConsoleLogger, forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { deepStrictEqual } from 'assert';
 import { UUIDVersion } from 'class-validator';
@@ -63,6 +63,7 @@ export class MessageService {
 	public async getMessage(chanIdentifier: string, user: User) : Promise<Channel>
 	{
 		const chan: Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
+		console.log("USER BLCOKED === " + user.blocked)
 		let msgs: Channel;
 		if (user.blocked.length > 0)
 		{
@@ -95,6 +96,7 @@ export class MessageService {
 	 */
 	public async 	getChannelMessagesOfUser(chanIdentifier: string, user : User) //: Promise<User>
 	{
+
 		let chan : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
 		const msgs = this.chatRepo.createQueryBuilder("msg")
 			.where("msg.sender = :sendername", { sendername: user.id })
@@ -116,13 +118,14 @@ export class MessageService {
 	 */
 	public async sendPrivateMessage(src: User, target: User, msg: string) : Promise<privateMessage[]> {
 
-		const user2 = await this.userService.getUserByIdentifier(target.name);
-		if (user2.blocked.includes(src.id))
+		console.log( "ICI " + JSON.stringify(target))
+		console.log(target.blocked)
+		if (target.blocked.includes(src.id))
 			throw new HttpException('This user blocked you.', HttpStatus.FORBIDDEN)
 		const newMessage : privateMessage = await this.pmRepo.save(
 		{
 			sender: src.id,
-			target: user2.id,
+			target: target.id,
 			message : msg,
 		}
 		)
