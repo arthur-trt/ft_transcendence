@@ -1,19 +1,11 @@
-import { User } from "src/user/user.entity";
-import { UserService } from "src/user/user.service";
-import { WSServer } from "./wsserver.gateway";
-import { forwardRef, Inject, Injectable, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
+import { UserService } from "src/user/user.service";
+import { Ball, dataFront, Match, Names, Paddle } from "../game/game.interface";
 import { GameService } from '../game/game.service';
-import { MatchHistory } from "src/game/game.entity";
-import { GameModule } from "../game/game.module";
-import { UserModule } from "../user/user.module";
-import { Ball, Match, Paddle, Names } from "../game/game.interface"
-import { dataFront } from "../game/game.interface";
-import { createHistogram } from "perf_hooks";
-import { Client } from "socket.io/dist/client";
+import { WSServer } from "./wsserver.gateway";
 
 const MIN_SPEED = 7;
 const VEL_X= 5;
@@ -25,12 +17,12 @@ function collision(b : Ball, p : Paddle){
     const pad_bottom = p.y + p.height;
     const pad_left = p.x;
     const pad_right = p.x + p.width;
-    
+
     const ball_top = b.y - b.radius;
     const ball_bottom = b.y + b.radius;
     const ball_left = b.x - b.radius;
     const ball_right = b.x + b.radius;
-    
+
     //return p.left < b.right && p.top < b.bottom && p.right > b.left && p.bottom > b.top;
     return pad_left < ball_right && pad_top < ball_bottom && pad_right > ball_left && pad_bottom > ball_top;
 }
@@ -42,11 +34,11 @@ export class GameRelayService
         protected readonly jwtService: JwtService,
 		protected readonly userService: UserService,
         protected readonly gameService: GameService,
-        
+
         @Inject(forwardRef(() => WSServer)) protected gateway : WSServer
         ) {
         }
-        
+
         protected players = new Set<Socket>();
         protected MatchRooms = [];
         static nb_room = 0 ;
@@ -66,7 +58,7 @@ export class GameRelayService
         protected P2_MoveDOWN : boolean;
 
         protected names = {} as Names;
-        
+
         // async resetBall(){
         //     this.match.ball.x = 50;
         //     this.match.ball.y = 100;
@@ -90,7 +82,7 @@ export class GameRelayService
                 this.players.clear();
             }
         }
-        
+
     @UseGuards(WsJwtAuthGuard)
     @UsePipes(ValidationPipe)
     async start_gameloop()
@@ -108,7 +100,7 @@ export class GameRelayService
         clearInterval(this.loop_stop);
         this.players_ready = 0;
         await this.gameService.endMatch({id : this.match.id, scoreUser1: this.p1_score, scoreUser2 : this.p2_score})
-        
+
     }
 
     @UseGuards(WsJwtAuthGuard)
@@ -310,7 +302,7 @@ export class GameRelayService
                     this.player2.y += 2;
             }
         }
-    
+
         async resetBall()
         {
             this.ball.speed = 1;
@@ -336,7 +328,7 @@ export class GameRelayService
         //     this.match.player_2.y = 50;
         //     //this.sendPosition(client);
         // };
-        
+
         // @UseGuards(WsJwtAuthGuard)
         // @UsePipes(ValidationPipe)
         // @SubscribeMessage('game_start')
@@ -352,23 +344,23 @@ export class GameRelayService
         //     console.log(this.match.id)
         //     this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
         // }
-    
+
     // collision detection
-    
-    
+
+
     //watchmode if a friend is on a match (make a research ), join on watch mode
     // for (friend in matchhistory)
     //  if (matchhistory.stoptime == null)
     // join (matchhistory.uuid) (room)
-    
+
 
     // @UseGuards(WsJwtAuthGuard)
     // @UsePipes(ValidationPipe)
     // @SubscribeMessage('game_settings')
     // async updateCanvas(client : Socket)
-    // {     
+    // {
     // }
-    
+
     // @SubscribeMessage('test')
     // async test(client: Socket, position: any) {
     //     this.dataT.player1_paddle_x = 50;
