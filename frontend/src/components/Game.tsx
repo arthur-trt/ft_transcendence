@@ -398,9 +398,9 @@ export default function Game() {
       </div>
       {/*<button type='button' onClick={handleStart}>Start game</button>*/}
       <canvas ref={canvasRef} className="pong-container" onClick={handleClick}/>
-      <img ref={imgRef} src="coupe.png" className="hidden" alt="image de coupe indiquant votre placement dans la partie"/>
-      <img ref={firstRef} src="1st.png" className="hidden" alt="premier"/>
-      <img ref={secondRef} src="2nd.png" className="hidden" alt="deuxieme"/>
+      <img ref={imgRef} src="coupe.png" className="hidden" alt="Winning cup"/>
+      <img ref={firstRef} src="1st.png" className="hidden" alt="First place"/>
+      <img ref={secondRef} src="2nd.png" className="hidden" alt="Second place"/>
       {/*onMouseMove={updateMousePosition}*/}
     </div>
   )
