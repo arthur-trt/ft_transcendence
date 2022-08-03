@@ -31,7 +31,7 @@ export class ChatService {
 
 	async findSocketId(user: User) : Promise<Socket>
 	{
-		for (let [allUsers, socket] of this.gateway.activeUsers.entries()) {
+		for (const [allUsers, socket] of this.gateway.activeUsers.entries()) {
   			if (allUsers.id == user.id)
     			return socket;
 		}
@@ -39,7 +39,7 @@ export class ChatService {
 
 	async findUserbySocket(askedsocket: string): Promise<User>
 	{
-		for (let [allUsers, socket] of this.gateway.activeUsers.entries()) {
+		for (const [allUsers, socket] of this.gateway.activeUsers.entries()) {
   			if (socket.id == askedsocket)
     			return allUsers;
 		}
@@ -47,13 +47,13 @@ export class ChatService {
 
 	async getRooms(client? : Socket)
 	{
-		for (let [allUsers, socket] of this.gateway.activeUsers.entries())
+		for (const [allUsers, socket] of this.gateway.activeUsers.entries())
 			this.gateway.server.to(socket.id).emit('rooms', " get rooms ", await this.channelService.getChannelsForUser(allUsers));
 	}
 
 	async refreshChanMessage(channelName: string)
 	{
-		for (let [allUsers, socket] of this.gateway.activeUsers.entries())
+		for (const [allUsers, socket] of this.gateway.activeUsers.entries())
 			this.gateway.server.to(socket.id).emit('channelMessage', await this.messageService.getMessage(channelName, allUsers));
 	}
 
@@ -73,11 +73,11 @@ export class ChatService {
 		})
 	}
 
-
 	async addUser(client: Socket, userToAdd : addToPrivateRoomDto)
 	{
-		const userSocket : Socket = await this.findSocketId(userToAdd.user);
-		await this.userService.joinChannel(userToAdd.user, userToAdd.chanName)
+		const userSocket: Socket = await this.findSocketId(userToAdd.user);
+		const user: User = await this.userService.getUserByIdentifier(userToAdd.user.id);
+		await this.userService.joinChannel(user, userToAdd.chanName)
 		.then(async () =>  {
 			userSocket.join(userToAdd.chanName);
 			await this.getRooms();
@@ -100,7 +100,6 @@ export class ChatService {
 
 	async ban(client: Socket, data : { channel: string, toBan: User })
 	{
-		console.log("chat service");
 		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
 		await this.channelService.temporaryBanUser(client.data.user, chan, data.toBan);
 		await this.refreshChanMessage(data.channel);
@@ -148,12 +147,18 @@ export class ChatService {
 	async sendChannelMessage(client: Socket, data: sendChannelMessageDto)
 	{
 		await this.messageService.sendMessageToChannel(data.chan, client.data.user, data.msg);
-		this.gateway.server.to(data.chan).emit('channelMessage', await this.messageService.getMessage(data.chan, client.data.user));
+		await this.getChannelMessages(client, data.chan);
 	}
+
 
 	async getChannelMessages(client : Socket, channelName: string)
 	{
-		this.gateway.server.to(channelName).emit('channelMessage', await this.messageService.getMessage(channelName, client.data.user));
+		const sockets = await this.gateway.server.in(channelName).allSockets();
+        for (const [k] of sockets.entries())
+		{
+        	const u = await this.userService.getUserByIdentifier((await this.findUserbySocket(k)).id);
+        	this.gateway.server.to((await this.findSocketId(u)).id).emit('channelMessage', await this.messageService.getMessage(channelName, u));
+        }
 	}
 
 	/** Friendships */
