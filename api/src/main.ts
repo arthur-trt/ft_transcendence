@@ -47,7 +47,6 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('api')
     .addCookieAuth('Authentication')
-    .setBasePath('api')
     .build();
 
   const options: SwaggerDocumentOptions = {
