@@ -45,7 +45,7 @@ export class ChatService {
 		}
 	}
 
-	async getRooms(client? : Socket)
+	async getRooms()
 	{
 		for (const [allUsers, socket] of this.gateway.activeUsers.entries())
 			this.gateway.server.to(socket.id).emit('rooms', " get rooms ", await this.channelService.getChannelsForUser(allUsers));

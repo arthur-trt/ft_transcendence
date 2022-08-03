@@ -109,7 +109,7 @@ export class UserController {
 	@ApiOperation({ summary: "Block a user" })
 	@UseGuards(JwtAuthGuard)
 	@ApiCookieAuth()
-	public async blockUser(@Req() req: Request, @Body() toBeBlocked: any) //: Promise<User>
+	public async blockUser(@Req() req: Request, @Body() toBeBlocked: { username : string}) //: Promise<User>
 	{
 		const user: User = await this.userService.getUserByRequest(req);
 		const toBlock: User = await this.userService.getUserByIdentifier(toBeBlocked.username);

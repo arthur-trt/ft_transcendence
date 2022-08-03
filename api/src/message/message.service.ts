@@ -54,7 +54,6 @@ export class MessageService {
 	 */
 	public async getMessage(chanIdentifier: string, user: User) : Promise<Channel>
 	{
-		const chan: Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
 		let msgs: Channel;
 		if (user.blocked.length > 0)
 		{
