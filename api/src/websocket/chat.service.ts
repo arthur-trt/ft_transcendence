@@ -204,11 +204,13 @@ export class ChatService {
 	{
 		await this.userService.block(client.data.user, toBlock);
 		this.gateway.server.to(client.id).emit('blocked', toBlock.name + " has been blocked");
+		await this.getFriends(client);
 	}
 
 	async unblock(client: Socket, toUnBlock: User)
 	{
 		await this.userService.unblock(client.data.user, toUnBlock);
 		this.gateway.server.to(client.id).emit('unblocked', toUnBlock.name + " has been unblocked");
+		await this.getFriends(client);
 	}
 }
