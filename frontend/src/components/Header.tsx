@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import 'font-awesome/css/font-awesome.min.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCookies } from "react-cookie";
 import bplogo from './bplogo.png';
 
@@ -9,6 +9,7 @@ export const Header = () => {
     const [data, setData] = useState<any>([]);
     let current_url = window.location.href.substring(21);
     const [cookies, setCookie, removeCookie] = useCookies();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const getData = async () => {
@@ -24,12 +25,12 @@ export const Header = () => {
             else
             {
                 removeCookie('Authentication');
-                window.location.reload();
+                navigate('/login');
             }
         }
         getData()
     }, [])
-    
+
     return (
             <div className="header">
                 <div className="title">
