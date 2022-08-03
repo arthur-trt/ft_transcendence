@@ -95,7 +95,7 @@ export class MessageService {
 	 */
 	public async 	getChannelMessagesOfUser(chanIdentifier: string, user : User) //: Promise<User>
 	{
-		let chan : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
+		const chan : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
 		const msgs = this.chatRepo.createQueryBuilder("msg")
 			.where("msg.sender = :sendername", { sendername: user.id })
 			.leftJoinAndSelect("msg.sender", "sender")

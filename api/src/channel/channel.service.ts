@@ -102,7 +102,7 @@ export class ChannelService {
 	 */
 	public async getChannelByIdentifier(channelIdentifier : string) : Promise<Channel>
 	{
-		let chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages', 'banned', 'admins', 'muted'] });
+		const chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages', 'banned', 'admins', 'muted'] });
 		if (!chan && isValidUUID(channelIdentifier))
 			await this.channelsRepo.findOne({ where: { id: channelIdentifier }, relations: ['messages', 'banned', 'admins', 'muted'] })
 		if (!chan)
