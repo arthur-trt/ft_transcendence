@@ -65,13 +65,6 @@ export class GameRelayService
         protected P2_MoveUP : boolean;
         protected P2_MoveDOWN : boolean;
         
-        // async resetBall(){
-        //     this.match.ball.x = 50;
-        //     this.match.ball.y = 100;
-        //     this.match.ball.velocity.x = VEL_X;
-        //     this.match.ball.velocity.y = VEL_Y;
-        //     //this.match.ball.speed = 7;
-        // }
         @UseGuards(WsJwtAuthGuard)
         @UsePipes(ValidationPipe)
         async getInQueue(client : Socket)
@@ -214,6 +207,7 @@ export class GameRelayService
         this.dataT.player2_paddle_y = this.player2.y;
         this.dataT.ball_x = this.ball.x;
         this.dataT.ball_y = this.ball.y;
+
     }
 
         @UseGuards(WsJwtAuthGuard)
@@ -226,16 +220,21 @@ export class GameRelayService
             this.dataT.player2_paddle_y = this.player2.y;
             this.dataT.ball_x = this.ball.x;
             this.dataT.ball_y = this.ball.y;
+            // this.dataT.player_1 = this.MatchRooms[client.id].user[0];
+            // this.dataT.player_2 = this.MatchRooms[client.id].user[1];
+            // console.log(this.dataT.player_1);
+            // console.log(this.dataT.player_2);
             this.gateway.server.to(client.id).emit('game_position', this.dataT);
         }
         async startMatch(players) 
         {
+            await this.gameService.listUsersInGame;
             const [first] = players;
             const[, second] = players;
             this.player1.socket = first;
             this.player2.socket = second;
             console.log("starting match");
-            const Match = await this.gameService.createMatch(first.data.user, second.data.user);
+            var Match = await this.gameService.createMatch(first.data.user, second.data.user);
             first.join(Match.id);
             second.join(Match.id);
             this.MatchRooms.push(Match.id);

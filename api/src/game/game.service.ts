@@ -8,6 +8,7 @@ import { MatchHistory } from './game.entity';
 import { Socket, Server } from 'socket.io'
 import { Achievements_types } from 'src/achievements/achievements.entity';
 import { AchievementsService } from 'src/achievements/achievements.service';
+import { compareSync } from 'bcrypt';
 
 
 @Injectable()
@@ -108,7 +109,18 @@ export class GameService {
 		});
 		return match;
 	}
-
+	async listUsersInGame()
+	{
+		const list = await this.MatchRepo.find({
+			where :{
+				finished: false,		
+			},
+		}) 
+		console.log("CACACACCACACACACCA")
+		console.log(list)
+		return list;
+	}
+	
 	async checkForAchievements(user: User)
 	{
 		const ladder = await this.ladder();
