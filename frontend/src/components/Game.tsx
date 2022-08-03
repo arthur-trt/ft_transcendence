@@ -1,4 +1,4 @@
-import { computeHeadingLevel } from '@testing-library/react';
+//import { computeHeadingLevel } from '@testing-library/react';
 import React, { useState, useEffect } from 'react';
 
 import { socketo } from '..';
@@ -402,9 +402,9 @@ export default function Game() {
       </div>
       {/*<button type='button' onClick={handleStart}>Start game</button>*/}
       <canvas ref={canvasRef} className="pong-container" onClick={handleClick}/>
-      <img ref={imgRef} src={coupe} className="hidden" />
-      <img ref={firstRef} src={first} className="hidden" />
-      <img ref={secondRef} src={second} className="hidden" />
+      <img ref={imgRef} src={coupe} className="hidden" alt="image de coupe indiquant votre placement dans la partie"/>
+      <img ref={firstRef} src={first} className="hidden" alt="premier"/>
+      <img ref={secondRef} src={second} className="hidden" alt="deuxieme"/>
       {/*onMouseMove={updateMousePosition}*/}
     </div>
   )
