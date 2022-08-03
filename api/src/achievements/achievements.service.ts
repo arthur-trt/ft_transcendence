@@ -32,7 +32,7 @@ export class AchievementsService {
 	public async hasAchievement(achievement: Achievements_types, user: User)
 	{
 		const achiev = this.getAchievements(user);
-		for (let i in achiev)
+		for (const i in achiev)
 		{
 			if (achiev[i] == achievement)
 				return true;
