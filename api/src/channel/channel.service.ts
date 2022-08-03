@@ -16,6 +16,12 @@ export class ChannelService {
 	@Inject(forwardRef(() => UserService)) private readonly userService: UserService)
 	{ }
 
+	/**
+	 * @brief Returns true if an user is in the specified channel, false if not.
+	 * @param chan
+	 * @param user
+	 * @returns
+	 */
 	public async isInChan(chan: Channel, user: User) : Promise<boolean>
 	{
 		const foundChan : Channel = await this.channelsRepo.findOne({
@@ -25,7 +31,6 @@ export class ChannelService {
 			return true;
 		return false;
 	}
-
 
 	/**
 	 * @brief Create channel
@@ -53,6 +58,12 @@ export class ChannelService {
 
 	}
 
+	/**
+	 * @brief Set a new admin for a channel. Only admins can name another admin.
+	 * @param user the user performing the request
+	 * @param channel the channel concerned by changes
+	 * @param toBeAdmin the user to be named
+	 */
 	public async setNewAdmin(user: User, channel : Channel, toBeAdmin: User)
 	{
 		if (!await this.isInChan(channel, toBeAdmin))
@@ -110,6 +121,11 @@ export class ChannelService {
 		return chan;
 	}
 
+	/**
+	 * @brief get the hashed form of the password for a particular user
+	 * @param channelId (id or name)
+	 * @returns
+	 */
 	async	getChannelPasswordHash(channelId: string): Promise<string> {
 		const chan: Channel = await this.channelsRepo.createQueryBuilder('Channel')
 			.select(["Channel.password"])
@@ -119,11 +135,12 @@ export class ChannelService {
 	}
 
 	/**
- 	* @brief updateChannelSettings -- can only be performed by owner.
-	* @param user User requesting changes
- 	* @param changes changes to be performed - chanName or ownership
- 	* @returns Repository modified
- 	*/
+	 * @description 🔐🔐🔐 OWNER ONLY FEATURE 🔐🔐🔐
+ 	 * @brief updateChannelSettings -- can only be performed by owner.
+	 * @param user User requesting changes
+ 	 * @param changes changes to be performed - chanName or ownership
+ 	 * @returns Repository modified
+ 	 */
 	public async updateChannelSettings(user: User, changes: ModifyChannelDto) : Promise<Channel>
 	{
 		const chan: Channel = await this.getChannelByIdentifier(changes.chanName);
@@ -143,14 +160,13 @@ export class ChannelService {
 
 
 	/**
- 	* @brief deleteChannel -- performed by owner
-	* @param user User requesting changes
- 	* @param changes changes to be performed - chanName or ownership
- 	* @returns All channels after deletion
- 	*/
-
-	 public async deleteChannel(user: User, channel: Channel)// : Promise<Channel[]>
-	 {
+	 * @description ADMIN FEATURE 🔐🔐🔐
+ 	 * @brief deleteChannel -- performed by administrator
+	 * @param user User requesting changes
+ 	 * @param changes changes to be performed - chanName or ownership
+ 	 */
+	public async deleteChannel(user: User, channel: Channel): Promise<void>
+	{
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to delete chan.", HttpStatus.FORBIDDEN);
 		await this.channelsRepo
@@ -163,37 +179,48 @@ export class ChannelService {
 
 
 	/**
- 	*
- 	* @param user
- 	* @param toBan
- 	* @returns
- 	*/
-	public async deleteUserFromChannel(user: User, channel : Channel, toBan: User) : Promise<Channel[]>
+	 * @description ADMIN FEATURE 🔐🔐🔐
+	 * @brief delete an user from channel
+ 	 * @param user the user trying to perform the request
+ 	 * @param toDelete the user to deleetee
+ 	 * @returns
+ 	 */
+	public async deleteUserFromChannel(user: User, channel : Channel, toDelete: User): Promise<void>
 	{
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to delete an user from chan.", HttpStatus.FORBIDDEN);
 		if (!await this.isInChan(channel, user))
-			throw new HttpException("User " + toBan.name + " is not in channel", HttpStatus.FORBIDDEN);
+			throw new HttpException("User " + toDelete.name + " is not in channel", HttpStatus.FORBIDDEN);
 
 		await this.channelsRepo.createQueryBuilder()
 			.relation(Channel, "users")
-			.of({ id: toBan.id })
+			.of({ id: toDelete.id })
 			.remove({ id: channel.id });
-		return this.getUsersOfChannels();
 	}
 
-	public async unban(channel: Channel, toUnBan: User)
+	/**
+	 * @description ADMIN FEATURE 🔐🔐🔐
+	 * @brief unban an user from a channel
+	 * @param channel the channel to unban from
+	 * @param toUnBan the user to unban
+	 * @returns
+	 */
+	public async unban(channel: Channel, toUnBan: User): Promise<void>
 	{
 		console.log("Un Ban")
-
 		channel.banned = channel.banned.filter((banned) => {
 			return banned.id !== toUnBan.id
 		})
 		await channel.save();
-		return channel;
 	}
 
-	public async unmute(channel: Channel, toUnMute: User)
+	/**
+	 * @description ADMIN FEATURE 🔐🔐🔐
+	 * @brief unmute an user from a channel
+	 * @param channel the channel to unban from
+	 * @param toUnMute the user to unmute
+	 */
+	public async unmute(channel: Channel, toUnMute: User): Promise<void>
 	{
 		console.log("Un Mute")
 		channel.muted = channel.muted.filter((muted) => {
@@ -202,10 +229,16 @@ export class ChannelService {
 		await channel.save();
 		console.log("Muted" + channel.muted)
 		console.log( "Id " + channel.mutedId)
-		return channel;
 	}
 
-	public async temporaryBanUser(user: User, channel: Channel, toBan: User)
+	/**
+	 * @description ADMIN FEATURE 🔐🔐🔐
+	 * @brief ban user for 30 sec.
+	 * @param user the user performing the request
+	 * @param channel the channel to ban the user from
+	 * @param toBan the user to ban
+	 */
+	public async temporaryBanUser(user: User, channel: Channel, toBan: User): Promise<void>
 	{
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to ban an user from chan.", HttpStatus.FORBIDDEN);
@@ -220,12 +253,18 @@ export class ChannelService {
 		console.log(channel.banned);
 		await channel.save();
 		/** Step three : set timeout to remove from ban list */
-		setTimeout(() => { this.unban(channel, toBan)}, 30000);
-		return channel;
+		setTimeout(() => { this.unban(channel, toBan) }, 30000);
 	}
 
 
-	public async temporaryMuteUser(user: User, channel: Channel, toMute: User)
+	/**
+	 * @description ADMIN FEATURE 🔐🔐🔐
+	 * @brief mute user for 30 sec.
+	 * @param user the user performing the request
+	 * @param channel the channel to mute the user from
+	 * @param toMute the user to mute
+	 */
+	public async temporaryMuteUser(user: User, channel: Channel, toMute: User): Promise<void>
 	{
 		if (!await this.isInChan(channel, toMute))
 			throw new HttpException("User " + toMute.name + " is not in channel", HttpStatus.FORBIDDEN);
@@ -237,6 +276,5 @@ export class ChannelService {
 		console.log("Muted" + channel.muted)
 		console.log( "Id " + channel.mutedId)
 		setTimeout(() => { this.unmute(channel, toMute)}, 30000);
-		return channel;
 	}
 }

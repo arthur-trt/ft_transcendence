@@ -1,8 +1,4 @@
-import { User } from "src/user/user.entity";
-import { BaseEntity, Column, CreateDateColumn, PrimaryGeneratedColumn } from "typeorm"
-
-
-
+import { Column, CreateDateColumn, PrimaryGeneratedColumn } from "typeorm";
 
 export abstract class AMessage  {
 	@PrimaryGeneratedColumn()

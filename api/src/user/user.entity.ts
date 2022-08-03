@@ -1,8 +1,6 @@
 
 import { channelMessage } from "src/message/channelMessage.entity";
-import { privateMessage } from "src/message/privateMessage.entity";
-import internal from "stream";
-import { BaseEntity, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Channel } from "../channel/channel.entity";
 
 @Entity('Users') /** table name */
@@ -49,7 +47,7 @@ export class User extends BaseEntity {
 		default: 0
 	})
 	lostMatches: number;
-	
+
 	@Column({
 		nullable: true,
 		select: false

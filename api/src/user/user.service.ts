@@ -176,14 +176,12 @@ export class UserService {
 			.of(user)
 			.remove(chan);
 
-
 		if (chan.adminsId.includes(user.id)) {
 			chan.admins = chan.admins.filter((admins) => {
 				return admins.id !== user.id
 			})
 			await chan.save();
 		}
-
 		if (chan.ownerId == user.id)
 		{
 			await this.channelsRepo
@@ -193,7 +191,6 @@ export class UserService {
 				.set(null);
 			chan.ownerId = ""; // See how possible to not do it manually
 		}
-		return await this.chanService.getUsersOfChannels();
 	}
 
 	public async getChannelsForUser(user: User) :  Promise<Channel[]>
@@ -206,20 +203,19 @@ export class UserService {
 		return chans;
 	}
 
-	public async block(user: User, toBan: User) :  Promise<User>
+	public async block(user: User, toBan: User) //:  Promise<User>
 	{
 		user.blocked.push(toBan.id);
 		await user.save();
-		return user;
 	}
 
-	public async unblock(user: User, toUnBan: User): Promise<User> {
+	public async unblock(user: User, toUnBan: User)//: Promise<User>
+	{
 		const index = user.blocked.indexOf(toUnBan.id);
 		if (index > -1) {
 			user.blocked.splice(index, 1);
 		}
 		await user.save();
-		return user;
 	}
 
 	public async	setUserActive (user: User) {

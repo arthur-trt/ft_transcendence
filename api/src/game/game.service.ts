@@ -14,12 +14,11 @@ import { compareSync } from 'bcrypt';
 @Injectable()
 export class GameService {
 
-	constructor(
+	constructor (
 		@InjectRepository(MatchHistory) private MatchRepo: Repository<MatchHistory>,
 		@InjectRepository(User) private UserRepo: Repository<User>,
 		private userService: UserService,
 		private achievementsService: AchievementsService,
-		//private gameservice : GameService
 	) { }
 
 	/**

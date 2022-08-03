@@ -228,7 +228,6 @@ export class GameRelayService
         }
         async startMatch(players) 
         {
-            await this.gameService.listUsersInGame;
             const [first] = players;
             const[, second] = players;
             this.player1.socket = first;

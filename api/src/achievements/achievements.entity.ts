@@ -1,6 +1,5 @@
-import { userInfo } from "os";
 import { User } from "src/user/user.entity";
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 export enum Achievements_types {
     TOP1 = "Top 1",
