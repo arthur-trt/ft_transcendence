@@ -1,14 +1,10 @@
 import { Injectable, Res } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { access } from 'fs';
 import { authenticator } from 'otplib';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Request, Response } from 'express';
 import { toDataURL } from 'qrcode';
-import { jwtConstants } from '../jwt/jwt.constants';
-import { TransformStreamDefaultController } from 'stream/web';
-import { useContainer } from 'class-validator';
 import { AuthService } from '../auth.service';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -26,7 +22,7 @@ export class TwoFaService extends AuthService {
 	 * @param user User
 	 * @returns secret and url to put in qrcode
 	 */
-	public async generateTwoFactorAuthtificationSecret (user: User) {
+	public async generateTwoFactorAuthtificationSecret (user: User): Promise<string[]> {
 		let	secret: string;
 		if (user.TwoFA_enable)
 			secret = (await this.userRepo.createQueryBuilder('User')
@@ -42,38 +38,56 @@ export class TwoFaService extends AuthService {
 		);
 
 		await this.userService.setTwoFactorAuthenticationSecret(user, secret);
-		return {
+		return [
 			secret,
 			optAuthUrl
-		};
+		];
 	}
 
-	public twofa_login (user: User, @Res() res: Response) {
+	/**
+	 * Generate the cookie after the user successfully log with 2fa
+	 * @param user User who try to logged in
+	 * @param res HTTP Response with `Set-Cookie` header
+	 * @returns json
+	 */
+	public twofa_login (user: User, @Res() res: Response): Response {
 		res.header('Set-Cookie', this.generateCookie(user, true));
 		return res.json(JSON.stringify({
 			connection: "ok"
 		}));
 	}
 
-
-
-	public async pipeQrCodeURL (text: string)
+	/**
+	 * Generate base64 image
+	 * @param text Text to encode
+	 * @returns base64 image
+	 */
+	public async pipeQrCodeURL (text: string): Promise<string>
 	{
 		return toDataURL(text);
 	}
 
-	public async isTwoFactorCodeValid (code: string, req: Request)
+	/**
+	 * Check if user enter a valid code
+	 * @param code Code enter by the user
+	 * @param req Request containing user details
+	 * @returns boolean
+	 */
+	public async isTwoFactorCodeValid (code: string, req: Request) : Promise<boolean>
 	{
 		const user_secret	= await this.userService.getTwoFASecret(req);
-		console.log(code);
-		console.log(user_secret);
 		return (authenticator.verify({
 			token: code,
 			secret: user_secret,
 		}));
 	}
 
-	async deactivateTwoFa (user: User)
+	/**
+	 * Desactivate and forget secret for user
+	 * @param user User who made the request
+	 * @returns User
+	 */
+	async deactivateTwoFa (user: User): Promise<User>
 	{
 		user.TwoFA_enable = false;
 		user.TwoFA_secret = null;
