@@ -6,7 +6,7 @@ import { UserService } from 'src/user/user.service';
 import { Brackets, Repository } from 'typeorm';
 import { MatchHistory } from './game.entity';
 import { Socket, Server } from 'socket.io'
-import { Achievements, Achievements_types } from 'src/achievements/achievements.entity';
+import { Achievements_types } from 'src/achievements/achievements.entity';
 import { AchievementsService } from 'src/achievements/achievements.service';
 
 
