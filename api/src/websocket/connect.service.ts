@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { JwtService, JwtVerifyOptions } from "@nestjs/jwt";
 import { Socket } from "socket.io";
 import { jwtConstants } from "src/auth/jwt/jwt.constants";
+import { JwtPayload } from "src/auth/payload.type";
 import { Channel } from "src/channel/channel.entity";
 import { ChannelService } from "src/channel/channel.service";
 import { FriendshipsService } from "src/friendships/friendships.service";
@@ -34,7 +35,7 @@ export class ConnectService {
 			const jwtOptions: JwtVerifyOptions = {
 				secret: jwtConstants.secret
 			}
-			const jwtPayload = await this.jwtService.verify(authToken, jwtOptions);
+			const jwtPayload: JwtPayload = await this.jwtService.verify(authToken, jwtOptions);
 			const user: User = await this.userService.getUserByIdentifierLight(jwtPayload.sub);
 			return user;
 		} catch (err) {

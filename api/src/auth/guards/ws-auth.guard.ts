@@ -4,6 +4,8 @@ import { JwtService, JwtVerifyOptions } from '@nestjs/jwt';
 import { WsException } from '@nestjs/websockets';
 import { jwtConstants } from '../jwt/jwt.constants';
 import { UserService } from 'src/user/user.service';
+import { User } from 'src/user/user.entity';
+import { JwtPayload } from '../payload.type';
 
 @Injectable()
 export class WsJwtAuthGuard implements CanActivate {
@@ -22,13 +24,11 @@ export class WsJwtAuthGuard implements CanActivate {
 			const jwtOptions: JwtVerifyOptions = {
 				secret: jwtConstants.secret
 			}
-			const jwtPayload = await this.jwtService.verify(authToken, jwtOptions);
-			const user: any = await this.userService.getUserByIdentifier(jwtPayload.sub);
+			const jwtPayload: JwtPayload = await this.jwtService.verify(authToken, jwtOptions);
+			const user: User = await this.userService.getUserByIdentifier(jwtPayload.sub);
 			client.data.user = user;
 			return Boolean(user);
 		} catch (err) {
-			console.log("Guard error : ");
-			console.log(err.message);
 			throw new WsException(err.message);
 		}
 	}

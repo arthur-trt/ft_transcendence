@@ -4,6 +4,7 @@ import { Injectable } from "@nestjs/common";
 import { jwtConstants } from "./jwt.constants";
 import { Request } from "express";
 import { UserService } from "src/user/user.service";
+import { JwtPayload } from "../payload.type";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy)
@@ -21,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy)
 		});
 	}
 
-	async validate(request: Request, payload: any) {
+	async validate(request: Request, payload: JwtPayload) {
 		const	user = await this.userService.getUserByIdentifier(payload.sub);
 		if (!user.TwoFA_enable)
 			return { userId: payload.sub };
