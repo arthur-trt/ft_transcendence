@@ -35,7 +35,7 @@ export class MessageService {
 	 * @param msg
 	 * @returns the Channel object containing its new message in its messages relationship
 	 */
-	public async sendMessageToChannel(chanIdentifier : string, user : User, msg : string) : Promise<Channel>
+	public async sendMessageToChannel(chanIdentifier : string, user : User, msg : string) //: Promise<Channel>
 	{
 		const channel : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier);
 		if (channel.mutedId.includes(user.id))
@@ -51,7 +51,7 @@ export class MessageService {
 		)
 		channel.messages = [...channel.messages, newMessage]; /* if pb of is not iterable, it is because we did not get the
 		 ealtions in the find one */
-		return await channel.save();
+		await channel.save();
 	}
 
 
@@ -114,7 +114,8 @@ export class MessageService {
 	 * @param msg
 	 * @returns array of all private messages
 	 */
-	public async sendPrivateMessage(src: User, target: User, msg: string) : Promise<privateMessage[]> {
+	public async sendPrivateMessage(src: User, target: User, msg: string)// : Promise<privateMessage[]>
+	{
 
 		const user2 = await this.userService.getUserByIdentifier(target.name);
 		if (user2.blocked.includes(src.id))
@@ -126,7 +127,6 @@ export class MessageService {
 			message : msg,
 		}
 		)
-		return await this.pmRepo.find();
 	}
 
 
