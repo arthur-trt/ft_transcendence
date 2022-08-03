@@ -110,6 +110,11 @@ export class ChannelService {
 		return chan;
 	}
 
+	/**
+	 * @brief get the hashed form of the password for a particular user
+	 * @param channelId
+	 * @returns
+	 */
 	async	getChannelPasswordHash(channelId: string): Promise<string> {
 		const chan: Channel = await this.channelsRepo.createQueryBuilder('Channel')
 			.select(["Channel.password"])
@@ -148,9 +153,8 @@ export class ChannelService {
  	* @param changes changes to be performed - chanName or ownership
  	* @returns All channels after deletion
  	*/
-
-	 public async deleteChannel(user: User, channel: Channel)// : Promise<Channel[]>
-	 {
+	public async deleteChannel(user: User, channel: Channel)// : Promise<Channel[]>
+	{
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to delete chan.", HttpStatus.FORBIDDEN);
 		await this.channelsRepo
@@ -164,20 +168,21 @@ export class ChannelService {
 
 	/**
  	*
- 	* @param user
- 	* @param toBan
+	* @brief delete an user from channel
+ 	* @param user the user trying to perform the request
+ 	* @param toDelete the user to deleetee 
  	* @returns
  	*/
-	public async deleteUserFromChannel(user: User, channel : Channel, toBan: User) : Promise<Channel[]>
+	public async deleteUserFromChannel(user: User, channel : Channel, toDelete: User) : Promise<Channel[]>
 	{
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to delete an user from chan.", HttpStatus.FORBIDDEN);
 		if (!await this.isInChan(channel, user))
-			throw new HttpException("User " + toBan.name + " is not in channel", HttpStatus.FORBIDDEN);
+			throw new HttpException("User " + toDelete.name + " is not in channel", HttpStatus.FORBIDDEN);
 
 		await this.channelsRepo.createQueryBuilder()
 			.relation(Channel, "users")
-			.of({ id: toBan.id })
+			.of({ id: toDelete.id })
 			.remove({ id: channel.id });
 		return this.getUsersOfChannels();
 	}
