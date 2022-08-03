@@ -1,7 +1,6 @@
 import { Controller, UseGuards, HttpStatus, HttpException, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiCookieAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Get, Req, Res, Post, Body } from '@nestjs/common';
-import { AuthService } from '../auth.service';
 import { UserService } from 'src/user/user.service';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
