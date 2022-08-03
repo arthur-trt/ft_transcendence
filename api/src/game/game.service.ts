@@ -106,6 +106,7 @@ export class GameService {
 		});
 		return match;
 	}
+	
 	async checkForAchievements(user: User)
 	{
 		let ladder = await this.ladder();

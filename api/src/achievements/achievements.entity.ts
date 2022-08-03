@@ -6,9 +6,8 @@ export enum Achievements_types {
     TOP1 = "Top 1",
 	WINNER = "Winner - Won all matches",
 	FIRST = "First victory",
-	//LOSER = "Loser - Lost all matches",
-	CHANNELLEADER = "Channel Leader - Is owner of at least three channels",
 	HALFHALF = "50/50 : Perfect balance between loss and success",
+	CHANNELLEADER = "Channel Leader - Is owner of at least three channels",
 	NOBODYLOVESYOU = "Nobody Loves You - Banned from a channel"
 }
 
