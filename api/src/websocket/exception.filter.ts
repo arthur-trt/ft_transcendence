@@ -10,7 +10,7 @@ export class WebsocketExceptionsFilter extends BaseWsExceptionFilter {
 
 		const client = host.switchToWs().getClient() as Socket;
 		const data = host.switchToWs().getData();
-		let error;
+		let error : string | object | any;
 		if (exception instanceof WsException)
 			error = exception.getError()
 		else if (exception instanceof BadRequestException) // pour les DTO
@@ -23,7 +23,6 @@ export class WebsocketExceptionsFilter extends BaseWsExceptionFilter {
 			error = exception.getResponse();
 		else if (exception instanceof QueryFailedError)
 			error = "Query failed [" + exception.parameters + "] : " + exception.message;
-		const details = error instanceof Object ? { ...error } : { message: error };
 		client.emit("error", { event: error, data: data })
 	}
 }
