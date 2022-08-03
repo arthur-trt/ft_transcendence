@@ -1,6 +1,6 @@
 // select canvas element
-var canvas = document.getElementById("pong");
-var start = document.getElementById("start");
+let canvas = document.getElementById("pong");
+let start = document.getElementById("start");
 
 canvas.width = window.innerWidth * 0.7;
 
@@ -64,7 +64,7 @@ function drawArc(x, y, r, color){
     ctx.fill();
 }
 
-let keyPressed = {};
+const keyPressed = {};
 
 document.addEventListener('keydown', (e) => {
 
@@ -165,17 +165,17 @@ function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-var client = {};
+let client = {};
 client.socket = io.connect();
 
-let framePerSecond = 60;
+const framePerSecond = 60;
 let loop;
 
 async function game_start()
 {
     let i = 3;
-    var seconds_left = document.createTextNode(i.toString());
-    var EOS = document.createTextNode(' seconds ...');
+    let seconds_left = document.createTextNode(i.toString());
+    let EOS = document.createTextNode(' seconds ...');
     start.innerHTML = "The game starts in ";
 
     render();

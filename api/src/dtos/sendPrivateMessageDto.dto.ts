@@ -1,4 +1,3 @@
-import { ApiProperty } from "@nestjs/swagger";
 import { Length } from "class-validator";
 import { IsNotEmpty } from "class-validator";
 import { User } from "src/user/user.entity";
