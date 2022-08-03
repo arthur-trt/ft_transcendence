@@ -103,6 +103,7 @@ export default function Channels() {
           setMessages(msg);
       });
       socket.on('friendList', (msg:any, tab:any) => {
+        
           setFriends(tab);
       });
       socket.on('newFriendRequest', (msg:any, tab:any) => {
@@ -608,9 +609,14 @@ export default function Channels() {
           {
             return (
               <div className='chat-owner-op'>
+                <datalist id="mylist">
+                  {friends.friends.map((item:any,index:any)=>{
+                  return  <option key={index} value={friends.friends[index].name} />;})}
+                </datalist>
                 <form onSubmit={handleAddMembersPrivate}>
                   <input
-                  type="text"
+                  type="search"
+                  list="mylist"
                   value={chanOpPass}
                   placeholder="Add Members"
                   onChange={(e) => setChanOpPass(e.target.value)}
