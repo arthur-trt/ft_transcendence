@@ -1,6 +1,4 @@
-import { IsEmail, IsNotEmpty } from "class-validator";
-import { User } from "src/user/user.entity";
-import { uuidDto } from "./uuid.dto";
+import { IsNotEmpty } from "class-validator";
 
 export class CreateMatchDto {
 
