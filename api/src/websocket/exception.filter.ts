@@ -10,14 +10,15 @@ export class WebsocketExceptionsFilter extends BaseWsExceptionFilter {
 
 		const client = host.switchToWs().getClient() as Socket;
 		const data = host.switchToWs().getData();
-		let error : string | object | any;
+		let error : string | object;
 		if (exception instanceof WsException)
 			error = exception.getError()
 		else if (exception instanceof BadRequestException) // pour les DTO
 		{
 			error = exception.getResponse();
-			if (typeof (error) == 'object')
-				error = error.message[0]; // a chaque fois on prend juste le premier pour assurere un meilleur formatage
+			if (typeof (error) == 'object') {
+				error = JSON.parse(JSON.stringify(error)).message[0];// a chaque fois on prend juste le premier pour assurere un meilleur formatage
+			}
 		}
 		else if (exception instanceof HttpException)
 			error = exception.getResponse();

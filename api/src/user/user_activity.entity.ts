@@ -1,4 +1,4 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user.entity";
 
 @Entity('UserActivity')
@@ -11,8 +11,8 @@ export class UserActivity extends BaseEntity {
 	user: User
 
 	@Column({
-		default: () => "now()", // you can use () => "now() at time zone 'utc'" here
-		type: 'timestamptz' // or use timestamptz
+		default: () => "now()",
+		type: 'timestamptz'
 	 })
 	online_since: Date;
 }
