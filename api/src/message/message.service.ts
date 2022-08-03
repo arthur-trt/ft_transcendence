@@ -63,16 +63,18 @@ export class MessageService {
 	public async getMessage(chanIdentifier: string, user: User) : Promise<Channel>
 	{
 		const chan: Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
-
-		let msgs : Channel;
-		if (user.blocked && user.blocked.length > 0) {
-			msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
+		let msgs: Channel;
+		if (user.blocked.length > 0)
+		{
+			msgs = await this.chanRepo.createQueryBuilder("chan")
+				.where("chan.name = :chanName", { chanName: chanIdentifier })
 				.leftJoinAndSelect("chan.messages", "messages")
 				.leftJoinAndSelect("messages.sender", "sender")
-				.where(new Brackets(qb => {
+				.andWhere(new Brackets(qb => {
 					qb.where("sender.id NOT IN (:...blocked)", { blocked: user.blocked })
 				}))
 				.getOne()
+
 		}
 		else
 		{
@@ -115,6 +117,8 @@ export class MessageService {
 	public async sendPrivateMessage(src: User, target: User, msg: string) : Promise<privateMessage[]> {
 
 		const user2 = await this.userService.getUserByIdentifier(target.name);
+		if (user2.blocked.includes(src.id))
+			throw new HttpException('This user blocked you.', HttpStatus.FORBIDDEN)
 		const newMessage : privateMessage = await this.pmRepo.save(
 		{
 			sender: src.id,

@@ -1,7 +1,6 @@
 import { Controller, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Get, Req, Res } from '@nestjs/common';
-import { AuthService } from './auth.service';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { UserService } from 'src/user/user.service';

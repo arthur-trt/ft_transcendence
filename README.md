@@ -9,7 +9,7 @@ For the first startup, you need to set up :
 
 ```
 # DOCKER CONFIG
-DOCKER_SOCK=(/var/run/docker.sock) (for 42Linux use : ${DOCKET_HOT:7})
+DOCKER_SOCK=(/var/run/docker.sock) (for 42Linux use : ${DOCKET_HOST:7})
 
 # DB CONFIG
 DB_PATH=<path> (./private/db) (for 42Linux use: ${HOME}/goinfre/db)
