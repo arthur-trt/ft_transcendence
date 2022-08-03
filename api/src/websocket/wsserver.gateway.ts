@@ -445,4 +445,18 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.gameRelayService.StopMove(client);
 	}
 
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('ActivesMatches')
+	async GameOngoing(client: Socket)
+	{
+		console.log("kokokoko")
+		await this.gameRelayService.getOngoingMatches();
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('ActivesUsers')
+	async UsersPlaying(client: Socket)
+	{
+		await this.gameRelayService.getActivesUsers();
+	}
 }

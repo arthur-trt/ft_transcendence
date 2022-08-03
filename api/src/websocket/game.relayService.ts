@@ -203,12 +203,10 @@ export class GameRelayService
             this.dataT.player2_paddle_y = this.player2.y;
             this.dataT.ball_x = this.ball.x;
             this.dataT.ball_y = this.ball.y;
-            // this.dataT.player_1 = this.MatchRooms[client.id].user[0];
-            // this.dataT.player_2 = this.MatchRooms[client.id].user[1];
-            // console.log(this.dataT.player_1);
-            // console.log(this.dataT.player_2);
             this.gateway.server.to(client.id).emit('game_position', this.dataT);
         }
+    
+       
         async startMatch(players) 
         {
             const [first] = players;
@@ -394,5 +392,17 @@ export class GameRelayService
     //     console.log(client.id + ' position ' + position)
     //     this.gateway.server.emit('game_postion', position)
     // }
+    
+    async getOngoingMatches()
+    {
+        this.gateway.server.emit('ActivesMatches', await this.gameService.listGameOngoing());
+        console.log(await this.gameService.listGameOngoing())
+    }
+    async getActivesUsers()
+    {
+        this.gateway.server.emit('UserPlaying', await this.gameService.userPlaying());
+        return this.gameService.userPlaying();
+    }
+
 
 }
