@@ -64,7 +64,6 @@ export class MessageService {
 	{
 		const chan: Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
 		let msgs: Channel;
-		console.log( "asking for " + chanIdentifier)
 		if (user.blocked.length > 0)
 		{
 			msgs = await this.chanRepo.createQueryBuilder("chan")
@@ -84,8 +83,6 @@ export class MessageService {
 			.leftJoinAndSelect("messages.sender", "sender")
 			.getOne()
 		}
-
-		console.log("FOUND: "+ msgs.name)
 		return msgs;
 	}
 

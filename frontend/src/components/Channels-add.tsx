@@ -579,12 +579,17 @@ export default function Channels() {
           {
             return (
               <div className='chat-owner-op'>
+                <datalist id="mylist">
+                  {friends.friends.map((item:any,index:any)=>{
+                  return  <option key={index} value={friends.friends[index].name} />;})}
+                </datalist>
                 <form onSubmit={handleAddMembersPrivate}>
                   <input
-                    type="text"
-                    value={chanOpPass}
-                    placeholder="Add Members"
-                    onChange={(e) => setChanOpPass(e.target.value)}
+                  type="search"
+                  list="mylist"
+                  value={chanOpPass}
+                  placeholder="Add Members"
+                  onChange={(e) => setChanOpPass(e.target.value)}
                   />
                 </form>
               </div>
