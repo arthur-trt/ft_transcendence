@@ -64,7 +64,7 @@ function drawArc(x, y, r, color){
     ctx.fill();
 }
 
-let keyPressed = {};
+const keyPressed = {};
 
 document.addEventListener('keydown', (e) => {
 
@@ -168,7 +168,7 @@ function sleep(ms) {
 var client = {};
 client.socket = io.connect();
 
-let framePerSecond = 60;
+const framePerSecond = 60;
 let loop;
 
 async function game_start()
