@@ -7,7 +7,7 @@ import { UserModule } from 'src/user/user.module';
 
 
 @Module({
-	imports: [TypeOrmModule.forFeature([Channel]), forwardRef(() => UserModule)], /* Forward ref is for circular dependancy see https://stackoverflow.com/questions/63572923/nest-cant-resolve-dependencies-of-authservice */
+	imports: [TypeOrmModule.forFeature([Channel]), forwardRef(() => UserModule)],
 	providers: [ChannelService],
 	controllers: [ChannelController],
 	exports: [ChannelService]

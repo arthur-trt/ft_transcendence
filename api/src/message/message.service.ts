@@ -1,15 +1,10 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { deepStrictEqual } from 'assert';
-import { UUIDVersion } from 'class-validator';
-import { Request } from 'express';
-import { throwIfEmpty } from 'rxjs';
 import { Channel } from 'src/channel/channel.entity';
 import { ChannelService } from 'src/channel/channel.service';
-import { MessageDto } from 'src/dtos/message.dto';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
-import { Brackets, Not, Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { channelMessage } from './channelMessage.entity';
 import { privateMessage } from './privateMessage.entity';
 
@@ -42,13 +37,10 @@ export class MessageService {
 			throw (new HttpException('You are mute and cannot send message to channel.', HttpStatus.FORBIDDEN))
 		if (channel.bannedId.includes(user.id))
 			throw (new HttpException('You are banned and cannot temporary send message to channel.', HttpStatus.FORBIDDEN))
-		const newMessage = await this.chatRepo.save
-		(
-			{
-				sender: user,
-				message: msg,
-			}
-		)
+		const newMessage = await this.chatRepo.save({
+			sender: user,
+			message: msg,
+		});
 		channel.messages = [...channel.messages, newMessage]; /* if pb of is not iterable, it is because we did not get the
 		 ealtions in the find one */
 		await channel.save();
@@ -86,23 +78,6 @@ export class MessageService {
 		return msgs;
 	}
 
-
-	/**
-	 * @brief get all messages a user sent on a particular channel
-	 * @param chanIdentifier
-	 * @param user the user we wanr to see messages of
-	 * @returns the Channel with relation to its message
-	 */
-	public async 	getChannelMessagesOfUser(chanIdentifier: string, user : User) //: Promise<User>
-	{
-		const chan : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
-		const msgs = this.chatRepo.createQueryBuilder("msg")
-			.where("msg.sender = :sendername", { sendername: user.id })
-			.leftJoinAndSelect("msg.sender", "sender")
-			.getMany();
-			return msgs;
-	}
-
 	/*
 	**	PRIVATE MESSAGES
 	*/
@@ -116,17 +91,14 @@ export class MessageService {
 	 */
 	public async sendPrivateMessage(src: User, target: User, msg: string)// : Promise<privateMessage[]>
 	{
-
 		const user2 = await this.userService.getUserByIdentifier(target.name);
 		if (user2.blocked.includes(src.id))
 			throw new HttpException('This user blocked you.', HttpStatus.FORBIDDEN)
-		const newMessage : privateMessage = await this.pmRepo.save(
-		{
+		await this.pmRepo.save({
 			sender: src.id,
 			target: user2.id,
-			message : msg,
-		}
-		)
+			message: msg,
+		});
 	}
 
 
