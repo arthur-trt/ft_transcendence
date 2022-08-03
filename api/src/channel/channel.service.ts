@@ -6,7 +6,6 @@ import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { validate as isValidUUID } from 'uuid';
-import { DefaultSerializer } from 'v8';
 import { Channel } from './channel.entity';
 
 @Injectable()

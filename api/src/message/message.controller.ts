@@ -4,6 +4,7 @@ import { Request } from 'express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { getPrivateMessageDto } from 'src/dtos/getPrivateMessageDto.dto';
 import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto.dto';
+import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { MessageService } from './message.service';
@@ -31,7 +32,7 @@ export class MessageController {
 	@ApiOperation({ summary: "Send a message to a channel" })
 	@Post('channel/sendMsg/:identifier')
 	@UseGuards(JwtAuthGuard)
-	public async sendMessage(@Param('identifier') chanIdentifier : string, @Req() req : Request, @Body() msg : sendChannelMessageDto)
+	public async sendMessage(@Param('identifier') chanIdentifier : string, @Req() req : Request, @Body() msg : sendChannelMessageDto): Promise<void>
 	{
 		const message = msg.msg;
 		const sender: User = await this.userService.getUserByRequest(req);
@@ -50,7 +51,7 @@ export class MessageController {
 	@ApiOperation({ summary: "Get all messages from a channel" })
 	@Get('channel/getMsg/:identifier')
 	@UseGuards(JwtAuthGuard)
-	public async getMessages(@Req() req : Request, @Param('identifier') chanIdentifier : string)
+	public async getMessages(@Req() req : Request, @Param('identifier') chanIdentifier : string): Promise<import("/Users/clairecommissaire/Documents/42/Cursus42/ft_transcendence/api/src/channel/channel.entity").Channel>
 	{
 		const user : User = await this.userService.getUserByRequest(req);
 		const messages = await this.messageService.getMessage(chanIdentifier, user)
@@ -73,7 +74,7 @@ export class MessageController {
 	@Post('privateMessage/sendMsg')
 	@ApiOperation({ summary: "Send private message to another user" })
 	@UseGuards(JwtAuthGuard)
-	public async privateMessage(@Req() req : Request, @Body() message : any)
+	public async privateMessage(@Req() req : Request, @Body() message : sendPrivateMessageDto): Promise<void>
 	{
 		const target = message.to;
 		const msg = message.msg;
