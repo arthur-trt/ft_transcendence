@@ -79,6 +79,8 @@ export class GameService {
 		endedMatch.finished = true;
 		const winner: User = match.scoreUser1 > match.scoreUser2 ? await this.userService.getUserByIdentifier(endedMatch.user1) : await this.userService.getUserByIdentifier(endedMatch.user2);
 		winner.wonMatches += 1;
+		const loser: User = match.scoreUser1 < match.scoreUser2 ? await this.userService.getUserByIdentifier(endedMatch.user1) : await this.userService.getUserByIdentifier(endedMatch.user2);
+		loser.lostMatches += 1;
 		await this.UserRepo.save(winner);
 		await this.MatchRepo.save(endedMatch);
 		return await this.getCompleteMatchHistory();
@@ -106,7 +108,7 @@ export class GameService {
 		});
 		return match;
 	}
-	
+
 	async checkForAchievements(user: User)
 	{
 		let ladder = await this.ladder();
