@@ -3,10 +3,6 @@ import React, { useState, useEffect } from 'react';
 
 import { socketo } from '..';
 
-import coupe from "./coupe.png";
-import first from "./1st.png";
-import second from "./2nd.png";
-
 export default function Game() {
   // DEFINE TYPE
   type userT = {
@@ -119,7 +115,7 @@ export default function Game() {
       const canvas = canvasRef.current;
       if (canvas) {
         //canvas.height = canvas.clientHeight;
-        canvas.width = window.innerWidth * 0.7; 
+        canvas.width = window.innerWidth * 0.7;
         //canvas.width = canvas.clientWidth;
         canvas.height = canvas.width * 0.6;
         setCanvas(canvas);
@@ -420,7 +416,7 @@ export default function Game() {
       }
     }
   }
-    
+
   function adaptToCanvas(data: dataT, canvas:any)
     {
       if (canvas)
@@ -456,9 +452,9 @@ export default function Game() {
       </div>
       {/*<button type='button' onClick={handleStart}>Start game</button>*/}
       <canvas ref={canvasRef} className="pong-container" onClick={handleClick}/>
-      <img ref={imgRef} src={coupe} className="hidden" alt="coupe indiquant votre placement dans la partie"/>
-      <img ref={firstRef} src={first} className="hidden" alt="premier"/>
-      <img ref={secondRef} src={second} className="hidden" alt="deuxieme"/>
+      <img ref={imgRef} src="coupe.png" className="hidden" alt="Winning cup"/>
+      <img ref={firstRef} src="1st.png" className="hidden" alt="First place"/>
+      <img ref={secondRef} src="2nd.png" className="hidden" alt="Second place"/>
       {/*onMouseMove={updateMousePosition}*/}
     </div>
   )
