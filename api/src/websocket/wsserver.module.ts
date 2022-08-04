@@ -14,7 +14,7 @@ import { GameRelayService } from './game.relayService';
 @Module({
 
 	imports: [UserModule, MessageModule, JwtModule, ChannelModule, FriendshipsModule, GameModule],
-	// exports: [ChatService],
+	exports: [ChatService],
 	providers: [WSServer, ChatService, ConnectService, GameRelayService]
 })
 

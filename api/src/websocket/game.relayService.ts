@@ -133,6 +133,8 @@ export class GameRelayService
     {
         if (this.players_ready == 1)
         {
+            if (!this.gateway.activeUsers.has(await this.userService.getUserByIdentifier(this.names.p1_name)))
+                this.end_game()//send end_game with victory for the player staying
             this.loop_stop = setInterval(() => this.loop(), 1000/60);
             console.log("inter = " + this.loop_stop);
         }
@@ -144,11 +146,19 @@ export class GameRelayService
     {
         clearInterval(this.loop_stop);
         console.log("interval stopped : " + this.loop_stop);
+        const sockets = await this.gateway.server.in(this.match.id).allSockets;
+        for ( const i  in sockets )
+        {
+            sockets[i].leave(this.match.id)
+            console.log("clients are leaving the room")
+        }
+        //this.player2.socket.leave(this.match.id)
+        //this.player2.socket.leave(this.match.id); //dont forget to make watch quit the room 
         this.players_ready = 0;
         await this.gameService.endMatch({id : this.match.id, scoreUser1: this.p1_score, scoreUser2 : this.p2_score})
         
     }
-
+ 
     @UseGuards(WsJwtAuthGuard)
     @UsePipes(ValidationPipe)
     async loop() {
