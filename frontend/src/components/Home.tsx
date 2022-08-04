@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 import {socketo} from '../index';
+import Game from './Game';
+import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
 
     const [socket, setSocket] = useState<any>([]);
     const [users, setUsers] = useState<any>([]);
     const [friends, setFriends] = useState<any>([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const socket = socketo;
@@ -84,6 +87,15 @@ export default function Home() {
         return indents;
     }
 
+    function handleLaunchMatchMaking(mode: number) {
+        if (mode == 1)
+        {
+            console.log("SUPER");
+            socket.emit('game_inQueue');
+            navigate('/game');
+        }
+    }
+
     function displaySteps() {
         if (!next)
         {
@@ -118,7 +130,7 @@ export default function Home() {
                 <div className='home-search'>
                     <h2>FIND A GAME</h2>
                     <h3>MODE : <span>{mode_selec}</span></h3>
-                    <div className='home-play-matchmaking'><button>PLAY WITH MATCHMAKING</button></div>
+                    <div className='home-play-matchmaking'><button onClick={() => handleLaunchMatchMaking(mode)}>PLAY WITH MATCHMAKING</button></div>
                     <div className='home-play-friends'>
                         <h4>PLAY WITH ONLINE FRIENDS</h4>
                         {displayFriends()}
