@@ -43,6 +43,7 @@ export interface Match
     x: number;
     y: number;
     watcher : User;
+    modeSpecial: boolean;
    
 }
 export interface dataFront {

@@ -409,8 +409,14 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('game_inQueue')
-	async getInQueue(client : Socket) {
-		await this.gameRelayService.getInQueue(client)
+	async getInQueue(client : Socket, mode) {
+		await this.gameRelayService.getInQueue(client, mode)
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('joinGame')
+	async joinGame(client : Socket, playerSocket, mode) {
+		await this.gameRelayService.joinGame(client, playerSocket, mode)
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -449,14 +455,14 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('ActivesMatches')
 	async GameOngoing(client: Socket)
 	{
-		console.log("kokokoko")
 		await this.gameRelayService.getOngoingMatches();
 	}
-
+	
 	@UseGuards(WsJwtAuthGuard)
-	@SubscribeMessage('ActivesUsers')
-	async UsersPlaying(client: Socket)
+	@SubscribeMessage('WatchGame')
+	async watchGame(client: Socket, gameId)
 	{
-		await this.gameRelayService.getActivesUsers();
+		await this.gameRelayService.watchGame(client, gameId);
 	}
+
 }

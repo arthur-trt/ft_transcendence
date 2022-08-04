@@ -120,17 +120,17 @@ export class GameService {
 		})
 		return list;
 	}
-	async userPlaying() 
-	{
-		const matches: MatchHistory[] = await this.listGameOngoing();
-		let userPlaying: Set<string>;
-		for (const i in matches)
-		{
-			userPlaying.add(matches[i].user1);
-			userPlaying.add(matches[i].user2);
-		}
-		return userPlaying;
-	}
+	// async userPlaying() 
+	// {
+	// 	const matches: MatchHistory[] = await this.listGameOngoing();
+	// 	let userPlaying: Set<string>;
+	// 	for (const i in matches)
+	// 	{
+	// 		userPlaying.add(matches[i].user1);
+	// 		userPlaying.add(matches[i].user2);
+	// 	}
+	// 	return userPlaying;
+	// }
 
 	async checkForAchievements(user: User)
 	{
