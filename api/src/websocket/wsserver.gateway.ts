@@ -470,7 +470,7 @@ s
 		await this.gameRelayService.watchGame(client, gameId);
 	}
 
-}
+
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('MoveUP2')
 	async MoveUp_Pad2(client : Socket)

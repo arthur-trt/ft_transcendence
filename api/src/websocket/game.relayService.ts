@@ -103,13 +103,19 @@ export class GameRelayService
             this.startMatch(this.players, mode);
             this.players.clear();
         }
-
+        
         async startMatch(players, mode) 
         {
             const [first] = players;
             const[, second] = players;
             this.player1.socket = first;
             this.player2.socket = second;
+            this.player1_pad2.socket = first;
+            this.player2_pad2.socket = second;
+            this.names.p1_name = this.player1.socket.data.user.name;
+            this.names.p2_name = this.player2.socket.data.user.name;
+            this.gateway.server.to(this.player1.socket.id).emit('set_names', this.names); //p1_name = left_name
+            this.gateway.server.to(this.player2.socket.id).emit('set_names', this.names);
             console.log("starting match");
             const Match = await this.gameService.createMatch(first.data.user, second.data.user);
             first.join(Match.id);
@@ -241,32 +247,6 @@ export class GameRelayService
 
     }
 
-        @UseGuards(WsJwtAuthGuard)
-        @UsePipes(ValidationPipe)
-        async sendPosition(client: Socket)
-        {
-            const [first] = players;
-            const[, second] = players;
-
-            //send player names to front
-            this.player1.socket = first;
-            this.player2.socket = second;
-            this.player1_pad2.socket = first;
-            this.player2_pad2.socket = second;
-            this.names.p1_name = this.player1.socket.data.user.name;
-            this.names.p2_name = this.player2.socket.data.user.name;
-            this.gateway.server.to(this.player1.socket.id).emit('set_names', this.names); //p1_name = left_name
-            this.gateway.server.to(this.player2.socket.id).emit('set_names', this.names);
-
-            console.log("starting match/startMatch");
-            const Match = await this.gameService.createMatch(first.data.user, second.data.user);
-            first.join( Match.id);
-            second.join( Match.id);
-            this.MatchRooms.push( Match.id);
-            this.initPositions();
-            this.gateway.server.to( Match.id).emit('game_countdownStart');
-            this.match.id = Match.id;
-        }
         
         
 
