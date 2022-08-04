@@ -38,7 +38,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly gameRelayService: GameRelayService,
 
 	  @Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
-	@Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
+	  @Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
 		) { }
 
 
@@ -415,10 +415,10 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('joinGame')
-	async joinGame(client : Socket, playerSocket, mode) {
-		await this.gameRelayService.joinGame(client, playerSocket, mode)
+	async joinGame(client : Socket, playerId, mode) {
+		await this.gameRelayService.joinGame(client, playerId, mode)
 	}
-
+s
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('game_start')
 	async startMatch() {

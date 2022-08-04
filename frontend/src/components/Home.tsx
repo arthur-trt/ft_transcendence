@@ -50,7 +50,7 @@ export default function Home() {
             setNext(2);
     }
 
-    function displayFriends() {
+    function displayFriends(mode: number) {
         var indents:any = [];
         let j = 0;
         let i = 0;
@@ -68,8 +68,8 @@ export default function Home() {
                             <div className='home-search-single-friend' key={i}>
                                 <img src={friends?.friends[i].avatar_url} alt="avatar"></img>
                                 <h5>{friends?.friends[i].name}</h5>
-                                <button>PLAY</button>
-                            </div>
+                                <button onClick={() => handleLaunchGameWithFriend(friends?.friends[i].id, mode)}>PLAY WITH FRIEND</button>
+                                </div>
                         );
                     }
                 i++;
@@ -90,12 +90,32 @@ export default function Home() {
     function handleLaunchMatchMaking(mode: number) {
         if (mode == 1)
         {
-            console.log("SUPER");
-            socket.emit('game_inQueue');
+            console.log("MODE SIMPLE");
+            socket.emit('game_inQueue', mode);
+            navigate('/game');
+        }
+        else if (mode == 2)
+        {
+            console.log("MODESPECIAL");
+            socket.emit('game_inQueue', mode);
             navigate('/game');
         }
     }
-
+    function handleLaunchGameWithFriend(FriendId: string, mode: number)
+    {
+        if (mode == 1)
+        {
+            console.log("MODESOLO WITH");
+            socket.emit('joinGame', FriendId, mode);
+            navigate('/game');
+        }
+        else if (mode == 2)
+        {
+            console.log("MODESPECIAL WITH");
+            socket.emit('joinGame', FriendId, mode);
+            navigate('/game');
+        }
+    }
     function displaySteps() {
         if (!next)
         {
@@ -133,7 +153,7 @@ export default function Home() {
                     <div className='home-play-matchmaking'><button onClick={() => handleLaunchMatchMaking(mode)}>PLAY WITH MATCHMAKING</button></div>
                     <div className='home-play-friends'>
                         <h4>PLAY WITH ONLINE FRIENDS</h4>
-                        {displayFriends()}
+                        {displayFriends(mode)}
                     </div>
                 </div>
             );

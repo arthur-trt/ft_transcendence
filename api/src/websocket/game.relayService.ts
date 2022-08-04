@@ -6,6 +6,7 @@ import { UserService } from "src/user/user.service";
 import { Ball, dataFront, Match, Names, Paddle } from "../game/game.interface";
 import { GameService } from '../game/game.service';
 import { WSServer } from "./wsserver.gateway";
+import { ChatService } from './chat.service';
 
 const VICTORY = 3;
 
@@ -31,7 +32,8 @@ export class GameRelayService
         protected readonly jwtService: JwtService,
 		protected readonly userService: UserService,
         protected readonly gameService: GameService,
-
+        
+        @Inject(forwardRef(() => ChatService)) protected readonly chatservice : ChatService,
         @Inject(forwardRef(() => WSServer)) protected gateway : WSServer
         ) {
         }
@@ -57,17 +59,17 @@ export class GameRelayService
         protected names = {} as Names;
 
     /*  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-    ██░▄▀▄░█░▄▄▀█▄▄░▄▄██░▄▄▀██░██░██░▄▀▄░█░▄▄▀██░█▀▄█▄░▄██░▀██░██░▄▄░
-    ██░█░█░█░▀▀░███░████░█████░▄▄░██░█░█░█░▀▀░██░▄▀███░███░█░█░██░█▀▀
-    ██░███░█░██░███░████░▀▀▄██░██░██░███░█░██░██░██░█▀░▀██░██▄░██░▀▀▄
-    ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+        ██░▄▀▄░█░▄▄▀█▄▄░▄▄██░▄▄▀██░██░██░▄▀▄░█░▄▄▀██░█▀▄█▄░▄██░▀██░██░▄▄░
+        ██░█░█░█░▀▀░███░████░█████░▄▄░██░█░█░█░▀▀░██░▄▀███░███░█░█░██░█▀▀
+        ██░███░█░██░███░████░▀▀▄██░██░██░███░█░██░██░██░█▀░▀██░██▄░██░▀▀▄
+        ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
     
         /**
          * @brief Random matchmaking
          * @param client
          */
         @UseGuards(WsJwtAuthGuard)
-        async getInQueue(client : Socket, mode)//add mode 
+        async getInQueue(client : Socket, mode)
         {
             if (!this.players.has(client))
                 this.players.add(client);
@@ -83,8 +85,9 @@ export class GameRelayService
          * @param client
          */
         @UseGuards(WsJwtAuthGuard)
-        async  joinGame(client: Socket, playerSocket, mode)
+        async  joinGame(client: Socket, friendId, mode)
         {
+            const playerSocket = await this.chatservice.findSocketId(friendId);
             this.players.add(client);
             this.players.add(playerSocket);
             console.log("starting matchWithFriend");
@@ -104,9 +107,11 @@ export class GameRelayService
             second.join(Match.id);
             this.MatchRooms.push(Match.id);
             this.initPositions();
-            this.gateway.server.to(Match.id).emit('game_countdownStart');
+            if (mode == 2)
+                this.match.modeSpecial = true;
+            this.gateway.server.to(Match.id).emit('game_countdownStart', this.match.modeSpecial);
             this.match.id = Match.id;
-            this.match.modeSpecial = mode;
+            
         }
 
     async start_gameloop()
