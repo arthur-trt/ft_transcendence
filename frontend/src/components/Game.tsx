@@ -157,7 +157,8 @@ export default function Game() {
         setData(adaptToCanvas(pos, canvas));
       });
 
-      socket.on('game_countdownStart', () => {
+      socket.on('game_countdownStart', (mode: boolean) => {
+        setGameMode(mode);
         console.log("socket.on/game_countdown");
         setCountdown(true);
       })
@@ -221,7 +222,7 @@ export default function Game() {
   }
 
   useEffect(() => {
-    console.log("useEffect/game_start" + gameStart);
+    console.log("useEffect/game_start " + gameStart);
     if (gameStart === true)
       socket.emit('game_start');
   }, [gameStart]);
@@ -420,6 +421,7 @@ export default function Game() {
     {
       if (canvas)
       {
+        console.log("P1.y = " + data.player1_paddle_y + " P2.y = " + data.player2_paddle_y);
         data.player1_paddle_y = data.player1_paddle_y / 100 * canvas.height;
         data.player2_paddle_y = data.player2_paddle_y / 100 * canvas.height;
         data.ball_y = data.ball_y / 100 * canvas.height;
