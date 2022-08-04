@@ -64,7 +64,7 @@ export class GameRelayService
         protected P2_MoveDOWN_pad2 : boolean;
 
         protected names = {} as Names;
-        protected isBabyPong = true;
+        protected isBabyPong = false;
 
 
     /*  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
@@ -104,7 +104,7 @@ export class GameRelayService
             this.players.clear();
         }
         
-        async startMatch(players, mode) 
+        async startMatch(players, mode)
         {
             const [first] = players;
             const[, second] = players;
@@ -123,8 +123,8 @@ export class GameRelayService
             this.MatchRooms.push(Match.id);
             this.initPositions();
             if (mode == 2)
-                this.match.modeSpecial = true;
-            this.gateway.server.to(Match.id).emit('game_countdownStart', this.match.modeSpecial);
+                this.isBabyPong = true;
+            this.gateway.server.to(Match.id).emit('game_countdownStart', this.isBabyPong);
             this.match.id = Match.id;
             
         }
@@ -143,6 +143,7 @@ export class GameRelayService
     async end_game()
     {
         clearInterval(this.loop_stop);
+        console.log("interval stopped : " + this.loop_stop);
         this.players_ready = 0;
         await this.gameService.endMatch({id : this.match.id, scoreUser1: this.p1_score, scoreUser2 : this.p2_score})
         
