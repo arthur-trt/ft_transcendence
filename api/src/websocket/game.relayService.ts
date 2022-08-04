@@ -160,7 +160,9 @@ export class GameRelayService
                 if (this.p2_score >= VICTORY) {
                     await this.end_game();
                     console.log("P2 WINS");
-                    this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
+                    this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
+                    this.gateway.server.to(this.player2.socket.id).emit('game_end', true);
+                    //this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
                     return;
                 }
                 else
@@ -172,7 +174,9 @@ export class GameRelayService
                 if (this.p1_score >= VICTORY) {
                     await this.end_game();
                     console.log("P1 WINS");
-                    this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
+                    this.gateway.server.to(this.player1.socket.id).emit('game_end', true);
+                    this.gateway.server.to(this.player2.socket.id).emit('game_end', false);
+                    //this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
                     return;
                 }
                 else
@@ -247,9 +251,6 @@ export class GameRelayService
 
     }
 
-        
-        
-
         async initPositions()
         {
             //ball stats
@@ -295,7 +296,6 @@ export class GameRelayService
             if (client.id == this.player1.socket.id)
                 this.P1_MoveUP = true;
             else if (client.id == this.player2.socket.id)
-                this.P2_MoveUP = true;
             {
                 //manip visant a ameliorer l'ergonomie :
                 //quand on est p2 les commandes sont inversees (i.e. w et s bougent la pallette droite)
@@ -314,7 +314,6 @@ export class GameRelayService
             if (client.id == this.player1.socket.id)
                 this.P1_MoveDOWN = true;
             else if (client.id == this.player2.socket.id)
-                this.P2_MoveDOWN = true;
             {
                 if (this.isBabyPong === true)
                     this.P2_MoveDOWN_pad2 = true;
@@ -353,7 +352,7 @@ export class GameRelayService
         {
             if (client.id == this.player1_pad2.socket.id)
                 this.P1_MoveUP_pad2 = true;
-            else
+            else if (client.id == this.player2_pad2.socket.id)
                 this.P2_MoveUP = true;
         }
 
@@ -363,7 +362,7 @@ export class GameRelayService
         {
             if (client.id == this.player1_pad2.socket.id)
                 this.P1_MoveDOWN_pad2 = true;
-            else
+            else if (client.id == this.player2_pad2.socket.id)
                 this.P2_MoveDOWN = true;
         }
 
@@ -376,7 +375,7 @@ export class GameRelayService
                 this.P1_MoveUP_pad2 = false;
                 this.P1_MoveDOWN_pad2 = false;
             }
-            else
+            else if (client.id == this.player2_pad2.socket.id)
             {
                 this.P2_MoveUP = false;
                 this.P2_MoveDOWN = false;

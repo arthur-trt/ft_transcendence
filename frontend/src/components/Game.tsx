@@ -248,10 +248,10 @@ export default function Game() {
       if (e.key === 's' && MoveDown === false)
         setMoveDown(true);
 
-      if (e.key === "ArrowUp" && Pad2_MoveUp === false && isBabyPong === true)
+      if (e.key === "o" && Pad2_MoveUp === false && isBabyPong === true)
         setPad2_MoveUp(true);
 
-      if (e.key === "ArrowDown" && Pad2_MoveDown === false && isBabyPong === true)
+      if (e.key === "l" && Pad2_MoveDown === false && isBabyPong === true)
         setPad2_MoveDown(true);
     }
   }, {once : true});
@@ -264,10 +264,10 @@ export default function Game() {
       if (e.key === 's' && MoveDown === true)
         setMoveDown(false);
 
-      if (e.key === "ArrowUp" && Pad2_MoveUp === true && isBabyPong === true)
+      if (e.key === "o" && Pad2_MoveUp === true && isBabyPong === true)
         setPad2_MoveUp(false);
 
-      if (e.key === "ArrowDown" && Pad2_MoveDown === true && isBabyPong === true)
+      if (e.key === "l" && Pad2_MoveDown === true && isBabyPong === true)
         setPad2_MoveDown(false);
     }
   }, {once : true});
@@ -393,8 +393,7 @@ export default function Game() {
 
   function render_game_end(winner : boolean, canvas : any)
   {
-    console.log("rener_game_end");
-    //setCtx(canvas.getContext("2d"));
+    //console.log("rener_game_end");
     const ctx = canvas.getContext("2d");
     if (ctx) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
