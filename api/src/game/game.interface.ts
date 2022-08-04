@@ -47,10 +47,10 @@ export interface Match
    
 }
 export interface dataFront {
-    player1_paddle_x: number;
     player1_paddle_y: number;
-    player2_paddle_x: number;
+    player1_paddle2_y: number;
     player2_paddle_y: number;
+    player2_paddle2_y: number;
     ball_x: number;
     ball_y: number;
 }

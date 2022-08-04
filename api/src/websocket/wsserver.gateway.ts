@@ -5,7 +5,9 @@ import { Server, Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
 import { ChannelService } from 'src/channel/channel.service';
 import { addToPrivateRoomDto } from 'src/dtos/addToPrivateRoom.dto';
+import { banUserDto } from 'src/dtos/banUser.dto';
 import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
+import { muteUserDto } from 'src/dtos/muteUser.dto';
 import { newChannelDto } from 'src/dtos/newChannel.dto';
 import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto.dto';
 import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
@@ -204,17 +206,20 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@SubscribeMessage('addUser')
 	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
 	async onAddUser(client: Socket, data : addToPrivateRoomDto) {
 		await this.chatService.addUser(client, data)
 	}
 
 	@SubscribeMessage('banUser')
-	async onBanUser(client: Socket, data : { channel: string, toBan: User }) {
+	@UsePipes(ValidationPipe)
+	async onBanUser(client: Socket, data : banUserDto) {
 		await this.chatService.ban(client, data);
 	}
 
 	@SubscribeMessage('muteUser')
-	async onMuteUser(client: Socket, data : { channel: string, toMute: User }) {
+	@UsePipes(ValidationPipe) 
+	async onMuteUser(client: Socket, data : muteUserDto) {
 		await this.chatService.mute(client, data);
 	}
 
@@ -463,6 +468,33 @@ s
 	async watchGame(client: Socket, gameId)
 	{
 		await this.gameRelayService.watchGame(client, gameId);
+	}
+
+}
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('MoveUP2')
+	async MoveUp_Pad2(client : Socket)
+	{
+		console.log("MoveUP2 " + client.id);
+		await this.gameRelayService.MoveUp2(client);
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('MoveDOWN2')
+	async MoveDown_Pad2(client : Socket)
+	{
+		console.log("MoveDOWN2 " + client.id);
+		await this.gameRelayService.MoveDown2(client);
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('StopMove2')
+	async StopMove_Pad2(client : Socket)
+	{
+		console.log("STOPMove2 " + client.id);
+		await this.gameRelayService.StopMove2(client);
 	}
 
 }
