@@ -40,7 +40,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly gameRelayService: GameRelayService,
 
 	  @Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
-	@Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
+	  @Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
 		) { }
 
 
@@ -414,10 +414,16 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('game_inQueue')
-	async getInQueue(client : Socket) {
-		await this.gameRelayService.getInQueue(client)
+	async getInQueue(client : Socket, mode) {
+		await this.gameRelayService.getInQueue(client, mode)
 	}
 
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('joinGame')
+	async joinGame(client : Socket, playerId, mode) {
+		await this.gameRelayService.joinGame(client, playerId, mode)
+	}
+s
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('game_start')
 	async startMatch() {
@@ -451,6 +457,20 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	}
 
 	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('ActivesMatches')
+	async GameOngoing(client: Socket)
+	{
+		await this.gameRelayService.getOngoingMatches();
+	}
+	
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('WatchGame')
+	async watchGame(client: Socket, gameId)
+	{
+		await this.gameRelayService.watchGame(client, gameId);
+	}
+
+}
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('MoveUP2')
 	async MoveUp_Pad2(client : Socket)

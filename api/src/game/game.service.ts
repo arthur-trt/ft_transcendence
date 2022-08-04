@@ -8,6 +8,9 @@ import { MatchHistory } from './game.entity';
 import { Socket, Server } from 'socket.io'
 import { Achievements_types } from 'src/achievements/achievements.entity';
 import { AchievementsService } from 'src/achievements/achievements.service';
+import { compareSync } from 'bcrypt';
+import { identity } from 'rxjs';
+import { stringify } from 'querystring';
 
 
 @Injectable()
@@ -107,6 +110,27 @@ export class GameService {
 		});
 		return match;
 	}
+
+	async listGameOngoing()
+	{
+		const list: MatchHistory[]  = await this.MatchRepo.find({
+			where :{
+				finished: false,		
+			},
+		})
+		return list;
+	}
+	// async userPlaying() 
+	// {
+	// 	const matches: MatchHistory[] = await this.listGameOngoing();
+	// 	let userPlaying: Set<string>;
+	// 	for (const i in matches)
+	// 	{
+	// 		userPlaying.add(matches[i].user1);
+	// 		userPlaying.add(matches[i].user2);
+	// 	}
+	// 	return userPlaying;
+	// }
 
 	async checkForAchievements(user: User)
 	{
