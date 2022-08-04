@@ -46,7 +46,9 @@ export class GameRelayService
         protected dataT = {} as dataFront;
         protected ball = {} as Ball;
         protected player1 = {} as Paddle;
+        protected player1_pad2 = {} as Paddle;
         protected player2 = {} as Paddle;
+        protected player2_pad2 = {} as Paddle;
         protected p1_score = 0;
         protected p2_score = 0;
         protected loop_stop : NodeJS.Timer;
@@ -57,15 +59,15 @@ export class GameRelayService
         protected P2_MoveUP : boolean;
         protected P2_MoveDOWN : boolean;
 
+        protected P1_MoveUP_pad2 : boolean;
+        protected P1_MoveDOWN_pad2 : boolean;
+        protected P2_MoveUP_pad2 : boolean;
+        protected P2_MoveDOWN_pad2 : boolean;
+
         protected names = {} as Names;
 
-        // async resetBall(){
-        //     this.match.ball.x = 50;
-        //     this.match.ball.y = 100;
-        //     this.match.ball.velocity.x = VEL_X;
-        //     this.match.ball.velocity.y = VEL_Y;
-        //     //this.match.ball.speed = 7;
-        // }
+        protected isBabyPong = true;
+        
         @UseGuards(WsJwtAuthGuard)
         @UsePipes(ValidationPipe)
         async getInQueue(client : Socket)
@@ -108,7 +110,7 @@ export class GameRelayService
     async loop() {
         if (this.ball && this.player1 && this.player2)
         {
-            // change the score of players, if the ball goes to the left "ball.x<0" computer win, else if "ball.x > canvas.width" the user win
+            // change the score of players, if the ball goes to the left "ball.x<0" p2 win, else if "ball.x > canvas.width" the p1 win
             if (this.ball.x - this.ball.radius < 0) {
                 this.p2_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', false);
@@ -149,7 +151,21 @@ export class GameRelayService
             }
 
             // we check if the paddle hit the user or the com paddle
-            const player = (this.ball.x + this.ball.radius < 200 / 2) ? this.player1 : this.player2;
+            let player = (this.ball.x + this.ball.radius < 200 / 2) ? this.player1 : this.player2;
+
+            if (this.isBabyPong === true)
+            {
+                if (player === this.player1)
+                {
+                    //Player1's side
+                    player = (this.ball.x + this.ball.radius < this.player1_pad2.x) ? this.player1 : this.player1_pad2;
+                }
+                else
+                {
+                    //Player2's side
+                    player = (this.ball.x + this.ball.radius > this.player2_pad2.x + this.player2_pad2.width) ? this.player2 : this.player2_pad2;
+                }
+            }
 
             // if the ball hits a paddle
             if (collision(this.ball, player)) {
@@ -166,7 +182,8 @@ export class GameRelayService
                 const angleRad = (Math.PI / 4) * collidePoint;
 
                 // change the X and Y velocity direction
-                const direction = (this.ball.x + this.ball.radius < 200 / 2) ? 1 : -1;
+                //const direction = (this.ball.x + this.ball.radius < 200 / 2) ? 1 : -1;
+                const direction = (this.ball.velocityX >= 0) ? -1 : 1;
                 this.ball.velocityX = direction * this.ball.speed * Math.cos(angleRad);
                 this.ball.velocityY = this.ball.speed * Math.sin(angleRad);
 
@@ -180,10 +197,10 @@ export class GameRelayService
 
     async createData()
     {
-        this.dataT.player1_paddle_x = this.player1.x;
         this.dataT.player1_paddle_y = this.player1.y;
-        this.dataT.player2_paddle_x = this.player2.x;
+        this.dataT.player1_paddle2_y = this.player1_pad2.y;
         this.dataT.player2_paddle_y = this.player2.y;
+        this.dataT.player2_paddle2_y = this.player2_pad2.y;
         this.dataT.ball_x = this.ball.x;
         this.dataT.ball_y = this.ball.y;
     }
@@ -196,6 +213,8 @@ export class GameRelayService
             //send player names to front
             this.player1.socket = first;
             this.player2.socket = second;
+            this.player1_pad2.socket = first;
+            this.player2_pad2.socket = second;
             this.names.p1_name = this.player1.socket.data.user.name;
             this.names.p2_name = this.player2.socket.data.user.name;
             this.gateway.server.to(this.player1.socket.id).emit('set_names', this.names); //p1_name = left_name
@@ -213,6 +232,7 @@ export class GameRelayService
 
         async initPositions()
         {
+            //ball stats
             this.ball.radius = 1;
             this.ball.speed = 1;
             this.ball.velocityX = .5;
@@ -220,15 +240,32 @@ export class GameRelayService
             this.ball.x = 100;
             this.ball.y = 50;
 
+            //player1 pad1 stats
             this.player1.x = 2;
             this.player1.y = 50;
             this.player1.height = 10;
             this.player1.width = 2;
 
+            //player1 pad2 stats
+            this.player1_pad2.x = 40;
+            this.player1_pad2.y = 50;
+            this.player1_pad2.height = 10;
+            this.player1_pad2.width = 2;
+
+            //player2 pad1 stats
             this.player2.x = 200 - 2 - 2; //P2 est decolle de 2px du mur en comprenant sa largeur (2px)
             this.player2.y = 50;
             this.player2.height = 10;
             this.player2.width = 2;
+
+            //player2 pad2 stats
+            this.player2_pad2.x = 200 - 40 - 2;
+            this.player2_pad2.y = 50;
+            this.player2_pad2.height = 10;
+            this.player2_pad2.width = 2;
+
+            this.p1_score = 0;
+            this.p2_score = 0;
         }
 
         @UseGuards(WsJwtAuthGuard)
@@ -237,8 +274,16 @@ export class GameRelayService
         {
             if (client.id == this.player1.socket.id)
                 this.P1_MoveUP = true;
-            else
-                this.P2_MoveUP = true;
+            else if (client.id == this.player2.socket.id)
+            {
+                //manip visant a ameliorer l'ergonomie :
+                //quand on est p2 les commandes sont inversees (i.e. w et s bougent la pallette droite)
+                //ce qui peut etre tres ennuyant, donc si mode babyong et p2 on re-inverse 
+                if (this.isBabyPong === true)
+                    this.P2_MoveUP_pad2 = true;
+                else
+                    this.P2_MoveUP = true;
+            }
         }
 
         @UseGuards(WsJwtAuthGuard)
@@ -247,8 +292,13 @@ export class GameRelayService
         {
             if (client.id == this.player1.socket.id)
                 this.P1_MoveDOWN = true;
-            else
-                this.P2_MoveDOWN = true;
+            else if (client.id == this.player2.socket.id)
+            {
+                if (this.isBabyPong === true)
+                    this.P2_MoveDOWN_pad2 = true;
+                else
+                    this.P2_MoveDOWN = true;
+            }
         }
 
         @UseGuards(WsJwtAuthGuard)
@@ -259,6 +309,50 @@ export class GameRelayService
             {
                 this.P1_MoveUP = false;
                 this.P1_MoveDOWN = false;
+            }
+            else if (client.id == this.player2.socket.id)
+            {
+                if (this.isBabyPong === true)
+                {
+                    this.P2_MoveDOWN_pad2 = false;
+                    this.P2_MoveUP_pad2 = false;
+                }
+                else
+                {
+                    this.P2_MoveUP = false;
+                    this.P2_MoveDOWN = false;
+                }
+            }
+        }
+
+        @UseGuards(WsJwtAuthGuard)
+        @UsePipes(ValidationPipe)
+        async MoveUp2(client : Socket)
+        {
+            if (client.id == this.player1_pad2.socket.id)
+                this.P1_MoveUP_pad2 = true;
+            else
+                this.P2_MoveUP = true;
+        }
+
+        @UseGuards(WsJwtAuthGuard)
+        @UsePipes(ValidationPipe)
+        async MoveDown2(client : Socket)
+        {
+            if (client.id == this.player1_pad2.socket.id)
+                this.P1_MoveDOWN_pad2 = true;
+            else
+                this.P2_MoveDOWN = true;
+        }
+
+        @UseGuards(WsJwtAuthGuard)
+        @UsePipes(ValidationPipe)
+        async StopMove2(client : Socket)
+        {
+            if (client.id == this.player1_pad2.socket.id)
+            {
+                this.P1_MoveUP_pad2 = false;
+                this.P1_MoveDOWN_pad2 = false;
             }
             else
             {
@@ -283,6 +377,23 @@ export class GameRelayService
                 else
                     this.player1.y += 2;
             }
+
+            if (this.isBabyPong === true)
+            {
+                if (this.P1_MoveUP_pad2 === true) {
+                    if (this.player1_pad2.y - 2 < 0)
+                        this.player1_pad2.y = 0;
+                    else
+                        this.player1_pad2.y -= 2;
+                }
+                if (this.P1_MoveDOWN_pad2 === true) {
+
+                    if (this.player1_pad2.y + 2 > 100 - this.player1.height)
+                        this.player1_pad2.y = 100 - this.player1.height;
+                    else
+                        this.player1_pad2.y += 2;
+                }
+            }
         }
 
         async calculateP2Pad()
@@ -300,6 +411,22 @@ export class GameRelayService
                     this.player2.y = 100 - this.player2.height;
                 else
                     this.player2.y += 2;
+            }
+
+            if (this.isBabyPong === true) {
+                if (this.P2_MoveUP_pad2 === true) {
+                    if (this.player2_pad2.y - 2 < 0)
+                        this.player2_pad2.y = 0;
+                    else
+                        this.player2_pad2.y -= 2;
+                }
+                if (this.P2_MoveDOWN_pad2 === true) {
+
+                    if (this.player2_pad2.y + 2 > 100 - this.player2.height)
+                        this.player2_pad2.y = 100 - this.player2.height;
+                    else
+                        this.player2_pad2.y += 2;
+                }
             }
         }
 

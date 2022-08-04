@@ -450,4 +450,31 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.gameRelayService.StopMove(client);
 	}
 
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('MoveUP2')
+	async MoveUp_Pad2(client : Socket)
+	{
+		console.log("MoveUP2 " + client.id);
+		await this.gameRelayService.MoveUp2(client);
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('MoveDOWN2')
+	async MoveDown_Pad2(client : Socket)
+	{
+		console.log("MoveDOWN2 " + client.id);
+		await this.gameRelayService.MoveDown2(client);
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('StopMove2')
+	async StopMove_Pad2(client : Socket)
+	{
+		console.log("STOPMove2 " + client.id);
+		await this.gameRelayService.StopMove2(client);
+	}
+
 }

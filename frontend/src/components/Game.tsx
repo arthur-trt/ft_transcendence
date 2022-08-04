@@ -33,7 +33,9 @@ export default function Game() {
 
   type dataT = {
     player1_paddle_y: number,
+    player1_paddle2_y: number,
     player2_paddle_y: number,
+    player2_paddle2_y: number,
     ball_x: number,
     ball_y: number
   }
@@ -57,6 +59,7 @@ export default function Game() {
   const [matchMaking, setMatchMaking] = useState<boolean>(false);
   const [countdown, setCountdown] = useState<boolean>(false);
   const [gameStart, setGameStart] = useState<boolean>(false);
+  const [isBabyPong, setGameMode] = useState<boolean>(true);
 
   let [P1score, setP1Score] = useState(0);
   let [P2score, setP2Score] = useState(0);
@@ -71,6 +74,9 @@ export default function Game() {
     height: 30,
     color: "DEEPSKYBLUE"
   });
+
+  const [userLeft_Pad2, setUserLeftP2] = useState<userT>();
+
   const [userRight, setUserRight] = useState<userT>({
     x: 20,
     y: 0,
@@ -78,6 +84,8 @@ export default function Game() {
     height: 30,
     color: "FIREBRICK"
   });
+
+  const [userRight_Pad2, setUserRightP2] = useState<userT>();
 
   const [ball, setBall] = useState<ballT>({
      x: 0,
@@ -131,6 +139,11 @@ export default function Game() {
         setNet({x : canvas.width/2, y : 0, height : 20, width : 5, color : "BLACK"});
         setUserLeft({x : canvas.width * 0.01, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "DEEPSKYBLUE"});
         setUserRight({x : canvas.width * 0.98, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "FIREBRICK"});
+        if (isBabyPong === true)
+        {
+          setUserLeftP2({x : canvas.width * 0.2, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "DEEPSKYBLUE"});
+          setUserRightP2({x : canvas.width * 0.78, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "FIREBRICK"});
+        }
       }
 
       socket.on('set_names', (n: nameT) => {
@@ -223,14 +236,23 @@ export default function Game() {
 
   const [MoveUp, setMoveUp] = useState<boolean>(false);
   const [MoveDown, setMoveDown] = useState<boolean>(false);
+  const [Pad2_MoveUp, setPad2_MoveUp] = useState<boolean>(false);
+  const [Pad2_MoveDown, setPad2_MoveDown] = useState<boolean>(false);
 
   document.addEventListener('keydown', (e) => {
     if (gameStart) {
+
       if (e.key === 'w' && MoveUp === false)
         setMoveUp(true);
 
       if (e.key === 's' && MoveDown === false)
         setMoveDown(true);
+
+      if (e.key === "ArrowUp" && Pad2_MoveUp === false && isBabyPong === true)
+        setPad2_MoveUp(true);
+
+      if (e.key === "ArrowDown" && Pad2_MoveDown === false && isBabyPong === true)
+        setPad2_MoveDown(true);
     }
   }, {once : true});
 
@@ -241,6 +263,12 @@ export default function Game() {
 
       if (e.key === 's' && MoveDown === true)
         setMoveDown(false);
+
+      if (e.key === "ArrowUp" && Pad2_MoveUp === true && isBabyPong === true)
+        setPad2_MoveUp(false);
+
+      if (e.key === "ArrowDown" && Pad2_MoveDown === true && isBabyPong === true)
+        setPad2_MoveDown(false);
     }
   }, {once : true});
 
@@ -258,8 +286,24 @@ export default function Game() {
         socket.emit('StopMove');
         console.log("front STOP move");
       }
+
+      if (isBabyPong === true)
+      {
+        if (Pad2_MoveUp === true) {
+          console.log("front Pad_2 MoveUp");
+          socket.emit('MoveUP2')
+        }
+        if (Pad2_MoveDown === true) {
+          console.log("front Pad_2 MoveUDown");
+          socket.emit('MoveDOWN2')
+        }
+        if (Pad2_MoveUp === false && Pad2_MoveDown === false) {
+          console.log("front Pad_2 STOP move");
+          socket.emit('StopMove2');
+        }
+      }
     }
-  }, [MoveUp, MoveDown]);
+  }, [MoveUp, MoveDown, Pad2_MoveUp, Pad2_MoveDown]);
 
   /**
    * Draw a rectangle on the canva
@@ -335,6 +379,13 @@ export default function Game() {
       drawRect(userLeft.x, data.player1_paddle_y, userLeft.width, userLeft.height, userLeft.color);
       drawRect(userRight.x, data.player2_paddle_y, userRight.width, userRight.height, userRight.color);
 
+      //if mode babypong draw the second paddles
+      if (isBabyPong === true && userLeft_Pad2 && userRight_Pad2)
+      {
+        drawRect(userLeft_Pad2.x, data.player1_paddle2_y, userLeft_Pad2.width, userLeft_Pad2.height, userLeft_Pad2.color);
+        drawRect(userRight_Pad2.x, data.player2_paddle2_y, userRight_Pad2.width, userRight_Pad2.height, userRight_Pad2.color);
+      }
+      
       //Draw the ball
       drawArc(data.ball_x, data.ball_y, ball.radius, ball.color);
     }
@@ -368,14 +419,17 @@ export default function Game() {
 
   function adaptToCanvas(data: dataT, canvas:any)
     {
-      //console.log("issou");
       if (canvas)
       {
         data.player1_paddle_y = data.player1_paddle_y / 100 * canvas.height;
-        //console.log("PAD1 Y = " + data.player1_paddle_y);
         data.player2_paddle_y = data.player2_paddle_y / 100 * canvas.height;
         data.ball_y = data.ball_y / 100 * canvas.height;
         data.ball_x = data.ball_x / 200 * canvas.width;
+        if (isBabyPong === true)
+        {
+          data.player1_paddle2_y = data.player1_paddle2_y / 100 * canvas.height;
+          data.player2_paddle2_y = data.player2_paddle2_y / 100 * canvas.height;
+        }
         return (data);
       }
     }
