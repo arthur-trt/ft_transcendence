@@ -153,7 +153,7 @@ export default function Game() {
 
       socket.on('game_position', (pos: dataT) => {
         //console.log(canvas);
-        //console.log("socket.on/game_position");
+        console.log("socket.on/game_position");
         setData(adaptToCanvas(pos, canvas));
       });
 
@@ -177,20 +177,30 @@ export default function Game() {
       })
 
       socket.on('game_end', (res : boolean) => {
+        kill_sockets(socket);
         render_game_end(res, canvas);
       })
     }, []);
 
-  // Wait for context to be ready.
-  useEffect(() => {
-    if (canvas && ctx)
+    function kill_sockets(socketi : any)
     {
-        ctx.fillStyle = "BLACK";
-        ctx.font = "48px serif";
-        ctx.textAlign = "center"
-        ctx.fillText("Cliquez ici pour jouer !", canvas.width / 2, canvas.height / 2);
+      socketi.off('game_position');
+      socketi.off('game_end');
+      socketi.off('update_score');
+      socketi.off('game_countdownStart');
+      socketi.off('set_names');
     }
-  }, [ctx])
+
+  // Wait for context to be ready.
+  // useEffect(() => {
+  //   if (canvas && ctx)
+  //   {
+  //       ctx.fillStyle = "BLACK";
+  //       ctx.font = "48px serif";
+  //       ctx.textAlign = "center"
+  //       ctx.fillText("Cliquez ici pour jouer !", canvas.width / 2, canvas.height / 2);
+  //   }
+  // }, [ctx])
 
   let i = 0;
   let inter : any;
@@ -316,11 +326,6 @@ export default function Game() {
    */
   function drawRect(x: number, y: number, w: number, h: number, color: string) {
     if (ctx != null) {
-      // console.log(" DRAW ME BITCH"); // ????? un peu vnr ?
-      // console.log(x + " " + y + " " + w + " " + h);
-      // console.log(canvas.height);
-      // console.log(canvas.width);
-      // console.log(color);
       ctx.fillStyle = color;
       ctx.fillRect(x, y, w, h);
     }
@@ -366,11 +371,9 @@ export default function Game() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Draw score for userLeft
-      // drawText("PLAYER 1", canvas.width * 0.2, canvas.height * 0.1, '#00000080', "48px serif");
       drawText(P1score.toString(), canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
 
       // Draw score for userRight
-      // drawText("PLAYER 2", canvas.width * 0.8, canvas.height * 0.1, '#00000080', "48px serif");
       drawText(P2score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
 
       // Draw net
@@ -421,7 +424,6 @@ export default function Game() {
     {
       if (canvas)
       {
-        console.log("P1.y = " + data.player1_paddle_y + " P2.y = " + data.player2_paddle_y);
         data.player1_paddle_y = data.player1_paddle_y / 100 * canvas.height;
         data.player2_paddle_y = data.player2_paddle_y / 100 * canvas.height;
         data.ball_y = data.ball_y / 100 * canvas.height;
@@ -435,15 +437,6 @@ export default function Game() {
       }
     }
 
-  function handleClick(e: any) {
-    if (!matchMaking)
-    {
-      socket.emit('game_inQueue');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      setMatchMaking(true);
-    }
-  }
-
   return (
 
     <div className='game-container'>
@@ -452,7 +445,7 @@ export default function Game() {
         <h3>{P2Name}</h3>
       </div>
       {/*<button type='button' onClick={handleStart}>Start game</button>*/}
-      <canvas ref={canvasRef} className="pong-container" onClick={handleClick}/>
+      <canvas ref={canvasRef} className="pong-container"/>
       <img ref={imgRef} src="coupe.png" className="hidden" alt="Winning cup"/>
       <img ref={firstRef} src="1st.png" className="hidden" alt="First place"/>
       <img ref={secondRef} src="2nd.png" className="hidden" alt="Second place"/>

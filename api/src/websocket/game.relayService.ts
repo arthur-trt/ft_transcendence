@@ -82,7 +82,7 @@ export class GameRelayService {
         if (!this.players.has(client))
             this.players.add(client);
         if (this.players.size == 2) {
-            console.log("starting match");
+            console.log("starting match/getInQueue");
             this.startMatch(this.players, mode);
         }
     }
@@ -112,7 +112,7 @@ export class GameRelayService {
         this.names.p2_name = this.player2.socket.data.user.name;
         this.gateway.server.to(this.player1.socket.id).emit('set_names', this.names); //p1_name = left_name
         this.gateway.server.to(this.player2.socket.id).emit('set_names', this.names);
-        console.log("starting match");
+        console.log("starting match/startMatch");
         players.clear();
         console.log(this.players.size)
         const Match = await this.gameService.createMatch(first.data.user, second.data.user);
@@ -275,10 +275,11 @@ export class GameRelayService {
         this.dataT.player2_paddle2_y = this.player2_pad2.y;
         this.dataT.ball_x = this.ball.x;
         this.dataT.ball_y = this.ball.y;
-
     }
 
     async initPositions() {
+        console.log("initPos");
+
         //ball stats
         this.ball.radius = 1;
         this.ball.speed = 1;
@@ -465,50 +466,6 @@ export class GameRelayService {
         this.ball.x = 100;
         this.ball.y = 50;
     }
-
-    // async MovementUp(client : Socket)
-    // {
-    //     if (this.player1.id.id == client.id)
-    //     {
-
-    //     }
-    // }
-
-    // @UseGuards(WsJwtAuthGuard)
-    // @UsePipes(ValidationPipe)
-    // //@SubscribeMessage('game_start')
-    // async initGamePosition()
-    // {
-    //     //this.match.ball.speed = 7;
-    //     //this.match.ball.velocity.x = VEL_X;
-    //     //this.match.ball.velocity.y = VEL_Y;
-    //     this.match.ball.x = 50;
-    //     this.match.ball.y = 100;
-    //     this.match.player_1.x = 2;
-    //     this.match.player_1.y = 50;
-    //     this.match.player_2.x = 198;
-    //     this.match.player_2.y = 50;
-    //     //this.sendPosition(client);
-    // };
-
-    // @UseGuards(WsJwtAuthGuard)
-    // @UsePipes(ValidationPipe)
-    // @SubscribeMessage('game_start')
-    // async sendPosition(client : Socket)
-    // {
-    //     console.log("game_start")
-    //     this.dataT.player1_paddle_x = this.match.player_1.x;
-    //     this.dataT.player1_paddle_y = this.match.player_1.y;
-    //     this.dataT.player2_paddle_x = this.match.player_2.x;
-    //     this.dataT.player2_paddle_y = this.match.player_2.y;
-    //     this.dataT.ball_x = this.match.ball.x;
-    //     this.dataT.ball_y = this.match.ball.y;
-    //     console.log(this.match.id)
-    //     this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
-    // }
-
-    // collision detection
-
 
     //watchmode if a friend is on a match (make a research ), join on watch mode
     // for (friend in matchhistory)
