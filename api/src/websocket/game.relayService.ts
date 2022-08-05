@@ -84,7 +84,6 @@ export class GameRelayService {
         if (this.players.size == 2) {
             console.log("starting match");
             this.startMatch(this.players, mode);
-            this.players.clear();
         }
     }
     /**
@@ -99,10 +98,9 @@ export class GameRelayService {
         this.players.add(client);
         this.players.add(playerSocket);
         console.log("starting matchWithFriend");
-        this.startMatch(this.players, mode);
-        this.players.clear();
+        this.startMatch(this.players, mode);   
     }
-
+    
     async startMatch(players, mode) {
         const [first] = players;
         const [, second] = players;
@@ -115,6 +113,8 @@ export class GameRelayService {
         this.gateway.server.to(this.player1.socket.id).emit('set_names', this.names); //p1_name = left_name
         this.gateway.server.to(this.player2.socket.id).emit('set_names', this.names);
         console.log("starting match");
+        players.clear();
+        console.log(this.players.size)
         const Match = await this.gameService.createMatch(first.data.user, second.data.user);
         first.join(Match.id);
         second.join(Match.id);
