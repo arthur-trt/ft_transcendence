@@ -68,7 +68,8 @@ export default function Home() {
                             <div className='home-search-single-friend' key={i}>
                                 <img src={friends?.friends[i].avatar_url} alt="avatar"></img>
                                 <h5>{friends?.friends[i].name}</h5>
-                                <button onClick={() => handleLaunchGameWithFriend(friends?.friends[i].id, mode)}>PLAY WITH FRIEND</button>
+                                {/* <button onClick={() =>inviteFriendToPlay(friends?.friends[i].name, mode)}>INVITE A FRIEND</button> */}
+                                {/* <button onClick={() => handleLaunchGameWithFriend(friends?.friends[i].id, mode)}>PLAY WITH FRIEND</button> */}
                                 </div>
                         );
                     }
@@ -86,6 +87,11 @@ export default function Home() {
         }
         return indents;
     }
+
+    // function inviteFriendToPlay(friendId: number, mode: number)
+    // {
+    //     //create an invite
+    // }
 
     function handleLaunchMatchMaking(mode: number) {
         if (mode == 1)
@@ -105,13 +111,13 @@ export default function Home() {
     {
         if (mode == 1)
         {
-            console.log("MODESOLO WITH");
+            console.log("MODESOLO WITH FRIEND");
             socket.emit('joinGame', FriendId, mode);
             navigate('/game');
         }
         else if (mode == 2)
         {
-            console.log("MODESPECIAL WITH");
+            console.log("MODESPECIAL WITH FRIEND");
             socket.emit('joinGame', FriendId, mode);
             navigate('/game');
         }

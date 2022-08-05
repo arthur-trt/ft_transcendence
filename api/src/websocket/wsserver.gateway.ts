@@ -475,7 +475,7 @@ s
 	@SubscribeMessage('MoveUP2')
 	async MoveUp_Pad2(client : Socket)
 	{
-		//console.log("MoveUP2 " + client.id);
+		console.log("MoveUP2 " + client.id);
 		await this.gameRelayService.MoveUp2(client);
 	}
 
@@ -484,7 +484,7 @@ s
 	@SubscribeMessage('MoveDOWN2')
 	async MoveDown_Pad2(client : Socket)
 	{
-		//console.log("MoveDOWN2 " + client.id);
+		console.log("MoveDOWN2 " + client.id);
 		await this.gameRelayService.MoveDown2(client);
 	}
 
@@ -493,7 +493,7 @@ s
 	@SubscribeMessage('StopMove2')
 	async StopMove_Pad2(client : Socket)
 	{
-		//console.log("STOPMove2 " + client.id);
+		console.log("STOPMove2 " + client.id);
 		await this.gameRelayService.StopMove2(client);
 	}
 
