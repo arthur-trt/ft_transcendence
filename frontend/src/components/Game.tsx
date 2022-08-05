@@ -56,7 +56,6 @@ export default function Game() {
 
   const [canvas, setCanvas] = useState<any>();
   const [ctx, setCtx] = useState<any>();
-  const [matchMaking, setMatchMaking] = useState<boolean>(false);
   const [countdown, setCountdown] = useState<boolean>(false);
   const [gameStart, setGameStart] = useState<boolean>(false);
   const [isBabyPong, setGameMode] = useState<boolean>(true);
