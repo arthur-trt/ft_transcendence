@@ -50,6 +50,7 @@ export default function Home() {
             setNext(2);
     }
 
+
     function displayFriends(mode: number) {
         var indents:any = [];
         let j = 0;
@@ -68,7 +69,8 @@ export default function Home() {
                             <div className='home-search-single-friend' key={i}>
                                 <img src={friends?.friends[i].avatar_url} alt="avatar"></img>
                                 <h5>{friends?.friends[i].name}</h5>
-                                <button id={friends?.friends[i].id} onClick={handleLaunchGameWithFriend}>PLAY</button>
+                                {/* <button id={friends?.friends[i].id} onClick={handleLaunchGameWithFriend}>PLAY</button> */}
+                                <button id={friends?.friends[i].id} onClick={sendingInvite}>PLAY</button>
                                 </div>
                         );
                     }
@@ -85,8 +87,13 @@ export default function Home() {
             );
         }
         return indents;
-    }
 
+    }
+    let sendingInvite = (e:any) =>
+    {
+        socket.emit(('pending invite'), e.currentTarget.id, mode)
+        console.log('sending invite')
+    }
     function handleLaunchMatchMaking(mode: number) {
         if (mode == 1)
         {
@@ -101,21 +108,21 @@ export default function Home() {
             navigate('/game');
         }
     }
-    let handleLaunchGameWithFriend = (e:any) =>
-    {
-        if (mode == 1)
-        {
-            console.log("MODESOLO WITH FRIEND");
-            socket.emit('joinGame', e.currentTarget.id, mode);
-            navigate('/game');
-        }
-        else if (mode == 2)
-        {
-            console.log("MODESPECIAL WITH FRIEND");
-            socket.emit('joinGame', e.currentTarget.id, mode);
-            navigate('/game');
-        }
-    }
+    // let handleLaunchGameWithFriend = (e:any) =>
+    // {
+    //     if (mode == 1)
+    //     {
+    //         console.log("MODESOLO WITH FRIEND");
+    //         socket.emit('joinGame', e.currentTarget.id, mode);
+    //         navigate('/game');
+    //     }
+    //     else if (mode == 2)
+    //     {
+    //         console.log("MODESPECIAL WITH FRIEND");
+    //         socket.emit('joinGame', e.currentTarget.id, mode);
+    //         navigate('/game');
+    //     }
+    // }
 
     function displaySteps() {
         if (!next)
