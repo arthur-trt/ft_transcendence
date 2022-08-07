@@ -108,21 +108,21 @@ export default function Home() {
             navigate('/game');
         }
     }
-    let handleLaunchGameWithFriend = (e:any) =>
-    {
-        if (mode == 1)
-        {
-            console.log("MODESOLO WITH FRIEND");
-            socket.emit('joinGame', e.currentTarget.id, mode);
-            navigate('/game');
-        }
-        else if (mode == 2)
-        {
-            console.log("MODESPECIAL WITH FRIEND");
-            socket.emit('joinGame', e.currentTarget.id, mode);
-            navigate('/game');
-        }
-    }
+    // let handleLaunchGameWithFriend = (e:any) =>
+    // {
+    //     if (mode == 1)
+    //     {
+    //         console.log("MODESOLO WITH FRIEND");
+    //         socket.emit('joinGame', e.currentTarget.id, mode);
+    //         navigate('/game');
+    //     }
+    //     else if (mode == 2)
+    //     {
+    //         console.log("MODESPECIAL WITH FRIEND");
+    //         socket.emit('joinGame', e.currentTarget.id, mode);
+    //         navigate('/game');
+    //     }
+    // }
 
     function displaySteps() {
         if (!next)
