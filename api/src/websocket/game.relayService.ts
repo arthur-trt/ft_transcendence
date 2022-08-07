@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ConsoleLogger, forwardRef, Inject, Injectable, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
@@ -8,23 +8,23 @@ import { GameService } from '../game/game.service';
 import { WSServer } from "./wsserver.gateway";
 import { ChatService } from './chat.service';
 
-const VICTORY = 3;
 
 function collision(b: Ball, p: Paddle) {
     const pad_top = p.y;
     const pad_bottom = p.y + p.height;
     const pad_left = p.x;
     const pad_right = p.x + p.width;
-
+    
     const ball_top = b.y - b.radius;
     const ball_bottom = b.y + b.radius;
     const ball_left = b.x - b.radius;
     const ball_right = b.x + b.radius;
-
+    
     //return p.left < b.right && p.top < b.bottom && p.right > b.left && p.bottom > b.top;
     return pad_left < ball_right && pad_top < ball_bottom && pad_right > ball_left && pad_bottom > ball_top;
 }
 
+const VICTORY = 3;
 @Injectable()
 export class GameRelayService {
     constructor(
@@ -132,20 +132,12 @@ export class GameRelayService {
      */
     async handleDisconnect()
     {
-        if (this.gateway.activeUsers.has(await this.userService.getUserByIdentifier(this.names.p1_name))) {
-            this.p2_score = VICTORY;
-            this.gateway.server.to(this.player1.socket.id).emit('game_end', true);
-            this.gateway.server.to(this.player2.socket.id).emit('game_end', false);
-            this.end_game()
-            return true
-        }
-        else if (this.gateway.activeUsers.has(await this.userService.getUserByIdentifier(this.names.p2_name))) {
-            this.p1_score = VICTORY;
-            this.gateway.server.to(this.player2.socket.id).emit('game_end', true);
-            this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
-            this.end_game()
-            return true;
-        }
+        const user1 = await this.chatservice.findUserbySocket(this.player1.socket.id);
+        const user2 = await this.chatservice.findUserbySocket(this.player2.socket.id);
+        if (!this.gateway.activeUsers.has(user1))
+            return 1
+        else if (!this.gateway.activeUsers.has(user2))
+            return 2;
     }
 
     async start_gameloop()
@@ -179,16 +171,13 @@ export class GameRelayService {
     }
 
     @UseGuards(WsJwtAuthGuard)
-    @UsePipes(ValidationPipe)
     async loop() {
-        // if (await this.handleDisconnect())  
-        //     return;
         if (this.ball && this.player1 && this.player2) {
             // change the score of players, if the ball goes to the left "ball.x<0" p2 win, else if "ball.x > canvas.width" the p1 win
             if (this.ball.x - this.ball.radius < 0) {
                 this.p2_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', false);
-                if (this.p2_score >= VICTORY) {
+                if (this.p2_score >= VICTORY || await this.handleDisconnect() == 1) {
                     await this.end_game();
                     console.log("P2 WINS");
                     this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
@@ -202,7 +191,7 @@ export class GameRelayService {
             else if (this.ball.x + this.ball.radius > 200) {
                 this.p1_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', true);
-                if (this.p1_score >= VICTORY) {
+                if (this.p1_score >= VICTORY || await this.handleDisconnect() == 2) {
                     await this.end_game();
                     console.log("P1 WINS");
                     this.gateway.server.to(this.player1.socket.id).emit('game_end', true);
@@ -317,7 +306,6 @@ export class GameRelayService {
     }
 
     @UseGuards(WsJwtAuthGuard)
-    @UsePipes(ValidationPipe)
     async MoveUp(client: Socket) {
         if (client.id == this.player1.socket.id)
             this.P1_MoveUP = true;
@@ -333,7 +321,6 @@ export class GameRelayService {
     }
 
     @UseGuards(WsJwtAuthGuard)
-    @UsePipes(ValidationPipe)
     async MoveDown(client: Socket) {
         if (client.id == this.player1.socket.id)
             this.P1_MoveDOWN = true;
@@ -346,7 +333,6 @@ export class GameRelayService {
     }
 
     @UseGuards(WsJwtAuthGuard)
-    @UsePipes(ValidationPipe)
     async StopMove(client: Socket) {
         if (client.id == this.player1.socket.id) {
             this.P1_MoveUP = false;
@@ -365,7 +351,6 @@ export class GameRelayService {
     }
 
     @UseGuards(WsJwtAuthGuard)
-    @UsePipes(ValidationPipe)
     async MoveUp2(client: Socket) {
         if (client.id == this.player1_pad2.socket.id)
             this.P1_MoveUP_pad2 = true;
@@ -374,7 +359,6 @@ export class GameRelayService {
     }
 
     @UseGuards(WsJwtAuthGuard)
-    @UsePipes(ValidationPipe)
     async MoveDown2(client: Socket) {
         if (client.id == this.player1_pad2.socket.id)
             this.P1_MoveDOWN_pad2 = true;
@@ -383,7 +367,6 @@ export class GameRelayService {
     }
 
     @UseGuards(WsJwtAuthGuard)
-    @UsePipes(ValidationPipe)
     async StopMove2(client: Socket) {
         if (client.id == this.player1_pad2.socket.id) {
             this.P1_MoveUP_pad2 = false;
