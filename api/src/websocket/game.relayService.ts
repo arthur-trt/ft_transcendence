@@ -7,6 +7,7 @@ import { Ball, dataFront, Match, Names, Paddle } from "../game/game.interface";
 import { GameService } from '../game/game.service';
 import { WSServer } from "./wsserver.gateway";
 import { ChatService } from './chat.service';
+import { AchievementsService} from 'src/achievements/achievements.service';
 
 
 function collision(b: Ball, p: Paddle) {
@@ -31,6 +32,7 @@ export class GameRelayService {
         protected readonly jwtService: JwtService,
         protected readonly userService: UserService,
         protected readonly gameService: GameService,
+        protected readonly achievementService: AchievementsService,
 
         @Inject(forwardRef(() => ChatService)) protected readonly chatservice: ChatService,
         @Inject(forwardRef(() => WSServer)) protected gateway: WSServer
@@ -108,29 +110,42 @@ export class GameRelayService {
      * @param mode
      */
      @UseGuards(WsJwtAuthGuard)
-     async pendingInvite(client: Socket, friendId, mode)
-     {
-        const friend = await this.chatservice.findSocketId(friendId);
+     async pendingInvite(client: Socket, friendId, mode){
+         const friend = await this.chatservice.findSocketId(friendId);
         this.gateway.server.to(friend.id).emit('accept invite', (await client.data.user.id, mode))
-     }
-     /**
+    }
+    /**
      * @brief Quit the game when user changes tab
      * @param client
      */
       @UseGuards(WsJwtAuthGuard)
       async changeTab(client: Socket)
       {
-          console.log(client.data.user.name, "changed tab")
+        console.log(client.data.user.name, "changed tab")
         if (client.data.user.name == this.names.p1_name)
             return 1;
         else if (client.data.user.name == this.names.p2_name)
             return 2;
+        }
         
-      }
+        
+        /**
+         * @brief Check if user is disconnected
+         * @return 1 or 2 depends on who's disconnected
+         */
+        async handleDisconnect()
+        {
+            const user1 = await this.chatservice.findUserbySocket(this.player1.socket.id);
+            const user2 = await this.chatservice.findUserbySocket(this.player2.socket.id);
+            if (!this.gateway.activeUsers.has(user1))
+                return 1
+            else if (!this.gateway.activeUsers.has(user2))
+                return 2;
+        }
 
-    async startMatch(players, mode) {
-        const [first] = players;
-        const [, second] = players;
+        async startMatch(players, mode) {
+            const [first] = players;
+            const [, second] = players;
         this.player1.socket = first;
         this.player2.socket = second;
         this.player1_pad2.socket = first;
@@ -148,25 +163,13 @@ export class GameRelayService {
         this.MatchRooms.push(Match.id);
         this.initPositions();
         if (mode == 2)
-            this.isBabyPong = true;
+        this.isBabyPong = true;
         this.gateway.server.to(Match.id).emit('game_countdownStart', this.isBabyPong);
         this.match.id = Match.id;
-
+        
     }
-
-    /**
-     * @brief Make a player lose when he disconnects
-     */
-    async handleDisconnect()
-    {
-        const user1 = await this.chatservice.findUserbySocket(this.player1.socket.id);
-        const user2 = await this.chatservice.findUserbySocket(this.player2.socket.id);
-        if (!this.gateway.activeUsers.has(user1))
-            return 1
-        else if (!this.gateway.activeUsers.has(user2))
-            return 2;
-    }
-
+    
+    
     async start_gameloop()
     {
         if (this.players_ready == 1)
@@ -175,9 +178,9 @@ export class GameRelayService {
             console.log("inter = " + this.loop_stop);
         }
         else
-            this.players_ready++;
+        this.players_ready++;
     }
-
+    
     async end_game() //DON'T FORGET TO MAKE THE WATCHER LEAVE THE ROOM
     {
         // const sockets = await this.gateway.server.in(this.match.id).allSockets;
@@ -194,9 +197,9 @@ export class GameRelayService {
         console.log("player2 left the room")
         this.players_ready = 0;
         await this.gameService.endMatch({ id: this.match.id, scoreUser1: this.p1_score, scoreUser2: this.p2_score })
-
+        
     }
-
+    
     @UseGuards(WsJwtAuthGuard)
     async loop() {
         if (this.ball && this.player1 && this.player2) {
@@ -227,7 +230,7 @@ export class GameRelayService {
                     return;
                 }
                 else
-                    this.resetBall();
+                this.resetBall();
             }
 
             this.calculateP1Pad();
@@ -241,7 +244,7 @@ export class GameRelayService {
             if (this.ball.y - this.ball.radius < 0 || this.ball.y + this.ball.radius > 100) {
                 this.ball.velocityY = -this.ball.velocityY;
             }
-
+            
             // we check if the paddle hit the user or the com paddle
             let player = (this.ball.x + this.ball.radius < 200 / 2) ? this.player1 : this.player2;
 
@@ -255,7 +258,7 @@ export class GameRelayService {
                     player = (this.ball.x + this.ball.radius > this.player2_pad2.x + this.player2_pad2.width) ? this.player2 : this.player2_pad2;
                 }
             }
-
+            
             // if the ball hits a paddle
             if (collision(this.ball, player)) {
                 // we check where the ball hits the paddle
@@ -283,7 +286,7 @@ export class GameRelayService {
             this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
         }
     }
-
+    
     async createData() {
         this.dataT.player1_paddle_y = this.player1.y;
         this.dataT.player1_paddle2_y = this.player1_pad2.y;
@@ -292,10 +295,10 @@ export class GameRelayService {
         this.dataT.ball_x = this.ball.x;
         this.dataT.ball_y = this.ball.y;
     }
-
+    
     async initPositions() {
         console.log("initPos");
-
+        
         //ball stats
         this.ball.radius = 1;
         this.ball.speed = 1;
@@ -315,7 +318,7 @@ export class GameRelayService {
         this.player1_pad2.y = 50;
         this.player1_pad2.height = 10;
         this.player1_pad2.width = 2;
-
+        
         //player2 pad1 stats
         this.player2.x = 200 - 2 - 2; //P2 est decolle de 2px du mur en comprenant sa largeur (2px)
         this.player2.y = 50;
@@ -327,15 +330,15 @@ export class GameRelayService {
         this.player2_pad2.y = 50;
         this.player2_pad2.height = 10;
         this.player2_pad2.width = 2;
-
+        
         this.p1_score = 0;
         this.p2_score = 0;
     }
-
+    
     @UseGuards(WsJwtAuthGuard)
     async MoveUp(client: Socket) {
         if (client.id == this.player1.socket.id)
-            this.P1_MoveUP = true;
+        this.P1_MoveUP = true;
         else if (client.id == this.player2.socket.id) {
             //manip visant a ameliorer l'ergonomie :
             //quand on est p2 les commandes sont inversees (i.e. w et s bougent la pallette droite)
@@ -343,7 +346,7 @@ export class GameRelayService {
             if (this.isBabyPong === true)
                 this.P2_MoveUP_pad2 = true;
             else
-                this.P2_MoveUP = true;
+            this.P2_MoveUP = true;
         }
     }
 
@@ -356,7 +359,7 @@ export class GameRelayService {
                 this.P2_MoveDOWN_pad2 = true;
             else
                 this.P2_MoveDOWN = true;
-        }
+            }
     }
 
     @UseGuards(WsJwtAuthGuard)
@@ -376,11 +379,11 @@ export class GameRelayService {
             }
         }
     }
-
+    
     @UseGuards(WsJwtAuthGuard)
     async MoveUp2(client: Socket) {
         if (client.id == this.player1_pad2.socket.id)
-            this.P1_MoveUP_pad2 = true;
+        this.P1_MoveUP_pad2 = true;
         else if (client.id == this.player2_pad2.socket.id)
             this.P2_MoveUP = true;
     }
@@ -389,10 +392,10 @@ export class GameRelayService {
     async MoveDown2(client: Socket) {
         if (client.id == this.player1_pad2.socket.id)
             this.P1_MoveDOWN_pad2 = true;
-        else if (client.id == this.player2_pad2.socket.id)
+            else if (client.id == this.player2_pad2.socket.id)
             this.P2_MoveDOWN = true;
     }
-
+    
     @UseGuards(WsJwtAuthGuard)
     async StopMove2(client: Socket) {
         if (client.id == this.player1_pad2.socket.id) {
@@ -409,13 +412,13 @@ export class GameRelayService {
         if (this.P1_MoveUP === true) {
             if (this.player1.y - 2 < 0)
                 this.player1.y = 0;
-            else
+                else
                 this.player1.y -= 2;
-        }
+            }
         if (this.P1_MoveDOWN === true) {
 
             if (this.player1.y + 2 > 100 - this.player1.height)
-                this.player1.y = 100 - this.player1.height;
+            this.player1.y = 100 - this.player1.height;
             else
                 this.player1.y += 2;
         }
@@ -423,7 +426,7 @@ export class GameRelayService {
         if (this.isBabyPong === true) {
             if (this.P1_MoveUP_pad2 === true) {
                 if (this.player1_pad2.y - 2 < 0)
-                    this.player1_pad2.y = 0;
+                this.player1_pad2.y = 0;
                 else
                     this.player1_pad2.y -= 2;
             }
@@ -440,30 +443,30 @@ export class GameRelayService {
     async calculateP2Pad() {
         if (this.P2_MoveUP === true) {
             if (this.player2.y - 2 < 0)
-                this.player2.y = 0;
+            this.player2.y = 0;
             else
-                this.player2.y -= 2;
+            this.player2.y -= 2;
         }
         if (this.P2_MoveDOWN === true) {
 
             if (this.player2.y + 2 > 100 - this.player2.height)
-                this.player2.y = 100 - this.player2.height;
+            this.player2.y = 100 - this.player2.height;
             else
-                this.player2.y += 2;
+            this.player2.y += 2;
         }
 
         if (this.isBabyPong === true) {
             if (this.P2_MoveUP_pad2 === true) {
                 if (this.player2_pad2.y - 2 < 0)
-                    this.player2_pad2.y = 0;
+                this.player2_pad2.y = 0;
                 else
                     this.player2_pad2.y -= 2;
             }
             if (this.P2_MoveDOWN_pad2 === true) {
-
+                
                 if (this.player2_pad2.y + 2 > 100 - this.player2.height)
                     this.player2_pad2.y = 100 - this.player2.height;
-                else
+                    else
                     this.player2_pad2.y += 2;
             }
         }
@@ -476,21 +479,34 @@ export class GameRelayService {
         this.ball.x = 100;
         this.ball.y = 50;
     }
-
-    //watchmode if a friend is on a match (make a research ), join on watch mode
-    // for (friend in matchhistory)
-    //  if (matchhistory.stoptime == null)
-    // join (matchhistory.uuid) (room)
-
     /**         
      * WATCH MODE 
      */
-
-    async getOngoingMatches() {
-        this.gateway.server.emit('ActivesMatches', await this.gameService.listGameOngoing());
+    
+    async getOngoingMatches(client: Socket) {
+        this.gateway.server.to(client.id).emit('ActivesMatches', await this.gameService.listGameOngoing());
     }
 
     async watchGame(client, gameId) {
         client.join(gameId);
+    }
+    
+    /**
+     * MATCH HISTORY
+     */
+    async getMatchHistory(client: Socket) {
+        const user = await this.chatservice.findUserbySocket(client.id);
+        this.gateway.server.to(client.id).emit('MatchHistory', await this.gameService.findMatchByUser(user));
+        console.log(await this.gameService.findMatchByUser(client.data.user))
+    }
+
+    /**
+     * ACHIEVEMENTS
+     */
+    async sendAchievements(client: Socket)
+    {
+        const user = await this.chatservice.findUserbySocket(client.id);
+        this.gateway.server.to(client.id).emit('Achievements', await this.achievementService.getAchievements(user));
+        console.log(await this.achievementService.getAchievements(user));
     }
 }

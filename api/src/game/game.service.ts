@@ -120,34 +120,38 @@ export class GameService {
 		})
 		return list;
 	}
-	// async userPlaying() 
-	// {
-	// 	const matches: MatchHistory[] = await this.listGameOngoing();
-	// 	let userPlaying: Set<string>;
-	// 	for (const i in matches)
-	// 	{
-	// 		userPlaying.add(matches[i].user1);
-	// 		userPlaying.add(matches[i].user2);
-	// 	}
-	// 	return userPlaying;
-	// }
 
 	async checkForAchievements(user: User)
 	{
 		const ladder = await this.ladder();
-		if (user.wonMatches == 1)
+		if (user.wonMatches == 10)
+		{
+			console.log("here")
 			this.achievementsService.createAchievements(user, Achievements_types.FIRST);
+		}
 		else if (user.wonMatches == user.lostMatches)
+		{
+			console.log("there")
+
 			this.addAchievement(user, Achievements_types.HALFHALF);
+		}
 		else if (user.wonMatches > 3 && user.lostMatches == 0)
+		{
+			console.log("ther     e")
+			
 			this.addAchievement(user, Achievements_types.WINNER);
+		}
 		else if (user == ladder[0])
+		{
+			console.log("ther     eeeee")
+
 			this.addAchievement(user, Achievements_types.TOP1);
+		}
 	}
 
 	async addAchievement(user, achievement)
 	{
-		if (!this.achievementsService.hasAchievement(achievement, user))
-			this.achievementsService.createAchievements(user, achievement);
+		//if (!this.achievementsService.hasAchievement(achievement, user))
+		this.achievementsService.createAchievements(user, achievement);
 	}
 }
