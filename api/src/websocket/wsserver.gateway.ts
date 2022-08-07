@@ -498,10 +498,10 @@ s
 	}
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
-	@SubscribeMessage('StopMove2')
+	@SubscribeMessage('pending invite')
 	async invite_to_play(client : Socket, FriendId: number, mode: number)
 	{
 		await this.gameRelayService.pendingInvite(client, FriendId, mode);
 	}
-
+	
 }

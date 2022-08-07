@@ -1,4 +1,4 @@
-import { ConsoleLogger, forwardRef, Inject, Injectable, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, UseGuards} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
