@@ -102,7 +102,7 @@ export class GameRelayService {
     }
     
     /**
-     * @brief Matchmaking with a friend
+     * @brief Send an event to a friend to play with
      * @param client
      * @param friendId
      * @param mode
@@ -113,7 +113,21 @@ export class GameRelayService {
         const friend = await this.chatservice.findSocketId(friendId);
         this.gateway.server.to(friend.id).emit('accept invite', (await client.data.user.id, mode))
      }
-     
+     /**
+     * @brief Quit the game when user changes tab
+     * @param client
+     */
+      @UseGuards(WsJwtAuthGuard)
+      async changeTab(client: Socket)
+      {
+          console.log(client.data.user.name, "changed tab")
+        if (client.data.user.name == this.names.p1_name)
+            return 1;
+        else if (client.data.user.name == this.names.p2_name)
+            return 2;
+        
+      }
+
     async startMatch(players, mode) {
         const [first] = players;
         const [, second] = players;
@@ -148,7 +162,6 @@ export class GameRelayService {
         const user1 = await this.chatservice.findUserbySocket(this.player1.socket.id);
         const user2 = await this.chatservice.findUserbySocket(this.player2.socket.id);
         if (!this.gateway.activeUsers.has(user1))
-
             return 1
         else if (!this.gateway.activeUsers.has(user2))
             return 2;
@@ -165,7 +178,7 @@ export class GameRelayService {
             this.players_ready++;
     }
 
-    async end_game()
+    async end_game() //DON'T FORGET TO MAKE THE WATCHER LEAVE THE ROOM
     {
         // const sockets = await this.gateway.server.in(this.match.id).allSockets;
         // for (const i in sockets)
@@ -178,7 +191,7 @@ export class GameRelayService {
         this.player1.socket.leave(this.match.id)
         console.log("player left the room")
         this.player2.socket.leave(this.match.id);
-        console.log("player2 left the room") //dont forget to make watch quit the room 
+        console.log("player2 left the room")
         this.players_ready = 0;
         await this.gameService.endMatch({ id: this.match.id, scoreUser1: this.p1_score, scoreUser2: this.p2_score })
 
@@ -191,7 +204,7 @@ export class GameRelayService {
             if (this.ball.x - this.ball.radius < 0) {
                 this.p2_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', false);
-                if (this.p2_score >= VICTORY || await this.handleDisconnect() == 1) {
+                if (this.p2_score >= VICTORY || await this.handleDisconnect() == 1 || await this.changeTab(this.player1.socket) == 1) {
                     await this.end_game();
                     console.log("P2 WINS");
                     this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
@@ -205,7 +218,7 @@ export class GameRelayService {
             else if (this.ball.x + this.ball.radius > 200) {
                 this.p1_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', true);
-                if (this.p1_score >= VICTORY || await this.handleDisconnect() == 2) {
+                if (this.p1_score >= VICTORY || await this.handleDisconnect() == 2 || await this.changeTab(this.player2.socket) == 2) {
                     await this.end_game();
                     console.log("P1 WINS");
                     this.gateway.server.to(this.player1.socket.id).emit('game_end', true);

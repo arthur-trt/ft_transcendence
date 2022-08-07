@@ -439,7 +439,6 @@ s
 	}
 
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
 	@SubscribeMessage('MoveDown')
 	async MoveDown(client : Socket)
 	{
@@ -448,7 +447,6 @@ s
 	}
 
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
 	@SubscribeMessage('StopMove')
 	async StopMove(client : Socket)
 	{
@@ -480,7 +478,6 @@ s
 	}
 
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
 	@SubscribeMessage('MoveDOWN2')
 	async MoveDown_Pad2(client : Socket)
 	{
@@ -489,7 +486,6 @@ s
 	}
 
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
 	@SubscribeMessage('StopMove2')
 	async StopMove_Pad2(client : Socket)
 	{
@@ -497,11 +493,18 @@ s
 		await this.gameRelayService.StopMove2(client);
 	}
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
 	@SubscribeMessage('pending invite')
 	async invite_to_play(client : Socket, FriendId: number, mode: number)
 	{
 		await this.gameRelayService.pendingInvite(client, FriendId, mode);
 	}
-	
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('tab is inactive')
+	async changingTab(client : Socket)
+	{
+		await this.gameRelayService.changeTab(client);
+	}
+
+
 }
