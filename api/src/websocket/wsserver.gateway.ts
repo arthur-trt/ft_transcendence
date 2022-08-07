@@ -496,5 +496,12 @@ s
 		console.log("STOPMove2 " + client.id);
 		await this.gameRelayService.StopMove2(client);
 	}
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('StopMove2')
+	async invite_to_play(client : Socket, FriendId: number, mode: number)
+	{
+		await this.gameRelayService.pendingInvite(client, FriendId, mode);
+	}
 
 }

@@ -101,6 +101,19 @@ export class GameRelayService {
         this.startMatch(this.players, mode);   
     }
     
+    /**
+     * @brief Matchmaking with a friend
+     * @param client
+     * @param friendId
+     * @param mode
+     */
+     @UseGuards(WsJwtAuthGuard)
+     async pendingInvite(client: Socket, friendId, mode)
+     {
+        const friend = await this.chatservice.findSocketId(friendId);
+        this.gateway.server.to(friend.id).emit('accept invite', (await client.data.user.id, mode))
+     }
+     
     async startMatch(players, mode) {
         const [first] = players;
         const [, second] = players;
@@ -135,6 +148,7 @@ export class GameRelayService {
         const user1 = await this.chatservice.findUserbySocket(this.player1.socket.id);
         const user2 = await this.chatservice.findUserbySocket(this.player2.socket.id);
         if (!this.gateway.activeUsers.has(user1))
+
             return 1
         else if (!this.gateway.activeUsers.has(user2))
             return 2;
