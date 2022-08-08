@@ -44,6 +44,9 @@ export class ConnectService {
 		}
 	}
 
+	async afterInit() {
+
+	}
 	async handleConnection(client: Socket) {
 		const user = await this.validateConnection(client);
 		if (!user)
@@ -68,6 +71,7 @@ export class ConnectService {
 		for (const c of chan) {
 			client.join(c.name);
 		}
+
 	}
 
 

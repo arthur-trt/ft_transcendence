@@ -14,12 +14,15 @@ import { FriendshipsService } from "src/friendships/friendships.service";
 import { MessageService } from "src/message/message.service";
 import { User } from "src/user/user.entity";
 import { UserService } from "src/user/user.service";
+import { InitializedRelationError } from "typeorm";
 import { WSServer } from "./wsserver.gateway";
 
 
 
 @Injectable()
 export class ChatService {
+
+	private chatBot: User;
 
 	constructor(
 		protected readonly jwtService: JwtService,
@@ -29,6 +32,25 @@ export class ChatService {
 		protected readonly friendService: FriendshipsService,
 		@Inject(forwardRef(() => WSServer)) protected gateway : WSServer
 	) {
+		this.init();
+	}
+
+	async init() {
+		console.log("init bot")
+		try {
+
+			this.chatBot = await this.userService.getUserByIdentifier("chatBot")
+		}
+		catch
+		{
+			this.chatBot = await this.userService.findOrCreateUser(
+				0,
+				"chatBot",
+				"chatBot",
+				"https://upload.wikimedia.org/wikipedia/commons/a/a6/Nicolas_Sarkozy_in_2010.jpg",
+				"chat@bot.fr"
+			);
+		}
 	}
 
 	async findSocketId(user: User) : Promise<Socket>
@@ -63,10 +85,14 @@ export class ChatService {
 	async joinRoom(client: Socket, joinRoom: newChannelDto)
 	{
 		await this.userService.joinChannel(client.data.user, joinRoom.chanName, joinRoom.password)
-		.then(async () =>  {
-			client.join(joinRoom.chanName);
-			await this.getRooms();
-		})
+			.then(async () => {
+				client.join(joinRoom.chanName);
+				await this.getRooms();
+			});
+
+		// TEST BOT
+		await this.messageService.sendMessageToChannel(joinRoom.chanName, this.chatBot, client.data.user.name + " just joined the chan.");
+		await this.getChannelMessages(client, joinRoom.chanName);
 	}
 
 	async addUser(client: Socket, userToAdd : addToPrivateRoomDto)
@@ -92,12 +118,20 @@ export class ChatService {
 		await this.userService.leaveChannel(client.data.user, channel)
 		client.leave(channel);
 		await this.getRooms();
+		// TEST BOT
+		await this.messageService.sendMessageToChannel(channel, this.chatBot, client.data.user.name + " just left the chan.");
+		await this.getChannelMessages(client, channel);
 	}
 
 	async ban(client: Socket, data : banUserDto)
 	{
+
+
 		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
+		await (await this.findSocketId(data.toBan)).leave(chan.name);
 		await this.channelService.temporaryBanUser(client.data.user, chan, data.toBan);
+		// TEST BOT
+		await this.messageService.sendMessageToChannel(data.channel, this.chatBot, data.toBan.name + " has been banned for 30 sec!");
 		await this.getChannelMessages(client, data.channel);
 		await this.getRooms();
 	}
@@ -107,12 +141,16 @@ export class ChatService {
 		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
 		await this.channelService.temporaryMuteUser(client.data.user, chan, data.toMute);
 		await this.getRooms();
+		//Test bot
+		await this.messageService.sendMessageToChannel(data.channel, this.chatBot, data.toMute.name + " has been muted for 30 sec!");
+		await this.getChannelMessages(client, data.channel);
 	}
 
 	async setAdmin(client: Socket, data : { channel: string, toSetAdmin: User })
 	{
 		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
 		await this.channelService.setNewAdmin(client.data.user, chan, data.toSetAdmin);
+		await this.messageService.sendMessageToChannel(chan.name, this.chatBot, client.data.user.name + " just joined the chan.");
 		await this.getChannelMessages(client, data.channel);
 	}
 
