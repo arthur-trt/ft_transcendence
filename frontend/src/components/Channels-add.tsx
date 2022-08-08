@@ -18,6 +18,7 @@ import { faGamepad } from '@fortawesome/free-solid-svg-icons'
 import { faHandsHoldingCircle } from '@fortawesome/free-solid-svg-icons'
 import { faBan } from '@fortawesome/free-solid-svg-icons'
 import { faCommentSlash } from '@fortawesome/free-solid-svg-icons'
+import { faEye } from '@fortawesome/free-solid-svg-icons'
 
 // SOCKET IMPORT FROM THE INDEX.TSX
 import { socketo } from '../index';
@@ -26,7 +27,6 @@ import { useCookies } from 'react-cookie';
 // VARIABLE DECLARATIONS OUTSIDE THE CHANNELS FUNCTION
 let tmp: any[any];
 var indents: any = [];
-let indexFriends = 0;
 let ispriv = 2;
 
 export default function Channels() {
@@ -60,6 +60,7 @@ export default function Channels() {
   const [friendsrequest, setFriendsRequest] = useState<any>([]);
   const [UsersBtnColor, setUsersBtnColor] = useState('#1dd1a1');
   const [FriendsBtnColor, setFriendsBtnColor] = useState('white');
+  const [RequestsBtnColor, setRequestsBtnColor] = useState('white');
 
   // CHANNEL CREATION
   const [publicChan, setPublicChan] = useState(2);
@@ -68,6 +69,11 @@ export default function Channels() {
 
   // CHANOP
   const [chanOpPass, setChanOpPass] = useState("");
+
+  // GAME
+  const [activesmatches, setActivesMatches] = useState<any>([]);
+  const [gamerequest, setGameRequest] = useState("");
+  const [gamemode, setGameMode] = useState(0);
 
   // IF THE ROUTE CHANGE
   useEffect(() => {
@@ -101,6 +107,10 @@ export default function Channels() {
       socket.emit('getUsers');
       socket.emit('getFriends');
       socket.emit('getFriendRequests');
+      socket.emit('ActivesMatches');
+      socket.on('ActivesMatches', (tab: any) => {
+        setActivesMatches(tab);
+      });
       socket.on('rooms', (msg: any, tab: any) => {
         setData(tab);
       });
@@ -121,8 +131,13 @@ export default function Channels() {
         setMessagesPriv(tab);
       });
       socket.on('error', (msg: any) => {
-        // console.log(msg);
-			alert(msg.event);
+			  alert(msg.event);
+      });
+      socket.on('accept invite', (id: string, mode:number) => {
+        console.log(id);
+        console.log(mode);
+        setGameRequest(id);
+        setGameMode(mode);
       });
 
     }, []);
@@ -215,6 +230,11 @@ export default function Channels() {
     setChanName(e.currentTarget.id);
     setprivMsgChat(1);
   }
+  function handleAcceptGame() {
+    socket.emit('joinGame', {friendId:gamerequest, mode:gamemode});
+    navigate('/game');
+  }
+
 
   function ChanStatus(i: number) {
     if (data[i]?.private === false) {
@@ -276,6 +296,27 @@ export default function Channels() {
     return indents;
   }
 
+  function isWatchable(id:string) {
+    let i = 0;
+    while (i < activesmatches?.length)
+    {
+      if (id === activesmatches[i]?.user1 || id === activesmatches[i]?.user2)
+        return (1);
+      i++;
+    }
+    return (0);
+  }
+
+  let handleWatchMode = (e: any) => {
+    let i = 0;
+    while (i < activesmatches?.length)
+    {
+      if (e.currentTarget.id === activesmatches[i]?.user1 || e.currentTarget.id === activesmatches[i]?.user2)
+        socket.emit('WatchGame', activesmatches[i]?.id);
+      i++;
+    }
+  }
+
   function isBlocked(id:string) {
     let i = 0;
     while (i < friends?.blocked?.length)
@@ -297,6 +338,7 @@ export default function Channels() {
                   {isBlocked(datausers[i]?.id) === 0 && <FontAwesomeIcon style={{color: '#1dd1a1'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleBlockFriend}></FontAwesomeIcon>}
                   {isBlocked(datausers[i]?.id) === 1 && <FontAwesomeIcon style={{color: 'red'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleUnBlockFriend}></FontAwesomeIcon>}
                   <FontAwesomeIcon className='userxmark' icon={faUserXmark} id={j.toString()} onClick={handleRemoveFriend} ></FontAwesomeIcon>
+                  {isWatchable(datausers[i]?.id) === 1 && <FontAwesomeIcon id={datausers[i]?.id} className='gameye' icon={faEye} onClick={handleWatchMode}></FontAwesomeIcon>}
                 </div>
         );
       }
@@ -314,7 +356,7 @@ export default function Channels() {
     let borderStatus = 'white';
     let profilelink;
 
-    if (switching % 2 === 0) {
+    if (switching === 0) {
       while (i < datausers?.length) {
         profilelink = "/profile/" + datausers[i]?.id;
         if (datausers[i]?.status === 'online')
@@ -337,7 +379,45 @@ export default function Channels() {
         borderStatus = 'white';
       }
     }
-    if (switching % 2 === 1) {
+    if (switching === 1) {
+      while (i < datausers?.length) {
+        profilelink = "/profile/" + datausers[i]?.id;
+        if (datausers[i]?.status === 'online')
+          borderStatus = 'springgreen';
+        else if (datausers[i]?.status === 'ingame')
+          borderStatus = 'orange';
+        else if (datausers[i]?.status === 'offline')
+          borderStatus = 'red';
+        
+        let j = 0;
+        while (j < friends?.friends?.length) {
+          if (datausers[i]?.id === friends?.friends[j]?.id) {
+            indents.push(<div className="users-single" key={i}>
+              <div className='users-single-img'>
+                <Link to={profilelink}><img style={{ 'borderColor': borderStatus }} src={datausers[i]?.avatar_url} alt="users"></img></Link>
+              </div>
+              <div className='users-single-info'>
+                <h5>{datausers[i]?.name}</h5>
+                {/* {displayButtonFriend(i)} */}
+                <div className='users-single-info-friends'>
+                  <FontAwesomeIcon className='paperplane' icon={faPaperPlane} id={datausers[i]?.name} onClick={handleOpenPrivate} ></FontAwesomeIcon>
+                  {datausers[i]?.status === 'online' && <FontAwesomeIcon className='gamepad' icon={faGamepad} ></FontAwesomeIcon>}
+                  {isBlocked(datausers[i]?.id) === 0 && <FontAwesomeIcon style={{color: '#1dd1a1'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleBlockFriend}></FontAwesomeIcon>}
+                  {isBlocked(datausers[i]?.id) === 1 && <FontAwesomeIcon style={{color: 'red'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleUnBlockFriend}></FontAwesomeIcon>}
+                  <FontAwesomeIcon className='userxmark' icon={faUserXmark} id={j.toString()} onClick={handleRemoveFriend} ></FontAwesomeIcon>
+                  {isWatchable(datausers[i]?.id) === 1 && <FontAwesomeIcon id={datausers[i]?.id} className='gameye' icon={faEye} onClick={handleWatchMode}></FontAwesomeIcon>}
+                </div>
+              </div>
+            </div>);
+          }
+          j++;
+        }
+
+        i++;
+        borderStatus = 'white';
+      }
+    }
+    if (switching === 2) {
       while (i < friendsrequest?.length) {
         indents.push(<div className='friendsrequest-single' key={i + 111}>
           <div className='friendsrequest-single-img'>
@@ -352,6 +432,21 @@ export default function Channels() {
         </div>);
         i++;
       }
+      // GAME REQUEST
+      if (gamerequest)
+      {
+      indents.push(<div className='friendsrequest-single' key={i + 112}>
+      <div className='friendsrequest-single-img'>
+        {/* <img src={friendsrequest[i].sender.avatar_url} alt="friends requests"></img> */}
+        <img src="bplogo.png"></img>
+      </div>
+      <div className='friendsrequest-single-name'>
+        <p>{gamerequest}</p>
+      </div>
+      <div className='friendsrequest-single-button'>
+        <button onClick={handleAcceptGame}>Accept</button>
+      </div>
+    </div>);}
     }
 
     return indents;
@@ -642,19 +737,30 @@ export default function Channels() {
   }
 
   function handleUsers() {
-    if (switching % 2 === 1) {
+    if (switching !== 0)
+    {
       setUsersBtnColor('#1dd1a1');
       setFriendsBtnColor('white');
-      indexFriends++;
-      setSwitching(indexFriends);
+      setRequestsBtnColor('white');
+      setSwitching(0);
     }
   }
   function handleFriends() {
-    if (switching % 2 === 0) {
+    if (switching !== 1)
+    {
       setUsersBtnColor('white');
       setFriendsBtnColor('#1dd1a1');
-      indexFriends++;
-      setSwitching(indexFriends);
+      setRequestsBtnColor('white');
+      setSwitching(1);
+    }
+  }
+  function handleRequests() {
+    if (switching !== 2)
+    {
+      setUsersBtnColor('white');
+      setFriendsBtnColor('white');
+      setRequestsBtnColor('#1dd1a1');
+      setSwitching(2);
     }
   }
 
@@ -725,7 +831,8 @@ export default function Channels() {
       <div className='users-container'>
         <div className='users-tab'>
           <button style={{ backgroundColor: UsersBtnColor }} onClick={handleUsers}>USERS</button>
-          <button style={{ backgroundColor: FriendsBtnColor }} onClick={handleFriends}>REQUESTS</button>
+          <button style={{ backgroundColor: FriendsBtnColor }} onClick={handleFriends}>FRIENDS</button>
+          <button style={{ backgroundColor: RequestsBtnColor }} onClick={handleRequests}>REQUESTS</button>
         </div>
         <div className='users-list'>
           {display_users()}

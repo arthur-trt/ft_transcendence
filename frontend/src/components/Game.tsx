@@ -3,6 +3,14 @@ import React, { useState, useEffect } from 'react';
 
 import { socketo } from '..';
 
+document.addEventListener("visibilitychange", event =>{
+  if (document.visibilityState === "hidden") {
+    socketo.emit('tab is inactive')
+  } else {
+    console.log("tab is active")
+  }
+}), {once : true};
+
 export default function Game() {
   // DEFINE TYPE
   type userT = {
@@ -22,6 +30,7 @@ export default function Game() {
     speed: number,
     color: string
   }
+
 
   type netT = {
     x: number,
