@@ -1,4 +1,5 @@
-import { ConsoleLogger, forwardRef, Inject, Injectable, UseGuards} from '@nestjs/common';
+
+import { forwardRef, Inject, Injectable, UseGuards} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
@@ -110,6 +111,7 @@ export class GameRelayService {
      * @param mode
      */
      @UseGuards(WsJwtAuthGuard)
+
      async pendingInvite(client: Socket, data : {friendId : string, mode : string} ) {
          const friend = await this.userService.getUserByIdentifier(data.friendId)
          const friendSocket = await this.chatservice.findSocketId(friend);
@@ -147,6 +149,11 @@ export class GameRelayService {
         async startMatch(players, mode) {
             const [first] = players;
             const [, second] = players;
+     
+    async startMatch(players, mode) {
+        const [first] = players;
+        const [, second] = players;
+
         this.player1.socket = first;
         this.player2.socket = second;
         this.player1_pad2.socket = first;
@@ -169,8 +176,22 @@ export class GameRelayService {
         this.match.id = Match.id;
         
     }
-    
-    
+
+
+    /**
+     * @brief Make a player lose when he disconnects
+     */
+    async handleDisconnect()
+    {
+        const user1 = await this.chatservice.findUserbySocket(this.player1.socket.id);
+        const user2 = await this.chatservice.findUserbySocket(this.player2.socket.id);
+        if (!this.gateway.activeUsers.has(user1))
+
+            return 1
+        else if (!this.gateway.activeUsers.has(user2))
+            return 2;
+    }
+
     async start_gameloop()
     {
         if (this.players_ready == 1)
@@ -208,7 +229,7 @@ export class GameRelayService {
             if (this.ball.x - this.ball.radius < 0) {
                 this.p2_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', false);
-                if (this.p2_score >= VICTORY || await this.handleDisconnect() == 1){// || await this.changeTab(this.player1.socket) == 1) {
+                if (this.p2_score >= VICTORY || await this.handleDisconnect() == 1) {
                     await this.end_game();
                     console.log("P2 WINS");
                     this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
@@ -222,7 +243,7 @@ export class GameRelayService {
             else if (this.ball.x + this.ball.radius > 200) {
                 this.p1_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', true);
-                if (this.p1_score >= VICTORY || await this.handleDisconnect() == 2){//|| await this.changeTab(this.player2.socket) == 2) {
+                if (this.p1_score >= VICTORY || await this.handleDisconnect() == 2) {
                     await this.end_game();
                     console.log("P1 WINS");
                     this.gateway.server.to(this.player1.socket.id).emit('game_end', true);
