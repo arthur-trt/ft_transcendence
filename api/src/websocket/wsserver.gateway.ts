@@ -469,24 +469,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.gameRelayService.pendingInvite(client, data);
 	}
 
-	// /**
-	//  * @brief Manage changement of tab during the game
-	//  * @param client 
-	//  */
-	// @UseGuards(WsJwtAuthGuard)
-	// @SubscribeMessage('tab is inactive')
-	// async changingTab(client : Socket)
-	// {
-	// 	await this.gameRelayService.getOngoingMatches();
-	// }
-
-	// @UseGuards(WsJwtAuthGuard)
-	// @SubscribeMessage('WatchGame')
-	// async watchGame(client: Socket, gameId)
-	// {
-	// 	await this.gameRelayService.watchGame(client, gameId);
-	// 	//await this.gameRelayService.changeTab(client);
-	// }
 
 	/**
 	 * @brief get match history of a user
