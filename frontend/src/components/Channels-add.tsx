@@ -134,6 +134,11 @@ export default function Channels() {
       socket.on('accept invite', (msg: any) => {
         console.log("on a reçu une invitation");
       });
+      socket.on('accept invite', (msg: any) => {
+      console.log("accept invite");
+			//alert(msg.event);
+      });
+      
 
 
     }, []);
