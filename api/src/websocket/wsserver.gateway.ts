@@ -480,7 +480,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 {
 		 await this.gameRelayService.getMatchHistory(client);
 	 }
- 
+
 	 /**
 	 * @brief get achievements list of client
 	 * @param client 
