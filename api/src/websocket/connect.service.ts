@@ -44,9 +44,6 @@ export class ConnectService {
 		}
 	}
 
-	async afterInit() {
-
-	}
 	async handleConnection(client: Socket) {
 		const user = await this.validateConnection(client);
 		if (!user)

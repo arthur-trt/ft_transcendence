@@ -32,7 +32,6 @@ export class ChatService {
 		protected readonly friendService: FriendshipsService,
 		@Inject(forwardRef(() => WSServer)) protected gateway : WSServer
 	) {
-		this.init();
 	}
 
 	async init() {
