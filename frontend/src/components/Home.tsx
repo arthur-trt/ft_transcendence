@@ -91,7 +91,8 @@ export default function Home() {
     }
     let sendingInvite = (e:any) =>
     {
-        socket.emit(('pending invite'), e.currentTarget.id, mode)
+        socket.emit(('pending invite'), {friendId: e.currentTarget.id, mode: mode})
+        navigate('/game');
         console.log('sending invite')
     }
     function handleLaunchMatchMaking(mode: number) {

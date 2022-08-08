@@ -81,8 +81,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		this.connectService.handleConnection(client);
 	}
 
-	afterInit() {
+	async afterInit() {
 		this.logger.log("Start listenning");
+		await this.chatService.init();
 	}
 
 	/**
@@ -218,7 +219,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	}
 
 	@SubscribeMessage('muteUser')
-	@UsePipes(ValidationPipe) 
+	@UsePipes(ValidationPipe)
 	async onMuteUser(client: Socket, data : muteUserDto) {
 		await this.chatService.mute(client, data);
 	}
@@ -406,9 +407,17 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	**
 	**	Game
 	**	├─ getInQueue
-	**
+	**	├─ joinGame
+	**	├─ startMatch
+	**	├─ GameOnGoing
+	**	├─ watchGame
+	**	├─ inviteToPlay
+	**	├─ changingTab
+	*/
 	/**
+	 * @brief Random matchmaking
 	 * @param client Socket
+	 * @param mode
 	 * @returns
 	 */
 
@@ -418,49 +427,30 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.gameRelayService.getInQueue(client, mode)
 	}
 
+	/**
+	 * @brief Matchmaking with a friend
+	 * @param client 
+	 * @param playerId 
+	 * @param mode 
+	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('joinGame')
-	async joinGame(client : Socket, playerId, mode) {
-		await this.gameRelayService.joinGame(client, playerId, mode)
+	async joinGame(client: Socket, data : {friendId : string, mode : string} ) {
+		await this.gameRelayService.joinGame(client, data)
 	}
-s
+
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('game_start')
 	async startMatch() {
 		await this.gameRelayService.start_gameloop();
 	}
 
-	@UseGuards(WsJwtAuthGuard)
-	@SubscribeMessage('MoveUp')
-	async MoveUp(client : Socket)
-	{
-		//console.log("MoveUP " + client.id);
-		await this.gameRelayService.MoveUp(client);
-	}
-
-	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
-	@SubscribeMessage('MoveDown')
-	async MoveDown(client : Socket)
-	{
-		//console.log("MoveDOWN " + client.id);
-		await this.gameRelayService.MoveDown(client);
-	}
-
-	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
-	@SubscribeMessage('StopMove')
-	async StopMove(client : Socket)
-	{
-		//console.log("STOPMove " + client.id);
-		await this.gameRelayService.StopMove(client);
-	}
-
+	
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('ActivesMatches')
 	async GameOngoing(client: Socket)
 	{
-		await this.gameRelayService.getOngoingMatches();
+		await this.gameRelayService.getOngoingMatches(client);
 	}
 	
 	@UseGuards(WsJwtAuthGuard)
@@ -470,6 +460,40 @@ s
 		await this.gameRelayService.watchGame(client, gameId);
 	}
 
+	
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('pending invite')
+	async inviteToPlay(client: Socket, data : {friendId : string, mode : string} )
+	{
+		console.log("pending invite")
+		await this.gameRelayService.pendingInvite(client, data);
+	}
+
+
+	/**
+	 * @brief get match history of a user
+	 * @param client 
+	 */
+	 @UseGuards(WsJwtAuthGuard)
+	 @SubscribeMessage('get history')
+	 async getHistory(client : Socket)
+	 {
+		 await this.gameRelayService.getMatchHistory(client);
+	 }
+
+	 /**
+	 * @brief get achievements list of client
+	 * @param client 
+	 */
+	  @UseGuards(WsJwtAuthGuard)
+	  @SubscribeMessage('get achievements')
+	  async getAchievements(client : Socket)
+	  {
+		  await this.gameRelayService.sendAchievements(client);
+	  }
+  
+
+
 
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('MoveUP2')
@@ -478,30 +502,45 @@ s
 		console.log("MoveUP2 " + client.id);
 		await this.gameRelayService.MoveUp2(client);
 	}
-
+	
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
 	@SubscribeMessage('MoveDOWN2')
 	async MoveDown_Pad2(client : Socket)
 	{
 		console.log("MoveDOWN2 " + client.id);
 		await this.gameRelayService.MoveDown2(client);
 	}
-
+	
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
 	@SubscribeMessage('StopMove2')
 	async StopMove_Pad2(client : Socket)
 	{
 		console.log("STOPMove2 " + client.id);
 		await this.gameRelayService.StopMove2(client);
 	}
+
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
-	@SubscribeMessage('pending invite')
-	async invite_to_play(client : Socket, FriendId: number, mode: number)
+	@SubscribeMessage('MoveUp')
+	async MoveUp(client : Socket)
 	{
-		await this.gameRelayService.pendingInvite(client, FriendId, mode);
+		//console.log("MoveUP " + client.id);
+		await this.gameRelayService.MoveUp(client);
 	}
 	
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('MoveDown')
+	async MoveDown(client : Socket)
+	{
+		//console.log("MoveDOWN " + client.id);
+		await this.gameRelayService.MoveDown(client);
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('StopMove')
+	async StopMove(client : Socket)
+	{
+		//console.log("STOPMove " + client.id);
+		await this.gameRelayService.StopMove(client);
+	}
+
 }
