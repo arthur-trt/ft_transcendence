@@ -81,8 +81,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		this.connectService.handleConnection(client);
 	}
 
-	afterInit() {
+	async afterInit() {
 		this.logger.log("Start listenning");
+		await this.chatService.init();
 	}
 
 	/**
@@ -218,7 +219,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	}
 
 	@SubscribeMessage('muteUser')
-	@UsePipes(ValidationPipe) 
+	@UsePipes(ValidationPipe)
 	async onMuteUser(client: Socket, data : muteUserDto) {
 		await this.chatService.mute(client, data);
 	}
@@ -434,8 +435,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('joinGame')
-	async joinGame(client : Socket, playerId, mode) {
-		await this.gameRelayService.joinGame(client, playerId, mode)
+	async joinGame(client: Socket, data : {friendId : string, mode : string} ) {
+		await this.gameRelayService.joinGame(client, data)
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -468,16 +469,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.gameRelayService.pendingInvite(client, data);
 	}
 
-	/**
-	 * @brief Manage changement of tab during the game
-	 * @param client 
-	 */
-	@UseGuards(WsJwtAuthGuard)
-	@SubscribeMessage('tab is inactive')
-	async changingTab(client : Socket)
-	{
-		await this.gameRelayService.changeTab(client);
-	}
 
 	/**
 	 * @brief get match history of a user
@@ -540,7 +531,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		//console.log("MoveDOWN " + client.id);
 		await this.gameRelayService.MoveDown(client);
 	}
-	
+
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('StopMove')
 	async StopMove(client : Socket)
@@ -548,4 +539,5 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		//console.log("STOPMove " + client.id);
 		await this.gameRelayService.StopMove(client);
 	}
+
 }

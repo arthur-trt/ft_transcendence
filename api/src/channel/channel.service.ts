@@ -204,9 +204,10 @@ export class ChannelService {
 	 * @param toUnBan the user to unban
 	 * @returns
 	 */
-	public async unban(channel: Channel, toUnBan: User): Promise<void>
+	public async unban(chanName: string, toUnBan: User): Promise<void>
 	{
 		console.log("Un Ban")
+		const channel: Channel = await this.getChannelByIdentifier(chanName);
 		channel.banned = channel.banned.filter((banned) => {
 			return banned.id !== toUnBan.id
 		})
@@ -219,9 +220,10 @@ export class ChannelService {
 	 * @param channel the channel to unban from
 	 * @param toUnMute the user to unmute
 	 */
-	public async unmute(channel: Channel, toUnMute: User): Promise<void>
+	public async unmute(chanName: string, toUnMute: User): Promise<void>
 	{
 		console.log("Un Mute")
+		const channel: Channel = await this.getChannelByIdentifier(chanName);
 		channel.muted = channel.muted.filter((muted) => {
 			return muted.id !== toUnMute.id
 		})
@@ -252,7 +254,7 @@ export class ChannelService {
 		console.log(channel.banned);
 		await channel.save();
 		/** Step three : set timeout to remove from ban list */
-		setTimeout(() => { this.unban(channel, toBan) }, 30000);
+		setTimeout(() => { this.unban(channel.name, toBan) }, 30000);
 	}
 
 
@@ -274,6 +276,6 @@ export class ChannelService {
 		await channel.save();
 		console.log("Muted" + channel.muted)
 		console.log( "Id " + channel.mutedId)
-		setTimeout(() => { this.unmute(channel, toMute)}, 30000);
+		setTimeout(() => { this.unmute(channel.name, toMute)}, 30000);
 	}
 }
