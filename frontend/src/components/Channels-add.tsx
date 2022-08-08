@@ -19,6 +19,7 @@ import { faHandsHoldingCircle } from '@fortawesome/free-solid-svg-icons'
 import { faBan } from '@fortawesome/free-solid-svg-icons'
 import { faCommentSlash } from '@fortawesome/free-solid-svg-icons'
 import { faEye } from '@fortawesome/free-solid-svg-icons'
+import { faRobot } from '@fortawesome/free-solid-svg-icons'
 
 // SOCKET IMPORT FROM THE INDEX.TSX
 import { socketo } from '../index';
@@ -134,13 +135,36 @@ export default function Channels() {
 			  alert(msg.event);
       });
       socket.on('accept invite', (id: string, mode:number) => {
-        console.log(id);
-        console.log(mode);
         setGameRequest(id);
         setGameMode(mode);
       });
-
+      
     }, []);
+    
+  useEffect(() => {
+    let z = 0;
+    let flag = 0;
+    while (z < data?.length)
+    {
+      let w = 0;
+      while (w < data[z]?.bannedId?.length)
+      {
+        if (datame?.id === data[z]?.bannedId[w])
+          if (chanName === data[z]?.name)
+            setDisplayChat(0);
+        w++;
+      }
+      if (data[z].name === chanName)
+        flag = 1;
+
+      z++;
+    }
+    if (!flag)
+      setDisplayChat(0);
+  }, [data]);
+
+
+
 
   // FUNCTIONS TO HANDLE ACTIONS ON CHANNELS
   let handleCreate = (e: any) => {
@@ -312,7 +336,10 @@ export default function Channels() {
     while (i < activesmatches?.length)
     {
       if (e.currentTarget.id === activesmatches[i]?.user1 || e.currentTarget.id === activesmatches[i]?.user2)
+      {
         socket.emit('WatchGame', activesmatches[i]?.id);
+        navigate("/game");
+      }
       i++;
     }
   }
@@ -366,17 +393,19 @@ export default function Channels() {
         else if (datausers[i]?.status === 'offline')
           borderStatus = 'red';
 
-        indents.push(<div className="users-single" key={i}>
-          <div className='users-single-img'>
-            <Link to={profilelink}><img style={{ 'borderColor': borderStatus }} src={datausers[i]?.avatar_url} alt="users"></img></Link>
-          </div>
-          <div className='users-single-info'>
-            <h5>{datausers[i]?.name}</h5>
-            {displayButtonFriend(i)}
-          </div>
-        </div>);
-        i++;
-        borderStatus = 'white';
+        if (datausers[i]?.name !== "chatBot")
+          indents.push(
+          <div className="users-single" key={i}>
+            <div className='users-single-img'>
+              <Link to={profilelink}><img style={{ 'borderColor': borderStatus }} src={datausers[i]?.avatar_url} alt="users"></img></Link>
+            </div>
+            <div className='users-single-info'>
+              <h5>{datausers[i]?.name}</h5>
+              {displayButtonFriend(i)}
+            </div>
+          </div>);
+          i++;
+          borderStatus = 'white';
       }
     }
     if (switching === 1) {
@@ -438,7 +467,6 @@ export default function Channels() {
       indents.push(<div className='friendsrequest-single' key={i + 112}>
       <div className='friendsrequest-single-img'>
         {/* <img src={friendsrequest[i].sender.avatar_url} alt="friends requests"></img> */}
-        <img src="bplogo.png"></img>
       </div>
       <div className='friendsrequest-single-name'>
         <p>{gamerequest}</p>
@@ -571,12 +599,15 @@ export default function Channels() {
 
         if (datame.name === tmp.messages[i]?.sender.name)
           msgColor = 'lightskyblue';
+          if (tmp.messages[i]?.sender.name === "chatBot")
+            msgColor = '#ff7675';
 
         indents.push(<div className='chat-message' key={i}>
           <div className='chat-message-info'>
+          {tmp.messages[i]?.sender.name === "chatBot" && <FontAwesomeIcon icon={faRobot} className="robot"></FontAwesomeIcon>}
             <Link to={profilelink} style={{ textDecoration: 'none', color: 'black' }}><h5>{tmp.messages[i]?.sender.name}</h5></Link>
             <span>{tmp.messages[i]?.sent_at.substr(0, 8)}</span>
-            {displayChanOp(i, tmp)}
+            {tmp.messages[i]?.sender.name !== "chatBot" && displayChanOp(i, tmp)}
           </div>
           <p style={{ 'backgroundColor': msgColor }}>{tmp.messages[i]?.message}</p>
         </div>);
