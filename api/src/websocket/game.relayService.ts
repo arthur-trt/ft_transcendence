@@ -145,15 +145,10 @@ export class GameRelayService {
             else if (!this.gateway.activeUsers.has(user2))
                 return 2;
         }
-
-        async startMatch(players, mode) {
-            const [first] = players;
-            const [, second] = players;
      
     async startMatch(players, mode) {
         const [first] = players;
         const [, second] = players;
-
         this.player1.socket = first;
         this.player2.socket = second;
         this.player1_pad2.socket = first;
@@ -177,20 +172,6 @@ export class GameRelayService {
         
     }
 
-
-    /**
-     * @brief Make a player lose when he disconnects
-     */
-    async handleDisconnect()
-    {
-        const user1 = await this.chatservice.findUserbySocket(this.player1.socket.id);
-        const user2 = await this.chatservice.findUserbySocket(this.player2.socket.id);
-        if (!this.gateway.activeUsers.has(user1))
-
-            return 1
-        else if (!this.gateway.activeUsers.has(user2))
-            return 2;
-    }
 
     async start_gameloop()
     {
