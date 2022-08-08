@@ -26,7 +26,7 @@ function collision(b: Ball, p: Paddle) {
     return pad_left < ball_right && pad_top < ball_bottom && pad_right > ball_left && pad_bottom > ball_top;
 }
 
-const VICTORY = 3;
+const VICTORY = 250;
 @Injectable()
 export class GameRelayService {
     constructor(
