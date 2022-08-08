@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 import {socketo} from '../index';
-import Game from './Game';
 import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
@@ -96,13 +95,13 @@ export default function Home() {
         console.log('sending invite')
     }
     function handleLaunchMatchMaking(mode: number) {
-        if (mode == 1)
+        if (mode === 1)
         {
             console.log("MODE SIMPLE");
             socket.emit('game_inQueue', mode);
             navigate('/game');
         }
-        else if (mode == 2)
+        else if (mode === 2)
         {
             console.log("MODESPECIAL");
             socket.emit('game_inQueue', mode);
