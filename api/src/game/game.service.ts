@@ -123,7 +123,7 @@ export class GameService {
 
 	async checkForAchievements(user: User)
 	{
-		const ladder = await this.ladder();
+		const ladder = await this.ladder(); 
 		if (user.wonMatches == 10)
 		{
 			console.log("here")
@@ -141,7 +141,7 @@ export class GameService {
 			
 			this.addAchievement(user, Achievements_types.WINNER);
 		}
-		else if (user == ladder[0])
+		else if (user == ladder[0])  
 		{
 			console.log("ther     eeeee")
 
