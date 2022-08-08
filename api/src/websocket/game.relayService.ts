@@ -26,7 +26,7 @@ function collision(b: Ball, p: Paddle) {
     return pad_left < ball_right && pad_top < ball_bottom && pad_right > ball_left && pad_bottom > ball_top;
 }
 
-const VICTORY = 5;
+const VICTORY = 2;
 @Injectable()
 export class GameRelayService {
     constructor(
@@ -170,7 +170,9 @@ export class GameRelayService {
         this.MatchRooms.push(Match.id);
         this.initPositions();
         if (mode == 2)
-        this.isBabyPong = true;
+            this.isBabyPong = true;
+        else if (mode == 1)
+            this.isBabyPong = false;
         this.gateway.server.to(Match.id).emit('game_countdownStart', this.isBabyPong);
         this.match.id = Match.id;   
     }
@@ -516,6 +518,8 @@ export class GameRelayService {
 
     async watchGame(client, gameId) {
         client.join(gameId);
+        this.gateway.server.to(client.id).emit('set_names', this.names);
+        this.gateway.server.to(client.id).emit('set_mode', this.isBabyPong);
     }
     
     /**

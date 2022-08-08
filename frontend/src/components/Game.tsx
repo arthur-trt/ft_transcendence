@@ -67,7 +67,7 @@ export default function Game() {
   const [ctx, setCtx] = useState<any>();
   const [countdown, setCountdown] = useState<boolean>(false);
   const [gameStart, setGameStart] = useState<boolean>(false);
-  const [isBabyPong, setGameMode] = useState<boolean>(true);
+  let [isBabyPong, setGameMode] = useState<boolean>(true);
 
   let [P1score, setP1Score] = useState(0);
   let [P2score, setP2Score] = useState(0);
@@ -159,15 +159,19 @@ export default function Game() {
         setP2Name(n.p2_name);
       });
 
+      socket.on('set_mode', (mode : boolean) => {
+        setGameMode(mode);
+      })
+
       socket.on('game_position', (pos: dataT) => {
         //console.log(canvas);
-        console.log("socket.on/game_position");
+        //console.log("socket.on/game_position");
         setData(adaptToCanvas(pos, canvas));
       });
 
       socket.on('game_countdownStart', (mode: boolean) => {
         setGameMode(mode);
-        console.log("socket.on/game_countdown");
+        console.log("socket.on/game_countdown, mode = " + mode);
         setCountdown(true);
       })
 
@@ -230,7 +234,7 @@ export default function Game() {
 
   function count_function()
   {
-    console.log("count");
+    //console.log("count");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillText("Le jeu va démarrer dans " + (3 - i) + " secondes !", canvas.width / 2, canvas.height / 2);
     if (i === 3)
@@ -298,30 +302,24 @@ export default function Game() {
   useEffect(() => {
     if (gameStart) {
       if (MoveUp === true) {
-        console.log("front MoveUp");
         socket.emit('MoveUp')
       }
       if (MoveDown === true) {
-        console.log("front MoveUDown");
         socket.emit('MoveDown')
       }
       if (MoveUp === false && MoveDown === false) {
         socket.emit('StopMove');
-        console.log("front STOP move");
       }
 
       if (isBabyPong === true)
       {
         if (Pad2_MoveUp === true) {
-          console.log("front Pad_2 MoveUp");
           socket.emit('MoveUP2')
         }
         if (Pad2_MoveDown === true) {
-          console.log("front Pad_2 MoveUDown");
           socket.emit('MoveDOWN2')
         }
         if (Pad2_MoveUp === false && Pad2_MoveDown === false) {
-          console.log("front Pad_2 STOP move");
           socket.emit('StopMove2');
         }
       }
