@@ -124,7 +124,7 @@ export class GameService {
 	async checkForAchievements(user: User)
 	{
 		const ladder = await this.ladder(); 
-		if (user.wonMatches == 10)
+		if (user.wonMatches == 1)
 		{
 			console.log("here")
 			this.achievementsService.createAchievements(user, Achievements_types.FIRST);
@@ -149,9 +149,9 @@ export class GameService {
 		}
 	}
 
-	async addAchievement(user, achievement)
+	async addAchievement(user: User , achievement: Achievements_types)
 	{
 		//if (!this.achievementsService.hasAchievement(achievement, user))
-		this.achievementsService.createAchievements(user, achievement);
+		console.log(this.achievementsService.createAchievements(user, achievement));
 	}
 }

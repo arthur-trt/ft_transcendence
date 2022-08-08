@@ -26,7 +26,7 @@ function collision(b: Ball, p: Paddle) {
     return pad_left < ball_right && pad_top < ball_bottom && pad_right > ball_left && pad_bottom > ball_top;
 }
 
-const VICTORY = 3;
+const VICTORY = 250;
 @Injectable()
 export class GameRelayService {
     constructor(
@@ -96,12 +96,13 @@ export class GameRelayService {
      * @param mode
      */
     @UseGuards(WsJwtAuthGuard)
-    async joinGame(client: Socket, friendId, mode) {
-        const playerSocket = await this.chatservice.findSocketId(friendId);
+    async joinGame(client: Socket, data : {friendId : string, mode : string} ) {
+        const friend = await this.userService.getUserByIdentifier(data.friendId)
+        const playerSocket = await this.chatservice.findSocketId(friend);
         this.players.add(client);
         this.players.add(playerSocket);
         console.log("starting matchWithFriend");
-        this.startMatch(this.players, mode);   
+        this.startMatch(this.players, data.mode);   
     }
     
     /**
