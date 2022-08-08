@@ -713,7 +713,7 @@ export default function Channels() {
   }
 
   function handleUsers() {
-    if (switching != 0)
+    if (switching !== 0)
     {
       setUsersBtnColor('#1dd1a1');
       setFriendsBtnColor('white');
@@ -722,7 +722,7 @@ export default function Channels() {
     }
   }
   function handleFriends() {
-    if (switching != 1)
+    if (switching !== 1)
     {
       setUsersBtnColor('white');
       setFriendsBtnColor('#1dd1a1');
@@ -731,7 +731,7 @@ export default function Channels() {
     }
   }
   function handleRequests() {
-    if (switching != 2)
+    if (switching !== 2)
     {
       setUsersBtnColor('white');
       setFriendsBtnColor('white');
