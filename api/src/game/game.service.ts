@@ -85,6 +85,8 @@ export class GameService {
 		loser.lostMatches += 1;
 		await this.UserRepo.save(winner);
 		await this.MatchRepo.save(endedMatch);
+		await this.checkForAchievements(winner);
+		await this.checkForAchievements(loser);
 		return await this.getCompleteMatchHistory();
 	}
 
@@ -123,11 +125,13 @@ export class GameService {
 
 	async checkForAchievements(user: User)
 	{
+		console.log("achievements !!!!!")
+		console.log(user.wonMatches)
 		const ladder = await this.ladder(); 
-		if (user.wonMatches == 1)
+		if (user.wonMatches > 1)
 		{
 			console.log("here")
-			this.achievementsService.createAchievements(user, Achievements_types.FIRST);
+			this.addAchievement(user, Achievements_types.FIRST);
 		}
 		else if (user.wonMatches == user.lostMatches)
 		{
@@ -152,6 +156,6 @@ export class GameService {
 	async addAchievement(user: User , achievement: Achievements_types)
 	{
 		//if (!this.achievementsService.hasAchievement(achievement, user))
-		console.log(this.achievementsService.createAchievements(user, achievement));
+		console.log(await this.achievementsService.createAchievements(user, achievement));
 	}
 }
