@@ -313,6 +313,7 @@ export default function Channels() {
     {
       if (e.currentTarget.id === activesmatches[i]?.user1 || e.currentTarget.id === activesmatches[i]?.user2)
         socket.emit('WatchGame', activesmatches[i]?.id);
+        navigate("/game");
       i++;
     }
   }
