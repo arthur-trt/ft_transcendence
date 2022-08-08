@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 import {socketo} from '../index';
+import Game from './Game';
+import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
 
     const [socket, setSocket] = useState<any>([]);
     const [users, setUsers] = useState<any>([]);
     const [friends, setFriends] = useState<any>([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const socket = socketo;
@@ -47,7 +50,8 @@ export default function Home() {
             setNext(2);
     }
 
-    function displayFriends() {
+
+    function displayFriends(mode: number) {
         var indents:any = [];
         let j = 0;
         let i = 0;
@@ -65,8 +69,9 @@ export default function Home() {
                             <div className='home-search-single-friend' key={i}>
                                 <img src={friends?.friends[i].avatar_url} alt="avatar"></img>
                                 <h5>{friends?.friends[i].name}</h5>
-                                <button>PLAY</button>
-                            </div>
+                                {/* <button id={friends?.friends[i].id} onClick={handleLaunchGameWithFriend}>PLAY</button> */}
+                                <button id={friends?.friends[i].id} onClick={sendingInvite}>PLAY</button>
+                                </div>
                         );
                     }
                 i++;
@@ -82,7 +87,42 @@ export default function Home() {
             );
         }
         return indents;
+
     }
+    let sendingInvite = (e:any) =>
+    {
+        socket.emit(('pending invite'), e.currentTarget.id, mode)
+        console.log('sending invite')
+    }
+    function handleLaunchMatchMaking(mode: number) {
+        if (mode == 1)
+        {
+            console.log("MODE SIMPLE");
+            socket.emit('game_inQueue', mode);
+            navigate('/game');
+        }
+        else if (mode == 2)
+        {
+            console.log("MODESPECIAL");
+            socket.emit('game_inQueue', mode);
+            navigate('/game');
+        }
+    }
+    // let handleLaunchGameWithFriend = (e:any) =>
+    // {
+    //     if (mode == 1)
+    //     {
+    //         console.log("MODESOLO WITH FRIEND");
+    //         socket.emit('joinGame', e.currentTarget.id, mode);
+    //         navigate('/game');
+    //     }
+    //     else if (mode == 2)
+    //     {
+    //         console.log("MODESPECIAL WITH FRIEND");
+    //         socket.emit('joinGame', e.currentTarget.id, mode);
+    //         navigate('/game');
+    //     }
+    // }
 
     function displaySteps() {
         if (!next)
@@ -118,10 +158,10 @@ export default function Home() {
                 <div className='home-search'>
                     <h2>FIND A GAME</h2>
                     <h3>MODE : <span>{mode_selec}</span></h3>
-                    <div className='home-play-matchmaking'><button>PLAY WITH MATCHMAKING</button></div>
+                    <div className='home-play-matchmaking'><button onClick={() => handleLaunchMatchMaking(mode)}>PLAY WITH MATCHMAKING</button></div>
                     <div className='home-play-friends'>
                         <h4>PLAY WITH ONLINE FRIENDS</h4>
-                        {displayFriends()}
+                        {displayFriends(mode)}
                     </div>
                 </div>
             );

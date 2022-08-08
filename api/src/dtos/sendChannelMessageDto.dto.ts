@@ -1,10 +1,6 @@
+import { Transform, TransformFnParams } from "class-transformer";
 import { Length } from "class-validator";
-import { IsEmail, IsNotEmpty } from "class-validator";
-import { Channel } from "src/channel/channel.entity";
-import { User } from "src/user/user.entity";
-import { ManyToMany } from "typeorm";
-
-
+import { IsNotEmpty } from "class-validator";
 
 export class sendChannelMessageDto
 {
@@ -14,5 +10,6 @@ export class sendChannelMessageDto
 
 	@IsNotEmpty()
 	@Length(1, 250)
+	@Transform(({ value }: TransformFnParams) => value?.trim())
 	msg: string;
 }

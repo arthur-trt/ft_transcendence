@@ -1,11 +1,13 @@
 import { forwardRef, Inject, Injectable, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
 import { ChannelService } from 'src/channel/channel.service';
 import { addToPrivateRoomDto } from 'src/dtos/addToPrivateRoom.dto';
+import { banUserDto } from 'src/dtos/banUser.dto';
 import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
+import { muteUserDto } from 'src/dtos/muteUser.dto';
 import { newChannelDto } from 'src/dtos/newChannel.dto';
 import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto.dto';
 import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
@@ -38,7 +40,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly gameRelayService: GameRelayService,
 
 	  @Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
-	@Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
+	  @Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
 		) { }
 
 
@@ -79,7 +81,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		this.connectService.handleConnection(client);
 	}
 
-	afterInit(server: Server) {
+	afterInit() {
 		this.logger.log("Start listenning");
 	}
 
@@ -148,9 +150,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@SubscribeMessage('getRooms')
 	@UseGuards(WsJwtAuthGuard)
-	async getRooms(client: Socket)
-	{
-		await this.chatService.getRooms().catch((err) => { throw new WsException ('puree')});
+	async getRooms() {
+		await this.chatService.getRooms();
 	}
 
 	/**
@@ -205,17 +206,20 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@SubscribeMessage('addUser')
 	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
 	async onAddUser(client: Socket, data : addToPrivateRoomDto) {
 		await this.chatService.addUser(client, data)
 	}
 
 	@SubscribeMessage('banUser')
-	async onBanUser(client: Socket, data : { channel: string, toBan: User }) {
+	@UsePipes(ValidationPipe)
+	async onBanUser(client: Socket, data : banUserDto) {
 		await this.chatService.ban(client, data);
 	}
 
 	@SubscribeMessage('muteUser')
-	async onMuteUser(client: Socket, data : { channel: string, toMute: User }) {
+	@UsePipes(ValidationPipe) 
+	async onMuteUser(client: Socket, data : muteUserDto) {
 		await this.chatService.mute(client, data);
 	}
 
@@ -409,28 +413,28 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
 	@SubscribeMessage('game_inQueue')
-	async getInQueue(client : Socket)
-	{
-		await this.gameRelayService.getInQueue(client)
+	async getInQueue(client : Socket, mode) {
+		await this.gameRelayService.getInQueue(client, mode)
 	}
 
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
+	@SubscribeMessage('joinGame')
+	async joinGame(client : Socket, playerId, mode) {
+		await this.gameRelayService.joinGame(client, playerId, mode)
+	}
+s
+	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('game_start')
-	async startMatch(client : Socket)
-	{
-		//await this.gameRelayService.sendPosition(client)
+	async startMatch() {
 		await this.gameRelayService.start_gameloop();
 	}
 
 	@UseGuards(WsJwtAuthGuard)
-	@UsePipes(ValidationPipe)
 	@SubscribeMessage('MoveUp')
 	async MoveUp(client : Socket)
 	{
-		console.log("MoveUP " + client.id);
+		//console.log("MoveUP " + client.id);
 		await this.gameRelayService.MoveUp(client);
 	}
 
@@ -439,33 +443,65 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('MoveDown')
 	async MoveDown(client : Socket)
 	{
-		console.log("MoveDOWN " + client.id);
+		//console.log("MoveDOWN " + client.id);
 		await this.gameRelayService.MoveDown(client);
 	}
-
-	// @UseGuards(WsJwtAuthGuard)
-	// @UsePipes(ValidationPipe)
-	// @SubscribeMessage('StopUp')
-	// async StopUp(client : Socket)
-	// {
-	// 	console.log("STOPUp " + client.id);
-	// }
-
-	// @UseGuards(WsJwtAuthGuard)
-	// @UsePipes(ValidationPipe)
-	// @SubscribeMessage('StopDown')
-	// async StopDown(client : Socket)
-	// {
-	// 	console.log("STOPDown " + client.id);
-	// }
 
 	@UseGuards(WsJwtAuthGuard)
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('StopMove')
 	async StopMove(client : Socket)
 	{
-		console.log("STOPMove " + client.id);
+		//console.log("STOPMove " + client.id);
 		await this.gameRelayService.StopMove(client);
 	}
 
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('ActivesMatches')
+	async GameOngoing(client: Socket)
+	{
+		await this.gameRelayService.getOngoingMatches();
+	}
+	
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('WatchGame')
+	async watchGame(client: Socket, gameId)
+	{
+		await this.gameRelayService.watchGame(client, gameId);
+	}
+
+
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('MoveUP2')
+	async MoveUp_Pad2(client : Socket)
+	{
+		console.log("MoveUP2 " + client.id);
+		await this.gameRelayService.MoveUp2(client);
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('MoveDOWN2')
+	async MoveDown_Pad2(client : Socket)
+	{
+		console.log("MoveDOWN2 " + client.id);
+		await this.gameRelayService.MoveDown2(client);
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('StopMove2')
+	async StopMove_Pad2(client : Socket)
+	{
+		console.log("STOPMove2 " + client.id);
+		await this.gameRelayService.StopMove2(client);
+	}
+	@UseGuards(WsJwtAuthGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('pending invite')
+	async invite_to_play(client : Socket, FriendId: number, mode: number)
+	{
+		await this.gameRelayService.pendingInvite(client, FriendId, mode);
+	}
+	
 }

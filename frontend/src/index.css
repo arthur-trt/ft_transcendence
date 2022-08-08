@@ -65,7 +65,7 @@ code {
   border: solid 2px #1dd1a1;
   border-radius: 5px;
   color: black;
-  padding: 15px 15px;
+  padding: 15px;
   font-size: 16px;
   transition-duration: 0.4s;
   cursor: pointer;
@@ -600,8 +600,15 @@ cursor: pointer;
   font-size: 11px;
 }
 
-.users-single-info .paperplane, .gamepad, .userslash, .userxmark ,.userplus {
+.users-single-info .paperplane, .gamepad, .userxmark ,.userplus {
   color: #1dd1a1;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 3px;
+  border-radius: 5px;
+}
+
+.users-single-info .userslash {
   cursor: pointer;
   font-size: 13px;
   padding: 3px;
@@ -1045,7 +1052,6 @@ textarea:focus, input:focus{
 }
 
 .twofa-container input {
-  margin-top: 5px;
   padding: 5px;
   border-radius: 3px;
   border: 2px solid black;
@@ -1151,7 +1157,7 @@ textarea:focus, input:focus{
   border: solid 2px #1dd1a1;
   border-radius: 5px;
   color: black;
-  padding: 15px 15px;
+  padding: 15px;
   font-size: 16px;
   transition-duration: 0.4s;
   cursor: pointer;
@@ -1200,6 +1206,10 @@ textarea:focus, input:focus{
   margin: auto;
   max-width: 1200px;
   border-radius: 5px;
+}
+
+.hidden {
+  display: none;
 }
 
 

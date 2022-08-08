@@ -201,7 +201,10 @@ export default function Channels() {
   let handleBlockFriend = (e:any) => {
     socket.emit('block', friends.friends[parseInt(e.currentTarget.id)]);
   }
-  let handleOpenPrivate = (e: any) => {
+  let handleUnBlockFriend = (e:any) => {
+    socket.emit('unblock', friends.friends[parseInt(e.currentTarget.id)]);
+  }
+  let handleOpenPrivate = (e:any) => {
     let j = 0;
     while (j < datausers?.length) {
       if (e.currentTarget.id === datausers[j]?.name)
@@ -273,16 +276,28 @@ export default function Channels() {
     return indents;
   }
 
+  function isBlocked(id:string) {
+    let i = 0;
+    while (i < friends?.blocked?.length)
+    {
+      if (id === friends?.blocked[i])
+        return (1);
+      i++;
+    }
+    return (0);
+  }
+
   function displayButtonFriend(i: number) {
     let j = 0;
     while (j < friends?.friends?.length) {
       if (datausers[i]?.id === friends?.friends[j]?.id) {
         return (<div className='users-single-info-friends'>
-          <FontAwesomeIcon className='paperplane' icon={faPaperPlane} id={datausers[i]?.name} onClick={handleOpenPrivate} ></FontAwesomeIcon>
-          {datausers[i]?.status === 'online' && <FontAwesomeIcon className='gamepad' icon={faGamepad} ></FontAwesomeIcon>}
-          <FontAwesomeIcon className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleBlockFriend}></FontAwesomeIcon>
-          <FontAwesomeIcon className='userxmark' icon={faUserXmark} id={j.toString()} onClick={handleRemoveFriend} ></FontAwesomeIcon>
-        </div>
+                  <FontAwesomeIcon className='paperplane' icon={faPaperPlane} id={datausers[i]?.name} onClick={handleOpenPrivate} ></FontAwesomeIcon>
+                  {datausers[i]?.status === 'online' && <FontAwesomeIcon className='gamepad' icon={faGamepad} ></FontAwesomeIcon>}
+                  {isBlocked(datausers[i]?.id) === 0 && <FontAwesomeIcon style={{color: '#1dd1a1'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleBlockFriend}></FontAwesomeIcon>}
+                  {isBlocked(datausers[i]?.id) === 1 && <FontAwesomeIcon style={{color: 'red'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleUnBlockFriend}></FontAwesomeIcon>}
+                  <FontAwesomeIcon className='userxmark' icon={faUserXmark} id={j.toString()} onClick={handleRemoveFriend} ></FontAwesomeIcon>
+                </div>
         );
       }
       j++;

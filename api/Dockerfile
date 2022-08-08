@@ -13,7 +13,7 @@
 #
 # Dev image
 #
-FROM	node as dev
+FROM	node:current as dev
 
 
 WORKDIR	/api/

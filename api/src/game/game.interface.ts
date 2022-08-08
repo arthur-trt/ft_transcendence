@@ -43,13 +43,14 @@ export interface Match
     x: number;
     y: number;
     watcher : User;
+    modeSpecial: boolean;
    
 }
 export interface dataFront {
-    player1_paddle_x: number;
     player1_paddle_y: number;
-    player2_paddle_x: number;
+    player1_paddle2_y: number;
     player2_paddle_y: number;
+    player2_paddle2_y: number;
     ball_x: number;
     ball_y: number;
 }
@@ -60,4 +61,9 @@ export interface Paddle {
     height : number;
     width : number;
     socket : Socket;
+}
+
+export interface Names {
+    p1_name : string;
+    p2_name : string;
 }

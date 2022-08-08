@@ -6,15 +6,21 @@ import { UserService } from 'src/user/user.service';
 import { Brackets, Repository } from 'typeorm';
 import { MatchHistory } from './game.entity';
 import { Socket, Server } from 'socket.io'
+import { Achievements_types } from 'src/achievements/achievements.entity';
+import { AchievementsService } from 'src/achievements/achievements.service';
+import { compareSync } from 'bcrypt';
+import { identity } from 'rxjs';
+import { stringify } from 'querystring';
 
 
 @Injectable()
 export class GameService {
 
-	constructor(
+	constructor (
 		@InjectRepository(MatchHistory) private MatchRepo: Repository<MatchHistory>,
 		@InjectRepository(User) private UserRepo: Repository<User>,
-		private userService: UserService
+		private userService: UserService,
+		private achievementsService: AchievementsService,
 	) { }
 
 	/**
@@ -63,6 +69,7 @@ export class GameService {
 	 */
 	async endMatch(match: endMatchDto): Promise<any> // en vrai c'est MatchHistory[]
 	{
+		console.log("Match has ended");
 		const endedMatch: MatchHistory = await this.findMatchById(match.id);
 		if (!endedMatch)
 			throw new HttpException('Match not found', HttpStatus.NOT_FOUND);
@@ -74,6 +81,8 @@ export class GameService {
 		endedMatch.finished = true;
 		const winner: User = match.scoreUser1 > match.scoreUser2 ? await this.userService.getUserByIdentifier(endedMatch.user1) : await this.userService.getUserByIdentifier(endedMatch.user2);
 		winner.wonMatches += 1;
+		const loser: User = match.scoreUser1 < match.scoreUser2 ? await this.userService.getUserByIdentifier(endedMatch.user1) : await this.userService.getUserByIdentifier(endedMatch.user2);
+		loser.lostMatches += 1;
 		await this.UserRepo.save(winner);
 		await this.MatchRepo.save(endedMatch);
 		return await this.getCompleteMatchHistory();
@@ -83,7 +92,7 @@ export class GameService {
 	async ladder(): Promise<User[]>
 	{
 		return await this.UserRepo.createQueryBuilder('user')
-			.orderBy('user.wonMatches', 'ASC')
+			.orderBy('user.wonMatches', 'DESC')
 			.getMany();
 	}
 
@@ -102,4 +111,43 @@ export class GameService {
 		return match;
 	}
 
+	async listGameOngoing()
+	{
+		const list: MatchHistory[]  = await this.MatchRepo.find({
+			where :{
+				finished: false,		
+			},
+		})
+		return list;
+	}
+	// async userPlaying() 
+	// {
+	// 	const matches: MatchHistory[] = await this.listGameOngoing();
+	// 	let userPlaying: Set<string>;
+	// 	for (const i in matches)
+	// 	{
+	// 		userPlaying.add(matches[i].user1);
+	// 		userPlaying.add(matches[i].user2);
+	// 	}
+	// 	return userPlaying;
+	// }
+
+	async checkForAchievements(user: User)
+	{
+		const ladder = await this.ladder();
+		if (user.wonMatches == 1)
+			this.achievementsService.createAchievements(user, Achievements_types.FIRST);
+		else if (user.wonMatches == user.lostMatches)
+			this.addAchievement(user, Achievements_types.HALFHALF);
+		else if (user.wonMatches > 3 && user.lostMatches == 0)
+			this.addAchievement(user, Achievements_types.WINNER);
+		else if (user == ladder[0])
+			this.addAchievement(user, Achievements_types.TOP1);
+	}
+
+	async addAchievement(user, achievement)
+	{
+		if (!this.achievementsService.hasAchievement(achievement, user))
+			this.achievementsService.createAchievements(user, achievement);
+	}
 }

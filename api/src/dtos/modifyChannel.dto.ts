@@ -1,7 +1,5 @@
+import { Transform, TransformFnParams } from "class-transformer";
 import { IsNotEmpty, Length } from "class-validator";
-import { User } from "src/user/user.entity";
-
-
 
 export class ModifyChannelDto {
 
@@ -9,5 +7,6 @@ export class ModifyChannelDto {
 	chanName: string;
 
 	@Length(1)
+	@Transform(({ value }: TransformFnParams) => value?.trim())
 	password?: string;
 }

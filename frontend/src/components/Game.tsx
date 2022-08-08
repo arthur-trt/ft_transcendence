@@ -1,3 +1,4 @@
+//import { computeHeadingLevel } from '@testing-library/react';
 import React, { useState, useEffect } from 'react';
 
 import { socketo } from '..';
@@ -32,9 +33,16 @@ export default function Game() {
 
   type dataT = {
     player1_paddle_y: number,
+    player1_paddle2_y: number,
     player2_paddle_y: number,
+    player2_paddle2_y: number,
     ball_x: number,
     ball_y: number
+  }
+
+  type nameT = {
+    p1_name: string;
+    p2_name: string
   }
 
   const [socket, setSocket] = useState<any>([]);
@@ -42,11 +50,21 @@ export default function Game() {
   // GAME VARIABLE
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
+  const imgRef = React.useRef<HTMLImageElement>(null);
+  const firstRef = React.useRef<HTMLImageElement>(null);
+  const secondRef = React.useRef<HTMLImageElement>(null);
+
   const [canvas, setCanvas] = useState<any>();
   const [ctx, setCtx] = useState<any>();
-  const [matchMaking, setMatchMaking] = useState<boolean>(false);
   const [countdown, setCountdown] = useState<boolean>(false);
   const [gameStart, setGameStart] = useState<boolean>(false);
+  const [isBabyPong, setGameMode] = useState<boolean>(true);
+
+  let [P1score, setP1Score] = useState(0);
+  let [P2score, setP2Score] = useState(0);
+
+  let [P1Name, setP1Name] = useState<string>("");
+  let [P2Name, setP2Name] = useState<string>("");
 
   const [userLeft, setUserLeft] = useState<userT>({
     x: 10,
@@ -55,6 +73,9 @@ export default function Game() {
     height: 30,
     color: "DEEPSKYBLUE"
   });
+
+  const [userLeft_Pad2, setUserLeftP2] = useState<userT>();
+
   const [userRight, setUserRight] = useState<userT>({
     x: 20,
     y: 0,
@@ -62,6 +83,8 @@ export default function Game() {
     height: 30,
     color: "FIREBRICK"
   });
+
+  const [userRight_Pad2, setUserRightP2] = useState<userT>();
 
   const [ball, setBall] = useState<ballT>({
      x: 0,
@@ -72,9 +95,6 @@ export default function Game() {
     speed: 7,
     color: "BLACK"
   });
-
-  let [P1score, setP1Score] = useState(0);
-  let [P2score, setP2Score] = useState(0);
 
   const [net, setNet] = useState<netT>(
     {
@@ -94,7 +114,7 @@ export default function Game() {
       const canvas = canvasRef.current;
       if (canvas) {
         //canvas.height = canvas.clientHeight;
-        canvas.width = window.innerWidth * 0.7; 
+        canvas.width = window.innerWidth * 0.7;
         //canvas.width = canvas.clientWidth;
         canvas.height = canvas.width * 0.6;
         setCanvas(canvas);
@@ -118,20 +138,31 @@ export default function Game() {
         setNet({x : canvas.width/2, y : 0, height : 20, width : 5, color : "BLACK"});
         setUserLeft({x : canvas.width * 0.01, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "DEEPSKYBLUE"});
         setUserRight({x : canvas.width * 0.98, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "FIREBRICK"});
+        if (isBabyPong === true)
+        {
+          setUserLeftP2({x : canvas.width * 0.2, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "DEEPSKYBLUE"});
+          setUserRightP2({x : canvas.width * 0.78, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "FIREBRICK"});
+        }
       }
+
+      socket.on('set_names', (n: nameT) => {
+        setP1Name(n.p1_name);
+        setP2Name(n.p2_name);
+      });
+
       socket.on('game_position', (pos: dataT) => {
         //console.log(canvas);
-        //console.log("socket.on/game_position");
+        console.log("socket.on/game_position");
         setData(adaptToCanvas(pos, canvas));
       });
 
-      socket.on('game_countdownStart', () => {
+      socket.on('game_countdownStart', (mode: boolean) => {
+        setGameMode(mode);
         console.log("socket.on/game_countdown");
         setCountdown(true);
       })
 
       socket.on('update_score', (res : Boolean) => {
-        console.log(res + " " + P1score);
         if (res === true)
         {
           setP1Score(P1score + 1);
@@ -143,18 +174,32 @@ export default function Game() {
           P2score++;
         }
       })
+
+      socket.on('game_end', (res : boolean) => {
+        kill_sockets(socket);
+        render_game_end(res, canvas);
+      })
     }, []);
 
-  // Wait for context to be ready.
-  useEffect(() => {
-    if (canvas && ctx)
+    function kill_sockets(socketi : any)
     {
-        ctx.fillStyle = "BLACK";
-        ctx.font = "48px serif";
-        ctx.textAlign = "center"
-        ctx.fillText("Cliquez ici pour jouer !", canvas.width / 2, canvas.height / 2);
+      socketi.off('game_position');
+      socketi.off('game_end');
+      socketi.off('update_score');
+      socketi.off('game_countdownStart');
+      socketi.off('set_names');
     }
-  }, [ctx])
+
+  // Wait for context to be ready.
+  // useEffect(() => {
+  //   if (canvas && ctx)
+  //   {
+  //       ctx.fillStyle = "BLACK";
+  //       ctx.font = "48px serif";
+  //       ctx.textAlign = "center"
+  //       ctx.fillText("Cliquez ici pour jouer !", canvas.width / 2, canvas.height / 2);
+  //   }
+  // }, [ctx])
 
   let i = 0;
   let inter : any;
@@ -186,32 +231,38 @@ export default function Game() {
   }
 
   useEffect(() => {
-    console.log("useEffect/game_start" + gameStart);
+    console.log("useEffect/game_start " + gameStart);
     if (gameStart === true)
       socket.emit('game_start');
   }, [gameStart]);
 
   useEffect(() => {
-    //console.log("useEffect/render");
     if (canvas && ctx)
     {
-      //console.log("render is triggered")
       if (data)
         render(data);
-      //blabla les fonctions
     }
   }, [data])
 
   const [MoveUp, setMoveUp] = useState<boolean>(false);
   const [MoveDown, setMoveDown] = useState<boolean>(false);
+  const [Pad2_MoveUp, setPad2_MoveUp] = useState<boolean>(false);
+  const [Pad2_MoveDown, setPad2_MoveDown] = useState<boolean>(false);
 
   document.addEventListener('keydown', (e) => {
     if (gameStart) {
+
       if (e.key === 'w' && MoveUp === false)
         setMoveUp(true);
 
       if (e.key === 's' && MoveDown === false)
         setMoveDown(true);
+
+      if (e.key === "o" && Pad2_MoveUp === false && isBabyPong === true)
+        setPad2_MoveUp(true);
+
+      if (e.key === "l" && Pad2_MoveDown === false && isBabyPong === true)
+        setPad2_MoveDown(true);
     }
   }, {once : true});
 
@@ -222,6 +273,12 @@ export default function Game() {
 
       if (e.key === 's' && MoveDown === true)
         setMoveDown(false);
+
+      if (e.key === "o" && Pad2_MoveUp === true && isBabyPong === true)
+        setPad2_MoveUp(false);
+
+      if (e.key === "l" && Pad2_MoveDown === true && isBabyPong === true)
+        setPad2_MoveDown(false);
     }
   }, {once : true});
 
@@ -239,8 +296,24 @@ export default function Game() {
         socket.emit('StopMove');
         console.log("front STOP move");
       }
+
+      if (isBabyPong === true)
+      {
+        if (Pad2_MoveUp === true) {
+          console.log("front Pad_2 MoveUp");
+          socket.emit('MoveUP2')
+        }
+        if (Pad2_MoveDown === true) {
+          console.log("front Pad_2 MoveUDown");
+          socket.emit('MoveDOWN2')
+        }
+        if (Pad2_MoveUp === false && Pad2_MoveDown === false) {
+          console.log("front Pad_2 STOP move");
+          socket.emit('StopMove2');
+        }
+      }
     }
-  }, [MoveUp, MoveDown]);
+  }, [MoveUp, MoveDown, Pad2_MoveUp, Pad2_MoveDown]);
 
   /**
    * Draw a rectangle on the canva
@@ -252,11 +325,6 @@ export default function Game() {
    */
   function drawRect(x: number, y: number, w: number, h: number, color: string) {
     if (ctx != null) {
-      // console.log(" DRAW ME BITCH"); // ????? un peu vnr ?
-      // console.log(x + " " + y + " " + w + " " + h);
-      // console.log(canvas.height);
-      // console.log(canvas.width);
-      // console.log(color);
       ctx.fillStyle = color;
       ctx.fillRect(x, y, w, h);
     }
@@ -288,7 +356,7 @@ export default function Game() {
   }
 
   function drawText(text: string, x: number, y: number, color: string, font: string) {
-    //console.log(ctx);
+    //console.log("drawText " + ctx);
     if (ctx != null) {
       ctx.fillStyle = color;
       ctx.font = font;
@@ -302,11 +370,9 @@ export default function Game() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Draw score for userLeft
-      // drawText("PLAYER 1", canvas.width * 0.2, canvas.height * 0.1, '#00000080', "48px serif");
       drawText(P1score.toString(), canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
 
       // Draw score for userRight
-      // drawText("PLAYER 2", canvas.width * 0.8, canvas.height * 0.1, '#00000080', "48px serif");
       drawText(P2score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
 
       // Draw net
@@ -315,44 +381,73 @@ export default function Game() {
       //Draw paddles
       drawRect(userLeft.x, data.player1_paddle_y, userLeft.width, userLeft.height, userLeft.color);
       drawRect(userRight.x, data.player2_paddle_y, userRight.width, userRight.height, userRight.color);
+
+      //if mode babypong draw the second paddles
+      if (isBabyPong === true && userLeft_Pad2 && userRight_Pad2)
+      {
+        drawRect(userLeft_Pad2.x, data.player1_paddle2_y, userLeft_Pad2.width, userLeft_Pad2.height, userLeft_Pad2.color);
+        drawRect(userRight_Pad2.x, data.player2_paddle2_y, userRight_Pad2.width, userRight_Pad2.height, userRight_Pad2.color);
+      }
       
       //Draw the ball
       drawArc(data.ball_x, data.ball_y, ball.radius, ball.color);
     }
   }
-    
+
+  function render_game_end(winner : boolean, canvas : any)
+  {
+    //console.log("rener_game_end");
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(imgRef.current, canvas.width * 0.35, canvas.height * 0.3, canvas.width * 0.3, canvas.height * 0.6);
+      ctx.fillStyle = '#1dd1a1';
+      ctx.font = "30px serif";
+      ctx.fillText(P1score + " - " + P2score, canvas.width * 0.5, canvas.height * 0.25);
+      ctx.font = "48px serif";
+
+      if(winner === true) //I won
+      {
+        ctx.fillText("CONGRATULATIONS, YOU WON !", canvas.width * 0.5, canvas.height * 0.1);
+        ctx.drawImage(firstRef.current, canvas.width * 0.45, canvas.height * 0.45, canvas.width * 0.1, canvas.height * 0.1);
+      }
+      else //Opponent won
+      {
+        ctx.fillText("MAYBE NEXT TIME... !", canvas.width * 0.5, canvas.height * 0.1);
+        ctx.drawImage(secondRef.current, canvas.width * 0.45, canvas.height * 0.45, canvas.width * 0.1, canvas.height * 0.1);
+      }
+    }
+  }
+
   function adaptToCanvas(data: dataT, canvas:any)
     {
-      //console.log("issou");
       if (canvas)
       {
         data.player1_paddle_y = data.player1_paddle_y / 100 * canvas.height;
-        //console.log("PAD1 Y = " + data.player1_paddle_y);
         data.player2_paddle_y = data.player2_paddle_y / 100 * canvas.height;
         data.ball_y = data.ball_y / 100 * canvas.height;
         data.ball_x = data.ball_x / 200 * canvas.width;
+        if (isBabyPong === true)
+        {
+          data.player1_paddle2_y = data.player1_paddle2_y / 100 * canvas.height;
+          data.player2_paddle2_y = data.player2_paddle2_y / 100 * canvas.height;
+        }
         return (data);
       }
     }
-
-  function handleClick(e: any) {
-    if (!matchMaking)
-    {
-      socket.emit('game_inQueue');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      setMatchMaking(true);
-    }
-  }
 
   return (
 
     <div className='game-container'>
       <div className='game-players'>
-        <h3>NAME PLAYER 1</h3>
-        <h3>NAME PLAYER 2</h3>
+        <h3>{P1Name}</h3>
+        <h3>{P2Name}</h3>
       </div>
       {/*<button type='button' onClick={handleStart}>Start game</button>*/}
-      <canvas ref={canvasRef} className="pong-container" onClick={handleClick}/> 
+      <canvas ref={canvasRef} className="pong-container"/>
+      <img ref={imgRef} src="coupe.png" className="hidden" alt="Winning cup"/>
+      <img ref={firstRef} src="1st.png" className="hidden" alt="First place"/>
+      <img ref={secondRef} src="2nd.png" className="hidden" alt="Second place"/>
       {/*onMouseMove={updateMousePosition}*/}
     </div>
   )

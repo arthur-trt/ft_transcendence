@@ -7,8 +7,6 @@ import { ChannelService } from 'src/channel/channel.service';
 import { Request } from 'express';
 import { validate as isValidUUID } from 'uuid';
 import { ModifyUserDto } from 'src/dtos/user.dto';
-import { UserActivity } from './user_activity.entity';
-import { UpsertOptions } from 'typeorm/repository/UpsertOptions';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -16,7 +14,6 @@ export class UserService {
 
 	constructor(
 		@InjectRepository(User) private userRepo: Repository<User>,
-		@InjectRepository(UserActivity) private userActivityRepo: Repository<UserActivity>,
 		@InjectRepository(Channel) private channelsRepo: Repository<Channel>,
 		@Inject(forwardRef(() => ChannelService)) private chanService: ChannelService)
 	{}
@@ -78,7 +75,7 @@ export class UserService {
 
 	public async findOrCreateUser(intra_id: number, fullname: string, username: string, avatar: string, mail: string)
 	{
-		let user = await this.getUserByIntraId(intra_id);
+		const user = await this.getUserByIntraId(intra_id);
 		if (user)
 		{
 			return (user);
@@ -176,14 +173,12 @@ export class UserService {
 			.of(user)
 			.remove(chan);
 
-
 		if (chan.adminsId.includes(user.id)) {
 			chan.admins = chan.admins.filter((admins) => {
 				return admins.id !== user.id
 			})
 			await chan.save();
 		}
-
 		if (chan.ownerId == user.id)
 		{
 			await this.channelsRepo
@@ -193,7 +188,6 @@ export class UserService {
 				.set(null);
 			chan.ownerId = ""; // See how possible to not do it manually
 		}
-		return await this.chanService.getUsersOfChannels();
 	}
 
 	public async getChannelsForUser(user: User) :  Promise<Channel[]>
@@ -206,36 +200,19 @@ export class UserService {
 		return chans;
 	}
 
-	public async block(user: User, toBan: User) :  Promise<User>
+	public async block(user: User, toBan: User) //:  Promise<User>
 	{
 		user.blocked.push(toBan.id);
 		await user.save();
-		return user;
 	}
 
-	public async unblock(user: User, toUnBan: User): Promise<User> {
+	public async unblock(user: User, toUnBan: User)//: Promise<User>
+	{
 		const index = user.blocked.indexOf(toUnBan.id);
 		if (index > -1) {
 			user.blocked.splice(index, 1);
 		}
 		await user.save();
-		return user;
-	}
-
-	public async	setUserActive (user: User) {
-		const options: UpsertOptions<UserActivity> = {
-			conflictPaths: ['user'],
-			skipUpdateIfNoValuesChanged: true,
-		}
-		await this.userActivityRepo.upsert({ user: user }, options);
-	}
-
-	public async	unsetUserActive (user: User) {
-		const found : UserActivity = await this.userActivityRepo.findOneOrFail({
-			where : {
-				user: { id: user.id } }});
-		this.userActivityRepo.delete(found.id);
-
 	}
 }
 

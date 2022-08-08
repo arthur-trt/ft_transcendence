@@ -1,6 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsEmpty, isNotEmpty, Length } from "class-validator";
-import {v4 as uuidv4} from 'uuid';
+import { Transform, TransformFnParams } from "class-transformer";
+import { IsEmail, IsNotEmpty, Length } from "class-validator";
 
 export class ModifyUserDto {
 
@@ -14,6 +13,7 @@ export class ModifyUserDto {
 
 	@IsNotEmpty()
 	@Length(3, 20)
+	@Transform(({ value }: TransformFnParams) => value?.trim())
 	fullname: string;
 
 	@IsNotEmpty()

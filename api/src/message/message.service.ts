@@ -1,15 +1,10 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { deepStrictEqual } from 'assert';
-import { UUIDVersion } from 'class-validator';
-import { Request } from 'express';
-import { throwIfEmpty } from 'rxjs';
 import { Channel } from 'src/channel/channel.entity';
 import { ChannelService } from 'src/channel/channel.service';
-import { MessageDto } from 'src/dtos/message.dto';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
-import { Brackets, Not, Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { channelMessage } from './channelMessage.entity';
 import { privateMessage } from './privateMessage.entity';
 
@@ -35,23 +30,20 @@ export class MessageService {
 	 * @param msg
 	 * @returns the Channel object containing its new message in its messages relationship
 	 */
-	public async sendMessageToChannel(chanIdentifier : string, user : User, msg : string) : Promise<Channel>
+	public async sendMessageToChannel(chanIdentifier : string, user : User, msg : string) //: Promise<Channel>
 	{
 		const channel : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier);
 		if (channel.mutedId.includes(user.id))
 			throw (new HttpException('You are mute and cannot send message to channel.', HttpStatus.FORBIDDEN))
 		if (channel.bannedId.includes(user.id))
 			throw (new HttpException('You are banned and cannot temporary send message to channel.', HttpStatus.FORBIDDEN))
-		const newMessage = await this.chatRepo.save
-		(
-			{
-				sender: user,
-				message: msg,
-			}
-		)
+		const newMessage = await this.chatRepo.save({
+			sender: user,
+			message: msg,
+		});
 		channel.messages = [...channel.messages, newMessage]; /* if pb of is not iterable, it is because we did not get the
 		 ealtions in the find one */
-		return await channel.save();
+		await channel.save();
 	}
 
 
@@ -62,7 +54,6 @@ export class MessageService {
 	 */
 	public async getMessage(chanIdentifier: string, user: User) : Promise<Channel>
 	{
-		const chan: Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
 		let msgs: Channel;
 		if (user.blocked.length > 0)
 		{
@@ -70,37 +61,20 @@ export class MessageService {
 				.where("chan.name = :chanName", { chanName: chanIdentifier })
 				.leftJoinAndSelect("chan.messages", "messages")
 				.leftJoinAndSelect("messages.sender", "sender")
-				.andWhere(new Brackets(qb => {
-					qb.where("sender.id NOT IN (:...blocked)", { blocked: user.blocked })
-				}))
+				.andWhere("sender.id NOT IN (:...blocked)", { blocked: user.blocked }) // make the query null if no messages
 				.getOne()
+
+			if (msgs == null) msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier }).getOne();
 
 		}
 		else
 		{
-			msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
-			.leftJoinAndSelect("chan.messages", "messages")
-			.leftJoinAndSelect("messages.sender", "sender")
-			.getOne()
+		 	msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
+		 		.leftJoinAndSelect("chan.messages", "messages")
+		 		.leftJoinAndSelect("messages.sender", "sender")
+				.getOne()
 		}
 		return msgs;
-	}
-
-
-	/**
-	 * @brief get all messages a user sent on a particular channel
-	 * @param chanIdentifier
-	 * @param user the user we wanr to see messages of
-	 * @returns the Channel with relation to its message
-	 */
-	public async 	getChannelMessagesOfUser(chanIdentifier: string, user : User) //: Promise<User>
-	{
-		let chan : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier)
-		const msgs = this.chatRepo.createQueryBuilder("msg")
-			.where("msg.sender = :sendername", { sendername: user.id })
-			.leftJoinAndSelect("msg.sender", "sender")
-			.getMany();
-			return msgs;
 	}
 
 	/*
@@ -114,19 +88,16 @@ export class MessageService {
 	 * @param msg
 	 * @returns array of all private messages
 	 */
-	public async sendPrivateMessage(src: User, target: User, msg: string) : Promise<privateMessage[]> {
-
+	public async sendPrivateMessage(src: User, target: User, msg: string)// : Promise<privateMessage[]>
+	{
 		const user2 = await this.userService.getUserByIdentifier(target.name);
 		if (user2.blocked.includes(src.id))
 			throw new HttpException('This user blocked you.', HttpStatus.FORBIDDEN)
-		const newMessage : privateMessage = await this.pmRepo.save(
-		{
+		await this.pmRepo.save({
 			sender: src.id,
 			target: user2.id,
-			message : msg,
-		}
-		)
-		return await this.pmRepo.find();
+			message: msg,
+		});
 	}
 
 

@@ -9,11 +9,12 @@ import { ConnectService } from './connect.service';
 import { WSServer } from './wsserver.gateway';
 import { GameModule } from 'src/game/game.module';
 import { GameRelayService } from './game.relayService';
-//import { ChatGateway } from './chat.gateway';
+
 
 @Module({
 
 	imports: [UserModule, MessageModule, JwtModule, ChannelModule, FriendshipsModule, GameModule],
+	exports: [ChatService],
 	providers: [WSServer, ChatService, ConnectService, GameRelayService]
 })
 

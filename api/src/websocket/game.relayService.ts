@@ -1,25 +1,15 @@
-import { User } from "src/user/user.entity";
-import { UserService } from "src/user/user.service";
-import { WSServer } from "./wsserver.gateway";
-import { forwardRef, Inject, Injectable, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, UseGuards} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
+import { UserService } from "src/user/user.service";
+import { Ball, dataFront, Match, Names, Paddle } from "../game/game.interface";
 import { GameService } from '../game/game.service';
-import { MatchHistory } from "src/game/game.entity";
-import { GameModule } from "../game/game.module";
-import { UserModule } from "../user/user.module";
-import { Ball, Match, Paddle } from "../game/game.interface"
-import { dataFront } from "../game/game.interface";
-import { createHistogram } from "perf_hooks";
-import { Client } from "socket.io/dist/client";
+import { WSServer } from "./wsserver.gateway";
+import { ChatService } from './chat.service';
 
-const MIN_SPEED = 7;
-const VEL_X= 5;
-const VEL_Y = 5;
 
-function collision(b : Ball, p : Paddle){
+function collision(b: Ball, p: Paddle) {
     const pad_top = p.y;
     const pad_bottom = p.y + p.height;
     const pad_left = p.x;
@@ -34,90 +24,141 @@ function collision(b : Ball, p : Paddle){
     return pad_left < ball_right && pad_top < ball_bottom && pad_right > ball_left && pad_bottom > ball_top;
 }
 
+const VICTORY = 3;
 @Injectable()
-export class GameRelayService
-{
+export class GameRelayService {
     constructor(
         protected readonly jwtService: JwtService,
-		protected readonly userService: UserService,
+        protected readonly userService: UserService,
         protected readonly gameService: GameService,
-        
-        @Inject(forwardRef(() => WSServer)) protected gateway : WSServer
-        ) {
-        }
-        
-        protected players = new Set<Socket>();
-        protected MatchRooms = [];
-        static nb_room = 0 ;
-        protected match = {} as Match;
-        protected dataT = {} as dataFront;
-        protected ball = {} as Ball;
-        protected player1 = {} as Paddle;
-        protected player2 = {} as Paddle;
-        protected p1_score = 0;
-        protected p2_score = 0;
-        protected loop_stop : NodeJS.Timer;
-        protected players_ready = 0;
 
-        protected P1_MoveUP : boolean;
-        protected P1_MoveDOWN : boolean;
-        protected P2_MoveUP : boolean;
-        protected P2_MoveDOWN : boolean;
-        
-        // async resetBall(){
-        //     this.match.ball.x = 50;
-        //     this.match.ball.y = 100;
-        //     this.match.ball.velocity.x = VEL_X;
-        //     this.match.ball.velocity.y = VEL_Y;
-        //     //this.match.ball.speed = 7;
-        // }
-        @UseGuards(WsJwtAuthGuard)
-        @UsePipes(ValidationPipe)
-        async getInQueue(client : Socket)
-        {
-            console.log("coucou");
+        @Inject(forwardRef(() => ChatService)) protected readonly chatservice: ChatService,
+        @Inject(forwardRef(() => WSServer)) protected gateway: WSServer
+    ) {
+    }
 
-            if (!this.players.has(client))
-                this.players.add(client);
-            console.log(this.players.size);
-            if (this.players.size == 2)
-            {
-                console.log("starting match");
-                const Match = this.startMatch(this.players);
-                this.players.clear();
-            }
-        }
+    protected players = new Set<Socket>();
+    protected MatchRooms = [];
+    static nb_room = 0;
+    protected match = {} as Match;
+    protected dataT = {} as dataFront;
+    protected ball = {} as Ball;
+    protected player1 = {} as Paddle;
+    protected player1_pad2 = {} as Paddle;
+    protected player2 = {} as Paddle;
+    protected player2_pad2 = {} as Paddle;
+    protected p1_score = 0;
+    protected p2_score = 0;
+    protected loop_stop: NodeJS.Timer;
+    protected players_ready = 0;
 
-//         function end_game(winner)
-// {
-//     clearInterval(loop);
+    protected P1_MoveUP: boolean;
+    protected P1_MoveDOWN: boolean;
+    protected P2_MoveUP: boolean;
+    protected P2_MoveDOWN: boolean;
 
-//     if (winner == false)
-//     {
-//         drawRect(0, 0, canvas.width, canvas.height, "FIREBRICK");
-//         drawText("PLAYER 2 WON !", canvas.width * 0.25, canvas.height * 0.2, '#D0AF0A');
-//     }
-//     else
-//     {
-//         drawRect(0, 0, canvas.width, canvas.height, "DEEPSKYBLUE");
-//         drawText("PLAYER 1 WON !", canvas.width * 0.25, canvas.height * 0.2, '#D0AF0A');
-//     }
+    protected P1_MoveUP_pad2: boolean;
+    protected P1_MoveDOWN_pad2: boolean;
+    protected P2_MoveUP_pad2: boolean;
+    protected P2_MoveDOWN_pad2: boolean;
 
-// }
+    protected names = {} as Names;
+    protected isBabyPong = false;
 
-// update function, the function that does all calculations
-// function update(){
-    
-    
-// }
-        
+
+    /*  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+        ██░▄▀▄░█░▄▄▀█▄▄░▄▄██░▄▄▀██░██░██░▄▀▄░█░▄▄▀██░█▀▄█▄░▄██░▀██░██░▄▄░
+        ██░█░█░█░▀▀░███░████░█████░▄▄░██░█░█░█░▀▀░██░▄▀███░███░█░█░██░█▀▀
+        ██░███░█░██░███░████░▀▀▄██░██░██░███░█░██░██░██░█▀░▀██░██▄░██░▀▀▄
+        ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+
+    /**
+     * @brief Random matchmaking
+     * @param client
+     * @param mode
+     */
     @UseGuards(WsJwtAuthGuard)
-    @UsePipes(ValidationPipe)
+    async getInQueue(client: Socket, mode) {
+        if (!this.players.has(client))
+            this.players.add(client);
+        if (this.players.size == 2) {
+            console.log("starting match/getInQueue");
+            this.startMatch(this.players, mode);
+        }
+    }
+    /**
+     * @brief Matchmaking with a friend
+     * @param client
+     * @param friendId
+     * @param mode
+     */
+    @UseGuards(WsJwtAuthGuard)
+    async joinGame(client: Socket, friendId, mode) {
+        const playerSocket = await this.chatservice.findSocketId(friendId);
+        this.players.add(client);
+        this.players.add(playerSocket);
+        console.log("starting matchWithFriend");
+        this.startMatch(this.players, mode);   
+    }
+    
+    /**
+     * @brief Matchmaking with a friend
+     * @param client
+     * @param friendId
+     * @param mode
+     */
+     @UseGuards(WsJwtAuthGuard)
+     async pendingInvite(client: Socket, friendId, mode)
+     {
+        const friend = await this.chatservice.findSocketId(friendId);
+        this.gateway.server.to(friend.id).emit('accept invite', (await client.data.user.id, mode))
+     }
+     
+    async startMatch(players, mode) {
+        const [first] = players;
+        const [, second] = players;
+        this.player1.socket = first;
+        this.player2.socket = second;
+        this.player1_pad2.socket = first;
+        this.player2_pad2.socket = second;
+        this.names.p1_name = this.player1.socket.data.user.name;
+        this.names.p2_name = this.player2.socket.data.user.name;
+        this.gateway.server.to(this.player1.socket.id).emit('set_names', this.names); //p1_name = left_name
+        this.gateway.server.to(this.player2.socket.id).emit('set_names', this.names);
+        console.log("starting match/startMatch");
+        players.clear();
+        console.log(this.players.size)
+        const Match = await this.gameService.createMatch(first.data.user, second.data.user);
+        first.join(Match.id);
+        second.join(Match.id);
+        this.MatchRooms.push(Match.id);
+        this.initPositions();
+        if (mode == 2)
+            this.isBabyPong = true;
+        this.gateway.server.to(Match.id).emit('game_countdownStart', this.isBabyPong);
+        this.match.id = Match.id;
+
+    }
+
+    /**
+     * @brief Make a player lose when he disconnects
+     */
+    async handleDisconnect()
+    {
+        const user1 = await this.chatservice.findUserbySocket(this.player1.socket.id);
+        const user2 = await this.chatservice.findUserbySocket(this.player2.socket.id);
+        if (!this.gateway.activeUsers.has(user1))
+
+            return 1
+        else if (!this.gateway.activeUsers.has(user2))
+            return 2;
+    }
+
     async start_gameloop()
     {
         if (this.players_ready == 1)
         {
-            this.loop_stop = setInterval(() => this.loop(), 1000/60);
+            this.loop_stop = setInterval(() => this.loop(), 1000 / 60);
             console.log("inter = " + this.loop_stop);
         }
         else
@@ -126,23 +167,36 @@ export class GameRelayService
 
     async end_game()
     {
+        // const sockets = await this.gateway.server.in(this.match.id).allSockets;
+        // for (const i in sockets)
+        // {
+            //     sockets[i].leave(this.match.id)
+            //     console.log("clients are leaving the room")
+            // }
         clearInterval(this.loop_stop);
+        console.log("interval stopped : " + this.loop_stop);
+        this.player1.socket.leave(this.match.id)
+        console.log("player left the room")
+        this.player2.socket.leave(this.match.id);
+        console.log("player2 left the room") //dont forget to make watch quit the room 
         this.players_ready = 0;
+        await this.gameService.endMatch({ id: this.match.id, scoreUser1: this.p1_score, scoreUser2: this.p2_score })
+
     }
 
     @UseGuards(WsJwtAuthGuard)
-    @UsePipes(ValidationPipe)
     async loop() {
-        if (this.ball && this.player1 && this.player2)
-        {
-            // change the score of players, if the ball goes to the left "ball.x<0" computer win, else if "ball.x > canvas.width" the user win
+        if (this.ball && this.player1 && this.player2) {
+            // change the score of players, if the ball goes to the left "ball.x<0" p2 win, else if "ball.x > canvas.width" the p1 win
             if (this.ball.x - this.ball.radius < 0) {
                 this.p2_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', false);
-                if (this.p2_score >= 1) {
-                    this.end_game();
+                if (this.p2_score >= VICTORY || await this.handleDisconnect() == 1) {
+                    await this.end_game();
                     console.log("P2 WINS");
-                    this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
+                    this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
+                    this.gateway.server.to(this.player2.socket.id).emit('game_end', true);
+                    //this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
                     return;
                 }
                 else
@@ -151,10 +205,12 @@ export class GameRelayService
             else if (this.ball.x + this.ball.radius > 200) {
                 this.p1_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', true);
-                if (this.p1_score >= 1) {
-                    this.end_game();
+                if (this.p1_score >= VICTORY || await this.handleDisconnect() == 2) {
+                    await this.end_game();
                     console.log("P1 WINS");
-                    this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
+                    this.gateway.server.to(this.player1.socket.id).emit('game_end', true);
+                    this.gateway.server.to(this.player2.socket.id).emit('game_end', false);
+                    //this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
                     return;
                 }
                 else
@@ -174,7 +230,18 @@ export class GameRelayService
             }
 
             // we check if the paddle hit the user or the com paddle
-            const player = (this.ball.x + this.ball.radius < 200 / 2) ? this.player1 : this.player2;
+            let player = (this.ball.x + this.ball.radius < 200 / 2) ? this.player1 : this.player2;
+
+            if (this.isBabyPong === true) {
+                if (player === this.player1) {
+                    //Player1's side
+                    player = (this.ball.x + this.ball.radius < this.player1_pad2.x) ? this.player1 : this.player1_pad2;
+                }
+                else {
+                    //Player2's side
+                    player = (this.ball.x + this.ball.radius > this.player2_pad2.x + this.player2_pad2.width) ? this.player2 : this.player2_pad2;
+                }
+            }
 
             // if the ball hits a paddle
             if (collision(this.ball, player)) {
@@ -191,7 +258,8 @@ export class GameRelayService
                 const angleRad = (Math.PI / 4) * collidePoint;
 
                 // change the X and Y velocity direction
-                const direction = (this.ball.x + this.ball.radius < 200 / 2) ? 1 : -1;
+                //const direction = (this.ball.x + this.ball.radius < 200 / 2) ? 1 : -1;
+                const direction = (this.ball.velocityX >= 0) ? -1 : 1;
                 this.ball.velocityX = direction * this.ball.speed * Math.cos(angleRad);
                 this.ball.velocityY = this.ball.speed * Math.sin(angleRad);
 
@@ -203,220 +271,213 @@ export class GameRelayService
         }
     }
 
-    async createData()
-    {
-        this.dataT.player1_paddle_x = this.player1.x;
+    async createData() {
         this.dataT.player1_paddle_y = this.player1.y;
-        this.dataT.player2_paddle_x = this.player2.x;
+        this.dataT.player1_paddle2_y = this.player1_pad2.y;
         this.dataT.player2_paddle_y = this.player2.y;
+        this.dataT.player2_paddle2_y = this.player2_pad2.y;
         this.dataT.ball_x = this.ball.x;
         this.dataT.ball_y = this.ball.y;
     }
 
-        @UseGuards(WsJwtAuthGuard)
-        @UsePipes(ValidationPipe)
-        //@SubscribeMessage('game_start')
-        async sendPosition(client: Socket)
-        {
-            // console.log("ooooooooooooooo")
-            // console.log("game_start")
-            this.dataT.player1_paddle_x = this.player1.x;
-            this.dataT.player1_paddle_y = this.player1.y;
-            this.dataT.player2_paddle_x = this.player2.x;
-            this.dataT.player2_paddle_y = this.player2.y;
-            this.dataT.ball_x = this.ball.x;
-            this.dataT.ball_y = this.ball.y;
-            // this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
-            this.gateway.server.to(client.id).emit('game_position', this.dataT);
-      }
-        async startMatch(players) //set a boolean to know if a player is already on match
-        {
-            const [first] = players;
-            const[, second] = players;
-            this.player1.socket = first;
-            this.player2.socket = second;
-            console.log("starting match");
-            var Match = await this.gameService.createMatch(first.data.user, second.data.user);
-            first.join( Match.id);
-            second.join( Match.id);
-            this.MatchRooms.push( Match.id);
-            this.initPositions();
-            this.gateway.server.to( Match.id).emit('game_countdownStart');
-            //console.log(this.match.id)
-            this.match.id = Match.id;
+    async initPositions() {
+        console.log("initPos");
 
-            
-            //this.initGamePosition();
-        }
+        //ball stats
+        this.ball.radius = 1;
+        this.ball.speed = 1;
+        this.ball.velocityX = .5;
+        this.ball.velocityY = .5;
+        this.ball.x = 100;
+        this.ball.y = 50;
 
-        async initPositions()
-        {
-            this.ball.radius = 1;
-            this.ball.speed = 1;
-            this.ball.velocityX = .5;
-            this.ball.velocityY = .5;
-            this.ball.x = 100;
-            this.ball.y = 50;
+        //player1 pad1 stats
+        this.player1.x = 2;
+        this.player1.y = 50;
+        this.player1.height = 10;
+        this.player1.width = 2;
 
-            this.player1.x = 2;
-            this.player1.y = 50;
-            this.player1.height = 10;
-            this.player1.width = 2;
+        //player1 pad2 stats
+        this.player1_pad2.x = 40;
+        this.player1_pad2.y = 50;
+        this.player1_pad2.height = 10;
+        this.player1_pad2.width = 2;
 
-            this.player2.x = 200 - 2 - 2; //P2 est decolle de 2px du mur en comprenant sa largeur (2px)
-            this.player2.y = 50;
-            this.player2.height = 10;
-            this.player2.width = 2;
-        }
+        //player2 pad1 stats
+        this.player2.x = 200 - 2 - 2; //P2 est decolle de 2px du mur en comprenant sa largeur (2px)
+        this.player2.y = 50;
+        this.player2.height = 10;
+        this.player2.width = 2;
 
-        @UseGuards(WsJwtAuthGuard)
-        @UsePipes(ValidationPipe)
-        async MoveUp(client : Socket)
-        {
-            if (client.id == this.player1.socket.id)
-                this.P1_MoveUP = true;
+        //player2 pad2 stats
+        this.player2_pad2.x = 200 - 40 - 2;
+        this.player2_pad2.y = 50;
+        this.player2_pad2.height = 10;
+        this.player2_pad2.width = 2;
+
+        this.p1_score = 0;
+        this.p2_score = 0;
+    }
+
+    @UseGuards(WsJwtAuthGuard)
+    async MoveUp(client: Socket) {
+        if (client.id == this.player1.socket.id)
+            this.P1_MoveUP = true;
+        else if (client.id == this.player2.socket.id) {
+            //manip visant a ameliorer l'ergonomie :
+            //quand on est p2 les commandes sont inversees (i.e. w et s bougent la pallette droite)
+            //ce qui peut etre tres ennuyant, donc si mode babyong et p2 on re-inverse 
+            if (this.isBabyPong === true)
+                this.P2_MoveUP_pad2 = true;
             else
                 this.P2_MoveUP = true;
         }
+    }
 
-        @UseGuards(WsJwtAuthGuard)
-        @UsePipes(ValidationPipe)
-        async MoveDown(client : Socket)
-        {
-            if (client.id == this.player1.socket.id)
-                this.P1_MoveDOWN = true;
+    @UseGuards(WsJwtAuthGuard)
+    async MoveDown(client: Socket) {
+        if (client.id == this.player1.socket.id)
+            this.P1_MoveDOWN = true;
+        else if (client.id == this.player2.socket.id) {
+            if (this.isBabyPong === true)
+                this.P2_MoveDOWN_pad2 = true;
             else
                 this.P2_MoveDOWN = true;
         }
+    }
 
-        @UseGuards(WsJwtAuthGuard)
-        @UsePipes(ValidationPipe)
-        async StopMove(client : Socket)
-        {
-            if (client.id == this.player1.socket.id)
-            {
-                this.P1_MoveUP = false;
-                this.P1_MoveDOWN = false;
+    @UseGuards(WsJwtAuthGuard)
+    async StopMove(client: Socket) {
+        if (client.id == this.player1.socket.id) {
+            this.P1_MoveUP = false;
+            this.P1_MoveDOWN = false;
+        }
+        else if (client.id == this.player2.socket.id) {
+            if (this.isBabyPong === true) {
+                this.P2_MoveDOWN_pad2 = false;
+                this.P2_MoveUP_pad2 = false;
             }
-            else
-            {
+            else {
                 this.P2_MoveUP = false;
                 this.P2_MoveDOWN = false;
             }
         }
+    }
 
-        async calculateP1Pad()
-        {
-            if (this.P1_MoveUP === true)
-            {
-                if (this.player1.y - 2 < 0)
-                    this.player1.y = 0;
-                else
-                    this.player1.y -= 2;
-            }
-            if (this.P1_MoveDOWN === true) {
+    @UseGuards(WsJwtAuthGuard)
+    async MoveUp2(client: Socket) {
+        if (client.id == this.player1_pad2.socket.id)
+            this.P1_MoveUP_pad2 = true;
+        else if (client.id == this.player2_pad2.socket.id)
+            this.P2_MoveUP = true;
+    }
 
-                if (this.player1.y + 2 > 100 - this.player1.height)
-                    this.player1.y = 100 - this.player1.height;
-                else
-                    this.player1.y += 2;
-            }
+    @UseGuards(WsJwtAuthGuard)
+    async MoveDown2(client: Socket) {
+        if (client.id == this.player1_pad2.socket.id)
+            this.P1_MoveDOWN_pad2 = true;
+        else if (client.id == this.player2_pad2.socket.id)
+            this.P2_MoveDOWN = true;
+    }
+
+    @UseGuards(WsJwtAuthGuard)
+    async StopMove2(client: Socket) {
+        if (client.id == this.player1_pad2.socket.id) {
+            this.P1_MoveUP_pad2 = false;
+            this.P1_MoveDOWN_pad2 = false;
+        }
+        else if (client.id == this.player2_pad2.socket.id) {
+            this.P2_MoveUP = false;
+            this.P2_MoveDOWN = false;
+        }
+    }
+
+    async calculateP1Pad() {
+        if (this.P1_MoveUP === true) {
+            if (this.player1.y - 2 < 0)
+                this.player1.y = 0;
+            else
+                this.player1.y -= 2;
+        }
+        if (this.P1_MoveDOWN === true) {
+
+            if (this.player1.y + 2 > 100 - this.player1.height)
+                this.player1.y = 100 - this.player1.height;
+            else
+                this.player1.y += 2;
         }
 
-        async calculateP2Pad()
-        {
-            if (this.P2_MoveUP === true)
-            {
-                if (this.player2.y - 2 < 0)
-                    this.player2.y = 0;
+        if (this.isBabyPong === true) {
+            if (this.P1_MoveUP_pad2 === true) {
+                if (this.player1_pad2.y - 2 < 0)
+                    this.player1_pad2.y = 0;
                 else
-                    this.player2.y -= 2;
+                    this.player1_pad2.y -= 2;
             }
-            if (this.P2_MoveDOWN === true) {
+            if (this.P1_MoveDOWN_pad2 === true) {
 
-                if (this.player2.y + 2 > 100 - this.player2.height)
-                    this.player2.y = 100 - this.player2.height;
+                if (this.player1_pad2.y + 2 > 100 - this.player1.height)
+                    this.player1_pad2.y = 100 - this.player1.height;
                 else
-                    this.player2.y += 2;
+                    this.player1_pad2.y += 2;
             }
         }
-    
-        async resetBall()
-        {
-            this.ball.speed = 1;
-            this.ball.velocityX = .5;
-            this.ball.velocityY = .5;
-            this.ball.x = 100;
-            this.ball.y = 50;
+    }
+
+    async calculateP2Pad() {
+        if (this.P2_MoveUP === true) {
+            if (this.player2.y - 2 < 0)
+                this.player2.y = 0;
+            else
+                this.player2.y -= 2;
+        }
+        if (this.P2_MoveDOWN === true) {
+
+            if (this.player2.y + 2 > 100 - this.player2.height)
+                this.player2.y = 100 - this.player2.height;
+            else
+                this.player2.y += 2;
         }
 
-        // async MovementUp(client : Socket)
-        // {
-        //     if (this.player1.id.id == client.id)
-        //     {
+        if (this.isBabyPong === true) {
+            if (this.P2_MoveUP_pad2 === true) {
+                if (this.player2_pad2.y - 2 < 0)
+                    this.player2_pad2.y = 0;
+                else
+                    this.player2_pad2.y -= 2;
+            }
+            if (this.P2_MoveDOWN_pad2 === true) {
 
-        //     }
-        // }
+                if (this.player2_pad2.y + 2 > 100 - this.player2.height)
+                    this.player2_pad2.y = 100 - this.player2.height;
+                else
+                    this.player2_pad2.y += 2;
+            }
+        }
+    }
 
-        // @UseGuards(WsJwtAuthGuard)
-        // @UsePipes(ValidationPipe)
-        // //@SubscribeMessage('game_start')
-        // async initGamePosition()
-        // {
-        //     //this.match.ball.speed = 7;
-        //     //this.match.ball.velocity.x = VEL_X;
-        //     //this.match.ball.velocity.y = VEL_Y;
-        //     this.match.ball.x = 50;
-        //     this.match.ball.y = 100;
-        //     this.match.player_1.x = 2;
-        //     this.match.player_1.y = 50;
-        //     this.match.player_2.x = 198;
-        //     this.match.player_2.y = 50;
-        //     //this.sendPosition(client);
-        // };
-        
-        // @UseGuards(WsJwtAuthGuard)
-        // @UsePipes(ValidationPipe)
-        // @SubscribeMessage('game_start')
-        // async sendPosition(client : Socket)
-        // {
-        //     console.log("game_start")
-        //     this.dataT.player1_paddle_x = this.match.player_1.x;
-        //     this.dataT.player1_paddle_y = this.match.player_1.y;
-        //     this.dataT.player2_paddle_x = this.match.player_2.x;
-        //     this.dataT.player2_paddle_y = this.match.player_2.y;
-        //     this.dataT.ball_x = this.match.ball.x;
-        //     this.dataT.ball_y = this.match.ball.y;
-        //     console.log(this.match.id)
-        //     this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
-        // }
-    
-    // collision detection
-    
-    
+    async resetBall() {
+        this.ball.speed = 1;
+        this.ball.velocityX = .5;
+        this.ball.velocityY = .5;
+        this.ball.x = 100;
+        this.ball.y = 50;
+    }
+
     //watchmode if a friend is on a match (make a research ), join on watch mode
     // for (friend in matchhistory)
     //  if (matchhistory.stoptime == null)
     // join (matchhistory.uuid) (room)
-    
 
-    // @UseGuards(WsJwtAuthGuard)
-    // @UsePipes(ValidationPipe)
-    // @SubscribeMessage('game_settings')
-    // async updateCanvas(client : Socket)
-    // {     
-    // }
-    
-    // @SubscribeMessage('test')
-    // async test(client: Socket, position: any) {
-    //     this.dataT.player1_paddle_x = 50;
-    //       this.dataT.player1_paddle_y = position;
-    //       this.dataT.player2_paddle_x = 150;
-    //       this.dataT.player2_paddle_y = position;
-    //       this.dataT.ball_x = 50;
-    //       this.dataT.ball_y = 80;
-    //     console.log(client.id + ' position ' + position)
-    //     this.gateway.server.emit('game_postion', position)
-    // }
+    /**         
+     * WATCH MODE 
+     */
 
+    async getOngoingMatches() {
+        this.gateway.server.emit('ActivesMatches', await this.gameService.listGameOngoing());
+    }
+
+    async watchGame(client, gameId) {
+        client.join(gameId);
+    }
 }
