@@ -26,7 +26,7 @@ function collision(b: Ball, p: Paddle) {
     return pad_left < ball_right && pad_top < ball_bottom && pad_right > ball_left && pad_bottom > ball_top;
 }
 
-const VICTORY = 250;
+const VICTORY = 5;
 @Injectable()
 export class GameRelayService {
     constructor(
@@ -501,7 +501,6 @@ export class GameRelayService {
     async getMatchHistory(client: Socket) {
         const user = await this.chatservice.findUserbySocket(client.id);
         this.gateway.server.to(client.id).emit('MatchHistory', await this.gameService.findMatchByUser(user));
-        console.log(await this.gameService.findMatchByUser(client.data.user))
     }
 
     /**
