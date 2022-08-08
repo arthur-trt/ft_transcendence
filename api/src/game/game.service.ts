@@ -104,7 +104,7 @@ export class GameService {
 	}
 
 	async findMatchByUser(user: User) {
-		const match: MatchHistory = await this.MatchRepo.findOne({
+		const match: MatchHistory[] = await this.MatchRepo.find({
 			where: [ { user1: user.id },
 					 { user2: user.id } ]
 		});
