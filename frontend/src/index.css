@@ -600,7 +600,7 @@ cursor: pointer;
   font-size: 11px;
 }
 
-.users-single-info .paperplane, .gamepad, .userxmark ,.userplus {
+.users-single-info .paperplane, .gamepad, .userxmark ,.userplus, .gameye {
   color: #1dd1a1;
   cursor: pointer;
   font-size: 13px;
@@ -615,11 +615,11 @@ cursor: pointer;
   border-radius: 5px;
 }
 
-.users-single-info .gamepad, .userslash, .userxmark {
+.users-single-info .gamepad, .userslash, .userxmark, .gameye {
   margin-left: 6px;
 }
 
-.users-single-info .paperplane:hover, .gamepad:hover, .userslash:hover, .userxmark:hover ,.userplus:hover {
+.users-single-info .paperplane:hover, .gamepad:hover, .userslash:hover, .userxmark:hover ,.userplus:hover, .gameye:hover {
   transition: all 0.5s ease-out;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
