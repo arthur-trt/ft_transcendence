@@ -462,9 +462,10 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('pending invite')
-	async inviteToPlay(client : Socket, FriendId: number, mode: number)
+	async inviteToPlay(client: Socket, data : {friendId : string, mode : string} )
 	{
-		await this.gameRelayService.pendingInvite(client, FriendId, mode);
+		console.log("pending invite")
+		await this.gameRelayService.pendingInvite(client, data);
 	}
 
 	/**
