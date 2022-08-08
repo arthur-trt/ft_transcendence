@@ -434,8 +434,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('joinGame')
-	async joinGame(client : Socket, playerId, mode) {
-		await this.gameRelayService.joinGame(client, playerId, mode)
+	async joinGame(client: Socket, data : {friendId : string, mode : string} ) {
+		await this.gameRelayService.joinGame(client, data)
 	}
 
 	@UseGuards(WsJwtAuthGuard)

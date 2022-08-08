@@ -96,12 +96,13 @@ export class GameRelayService {
      * @param mode
      */
     @UseGuards(WsJwtAuthGuard)
-    async joinGame(client: Socket, friendId, mode) {
-        const playerSocket = await this.chatservice.findSocketId(friendId);
+    async joinGame(client: Socket, data : {friendId : string, mode : string} ) {
+        const friend = await this.userService.getUserByIdentifier(data.friendId)
+        const playerSocket = await this.chatservice.findSocketId(friend);
         this.players.add(client);
         this.players.add(playerSocket);
         console.log("starting matchWithFriend");
-        this.startMatch(this.players, mode);   
+        this.startMatch(this.players, data.mode);   
     }
     
     /**
