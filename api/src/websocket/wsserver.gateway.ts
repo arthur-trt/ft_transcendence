@@ -81,8 +81,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		this.connectService.handleConnection(client);
 	}
 
-	afterInit() {
+	async afterInit() {
 		this.logger.log("Start listenning");
+		await this.chatService.init();
 	}
 
 	/**
@@ -218,7 +219,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	}
 
 	@SubscribeMessage('muteUser')
-	@UsePipes(ValidationPipe) 
+	@UsePipes(ValidationPipe)
 	async onMuteUser(client: Socket, data : muteUserDto) {
 		await this.chatService.mute(client, data);
 	}
@@ -476,6 +477,14 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('tab is inactive')
 	async changingTab(client : Socket)
 	{
+		await this.gameRelayService.getOngoingMatches();
+	}
+
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('WatchGame')
+	async watchGame(client: Socket, gameId)
+	{
+		await this.gameRelayService.watchGame(client, gameId);
 		await this.gameRelayService.changeTab(client);
 	}
 
@@ -543,7 +552,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		//console.log("MoveDOWN " + client.id);
 		await this.gameRelayService.MoveDown(client);
 	}
-	
+
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('StopMove')
 	async StopMove(client : Socket)
@@ -551,4 +560,5 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		//console.log("STOPMove " + client.id);
 		await this.gameRelayService.StopMove(client);
 	}
+
 }
