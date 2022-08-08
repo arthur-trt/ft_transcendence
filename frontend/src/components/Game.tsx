@@ -9,7 +9,7 @@ document.addEventListener("visibilitychange", event =>{
   } else {
     console.log("tab is active")
   }
-}), {once : true};
+}, {once : true});
 
 export default function Game() {
   // DEFINE TYPE
@@ -199,16 +199,17 @@ export default function Game() {
       socketi.off('set_names');
     }
 
-  // Wait for context to be ready.
-  // useEffect(() => {
-  //   if (canvas && ctx)
-  //   {
-  //       ctx.fillStyle = "BLACK";
-  //       ctx.font = "48px serif";
-  //       ctx.textAlign = "center"
-  //       ctx.fillText("Cliquez ici pour jouer !", canvas.width / 2, canvas.height / 2);
-  //   }
-  // }, [ctx])
+  //Wait for context to be ready.
+  useEffect(() => {
+    if (canvas && ctx)
+    {
+      const fontSize = (canvas.width / 20).toString();
+        ctx.fillStyle = "BLACK";
+        ctx.font = fontSize + "px serif";
+        ctx.textAlign = "center"
+        ctx.fillText("En attente de l'adversaire !", canvas.width / 2, canvas.height / 2);
+    }
+  }, [ctx])
 
   let i = 0;
   let inter : any;
@@ -216,8 +217,11 @@ export default function Game() {
   useEffect(() => {
     if (canvas && ctx)
     {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const fontSize = (canvas.width / 20).toString();
+      console.log("canvas width = " + canvas.width + " fontSize = " + fontSize);
       ctx.fillStyle = "RED";
-      ctx.font = "48px serif";
+      ctx.font = fontSize + "px serif";
       ctx.textAlign = "center"
       ctx.fillText("Le jeu va démarrer dans 4 secondes !", canvas.width / 2, canvas.height / 2);
       inter = setInterval(count_function, 1000);
@@ -405,15 +409,14 @@ export default function Game() {
 
   function render_game_end(winner : boolean, canvas : any)
   {
-    //console.log("rener_game_end");
     const ctx = canvas.getContext("2d");
     if (ctx) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(imgRef.current, canvas.width * 0.35, canvas.height * 0.3, canvas.width * 0.3, canvas.height * 0.6);
       ctx.fillStyle = '#1dd1a1';
-      ctx.font = "30px serif";
+      let fontSize = (canvas.width / 20).toString();
+      ctx.font = fontSize + "px serif";
       ctx.fillText(P1score + " - " + P2score, canvas.width * 0.5, canvas.height * 0.25);
-      ctx.font = "48px serif";
 
       if(winner === true) //I won
       {

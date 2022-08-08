@@ -140,10 +140,13 @@ export class GameRelayService {
         {
             const user1 = await this.chatservice.findUserbySocket(this.player1.socket.id);
             const user2 = await this.chatservice.findUserbySocket(this.player2.socket.id);
+            //console.log("bonjour");
             if (!this.gateway.activeUsers.has(user1))
                 return 1
             else if (!this.gateway.activeUsers.has(user2))
                 return 2;
+            else
+                return 0;
         }
      
     async startMatch(players, mode) {
@@ -168,10 +171,8 @@ export class GameRelayService {
         if (mode == 2)
         this.isBabyPong = true;
         this.gateway.server.to(Match.id).emit('game_countdownStart', this.isBabyPong);
-        this.match.id = Match.id;
-        
+        this.match.id = Match.id;   
     }
-
 
     async start_gameloop()
     {
@@ -203,19 +204,45 @@ export class GameRelayService {
         
     }
     
+    async set_winner(winner : number) {
+        if (winner == 2)
+        {
+            await this.end_game();
+            console.log("P2 WINS");
+            this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
+            this.gateway.server.to(this.player2.socket.id).emit('game_end', true);
+        }
+        else if (winner == 1)
+        {
+            await this.end_game();
+            console.log("P1 WINS");
+            this.gateway.server.to(this.player1.socket.id).emit('game_end', true);
+            this.gateway.server.to(this.player2.socket.id).emit('game_end', false);
+        }
+    }
+
+
     @UseGuards(WsJwtAuthGuard)
     async loop() {
         if (this.ball && this.player1 && this.player2) {
+            const quit = await this.handleDisconnect();
+            if (quit == 1)
+            {
+                this.set_winner(2);
+                return ;
+            }
+            else if (quit == 2)
+            {
+                this.set_winner(1);
+                return;
+            }
+
             // change the score of players, if the ball goes to the left "ball.x<0" p2 win, else if "ball.x > canvas.width" the p1 win
             if (this.ball.x - this.ball.radius < 0) {
                 this.p2_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', false);
-                if (this.p2_score >= VICTORY || await this.handleDisconnect() == 1) {
-                    await this.end_game();
-                    console.log("P2 WINS");
-                    this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
-                    this.gateway.server.to(this.player2.socket.id).emit('game_end', true);
-                    //this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
+                if (this.p2_score >= VICTORY) /*|| await this.handleDisconnect() == 1)*/ {
+                    this.set_winner(2);
                     return;
                 }
                 else
@@ -224,12 +251,8 @@ export class GameRelayService {
             else if (this.ball.x + this.ball.radius > 200) {
                 this.p1_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', true);
-                if (this.p1_score >= VICTORY || await this.handleDisconnect() == 2) {
-                    await this.end_game();
-                    console.log("P1 WINS");
-                    this.gateway.server.to(this.player1.socket.id).emit('game_end', true);
-                    this.gateway.server.to(this.player2.socket.id).emit('game_end', false);
-                    //this.gateway.server.to(this.match.id).emit('game_position', this.dataT);
+                if (this.p1_score >= VICTORY) /* || await this.handleDisconnect() == 2)*/ {
+                    this.set_winner(1);
                     return;
                 }
                 else

@@ -500,9 +500,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	  {
 		  await this.gameRelayService.sendAchievements(client);
 	  }
-  
-
-
 
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('MoveUP2')
