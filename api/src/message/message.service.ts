@@ -32,6 +32,7 @@ export class MessageService {
 	 */
 	public async sendMessageToChannel(chanIdentifier : string, user : User, msg : string) //: Promise<Channel>
 	{
+		console.log("senfding " + msg);
 		const channel : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier);
 		if (channel.mutedId.includes(user.id))
 			throw (new HttpException('You are mute and cannot send message to channel.', HttpStatus.FORBIDDEN))

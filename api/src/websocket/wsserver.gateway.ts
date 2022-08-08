@@ -81,8 +81,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		this.connectService.handleConnection(client);
 	}
 
-	afterInit() {
+	async afterInit() {
 		this.logger.log("Start listenning");
+		await this.chatService.init();
 	}
 
 	/**
@@ -218,7 +219,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	}
 
 	@SubscribeMessage('muteUser')
-	@UsePipes(ValidationPipe) 
+	@UsePipes(ValidationPipe)
 	async onMuteUser(client: Socket, data : muteUserDto) {
 		await this.chatService.mute(client, data);
 	}
@@ -462,7 +463,7 @@ s
 	{
 		await this.gameRelayService.getOngoingMatches();
 	}
-	
+
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('WatchGame')
 	async watchGame(client: Socket, gameId)
@@ -503,5 +504,5 @@ s
 	{
 		await this.gameRelayService.pendingInvite(client, FriendId, mode);
 	}
-	
+
 }
