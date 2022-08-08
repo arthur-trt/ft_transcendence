@@ -72,6 +72,8 @@ export default function Channels() {
 
   // GAME
   const [activesmatches, setActivesMatches] = useState<any>([]);
+  const [gamerequest, setGameRequest] = useState("");
+  const [gamemode, setGameMode] = useState(0);
 
   // IF THE ROUTE CHANGE
   useEffect(() => {
@@ -131,15 +133,12 @@ export default function Channels() {
       socket.on('error', (msg: any) => {
 			  alert(msg.event);
       });
-      socket.on('accept invite', (msg: any) => {
-        console.log("on a reçu une invitation");
+      socket.on('accept invite', (id: string, mode:number) => {
+        console.log(id);
+        console.log(mode);
+        setGameRequest(id);
+        setGameMode(mode);
       });
-      socket.on('accept invite', (msg: any) => {
-      console.log("accept invite");
-			//alert(msg.event);
-      });
-      
-
 
     }, []);
 
@@ -231,6 +230,11 @@ export default function Channels() {
     setChanName(e.currentTarget.id);
     setprivMsgChat(1);
   }
+  function handleAcceptGame() {
+    socket.emit('joinGame', {friendId:gamerequest, mode:gamemode});
+    navigate('/game');
+  }
+
 
   function ChanStatus(i: number) {
     if (data[i]?.private === false) {
@@ -428,6 +432,21 @@ export default function Channels() {
         </div>);
         i++;
       }
+      // GAME REQUEST
+      if (gamerequest)
+      {
+      indents.push(<div className='friendsrequest-single' key={i + 112}>
+      <div className='friendsrequest-single-img'>
+        {/* <img src={friendsrequest[i].sender.avatar_url} alt="friends requests"></img> */}
+        <img src="bplogo.png"></img>
+      </div>
+      <div className='friendsrequest-single-name'>
+        <p>{gamerequest}</p>
+      </div>
+      <div className='friendsrequest-single-button'>
+        <button onClick={handleAcceptGame}>Accept</button>
+      </div>
+    </div>);}
     }
 
     return indents;
