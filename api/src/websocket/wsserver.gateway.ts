@@ -551,4 +551,4 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		//console.log("STOPMove " + client.id);
 		await this.gameRelayService.StopMove(client);
 	}
-
+}
