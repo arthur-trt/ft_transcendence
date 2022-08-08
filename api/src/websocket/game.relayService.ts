@@ -162,12 +162,13 @@ export class GameRelayService {
         players.clear();
         console.log(this.players.size)
         const Match = await this.gameService.createMatch(first.data.user, second.data.user);
+        this.gateway.server.emit('ActivesMatches');
         first.join(Match.id);
         second.join(Match.id);
         this.MatchRooms.push(Match.id);
         this.initPositions();
         if (mode == 2)
-        this.isBabyPong = true;
+            this.isBabyPong = true;
         this.gateway.server.to(Match.id).emit('game_countdownStart', this.isBabyPong);
         this.match.id = Match.id;
         
@@ -201,6 +202,7 @@ export class GameRelayService {
         console.log("player2 left the room")
         this.players_ready = 0;
         await this.gameService.endMatch({ id: this.match.id, scoreUser1: this.p1_score, scoreUser2: this.p2_score })
+        this.gateway.server.emit('ActivesMatches');
         
     }
     
