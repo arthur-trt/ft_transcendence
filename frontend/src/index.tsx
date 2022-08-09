@@ -21,10 +21,11 @@ export const socketo = io();
 export let dataGR: any = [];
 
       socketo.on('accept invite', (id: string, mode:number) => {
+        console.log("INVITE");
         let i = 0;
         while (i < dataGR?.length)
         {
-          if (dataGR[i].id !== id)
+          if (dataGR[i].id !== id || dataGR[i].id === id && dataGR[i].state === 1)
             dataGR.push({id:id, mode:mode, state:0});
           i++;
         }
