@@ -84,12 +84,15 @@ export class ConnectService {
 	 * @param client client who disconnected
 	 */
 	async handleDisconnect(client: Socket) {
-		for (const entries of this.gateway.activeUsers.keys())
+		if (client.data.user)
 		{
-			if (entries.id == client.data.user.id)
+			for (const entries of this.gateway.activeUsers.keys())
 			{
-				this.gateway.activeUsers.delete(entries);
-				break;
+				if (entries.id == client.data.user.id)
+				{
+					this.gateway.activeUsers.delete(entries);
+					break;
+				}
 			}
 		}
 		this.gateway.activeUsers.forEach((socket: Socket) => {
