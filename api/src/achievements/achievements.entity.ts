@@ -24,6 +24,6 @@ export class Achievements extends BaseEntity
 	@Column({
 		type: 'text',
 	})
-	@Column({ default: []})
+	@Column()
 	achievement_list: Achievements_types;
 }

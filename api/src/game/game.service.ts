@@ -128,6 +128,7 @@ export class GameService {
 		if (user.wonMatches == 1)
 		{
 			this.addAchievement(user, Achievements_types.FIRST);
+	
 		}
 		else if (user.wonMatches == user.lostMatches)
 		{
@@ -145,7 +146,9 @@ export class GameService {
 
 	async addAchievement(user: User , achievement: Achievements_types)
 	{
-		//if (!this.achievementsService.hasAchievement(achievement, user))
-		console.log(await this.achievementsService.createAchievements(user, achievement));
+		// if (!this.achievementsService.hasAchievement(achievement, user))
+		// 
+		console.log(achievement)
+		await this.achievementsService.createAchievements(user, achievement);
 	}
 }

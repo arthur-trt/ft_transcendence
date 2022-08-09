@@ -1,5 +1,5 @@
 
-import { forwardRef, Inject, Injectable, UseGuards} from '@nestjs/common';
+import { ConsoleLogger, forwardRef, Inject, Injectable, UseGuards} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
@@ -125,13 +125,11 @@ export class GameRelayService {
       @UseGuards(WsJwtAuthGuard)
       async changeTab(client: Socket)
       {
-        //console.log(client.data.user.name, "changed tab")
-        if (client.data.user.name == this.names.p1_name)
-            return 1;
-        else if (client.data.user.name == this.names.p2_name)
-            return 2;
-        }
-        
+        if (client == this.player1.socket)
+            this.set_winner(2);
+        else if (client == this.player2.socket)
+            this.set_winner(1);
+      }
         
         /**
          * @brief Check if user is disconnected
@@ -154,7 +152,9 @@ export class GameRelayService {
         const [first] = players;
         const [, second] = players;
         this.player1.socket = first;
+        this.player2.active = true;
         this.player2.socket = second;
+        this.player2.active = true;
         this.player1_pad2.socket = first;
         this.player2_pad2.socket = second;
         this.names.p1_name = this.player1.socket.data.user.name;
@@ -233,13 +233,15 @@ export class GameRelayService {
     async loop() {
         if (this.ball && this.player1 && this.player2) {
             const quit = await this.handleDisconnect();
-            if (quit == 1)
+            if (quit == 1 || this.player1.active == false)
             {
+                console.log(this.player1.active)
                 this.set_winner(2);
                 return ;
             }
-            else if (quit == 2)
+            else if (quit == 2 || this.player2.active == false)
             {
+                console.log(this.player2.active)
                 this.set_winner(1);
                 return;
             }

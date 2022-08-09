@@ -1,15 +1,9 @@
 //import { computeHeadingLevel } from '@testing-library/react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect} from 'react';
+
+import { useLocation } from "react-router-dom";
 
 import { socketo } from '..';
-
-document.addEventListener("visibilitychange", event =>{
-  if (document.visibilityState === "hidden") {
-    socketo.emit('tab is inactive')
-  } else {
-    console.log("tab is active")
-  }
-}, {once : true});
 
 export default function Game() {
   // DEFINE TYPE
@@ -20,7 +14,8 @@ export default function Game() {
     height: number,
     color: string
   }
-
+  const location = useLocation();
+  
   type ballT = {
     x: number,
     y: number,
@@ -246,6 +241,10 @@ export default function Game() {
     else
       i++;
   }
+  useEffect(() => {
+    socketo.emit('changement of tab')
+    console.log("change tab")
+  }, [location, socket]);
 
   useEffect(() => {
     console.log("useEffect/game_start " + gameStart);
