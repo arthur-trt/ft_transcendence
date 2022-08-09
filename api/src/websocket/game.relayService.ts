@@ -69,6 +69,7 @@ export class GameRelayService {
     protected isBabyPong = false;
 
 
+
     /*  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
         ██░▄▀▄░█░▄▄▀█▄▄░▄▄██░▄▄▀██░██░██░▄▀▄░█░▄▄▀██░█▀▄█▄░▄██░▀██░██░▄▄░
         ██░█░█░█░▀▀░███░████░█████░▄▄░██░█░█░█░▀▀░██░▄▀███░███░█░█░██░█▀▀
@@ -125,11 +126,10 @@ export class GameRelayService {
       @UseGuards(WsJwtAuthGuard)
       async changeTab(client: Socket)
       {
-        //console.log(client.data.user.name, "changed tab")
         if (client.data.user.name == this.names.p1_name)
-            return 1;
+            this.player1.active = false;
         else if (client.data.user.name == this.names.p2_name)
-            return 2;
+            this.player2.active = false;
         }
         
         
@@ -151,7 +151,9 @@ export class GameRelayService {
         const [first] = players;
         const [, second] = players;
         this.player1.socket = first;
+        this.player1.active = true;
         this.player2.socket = second;
+        this.player2.active = true;
         this.player1_pad2.socket = first;
         this.player2_pad2.socket = second;
         this.names.p1_name = this.player1.socket.data.user.name;
@@ -213,7 +215,7 @@ export class GameRelayService {
             if (this.ball.x - this.ball.radius < 0) {
                 this.p2_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', false);
-                if (this.p2_score >= VICTORY || await this.handleDisconnect() == 1) {
+                if (this.p2_score >= VICTORY || await this.handleDisconnect() == 1 || this.player1.active == false) {
                     await this.end_game();
                     console.log("P2 WINS");
                     this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
@@ -227,7 +229,7 @@ export class GameRelayService {
             else if (this.ball.x + this.ball.radius > 200) {
                 this.p1_score++;
                 this.gateway.server.to(this.match.id).emit('update_score', true);
-                if (this.p1_score >= VICTORY || await this.handleDisconnect() == 2) {
+                if (this.p1_score >= VICTORY || await this.handleDisconnect() == 2 || this.player2.active == false) {
                     await this.end_game();
                     console.log("P1 WINS");
                     this.gateway.server.to(this.player1.socket.id).emit('game_end', true);
@@ -514,4 +516,5 @@ export class GameRelayService {
         this.gateway.server.to(client.id).emit('Achievements', await this.achievementService.getAchievements(user));
         console.log(await this.achievementService.getAchievements(user));
     }
+
 }
