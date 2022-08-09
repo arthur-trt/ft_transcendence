@@ -1,15 +1,7 @@
 //import { computeHeadingLevel } from '@testing-library/react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect} from 'react';
 
 import { socketo } from '..';
-
-document.addEventListener("visibilitychange", event =>{
-  if (document.visibilityState === "hidden") {
-    socketo.emit('tab is inactive')
-  } else {
-    console.log("tab is active")
-  }
-}), {once : true};
 
 export default function Game() {
   // DEFINE TYPE
@@ -69,6 +61,8 @@ export default function Game() {
   const [gameStart, setGameStart] = useState<boolean>(false);
   const [isBabyPong, setGameMode] = useState<boolean>(true);
 
+  // const location = useLocation();
+
   let [P1score, setP1Score] = useState(0);
   let [P2score, setP2Score] = useState(0);
 
@@ -76,9 +70,9 @@ export default function Game() {
   let [P2Name, setP2Name] = useState<string>("");
 
   // IF THE ROUTE CHANGE
-  useEffect(() => {
-    socket.emit("chan")
-  }, [location]);
+  // useEffect(() => {
+  //   socket.emit("chan")
+  // }, [location]);
 
   const [userLeft, setUserLeft] = useState<userT>({
     x: 10,
