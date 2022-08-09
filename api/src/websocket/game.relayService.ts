@@ -122,15 +122,16 @@ export class GameRelayService {
      * @brief Quit the game when user changes tab
      * @param client
      */
-      @UseGuards(WsJwtAuthGuard)
-      async changeTab(client: Socket)
-      {
-        //console.log(client.data.user.name, "changed tab")
+    @UseGuards(WsJwtAuthGuard)
+    async changeTab(client: Socket)
+    {
+        console.log(client.data.user.name, "changed tab")
         if (client.data.user.name == this.names.p1_name)
             return 1;
         else if (client.data.user.name == this.names.p2_name)
             return 2;
-        }
+    }
+        
         
         
         /**
@@ -232,17 +233,17 @@ export class GameRelayService {
     @UseGuards(WsJwtAuthGuard)
     async loop() {
         if (this.ball && this.player1 && this.player2) {
-            const quit = await this.handleDisconnect();
-            if (quit == 1)
-            {
-                this.set_winner(2);
-                return ;
-            }
-            else if (quit == 2)
-            {
-                this.set_winner(1);
-                return;
-            }
+            // const quit = await this.handleDisconnect();
+            // if (quit == 1)
+            // {
+            //     this.set_winner(2);
+            //     return ;
+            // }
+            // else if (quit == 2)
+            // {
+            //     this.set_winner(1);
+            //     return;
+            // }
 
             // change the score of players, if the ball goes to the left "ball.x<0" p2 win, else if "ball.x > canvas.width" the p1 win
             if (this.ball.x - this.ball.radius < 0) {
