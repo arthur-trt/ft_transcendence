@@ -27,7 +27,12 @@ export class ConnectService {
 
 	private all_users : User[];
 
-	async validateConnection(client) {
+	/**
+	 * Validate if the connection has a cookie and that this cookie is valid
+	 * @param client new socket
+	 * @returns user if everything correct
+	 */
+	async validateConnection(client: Socket): Promise<User> {
 		try {
 			const authCookies: string[] = client.handshake.headers.cookie.split('; ');
 			const authCookie: string[] = authCookies.filter(s => s.includes('Authentication='));
@@ -39,17 +44,20 @@ export class ConnectService {
 			const user: User = await this.userService.getUserByIdentifierLight(jwtPayload.sub);
 			return user;
 		} catch (err) {
-			console.log("Guard error :");
-			console.log(err.message);
+			return null;
 		}
 	}
 
+	/**
+	 * First function called when new connection is handle. Check if user is valid,
+	 * add in map `active_user` and send users lists to all client
+	 * @param client Socket of the client who try to connect
+	 * @returns nothing
+	 */
 	async handleConnection(client: Socket) {
 		const user = await this.validateConnection(client);
 		if (!user)
 			return this.handleDisconnect(client);
-
-
 		client.data.user = user;
 		this.all_users = await this.userService.getUsers();
 		if (!this.gateway.activeUsers.has(user)) {
@@ -71,20 +79,18 @@ export class ConnectService {
 
 	}
 
-
+	/**
+	 * Remove client from map `active_user`
+	 * @param client client who disconnected
+	 */
 	async handleDisconnect(client: Socket) {
-		try {
-			for (const entries of this.gateway.activeUsers.keys())
+		for (const entries of this.gateway.activeUsers.keys())
+		{
+			if (entries.id == client.data.user.id)
 			{
-				if (entries.id == client.data.user.id)
-				{
-					this.gateway.activeUsers.delete(entries);
-					break;
-				}
+				this.gateway.activeUsers.delete(entries);
+				break;
 			}
-		}
-		catch (err) {
-			console.log("Don't know what happened");
 		}
 		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(

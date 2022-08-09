@@ -25,8 +25,8 @@ export class AchievementsService {
 			where: {
 				user: { id: user.id },
 			},
-			relations: ['user']
-		});
+			select:["achievement_list"],
+			});
 	}
 
 	public async hasAchievement(achievement: Achievements_types, user: User)

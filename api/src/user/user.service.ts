@@ -9,6 +9,7 @@ import { validate as isValidUUID } from 'uuid';
 import { ModifyUserDto } from 'src/dtos/user.dto';
 import * as bcrypt from 'bcrypt';
 
+
 @Injectable()
 export class UserService {
 
@@ -125,7 +126,10 @@ export class UserService {
 		user.name = changes.name;
 		user.avatar_url = changes.avatar_url;
 		user.fullname = changes.fullname;
-		return await this.userRepo.save(user);
+		return await this.userRepo.save(user)
+			.catch((err) => {
+				throw new HttpException("Cannot update user : " + err, HttpStatus.FORBIDDEN)
+			});
 	}
 
 	public async setTwoFactorAuthenticationSecret (user: User, secret: string)
