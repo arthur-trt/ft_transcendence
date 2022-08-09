@@ -468,17 +468,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		console.log("pending invite")
 		await this.gameRelayService.pendingInvite(client, data);
 	}
-	/**
-	 * @brief receive event that a player has changed tab
-	 * @param client
-	 */
-	@UseGuards(WsJwtAuthGuard)
-	@SubscribeMessage('changement of tab')
-	async changeTab(client: Socket )
-	{
-		console.log("tab has changed")
-		await this.gameRelayService.changeTab(client);
-	}
 
 
 	/**
