@@ -164,7 +164,6 @@ export class GameRelayService {
         players.clear();
         console.log(this.players.size)
         const Match = await this.gameService.createMatch(first.data.user, second.data.user);
-        this.gateway.server.emit('ActivesMatches');
         first.join(Match.id);
         second.join(Match.id);
         this.MatchRooms.push(Match.id);
@@ -179,6 +178,7 @@ export class GameRelayService {
 
     async start_gameloop()
     {
+        this.gateway.server.emit('ActivesMatches');
         if (this.players_ready == 1)
         {
             this.loop_stop = setInterval(() => this.loop(), 1000 / 60);

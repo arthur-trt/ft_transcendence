@@ -75,6 +75,11 @@ export default function Game() {
   let [P1Name, setP1Name] = useState<string>("");
   let [P2Name, setP2Name] = useState<string>("");
 
+  // IF THE ROUTE CHANGE
+  useEffect(() => {
+    socket.emit("chan")
+  }, [location]);
+
   const [userLeft, setUserLeft] = useState<userT>({
     x: 10,
     y: 0,
