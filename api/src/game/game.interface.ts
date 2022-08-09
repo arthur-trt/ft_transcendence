@@ -61,7 +61,6 @@ export interface Paddle {
     height : number;
     width : number;
     socket : Socket;
-    active: boolean;
 }
 
 export interface Names {
