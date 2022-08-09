@@ -53,13 +53,15 @@ export default function Profile() {
         socket.emit('get history');
         socket.emit('getUsers');
         socket.on('MatchHistory', (tab:any) => {
-            console.log(tab);
             setHistory(tab);
-          });
-          socket.on('listUsers', (tab: any) => {
-              setDatausers(tab);
-              console.log(tab);
-          });
+        });
+        socket.on('listUsers', (tab: any) => {
+            setDatausers(tab);
+        });
+        socket.emit('get achievements');
+        socket.on('achievements', (tab: any) => {
+            console.log(tab);
+        });
 
     }, []);
 
