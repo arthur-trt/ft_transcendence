@@ -125,31 +125,21 @@ export class GameService {
 
 	async checkForAchievements(user: User)
 	{
-		console.log("achievements !!!!!")
-		console.log(user.wonMatches)
-		const ladder = await this.ladder(); 
-		if (user.wonMatches > 1)
+		if (user.wonMatches == 1)
 		{
-			console.log("here")
 			this.addAchievement(user, Achievements_types.FIRST);
 		}
 		else if (user.wonMatches == user.lostMatches)
 		{
-			console.log("there")
-
 			this.addAchievement(user, Achievements_types.HALFHALF);
 		}
-		else if (user.wonMatches > 3 && user.lostMatches == 0)
+		else if (user.wonMatches < 3 && user.lostMatches == 0)
 		{
-			console.log("ther     e")
-			
 			this.addAchievement(user, Achievements_types.WINNER);
 		}
-		else if (user == ladder[0])  
+		else if (user.lostMatches > 3 && user.wonMatches == 0)
 		{
-			console.log("ther     eeeee")
-
-			this.addAchievement(user, Achievements_types.TOP1);
+			this.addAchievement(user, Achievements_types.LOSER);
 		}
 	}
 
