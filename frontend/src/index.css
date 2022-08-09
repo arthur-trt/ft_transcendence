@@ -775,6 +775,10 @@ margin-left: 5px;
   font-size: 10px;
 }
 
+.chat-message-info .robot {
+  margin-right: 5px;
+  font-size: 10px;
+}
 
 .chat-message p {
   margin: 0;
