@@ -209,21 +209,23 @@ export class GameRelayService {
         
     }
     
-    async set_winner(winner : number) {
+    async set_winner(winner : number) {  
+        //this.gateway.server.to(this.match.id).emit('game_end', true);
         if (winner == 2)
         {
-            await this.end_game();
             console.log("P2 WINS");
-            this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
-            this.gateway.server.to(this.player2.socket.id).emit('game_end', true);
+            //this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
+            this.gateway.server.to(this.match.id).emit('game_end', false);
+            //this.gateway.server.to(this.player2.socket.id).emit('game_end', true);
         }
         else if (winner == 1)
         {
-            await this.end_game();
             console.log("P1 WINS");
-            this.gateway.server.to(this.player1.socket.id).emit('game_end', true);
-            this.gateway.server.to(this.player2.socket.id).emit('game_end', false);
+            //this.gateway.server.to(this.player1.socket.id).emit('game_end', true);
+            this.gateway.server.to(this.match.id).emit('game_end', true);
+            //this.gateway.server.to(this.player2.socket.id).emit('game_end', false);
         }
+        await this.end_game();
     }
 
 

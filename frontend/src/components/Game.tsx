@@ -190,7 +190,7 @@ export default function Game() {
 
       socket.on('game_end', (res : boolean) => {
         kill_sockets(socket);
-        render_game_end(res, canvas);
+        render_game_end(res, canvas, P1Name, P2Name);
       })
     }, []);
 
@@ -405,7 +405,7 @@ export default function Game() {
     }
   }
 
-  function render_game_end(winner : boolean, canvas : any)
+  function render_game_end(winner : boolean, canvas : any, p1 : string, p2 : string)
   {
     const ctx = canvas.getContext("2d");
     if (ctx) {
@@ -418,13 +418,13 @@ export default function Game() {
 
       if(winner === true) //I won
       {
-        ctx.fillText("CONGRATULATIONS, YOU WON !", canvas.width * 0.5, canvas.height * 0.1);
-        ctx.drawImage(firstRef.current, canvas.width * 0.45, canvas.height * 0.45, canvas.width * 0.1, canvas.height * 0.1);
+        ctx.fillText(p1 + " WON !", canvas.width * 0.5, canvas.height * 0.1);
+        //ctx.drawImage(firstRef.current, canvas.width * 0.45, canvas.height * 0.45, canvas.width * 0.1, canvas.height * 0.1);
       }
       else //Opponent won
       {
-        ctx.fillText("MAYBE NEXT TIME... !", canvas.width * 0.5, canvas.height * 0.1);
-        ctx.drawImage(secondRef.current, canvas.width * 0.45, canvas.height * 0.45, canvas.width * 0.1, canvas.height * 0.1);
+        ctx.fillText(p2 + " WON !", canvas.width * 0.5, canvas.height * 0.1);
+        //ctx.drawImage(secondRef.current, canvas.width * 0.45, canvas.height * 0.45, canvas.width * 0.1, canvas.height * 0.1);
       }
     }
   }
