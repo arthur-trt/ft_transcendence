@@ -18,6 +18,19 @@ import Home from "./components/Home";
 import NotFound from "./components/NotFound";
 
 export const socketo = io();
+export let dataGR: any = [];
+
+      socketo.on('accept invite', (id: string, mode:number) => {
+        let i = 0;
+        while (i < dataGR?.length)
+        {
+          if (dataGR[i].id !== id)
+            dataGR.push({id:id, mode:mode, state:0});
+          i++;
+        }
+        if (dataGR?.length === 0)
+          dataGR.push({id:id, mode:mode, state:0});
+      });
 
 /**
  * Check if a cookie is present and if token is valid. Can't check every case, for exemple if
