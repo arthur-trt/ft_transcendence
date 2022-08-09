@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 import {socketo} from '../index';
-import Game from './Game';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 
 export default function Home() {
 
@@ -11,6 +9,7 @@ export default function Home() {
     const [users, setUsers] = useState<any>([]);
     const [friends, setFriends] = useState<any>([]);
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         const socket = socketo;
@@ -26,30 +25,22 @@ export default function Home() {
       }, []);
 
     const [next, setNext] = useState(0);
-    const [singleColor, setSingleColor] = useState("white");
-    const [doubleColor, setDoubleColor] = useState("white");
     const [mode, setMode] = useState(0);
-    const [error, setError] = useState("");
+
+    useEffect(() => {
+        setNext(0);
+        setMode(0);
+    }, [location]);
 
     function handleSingleMode() {
         setMode(1);
-        setSingleColor("#1dd1a1");
-        setDoubleColor("white");
+        setNext(2);
     }
 
     function handleDoubleMode() {
         setMode(2);
-        setSingleColor("white");
-        setDoubleColor("#1dd1a1");
+        setNext(2);
     }
-
-    function handleLook() {
-        if (!mode)
-            setError("YOU MUST SELECT A MODE");
-        else
-            setNext(2);
-    }
-
 
     function displayFriends(mode: number) {
         var indents:any = [];
@@ -69,7 +60,6 @@ export default function Home() {
                             <div className='home-search-single-friend' key={i}>
                                 <img src={friends?.friends[i].avatar_url} alt="avatar"></img>
                                 <h5>{friends?.friends[i].name}</h5>
-                                {/* <button id={friends?.friends[i].id} onClick={handleLaunchGameWithFriend}>PLAY</button> */}
                                 <button id={friends?.friends[i].id} onClick={sendingInvite}>PLAY</button>
                                 </div>
                         );
@@ -96,34 +86,19 @@ export default function Home() {
         console.log('sending invite')
     }
     function handleLaunchMatchMaking(mode: number) {
-        if (mode == 1)
+        if (mode === 1)
         {
             console.log("MODE SIMPLE");
             socket.emit('game_inQueue', mode);
             navigate('/game');
         }
-        else if (mode == 2)
+        else if (mode === 2)
         {
             console.log("MODESPECIAL");
             socket.emit('game_inQueue', mode);
             navigate('/game');
         }
     }
-    // let handleLaunchGameWithFriend = (e:any) =>
-    // {
-    //     if (mode == 1)
-    //     {
-    //         console.log("MODESOLO WITH FRIEND");
-    //         socket.emit('joinGame', e.currentTarget.id, mode);
-    //         navigate('/game');
-    //     }
-    //     else if (mode == 2)
-    //     {
-    //         console.log("MODESPECIAL WITH FRIEND");
-    //         socket.emit('joinGame', e.currentTarget.id, mode);
-    //         navigate('/game');
-    //     }
-    // }
 
     function displaySteps() {
         if (!next)
@@ -140,10 +115,8 @@ export default function Home() {
             return (
                 <div className='home-mode'>
                     <h2>SELECT YOUR GAME MODE</h2>
-                    <div className='home-mode-button'><button onClick={handleSingleMode} style={{backgroundColor : singleColor}}>SINGLE PALLET</button></div>
-                    <div className='home-mode-button'><button onClick={handleDoubleMode} style={{backgroundColor : doubleColor}}>DOUBLE PALLETS</button></div>
-                    <div className='home-look-button'><button onClick={handleLook}><FontAwesomeIcon icon={faMagnifyingGlass} className="glass"/>LOOK FOR A GAME</button></div>
-                    {error && <h5>{error}</h5>}
+                    <div className='home-mode-button'><button onClick={handleSingleMode}>SINGLE PALLET</button></div>
+                    <div className='home-mode-button'><button onClick={handleDoubleMode}>DOUBLE PALLETS</button></div>
                 </div>
             );
         }
