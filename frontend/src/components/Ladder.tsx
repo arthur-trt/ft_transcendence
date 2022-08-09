@@ -19,14 +19,15 @@ export default function Ladder() {
 
     while (i < ladder?.length)
     {
-     {ladder[i].name !== "chatBot" &&  indents.push(
+    if (ladder[i].name !== "chatBot")
+      indents.push(
             <div className='ladder-line' key={i}>
 				<div className='ladder-rank'><h5>#</h5>{i + 1}</div>
 				<div className="ladder-img"><img src={ladder[i].avatar_url} alt="avatar"></img></div>
                 <div className='ladder-name'>{ladder[i].name}</div>
                 <div className='ladder-victories'><h5>VICTORIES :&nbsp;</h5>{ladder[i].wonMatches}</div>
             </div>
-        );}
+        );
         i++;
     }
 
