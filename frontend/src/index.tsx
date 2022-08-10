@@ -43,25 +43,21 @@ export let dataGR: any = [];
  * @returns Don't know react magic again !
  */
 function RequireAuth({ children }: { children: JSX.Element }) {
-  const [cookies, setCookie] = useCookies();
+  const [cookies, ] = useCookies();
   let location = useLocation();
 
   if (!cookies.Authentication) {
-    console.log("1");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   const token: any = jwtDecode(cookies.Authentication)
   const dateNow = new Date();
   if (token.exp * 1000 < dateNow.getTime()) {
-    console.log("2");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   if (token.isSecondFactorAuthenticated === false && location.pathname !== '/2fa') {
-    console.log("3");
     return <Navigate to="/2fa" state={{ from: location }} replace />;
   }
   if (token.isSecondFactorAuthenticated === true && location.pathname === '/2fa') {
-    console.log("4");
     return <Navigate to="/" />;
   }
   return children;

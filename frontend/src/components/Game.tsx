@@ -1,8 +1,9 @@
 //import { computeHeadingLevel } from '@testing-library/react';
 import React, { useState, useEffect} from 'react';
 
-import { socketo } from '..';
+import { useLocation } from "react-router-dom";
 
+import { socketo } from '..';
 let name1:string;
 let name2:string;
 
@@ -15,7 +16,8 @@ export default function Game() {
     height: number,
     color: string
   }
-
+  const location = useLocation();
+  
   type ballT = {
     x: number,
     y: number,
@@ -245,6 +247,10 @@ export default function Game() {
     else
       i++;
   }
+  useEffect(() => {
+    socketo.emit('changement of tab')
+    console.log("change tab")
+  }, [location, socket]);
 
   useEffect(() => {
     console.log("useEffect/game_start " + gameStart);
