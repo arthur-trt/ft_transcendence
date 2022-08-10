@@ -1,5 +1,5 @@
 
-import { ConsoleLogger, forwardRef, Inject, Injectable, UseGuards} from '@nestjs/common';
+import { forwardRef, Inject, Injectable, UseGuards} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
@@ -82,8 +82,8 @@ export class GameRelayService {
      */
     @UseGuards(WsJwtAuthGuard)
     async getInQueue(client: Socket, mode) {
-        const [first] = this.players;
-        const [, second] = this.players;
+        // const [first] = this.players;
+        // const [, second] = this.players;
         if (!this.players.has(client))
             this.players.add(client);
         if (this.players.size == 2) {
@@ -134,16 +134,20 @@ export class GameRelayService {
       @UseGuards(WsJwtAuthGuard)
       async changeTab(client: Socket)
       {
-          //console.log("change tab")
-        if (client == this.player1.socket)
-        {
-            //console.log("p1 has disconnected")
-            this.set_winner(2);
-        }
-        else if (client == this.player2.socket)
-        {
-            //console.log("p2 has disconnected")
-            this.set_winner(1);
+        console.log("allo change tab");
+          if (this.players_ready == 2)
+          {
+            console.log("oui c'est moi");
+            if (client == this.player1.socket)
+            {
+                //console.log("p1 has disconnected")
+                this.set_winner(2);
+            }
+            else if (client == this.player2.socket)
+            {
+                //console.log("p2 has disconnected")
+                this.set_winner(1);
+            }
         }
       }
         
@@ -157,11 +161,17 @@ export class GameRelayService {
             const user2 = await this.chatservice.findUserbySocket(this.player2.socket.id);
             //console.log("bonjour");
             if (!this.gateway.activeUsers.has(user1))
-                return 1
+            {
+                this.set_winner(2);
+                return true;
+            }
             else if (!this.gateway.activeUsers.has(user2))
-                return 2;
+            {
+                this.set_winner(1);
+                return true;
+            }
             else
-                return 0;
+                return false;
         }
      
     async startMatch(players, mode) {
@@ -189,6 +199,7 @@ export class GameRelayService {
             this.isBabyPong = true;
         else if (mode == 1)
             this.isBabyPong = false;
+        //this.gateway.server.emit('ActivesMatches');
         this.gateway.server.to(Match.id).emit('game_countdownStart', this.isBabyPong);
         this.match.id = Match.id;   
     }
@@ -197,6 +208,8 @@ export class GameRelayService {
     {
         if (this.players_ready == 1)
         {
+            this.players_ready++;
+            this.gateway.server.emit('ActivesMatches');
             this.loop_stop = setInterval(() => this.loop(), 1000 / 60);
             console.log("inter = " + this.loop_stop);
         }
@@ -227,16 +240,12 @@ export class GameRelayService {
         if (winner == 2)
         {
             console.log("P2 WINS");
-            //this.gateway.server.to(this.player1.socket.id).emit('game_end', false);
             this.gateway.server.to(this.match.id).emit('game_end', false);
-            //this.gateway.server.to(this.player2.socket.id).emit('game_end', true);
         }
         else if (winner == 1)
         {
             console.log("P1 WINS");
-            //this.gateway.server.to(this.player1.socket.id).emit('game_end', true);
             this.gateway.server.to(this.match.id).emit('game_end', true);
-            //this.gateway.server.to(this.player2.socket.id).emit('game_end', false);
         }
         await this.end_game();
     }
@@ -246,16 +255,18 @@ export class GameRelayService {
     async loop() {
         if (this.ball && this.player1 && this.player2) {
             const quit = await this.handleDisconnect();
-            if (quit == 1 )
-            {
-                this.set_winner(2);
+            // if (quit == 1)
+            // {
+            //     this.set_winner(2);
+            //     return ;
+            // }
+            // else if (quit == 2)
+            // {
+            //     this.set_winner(1);
+            //     return;
+            // }
+            if (quit == true)
                 return ;
-            }
-            else if (quit == 2)
-            {
-                this.set_winner(1);
-                return;
-            }
 
             // change the score of players, if the ball goes to the left "ball.x<0" p2 win, else if "ball.x > canvas.width" the p1 win
             if (this.ball.x - this.ball.radius < 0) {
