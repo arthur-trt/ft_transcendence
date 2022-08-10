@@ -166,7 +166,6 @@ export class GameRelayService {
         players.clear();
         console.log(this.players.size)
         const Match = await this.gameService.createMatch(first.data.user, second.data.user);
-        this.gateway.server.emit('ActivesMatches');
         first.join(Match.id);
         second.join(Match.id);
         this.MatchRooms.push(Match.id);
@@ -175,6 +174,7 @@ export class GameRelayService {
             this.isBabyPong = true;
         else if (mode == 1)
             this.isBabyPong = false;
+        //this.gateway.server.emit('ActivesMatches');
         this.gateway.server.to(Match.id).emit('game_countdownStart', this.isBabyPong);
         this.match.id = Match.id;   
     }
@@ -183,6 +183,7 @@ export class GameRelayService {
     {
         if (this.players_ready == 1)
         {
+            this.gateway.server.emit('ActivesMatches');
             this.loop_stop = setInterval(() => this.loop(), 1000 / 60);
             console.log("inter = " + this.loop_stop);
         }
@@ -233,17 +234,17 @@ export class GameRelayService {
     @UseGuards(WsJwtAuthGuard)
     async loop() {
         if (this.ball && this.player1 && this.player2) {
-            // const quit = await this.handleDisconnect();
-            // if (quit == 1)
-            // {
-            //     this.set_winner(2);
-            //     return ;
-            // }
-            // else if (quit == 2)
-            // {
-            //     this.set_winner(1);
-            //     return;
-            // }
+            const quit = await this.handleDisconnect();
+            if (quit == 1)
+            {
+                this.set_winner(2);
+                return ;
+            }
+            else if (quit == 2)
+            {
+                this.set_winner(1);
+                return;
+            }
 
             // change the score of players, if the ball goes to the left "ball.x<0" p2 win, else if "ball.x > canvas.width" the p1 win
             if (this.ball.x - this.ball.radius < 0) {
