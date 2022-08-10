@@ -3,12 +3,9 @@ import React, { useState, useEffect} from 'react';
 
 import { useLocation } from "react-router-dom";
 
-<<<<<<< HEAD
 import { socketo } from '..';
-=======
 let name1:string;
 let name2:string;
->>>>>>> origin/main
 
 export default function Game() {
   // DEFINE TYPE
