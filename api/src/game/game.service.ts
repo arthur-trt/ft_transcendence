@@ -85,6 +85,8 @@ export class GameService {
 		loser.lostMatches += 1;
 		await this.UserRepo.save(winner);
 		await this.MatchRepo.save(endedMatch);
+		await this.checkForAchievements(winner);
+		await this.checkForAchievements(loser);
 		return await this.getCompleteMatchHistory();
 	}
 
@@ -123,35 +125,28 @@ export class GameService {
 
 	async checkForAchievements(user: User)
 	{
-		const ladder = await this.ladder(); 
-		if (user.wonMatches == 1)
+		if (user.wonMatches == user.lostMatches)
 		{
-			console.log("here")
-			this.achievementsService.createAchievements(user, Achievements_types.FIRST);
-		}
-		else if (user.wonMatches == user.lostMatches)
-		{
-			console.log("there")
-
 			this.addAchievement(user, Achievements_types.HALFHALF);
 		}
-		else if (user.wonMatches > 3 && user.lostMatches == 0)
+		else if (user.wonMatches == 1)
 		{
-			console.log("ther     e")
-			
+			this.addAchievement(user, Achievements_types.FIRST);
+	
+		}
+		else if (user.wonMatches == 3 && user.lostMatches == 0)
+		{
 			this.addAchievement(user, Achievements_types.WINNER);
 		}
-		else if (user == ladder[0])  
+		else if (user.lostMatches == 3 && user.wonMatches == 0)
 		{
-			console.log("ther     eeeee")
-
-			this.addAchievement(user, Achievements_types.TOP1);
+			this.addAchievement(user, Achievements_types.LOSER);
 		}
 	}
 
 	async addAchievement(user: User , achievement: Achievements_types)
 	{
-		//if (!this.achievementsService.hasAchievement(achievement, user))
-		console.log(this.achievementsService.createAchievements(user, achievement));
+		console.log(achievement)
+		await this.achievementsService.createAchievements(user, achievement);
 	}
 }

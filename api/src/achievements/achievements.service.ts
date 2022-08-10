@@ -14,7 +14,7 @@ export class AchievementsService {
 	{
 		await this.successRepo.save({
 			user: user,
-			achievement_name: type
+			achievement_list: type
 		});
 		return this.successRepo.find( { relations: ['user'] });
 	}
@@ -22,11 +22,11 @@ export class AchievementsService {
 	public async getAchievements(user: User)
 	{
 		return await this.successRepo.find({
+			select:["achievement_list"],
 			where: {
 				user: { id: user.id },
 			},
-			relations: ['user']
-		});
+			});
 	}
 
 	public async hasAchievement(achievement: Achievements_types, user: User)

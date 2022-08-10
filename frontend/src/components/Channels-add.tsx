@@ -19,10 +19,12 @@ import { faHandsHoldingCircle } from '@fortawesome/free-solid-svg-icons'
 import { faBan } from '@fortawesome/free-solid-svg-icons'
 import { faCommentSlash } from '@fortawesome/free-solid-svg-icons'
 import { faEye } from '@fortawesome/free-solid-svg-icons'
+import { faRobot } from '@fortawesome/free-solid-svg-icons'
 
 // SOCKET IMPORT FROM THE INDEX.TSX
 import { socketo } from '../index';
 import { useCookies } from 'react-cookie';
+import { dataGR } from '../index';
 
 // VARIABLE DECLARATIONS OUTSIDE THE CHANNELS FUNCTION
 let tmp: any[any];
@@ -45,6 +47,7 @@ export default function Channels() {
   const [datausers, setDatausers] = useState<any>([]);
   let BgColor = 'white';
 
+  
   // TEST FOR CHAT
   const [chanName, setChanName] = useState("");
   const [message, setMessage] = useState("");
@@ -53,7 +56,7 @@ export default function Channels() {
   const [DisplayChat, setDisplayChat] = useState(0);
   const [privMsgChat, setprivMsgChat] = useState(0);
   const [privTarget, setPrivTarget] = useState<any>([]);
-
+  
   // DISPLAY FRIENDS LIST
   const [switching, setSwitching] = useState(0);
   const [friends, setFriends] = useState<any>([]);
@@ -61,20 +64,19 @@ export default function Channels() {
   const [UsersBtnColor, setUsersBtnColor] = useState('#1dd1a1');
   const [FriendsBtnColor, setFriendsBtnColor] = useState('white');
   const [RequestsBtnColor, setRequestsBtnColor] = useState('white');
-
+  
   // CHANNEL CREATION
   const [publicChan, setPublicChan] = useState(2);
   const [passToJoin, setPassToJoin] = useState("");
   const [chanToJoin, setChanToJoin] = useState("");
-
+  
   // CHANOP
   const [chanOpPass, setChanOpPass] = useState("");
-
+  
   // GAME
   const [activesmatches, setActivesMatches] = useState<any>([]);
-  const [gamerequest, setGameRequest] = useState("");
-  const [gamemode, setGameMode] = useState(0);
-
+  let [rFlag, setRflag] = useState(0);
+  
   // IF THE ROUTE CHANGE
   useEffect(() => {
     setDisplayChat(0);
@@ -133,14 +135,34 @@ export default function Channels() {
       socket.on('error', (msg: any) => {
 			  alert(msg.event);
       });
-      socket.on('accept invite', (id: string, mode:number) => {
-        console.log(id);
-        console.log(mode);
-        setGameRequest(id);
-        setGameMode(mode);
+      socketo.on('accept invite', (id: string, mode:number) => {
+        setRflag(rFlag => rFlag + 1);
       });
-
+      
     }, []);
+
+  useEffect(() => {
+    let z = 0;
+    let flag = 0;
+    while (z < data?.length)
+    {
+      let w = 0;
+      while (w < data[z]?.bannedId?.length)
+      {
+        if (datame?.id === data[z]?.bannedId[w])
+          if (chanName === data[z]?.name)
+            setDisplayChat(0);
+        w++;
+      }
+      if (data[z].name === chanName)
+        flag = 1;
+
+      z++;
+    }
+    if (!flag)
+      setDisplayChat(0);
+  }, [data]);
+
 
   // FUNCTIONS TO HANDLE ACTIONS ON CHANNELS
   let handleCreate = (e: any) => {
@@ -230,9 +252,15 @@ export default function Channels() {
     setChanName(e.currentTarget.id);
     setprivMsgChat(1);
   }
-  function handleAcceptGame() {
-    socket.emit('joinGame', {friendId:gamerequest, mode:gamemode});
+  let handleAcceptGame = (e:any) => {
+    socket.emit('joinGame', {friendId: dataGR[parseInt(e.currentTarget.id)].id, mode: dataGR[parseInt(e.currentTarget.id)].mode});
+    dataGR.splice(parseInt(e.currentTarget.id), 1);
     navigate('/game');
+  }
+  let handleSendInvite = (e:any) =>
+  {
+      socket.emit(('pending invite'), {friendId: e.currentTarget.id, mode: 1})
+      navigate('/game');
   }
 
 
@@ -312,8 +340,10 @@ export default function Channels() {
     while (i < activesmatches?.length)
     {
       if (e.currentTarget.id === activesmatches[i]?.user1 || e.currentTarget.id === activesmatches[i]?.user2)
+      {
         socket.emit('WatchGame', activesmatches[i]?.id);
         navigate("/game");
+      }
       i++;
     }
   }
@@ -335,7 +365,7 @@ export default function Channels() {
       if (datausers[i]?.id === friends?.friends[j]?.id) {
         return (<div className='users-single-info-friends'>
                   <FontAwesomeIcon className='paperplane' icon={faPaperPlane} id={datausers[i]?.name} onClick={handleOpenPrivate} ></FontAwesomeIcon>
-                  {datausers[i]?.status === 'online' && <FontAwesomeIcon className='gamepad' icon={faGamepad} ></FontAwesomeIcon>}
+                  {datausers[i]?.status === 'online' && <FontAwesomeIcon className='gamepad' icon={faGamepad} id={datausers[i]?.id} onClick={handleSendInvite}></FontAwesomeIcon>}
                   {isBlocked(datausers[i]?.id) === 0 && <FontAwesomeIcon style={{color: '#1dd1a1'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleBlockFriend}></FontAwesomeIcon>}
                   {isBlocked(datausers[i]?.id) === 1 && <FontAwesomeIcon style={{color: 'red'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleUnBlockFriend}></FontAwesomeIcon>}
                   <FontAwesomeIcon className='userxmark' icon={faUserXmark} id={j.toString()} onClick={handleRemoveFriend} ></FontAwesomeIcon>
@@ -367,17 +397,19 @@ export default function Channels() {
         else if (datausers[i]?.status === 'offline')
           borderStatus = 'red';
 
-        indents.push(<div className="users-single" key={i}>
-          <div className='users-single-img'>
-            <Link to={profilelink}><img style={{ 'borderColor': borderStatus }} src={datausers[i]?.avatar_url} alt="users"></img></Link>
-          </div>
-          <div className='users-single-info'>
-            <h5>{datausers[i]?.name}</h5>
-            {displayButtonFriend(i)}
-          </div>
-        </div>);
-        i++;
-        borderStatus = 'white';
+        if (datausers[i]?.name !== "chatBot")
+          indents.push(
+          <div className="users-single" key={i}>
+            <div className='users-single-img'>
+              <Link to={profilelink}><img style={{ 'borderColor': borderStatus }} src={datausers[i]?.avatar_url} alt="users"></img></Link>
+            </div>
+            <div className='users-single-info'>
+              <h5>{datausers[i]?.name}</h5>
+              {displayButtonFriend(i)}
+            </div>
+          </div>);
+          i++;
+          borderStatus = 'white';
       }
     }
     if (switching === 1) {
@@ -402,7 +434,7 @@ export default function Channels() {
                 {/* {displayButtonFriend(i)} */}
                 <div className='users-single-info-friends'>
                   <FontAwesomeIcon className='paperplane' icon={faPaperPlane} id={datausers[i]?.name} onClick={handleOpenPrivate} ></FontAwesomeIcon>
-                  {datausers[i]?.status === 'online' && <FontAwesomeIcon className='gamepad' icon={faGamepad} ></FontAwesomeIcon>}
+                  {datausers[i]?.status === 'online' && <FontAwesomeIcon className='gamepad' icon={faGamepad} id={datausers[i]?.id} onClick={handleSendInvite}></FontAwesomeIcon>}
                   {isBlocked(datausers[i]?.id) === 0 && <FontAwesomeIcon style={{color: '#1dd1a1'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleBlockFriend}></FontAwesomeIcon>}
                   {isBlocked(datausers[i]?.id) === 1 && <FontAwesomeIcon style={{color: 'red'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleUnBlockFriend}></FontAwesomeIcon>}
                   <FontAwesomeIcon className='userxmark' icon={faUserXmark} id={j.toString()} onClick={handleRemoveFriend} ></FontAwesomeIcon>
@@ -434,20 +466,32 @@ export default function Channels() {
         i++;
       }
       // GAME REQUEST
-      if (gamerequest)
+      rFlag++;
+      i = 0;
+      let index = 0;
+      while (i < dataGR?.length)
       {
-      indents.push(<div className='friendsrequest-single' key={i + 112}>
-      <div className='friendsrequest-single-img'>
-        {/* <img src={friendsrequest[i].sender.avatar_url} alt="friends requests"></img> */}
-        <img src="bplogo.png"></img>
-      </div>
-      <div className='friendsrequest-single-name'>
-        <p>{gamerequest}</p>
-      </div>
-      <div className='friendsrequest-single-button'>
-        <button onClick={handleAcceptGame}>Accept</button>
-      </div>
-    </div>);}
+        let j = 0;
+        while(j < datausers?.length)
+        {
+          if (dataGR[i]?.id === datausers[j]?.id)
+            index = j;
+          j++;
+        }
+          indents.push(<div className='friendsrequest-single' key={i + 112}>
+            <div className='friendsrequest-single-img'>
+              <img src={datausers[index].avatar_url} alt="friends requests"></img>
+            </div>
+            <div className='friendsrequest-single-name'>
+              <p>{datausers[index].name}</p>
+            </div>
+            <div className='friendsrequest-single-button'>
+              <button id={i.toString()} onClick={handleAcceptGame}>Play</button>
+            </div>
+          </div>);
+        i++;
+        index = 0;
+      }
     }
 
     return indents;
@@ -519,7 +563,7 @@ export default function Channels() {
       {
         return (
           <div className='chat-chanOp'>
-            {isOnline(tmp.messages[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadchan"></FontAwesomeIcon>}
+            {isOnline(tmp.messages[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadchan" id={tmp.messages[i]?.sender.id} onClick={handleSendInvite}></FontAwesomeIcon>}
           </div>
         );
       }
@@ -527,7 +571,7 @@ export default function Channels() {
       {
         return (
           <div className='chat-chanOp'>
-            {isOnline(tmp.messages[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadchan"></FontAwesomeIcon>}
+            {isOnline(tmp.messages[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadchan" id={tmp.messages[i]?.sender.id} onClick={handleSendInvite}></FontAwesomeIcon>}
             <FontAwesomeIcon onClick={() => handleSetAdmin(tmp.name, tmp.messages[i]?.sender)} icon={faHandsHoldingCircle} className="handsholding"></FontAwesomeIcon>
             <FontAwesomeIcon onClick={() => handleBanUser(tmp.name, tmp.messages[i]?.sender)} icon={faBan} className="ban"></FontAwesomeIcon>
             <FontAwesomeIcon onClick={() => handleMuteUser(tmp.name, tmp.messages[i]?.sender)} icon={faCommentSlash} className="commentslash"></FontAwesomeIcon>
@@ -538,7 +582,7 @@ export default function Channels() {
     else {
       return (
         <div className='chat-chanOp'>
-          {isOnline(tmp.messages[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadchan"></FontAwesomeIcon>}
+          {isOnline(tmp.messages[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadchan" id={tmp.messages[i]?.sender.id} onClick={handleSendInvite}></FontAwesomeIcon>}
         </div>
       );
     }
@@ -572,12 +616,15 @@ export default function Channels() {
 
         if (datame.name === tmp.messages[i]?.sender.name)
           msgColor = 'lightskyblue';
+          if (tmp.messages[i]?.sender.name === "chatBot")
+            msgColor = '#ff7675';
 
         indents.push(<div className='chat-message' key={i}>
           <div className='chat-message-info'>
+          {tmp.messages[i]?.sender.name === "chatBot" && <FontAwesomeIcon icon={faRobot} className="robot"></FontAwesomeIcon>}
             <Link to={profilelink} style={{ textDecoration: 'none', color: 'black' }}><h5>{tmp.messages[i]?.sender.name}</h5></Link>
             <span>{tmp.messages[i]?.sent_at.substr(0, 8)}</span>
-            {displayChanOp(i, tmp)}
+            {tmp.messages[i]?.sender.name !== "chatBot" && displayChanOp(i, tmp)}
           </div>
           <p style={{ 'backgroundColor': msgColor }}>{tmp.messages[i]?.message}</p>
         </div>);
@@ -597,7 +644,7 @@ export default function Channels() {
           <div className='chat-message-info'>
             <Link to={profilelink} style={{ textDecoration: 'none', color: 'black' }}><h5>{tmp[i]?.sender.name}</h5></Link>
             <span>{tmp[i]?.sent_at.substr(0, 8)}</span>
-            {isOnline(tmp[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadpriv"></FontAwesomeIcon>}
+            {isOnline(tmp[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadpriv" id={tmp[i]?.sender.id} onClick={handleSendInvite} ></FontAwesomeIcon>}
           </div>
           <p style={{ 'backgroundColor': msgColor }}>{tmp[i]?.message}</p>
         </div>);

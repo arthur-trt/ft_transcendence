@@ -1,9 +1,9 @@
 import { User } from "src/user/user.entity";
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
 
 export enum Achievements_types {
-    TOP1 = "Top 1",
 	WINNER = "Winner - Won all matches",
+	LOSER = "Loser - Lost all matches",
 	FIRST = "First victory",
 	HALFHALF = "50/50 : Perfect balance between loss and success",
 	CHANNELLEADER = "Channel Leader - Is owner of at least three channels",
@@ -24,5 +24,6 @@ export class Achievements extends BaseEntity
 	@Column({
 		type: 'text',
 	})
-	achievement_name: Achievements_types;
+	@Column()
+	achievement_list: Achievements_types;
 }

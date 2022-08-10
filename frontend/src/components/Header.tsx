@@ -11,21 +11,23 @@ export const Header = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const getData = async () => {
-
-            const response = await fetch(
-                `/api/user/me`
-            );
-            if (response.ok) {
-                let actualData = await response.json();
-                setData(actualData);
-                localStorage.setItem(actualData.name, cookies.Authentication);
-            }
-            else
-            {
-                removeCookie('Authentication');
-                navigate('/login');
-            }
+        const getData = () => {
+            fetch(`/api/user/me`).then((response) => {
+                if (response.ok) {
+                    return response.json();
+                }
+                else {
+                    removeCookie('Authentication');
+                    navigate('/login');
+                    throw new Error('not cool man');
+                }
+            }).then((responseJson) => {
+                setData(responseJson);
+                // Debug function to remove
+                localStorage.setItem(responseJson.name, cookies.Authentication);
+            }).catch((err) => {
+                const mute = err;
+            })
         }
         getData()
     }, [])
@@ -37,7 +39,7 @@ export const Header = () => {
                 </div>
                 <div className="onglets">
                     <h3 style={{borderBottom: location==="/community" ? '3px solid #1dd1a1' : '', }}><Link to="/community" style={{ textDecoration: 'none', color: 'black' }}>COMMUNITY</Link></h3>
-                    <h3 style={{borderBottom: location==="/game" ? '3px solid #1dd1a1' : '', }}><Link to="/game" style={{ textDecoration: 'none', color: 'black' }}>GAME</Link></h3>
+                    {/* <h3 style={{borderBottom: location==="/game" ? '3px solid #1dd1a1' : '', }}><Link to="/game" style={{ textDecoration: 'none', color: 'black' }}>GAME</Link></h3> */}
                     <h3 style={{borderBottom: location==="/ladder" ? '3px solid #1dd1a1' : '', }}><Link to="/ladder" style={{ textDecoration: 'none', color: 'black' }}>LADDER</Link></h3>
                 </div>
                 <div className="info">

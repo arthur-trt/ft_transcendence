@@ -480,6 +480,17 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 {
 		 await this.gameRelayService.getMatchHistory(client);
 	 }
+	 /**
+	 * @brief get match history of a user
+	 * @param client 
+	 */
+	  @UseGuards(WsJwtAuthGuard)
+	  @SubscribeMessage('changement of tab')
+	  async changeTab(client : Socket)
+	  {
+		  console.log("change of tabbbbbbb")
+		  await this.gameRelayService.changeTab(client);
+	  }
 
 	 /**
 	 * @brief get achievements list of client
@@ -491,9 +502,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	  {
 		  await this.gameRelayService.sendAchievements(client);
 	  }
-  
-
-
 
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('MoveUP2')

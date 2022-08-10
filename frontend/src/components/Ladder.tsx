@@ -5,6 +5,7 @@ export default function Ladder() {
 	const [ladder, setLadder] = useState<any>([]);
     var indents : any = [];
     let i = 0;
+    let rank = 1;
 
 	useEffect(()  =>  {
 		const getData = async () => {
@@ -19,9 +20,10 @@ export default function Ladder() {
 
     while (i < ladder?.length)
     {
-        indents.push(
+    if (ladder[i].name !== "chatBot")
+      indents.push(
             <div className='ladder-line' key={i}>
-				<div className='ladder-rank'><h5>#</h5>{i + 1}</div>
+				<div className='ladder-rank'><h5>#</h5>{rank++}</div>
 				<div className="ladder-img"><img src={ladder[i].avatar_url} alt="avatar"></img></div>
                 <div className='ladder-name'>{ladder[i].name}</div>
                 <div className='ladder-victories'><h5>VICTORIES :&nbsp;</h5>{ladder[i].wonMatches}</div>

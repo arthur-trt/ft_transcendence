@@ -1,15 +1,11 @@
 //import { computeHeadingLevel } from '@testing-library/react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect} from 'react';
+
+import { useLocation } from "react-router-dom";
 
 import { socketo } from '..';
-
-document.addEventListener("visibilitychange", event =>{
-  if (document.visibilityState === "hidden") {
-    socketo.emit('tab is inactive')
-  } else {
-    console.log("tab is active")
-  }
-}), {once : true};
+let name1:string;
+let name2:string;
 
 export default function Game() {
   // DEFINE TYPE
@@ -20,7 +16,8 @@ export default function Game() {
     height: number,
     color: string
   }
-
+  const location = useLocation();
+  
   type ballT = {
     x: number,
     y: number,
@@ -67,7 +64,9 @@ export default function Game() {
   const [ctx, setCtx] = useState<any>();
   const [countdown, setCountdown] = useState<boolean>(false);
   const [gameStart, setGameStart] = useState<boolean>(false);
-  const [isBabyPong, setGameMode] = useState<boolean>(true);
+  let [isBabyPong, setGameMode] = useState<boolean>(true);
+
+  // const location = useLocation();
 
   let [P1score, setP1Score] = useState(0);
   let [P2score, setP2Score] = useState(0);
@@ -157,17 +156,23 @@ export default function Game() {
       socket.on('set_names', (n: nameT) => {
         setP1Name(n.p1_name);
         setP2Name(n.p2_name);
+        name1 = n.p1_name;
+        name2 = n.p2_name;
       });
+
+      socket.on('set_mode', (mode : boolean) => {
+        setGameMode(mode);
+      })
 
       socket.on('game_position', (pos: dataT) => {
         //console.log(canvas);
-        console.log("socket.on/game_position");
+        //console.log("socket.on/game_position");
         setData(adaptToCanvas(pos, canvas));
       });
 
       socket.on('game_countdownStart', (mode: boolean) => {
         setGameMode(mode);
-        console.log("socket.on/game_countdown");
+        console.log("socket.on/game_countdown, mode = " + mode);
         setCountdown(true);
       })
 
@@ -186,7 +191,7 @@ export default function Game() {
 
       socket.on('game_end', (res : boolean) => {
         kill_sockets(socket);
-        render_game_end(res, canvas);
+        render_game_end(res, canvas, P1Name, P2Name);
       })
     }, []);
 
@@ -199,16 +204,17 @@ export default function Game() {
       socketi.off('set_names');
     }
 
-  // Wait for context to be ready.
-  // useEffect(() => {
-  //   if (canvas && ctx)
-  //   {
-  //       ctx.fillStyle = "BLACK";
-  //       ctx.font = "48px serif";
-  //       ctx.textAlign = "center"
-  //       ctx.fillText("Cliquez ici pour jouer !", canvas.width / 2, canvas.height / 2);
-  //   }
-  // }, [ctx])
+  //Wait for context to be ready.
+  useEffect(() => {
+    if (canvas && ctx)
+    {
+      const fontSize = (canvas.width / 20).toString();
+        ctx.fillStyle = "BLACK";
+        ctx.font = fontSize + "px serif";
+        ctx.textAlign = "center"
+        ctx.fillText("En attente de l'adversaire !", canvas.width / 2, canvas.height / 2);
+    }
+  }, [ctx])
 
   let i = 0;
   let inter : any;
@@ -216,8 +222,11 @@ export default function Game() {
   useEffect(() => {
     if (canvas && ctx)
     {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const fontSize = (canvas.width / 20).toString();
+      console.log("canvas width = " + canvas.width + " fontSize = " + fontSize);
       ctx.fillStyle = "RED";
-      ctx.font = "48px serif";
+      ctx.font = fontSize + "px serif";
       ctx.textAlign = "center"
       ctx.fillText("Le jeu va démarrer dans 4 secondes !", canvas.width / 2, canvas.height / 2);
       inter = setInterval(count_function, 1000);
@@ -226,7 +235,7 @@ export default function Game() {
 
   function count_function()
   {
-    console.log("count");
+    //console.log("count");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillText("Le jeu va démarrer dans " + (3 - i) + " secondes !", canvas.width / 2, canvas.height / 2);
     if (i === 3)
@@ -238,6 +247,10 @@ export default function Game() {
     else
       i++;
   }
+  useEffect(() => {
+    socketo.emit('changement of tab')
+    console.log("change tab")
+  }, [location, socket]);
 
   useEffect(() => {
     console.log("useEffect/game_start " + gameStart);
@@ -294,30 +307,24 @@ export default function Game() {
   useEffect(() => {
     if (gameStart) {
       if (MoveUp === true) {
-        console.log("front MoveUp");
         socket.emit('MoveUp')
       }
       if (MoveDown === true) {
-        console.log("front MoveUDown");
         socket.emit('MoveDown')
       }
       if (MoveUp === false && MoveDown === false) {
         socket.emit('StopMove');
-        console.log("front STOP move");
       }
 
       if (isBabyPong === true)
       {
         if (Pad2_MoveUp === true) {
-          console.log("front Pad_2 MoveUp");
           socket.emit('MoveUP2')
         }
         if (Pad2_MoveDown === true) {
-          console.log("front Pad_2 MoveUDown");
           socket.emit('MoveDOWN2')
         }
         if (Pad2_MoveUp === false && Pad2_MoveDown === false) {
-          console.log("front Pad_2 STOP move");
           socket.emit('StopMove2');
         }
       }
@@ -403,28 +410,22 @@ export default function Game() {
     }
   }
 
-  function render_game_end(winner : boolean, canvas : any)
+  function render_game_end(winner : boolean, canvas : any, p1 : string, p2 : string)
   {
-    //console.log("rener_game_end");
     const ctx = canvas.getContext("2d");
     if (ctx) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(imgRef.current, canvas.width * 0.35, canvas.height * 0.3, canvas.width * 0.3, canvas.height * 0.6);
       ctx.fillStyle = '#1dd1a1';
-      ctx.font = "30px serif";
+      let fontSize = (canvas.width / 20).toString();
+      ctx.font = fontSize + "px serif";
       ctx.fillText(P1score + " - " + P2score, canvas.width * 0.5, canvas.height * 0.25);
-      ctx.font = "48px serif";
 
       if(winner === true) //I won
-      {
-        ctx.fillText("CONGRATULATIONS, YOU WON !", canvas.width * 0.5, canvas.height * 0.1);
-        ctx.drawImage(firstRef.current, canvas.width * 0.45, canvas.height * 0.45, canvas.width * 0.1, canvas.height * 0.1);
-      }
+        ctx.fillText(name1.toUpperCase() + " WON !", canvas.width * 0.5, canvas.height * 0.1);
       else //Opponent won
-      {
-        ctx.fillText("MAYBE NEXT TIME... !", canvas.width * 0.5, canvas.height * 0.1);
-        ctx.drawImage(secondRef.current, canvas.width * 0.45, canvas.height * 0.45, canvas.width * 0.1, canvas.height * 0.1);
-      }
+        ctx.fillText(name2.toUpperCase() + " WON !", canvas.width * 0.5, canvas.height * 0.1);
+
     }
   }
 
