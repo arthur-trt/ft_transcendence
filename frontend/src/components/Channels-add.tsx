@@ -154,9 +154,13 @@ export default function Channels() {
             setDisplayChat(0);
         w++;
       }
-      if (data[z].name === chanName)
+      z++;
+    }
+    z = 0;
+    while (z < data?.length)
+    {
+      if (chanName === data[z]?.name)
         flag = 1;
-
       z++;
     }
     if (!flag)
@@ -200,8 +204,6 @@ export default function Channels() {
   }
   let handleDelete = (e: any) => {
     socket.emit('deleteRoom', e.currentTarget.id);
-    if (chanName === e.currentTarget.id)
-      setDisplayChat(0);
   }
   let handleLeave = (e: any) => {
     socket.emit('leaveRoom', e.currentTarget.id);
