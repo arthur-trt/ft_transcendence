@@ -3,7 +3,12 @@ import React, { useState, useEffect} from 'react';
 
 import { useLocation } from "react-router-dom";
 
+<<<<<<< HEAD
 import { socketo } from '..';
+=======
+let name1:string;
+let name2:string;
+>>>>>>> origin/main
 
 export default function Game() {
   // DEFINE TYPE
@@ -63,6 +68,8 @@ export default function Game() {
   const [countdown, setCountdown] = useState<boolean>(false);
   const [gameStart, setGameStart] = useState<boolean>(false);
   let [isBabyPong, setGameMode] = useState<boolean>(true);
+
+  // const location = useLocation();
 
   let [P1score, setP1Score] = useState(0);
   let [P2score, setP2Score] = useState(0);
@@ -152,6 +159,8 @@ export default function Game() {
       socket.on('set_names', (n: nameT) => {
         setP1Name(n.p1_name);
         setP2Name(n.p2_name);
+        name1 = n.p1_name;
+        name2 = n.p2_name;
       });
 
       socket.on('set_mode', (mode : boolean) => {
@@ -416,15 +425,10 @@ export default function Game() {
       ctx.fillText(P1score + " - " + P2score, canvas.width * 0.5, canvas.height * 0.25);
 
       if(winner === true) //I won
-      {
-        ctx.fillText(p1 + " WON !", canvas.width * 0.5, canvas.height * 0.1);
-        //ctx.drawImage(firstRef.current, canvas.width * 0.45, canvas.height * 0.45, canvas.width * 0.1, canvas.height * 0.1);
-      }
+        ctx.fillText(name1.toUpperCase() + " WON !", canvas.width * 0.5, canvas.height * 0.1);
       else //Opponent won
-      {
-        ctx.fillText(p2 + " WON !", canvas.width * 0.5, canvas.height * 0.1);
-        //ctx.drawImage(secondRef.current, canvas.width * 0.45, canvas.height * 0.45, canvas.width * 0.1, canvas.height * 0.1);
-      }
+        ctx.fillText(name2.toUpperCase() + " WON !", canvas.width * 0.5, canvas.height * 0.1);
+
     }
   }
 

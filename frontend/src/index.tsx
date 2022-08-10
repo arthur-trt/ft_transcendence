@@ -21,10 +21,11 @@ export const socketo = io();
 export let dataGR: any = [];
 
       socketo.on('accept invite', (id: string, mode:number) => {
+        console.log("INVITE");
         let i = 0;
         while (i < dataGR?.length)
         {
-          if (dataGR[i].id !== id)
+          if (dataGR[i].id !== id || dataGR[i].id === id && dataGR[i].state === 1)
             dataGR.push({id:id, mode:mode, state:0});
           i++;
         }
@@ -40,25 +41,21 @@ export let dataGR: any = [];
  * @returns Don't know react magic again !
  */
 function RequireAuth({ children }: { children: JSX.Element }) {
-  const [cookies, setCookie] = useCookies();
+  const [cookies, ] = useCookies();
   let location = useLocation();
 
   if (!cookies.Authentication) {
-    console.log("1");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   const token: any = jwtDecode(cookies.Authentication)
   const dateNow = new Date();
   if (token.exp * 1000 < dateNow.getTime()) {
-    console.log("2");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   if (token.isSecondFactorAuthenticated === false && location.pathname !== '/2fa') {
-    console.log("3");
     return <Navigate to="/2fa" state={{ from: location }} replace />;
   }
   if (token.isSecondFactorAuthenticated === true && location.pathname === '/2fa') {
-    console.log("4");
     return <Navigate to="/" />;
   }
   return children;

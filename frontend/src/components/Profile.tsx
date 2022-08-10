@@ -59,7 +59,7 @@ export default function Profile() {
             setDatausers(tab);
         });
         socket.emit('get achievements');
-        socket.on('achievements', (tab: any) => {
+        socket.on('Achievements', (tab: any) => {
             console.log(tab);
         });
 
