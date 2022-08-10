@@ -28,16 +28,16 @@ export class AchievementsService {
 			},
 			});
 	}
-
-	public async hasAchievement(achievement: Achievements_types, user: User)
-	{
-		const achiev = this.getAchievements(user);
-		for (const i in achiev)
-		{
-			if (achiev[i] == achievement)
-				return true;
-		}
-		return false;
-	}
-
+	public async hasAchievements(type: Achievements_types, user: User)
+    {
+        const exists = await this.successRepo.find({
+            where: {
+                user: { id: user.id },
+                achievement_list: type
+            },
+            });
+          if (!exists) 
+              return false;
+          return true; 
+    } 
 }

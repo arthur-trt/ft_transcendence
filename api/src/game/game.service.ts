@@ -129,16 +129,16 @@ export class GameService {
 		{
 			this.addAchievement(user, Achievements_types.HALFHALF);
 		}
-		else if (user.wonMatches == 1)
+		if (user.wonMatches == 1)
 		{
+			console.log("ICICICICI")
 			this.addAchievement(user, Achievements_types.FIRST);
-	
 		}
-		else if (user.wonMatches == 3 && user.lostMatches == 0)
+		if (user.wonMatches == 3 && user.lostMatches == 0)
 		{
 			this.addAchievement(user, Achievements_types.WINNER);
 		}
-		else if (user.lostMatches == 3 && user.wonMatches == 0)
+		if (user.lostMatches == 3 && user.wonMatches == 0)
 		{
 			this.addAchievement(user, Achievements_types.LOSER);
 		}
@@ -146,6 +146,12 @@ export class GameService {
 
 	async addAchievement(user: User , achievement: Achievements_types)
 	{
+		console.log(await this.achievementsService.hasAchievements(achievement, user))
+		if (await this.achievementsService.hasAchievements(achievement, user))
+		{
+			console.log("it has achievement", achievement)
+			return;
+		}
 		console.log(achievement)
 		await this.achievementsService.createAchievements(user, achievement);
 	}
