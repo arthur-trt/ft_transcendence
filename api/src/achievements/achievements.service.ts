@@ -30,7 +30,7 @@ export class AchievementsService {
 	}
 	public async hasAchievements(type: Achievements_types, user: User)
     {
-        const exists = await this.successRepo.find({
+        const exists = await this.successRepo.findOne({
             where: {
                 user: { id: user.id },
                 achievement_list: type
