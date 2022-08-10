@@ -134,10 +134,8 @@ export class GameRelayService {
       @UseGuards(WsJwtAuthGuard)
       async changeTab(client: Socket)
       {
-        console.log("allo change tab");
           if (this.players_ready == 2)
           {
-            console.log("oui c'est moi");
             if (client == this.player1.socket)
             {
                 //console.log("p1 has disconnected")
