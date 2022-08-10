@@ -84,6 +84,7 @@ export class GameService {
 		const loser: User = match.scoreUser1 < match.scoreUser2 ? await this.userService.getUserByIdentifier(endedMatch.user1) : await this.userService.getUserByIdentifier(endedMatch.user2);
 		loser.lostMatches += 1;
 		await this.UserRepo.save(winner);
+		await this.UserRepo.save(loser);
 		await this.MatchRepo.save(endedMatch);
 		await this.checkForAchievements(winner);
 		await this.checkForAchievements(loser);
@@ -125,20 +126,21 @@ export class GameService {
 
 	async checkForAchievements(user: User)
 	{
+		console.log(user.name,"lost == ", user.lostMatches, "times")
+		console.log(user.name, "win == ", user.wonMatches, "times")
 		if (user.wonMatches == user.lostMatches)
 		{
 			this.addAchievement(user, Achievements_types.HALFHALF);
 		}
-		else if (user.wonMatches == 1)
+		if (user.wonMatches == 1)
 		{
 			this.addAchievement(user, Achievements_types.FIRST);
-	
 		}
-		else if (user.wonMatches == 3 && user.lostMatches == 0)
+		if (user.wonMatches == 3 && user.lostMatches == 0)
 		{
 			this.addAchievement(user, Achievements_types.WINNER);
 		}
-		else if (user.lostMatches == 3 && user.wonMatches == 0)
+		if (user.lostMatches == 3 && user.wonMatches == 0)
 		{
 			this.addAchievement(user, Achievements_types.LOSER);
 		}
@@ -146,7 +148,10 @@ export class GameService {
 
 	async addAchievement(user: User , achievement: Achievements_types)
 	{
-		console.log(achievement)
-		await this.achievementsService.createAchievements(user, achievement);
+		console.log("CACA : ",await this.achievementsService.hasAchievements(achievement, user))
+		if (await this.achievementsService.hasAchievements(achievement, user) == false)
+		{
+			await this.achievementsService.createAchievements(user, achievement);
+		}
 	}
 }
