@@ -89,13 +89,16 @@ export class GameRelayService {
         if (this.players.size == 2) {
             console.log("starting match/getInQueue");
             this.startMatch(this.players, mode);
-
+            
         }
-        // if (this.gateway.activeUsers.has(first.data.user))
+        // const user1 = await this.chatservice.findUserbySocket(first.id);
+        // if (!this.gateway.activeUsers.has(user1))
         // {
-        //     console.log(first.data.user.name)
         //     this.players.delete(first);
-        //     //return;
+        //     const user = client;
+        //     this.players.clear();
+        //     this.players.add(user);
+        //     return;
         // }
     }
     /**
