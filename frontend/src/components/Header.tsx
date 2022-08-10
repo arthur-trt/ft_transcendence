@@ -2,12 +2,15 @@ import { useState, useEffect } from "react";
 import 'font-awesome/css/font-awesome.min.css';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCookies } from "react-cookie";
+import { socketo } from '../index';
+import { selectOptions } from "@testing-library/user-event/dist/types/setup/directApi";
 
 export const Header = () => {
 
     const [data, setData] = useState<any>([]);
     const location = useLocation().pathname;
     const [cookies, , removeCookie] = useCookies();
+    const [gameInvite, setGameInvite] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -32,6 +35,28 @@ export const Header = () => {
         getData()
     }, [])
 
+    useEffect(
+        () => {
+          socketo.on('accept invite', (id: string, mode:number) => {
+            setGameInvite("New game request !");
+          });
+          
+        }, []);
+
+        function displayNot() {
+            setTimeout(() => {
+                setGameInvite("");
+              }, 8000);
+            if (!gameInvite)
+                return("");
+            else
+            {
+                return (
+                    <h5>{gameInvite}</h5>
+                )
+            }
+        }
+
     return (
             <div className="header">
                 <div className="title">
@@ -48,6 +73,10 @@ export const Header = () => {
                     <Link to="/profile/me" style={{ textDecoration: 'none', color: 'black' }}>
                         <i className="fa fa-solid fa-user"></i>
                     </Link>
+                </div>
+
+                <div className="notifications">
+                    {displayNot()}
                 </div>
             </div>
     )
