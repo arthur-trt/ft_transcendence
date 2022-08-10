@@ -82,16 +82,20 @@ export class GameRelayService {
      */
     @UseGuards(WsJwtAuthGuard)
     async getInQueue(client: Socket, mode) {
+        const [first] = this.players;
+        const [, second] = this.players;
         if (!this.players.has(client))
             this.players.add(client);
         if (this.players.size == 2) {
             console.log("starting match/getInQueue");
             this.startMatch(this.players, mode);
-            // if (!this.gateway.activeUsers.has(this.players[0].data.user))
-            // {
-            //     this.players.erase()
-            // }
         }
+        // if (this.gateway.activeUsers.has(first.data.user))
+        // {
+        //     console.log(first.data.user.name)
+        //     this.players.delete(first);
+        //     //return;
+        // }
     }
     /**
      * @brief Matchmaking with a friend
@@ -129,10 +133,17 @@ export class GameRelayService {
       @UseGuards(WsJwtAuthGuard)
       async changeTab(client: Socket)
       {
+          //console.log("change tab")
         if (client == this.player1.socket)
+        {
+            //console.log("p1 has disconnected")
             this.set_winner(2);
+        }
         else if (client == this.player2.socket)
+        {
+            //console.log("p2 has disconnected")
             this.set_winner(1);
+        }
       }
         
         /**
@@ -197,9 +208,9 @@ export class GameRelayService {
         // const sockets = await this.gateway.server.in(this.match.id).allSockets;
         // for (const i in sockets)
         // {
-            //     sockets[i].leave(this.match.id)
-            //     console.log("clients are leaving the room")
-            // }
+        //         sockets[i].leave(this.match.id)
+        //         console.log("clients are leaving the room")
+        //     }
         clearInterval(this.loop_stop);
         console.log("interval stopped : " + this.loop_stop);
         this.player1.socket.leave(this.match.id)
@@ -234,15 +245,13 @@ export class GameRelayService {
     async loop() {
         if (this.ball && this.player1 && this.player2) {
             const quit = await this.handleDisconnect();
-            if (quit == 1 || this.player1.active == false)
+            if (quit == 1 )
             {
-                console.log(this.player1.active)
                 this.set_winner(2);
                 return ;
             }
-            else if (quit == 2 || this.player2.active == false)
+            else if (quit == 2)
             {
-                console.log(this.player2.active)
                 this.set_winner(1);
                 return;
             }
