@@ -146,9 +146,10 @@ export class GameService {
 
 	async addAchievement(user: User , achievement: Achievements_types)
 	{
-		// if (!this.achievementsService.hasAchievement(achievement, user))
-		// 
-		console.log(achievement)
-		await this.achievementsService.createAchievements(user, achievement);
+		if (!this.achievementsService.hasAchievement(achievement, user))		
+		{
+			console.log(achievement)
+			await this.achievementsService.createAchievements(user, achievement);
+		}
 	}
 }
