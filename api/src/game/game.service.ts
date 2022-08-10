@@ -125,14 +125,14 @@ export class GameService {
 
 	async checkForAchievements(user: User)
 	{
-		if (user.wonMatches == 1)
+		if (user.wonMatches == user.lostMatches)
+		{
+			this.addAchievement(user, Achievements_types.HALFHALF);
+		}
+		else if (user.wonMatches == 1)
 		{
 			this.addAchievement(user, Achievements_types.FIRST);
 	
-		}
-		else if (user.wonMatches == user.lostMatches)
-		{
-			this.addAchievement(user, Achievements_types.HALFHALF);
 		}
 		else if (user.wonMatches == 3 && user.lostMatches == 0)
 		{

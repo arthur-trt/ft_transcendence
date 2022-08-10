@@ -89,10 +89,7 @@ export class GameRelayService {
         if (this.players.size == 2) {
             console.log("starting match/getInQueue");
             this.startMatch(this.players, mode);
-            // if (!this.gateway.activeUsers.has(this.players[0].data.user))
-            // {
-            //     this.players.erase()
-            // }
+
         }
         // if (this.gateway.activeUsers.has(first.data.user))
         // {
