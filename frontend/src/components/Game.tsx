@@ -199,6 +199,7 @@ export default function Game() {
     useEffect(function callback() {
       return function () {
           console.log("i change everything");
+          socketo.emit("changement of tab");
       };
   }, [location]);
 
