@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen } from '@fortawesome/free-solid-svg-icons'
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faTrophy } from '@fortawesome/free-solid-svg-icons'
 import { socketo } from '../index';
 
 export default function Profile() {
@@ -20,6 +21,7 @@ export default function Profile() {
 
     const [history, setHistory] = useState<any>([]);
     const [datausers, setDatausers] = useState<any>([]);
+    const [achievements, setAchievements] = useState<any>([]);
 
 
     useEffect(() => {
@@ -61,6 +63,7 @@ export default function Profile() {
         socket.emit('get achievements');
         socket.on('Achievements', (tab: any) => {
             console.log(tab);
+            setAchievements(tab);
         });
 
     }, []);
@@ -255,6 +258,24 @@ export default function Profile() {
         return (indents);
     }
 
+    function displayAchievements() {
+        var indents : any = [];
+        let i = 0;
+        let bgColor = '#1dd1a1';
+
+        while (i < achievements?.length)
+        {
+            indents.push(
+                <div style={{backgroundColor: bgColor}} className='achievements-line' key={i}>
+                    <FontAwesomeIcon icon={faTrophy} className="trophy"/>
+                    <div className="name">{achievements[i]?.achievement_list}</div>
+                </div>
+            );
+            i++;
+        }
+        return (indents);
+    }
+
     return (
         <div className="profile-container">
 
@@ -291,12 +312,14 @@ export default function Profile() {
                     <button onClick={handleLogout}>LOGOUT</button>
                 </div>
             </div>
+            
+            <div className="profile-achievements">
+                <h4>ACHIEVEMENTS</h4>
+                {displayAchievements()}
+            </div>
 
             <div className="profile-history">
-                <div className="history-title">
-                    <h4 style={{color: '#74b9ff'}}>MATCH&nbsp;</h4>
-                    <h4 style={{color: '#ff7675'}}>&nbsp;HISTORY</h4>
-                </div>
+                <h4>MATCH HISTORY</h4>
                 {displayHistory()}
             </div>
 
