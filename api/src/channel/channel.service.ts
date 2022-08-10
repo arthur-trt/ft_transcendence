@@ -249,12 +249,13 @@ export class ChannelService {
 		/** Step one : Deleting user from channel */
 		await this.deleteUserFromChannel(user, channel, toBan);
 		/** Step two : add it to ban list  */
-		console.log(channel.banned);
 		channel.banned = [...channel.banned, toBan];
-		console.log(channel.banned);
 		await channel.save();
 		/** Step three : set timeout to remove from ban list */
-		setTimeout(() => { this.unban(channel.name, toBan) }, 30000);
+		setTimeout(() => {
+			this.unban(channel.name, toBan)
+			.catch(() => { console.log(':) c fix les nazes') })
+		}, 30000);
 	}
 
 
@@ -276,6 +277,9 @@ export class ChannelService {
 		await channel.save();
 		console.log("Muted" + channel.muted)
 		console.log( "Id " + channel.mutedId)
-		setTimeout(() => { this.unmute(channel.name, toMute)}, 30000);
+		setTimeout(() => {
+			this.unmute(channel.name, toMute)
+				.catch(() => { console.log(':) c fix les nazes') })
+		}, 30000);
 	}
 }
