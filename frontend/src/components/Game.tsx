@@ -16,8 +16,9 @@ export default function Game() {
     height: number,
     color: string
   }
-  const location = useLocation();
-  
+  let location = useLocation();
+
+
   type ballT = {
     x: number,
     y: number,
@@ -195,6 +196,13 @@ export default function Game() {
       })
     }, []);
 
+    useEffect(function callback() {
+      return function () {
+          console.log("i change everything");
+          socketo.emit("changement of tab");
+      };
+  }, [location]);
+
     function kill_sockets(socketi : any)
     {
       socketi.off('game_position');
@@ -247,10 +255,6 @@ export default function Game() {
     else
       i++;
   }
-  useEffect(() => {
-    socketo.emit('changement of tab')
-    console.log("change tab")
-  }, [location, socket]);
 
   useEffect(() => {
     console.log("useEffect/game_start " + gameStart);
@@ -404,7 +408,7 @@ export default function Game() {
         drawRect(userLeft_Pad2.x, data.player1_paddle2_y, userLeft_Pad2.width, userLeft_Pad2.height, userLeft_Pad2.color);
         drawRect(userRight_Pad2.x, data.player2_paddle2_y, userRight_Pad2.width, userRight_Pad2.height, userRight_Pad2.color);
       }
-      
+
       //Draw the ball
       drawArc(data.ball_x, data.ball_y, ball.radius, ball.color);
     }

@@ -129,10 +129,17 @@ export class GameService {
 		{
 			this.addAchievement(user, Achievements_types.HALFHALF);
 		}
+<<<<<<< HEAD
 		if (user.wonMatches == 1)
 		{
 			console.log("OUIIIII")
 			this.addAchievement(user, Achievements_types.FIRST);
+=======
+		else if (user.wonMatches == 1)
+		{
+			this.addAchievement(user, Achievements_types.FIRST);
+	
+>>>>>>> origin/main
 		}
 		if (user.wonMatches == 3 && user.lostMatches == 0)
 		{
