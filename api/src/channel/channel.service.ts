@@ -1,10 +1,11 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, forwardRef, HttpException, HttpStatus, Inject, Injectable, UseFilters } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
-import { Repository } from 'typeorm';
+import { WebsocketExceptionsFilter } from 'src/websocket/exception.filter';
+import { QueryFailedError, Repository } from 'typeorm';
 import { validate as isValidUUID } from 'uuid';
 import { Channel } from './channel.entity';
 
@@ -249,12 +250,13 @@ export class ChannelService {
 		/** Step one : Deleting user from channel */
 		await this.deleteUserFromChannel(user, channel, toBan);
 		/** Step two : add it to ban list  */
-		console.log(channel.banned);
 		channel.banned = [...channel.banned, toBan];
-		console.log(channel.banned);
 		await channel.save();
 		/** Step three : set timeout to remove from ban list */
-		setTimeout(() => { this.unban(channel.name, toBan) }, 30000);
+		setTimeout(() => {
+			this.unban(channel.name, toBan)
+			.catch(() => { console.log(':) c fix les nazes') })
+		}, 30000);
 	}
 
 
@@ -276,6 +278,9 @@ export class ChannelService {
 		await channel.save();
 		console.log("Muted" + channel.muted)
 		console.log( "Id " + channel.mutedId)
-		setTimeout(() => { this.unmute(channel.name, toMute)}, 30000);
+		setTimeout(() => {
+			this.unmute(channel.name, toMute)
+				.catch(() => { console.log(':) c fix les nazes') })
+		}, 30000);
 	}
 }
