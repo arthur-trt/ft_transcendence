@@ -87,6 +87,10 @@ export class GameRelayService {
         if (this.players.size == 2) {
             console.log("starting match/getInQueue");
             this.startMatch(this.players, mode);
+            // if (!this.gateway.activeUsers.has(this.players[0].data.user))
+            // {
+            //     this.players.erase()
+            // }
         }
     }
     /**
@@ -125,6 +129,7 @@ export class GameRelayService {
       @UseGuards(WsJwtAuthGuard)
       async changeTab(client: Socket)
       {
+        console.log("allo change tab");
         if (client == this.player1.socket)
             this.set_winner(2);
         else if (client == this.player2.socket)
