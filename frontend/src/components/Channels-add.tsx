@@ -9,7 +9,7 @@ import { faCircleXmark } from '@fortawesome/free-regular-svg-icons'
 import { faArrowAltCircleRight } from '@fortawesome/free-regular-svg-icons'
 import { faTrashCan } from '@fortawesome/free-regular-svg-icons'
 import { faPaperPlane } from '@fortawesome/free-regular-svg-icons'
-import { faLock, faWineGlassEmpty } from '@fortawesome/free-solid-svg-icons'
+import { faLock } from '@fortawesome/free-solid-svg-icons'
 import { faMask } from '@fortawesome/free-solid-svg-icons'
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons'
 import { faUserXmark } from '@fortawesome/free-solid-svg-icons'
@@ -75,6 +75,7 @@ export default function Channels() {
   
   // GAME
   const [activesmatches, setActivesMatches] = useState<any>([]);
+  let [rFlag, setRflag] = useState(0);
   
   // IF THE ROUTE CHANGE
   useEffect(() => {
@@ -134,9 +135,12 @@ export default function Channels() {
       socket.on('error', (msg: any) => {
 			  alert(msg.event);
       });
+      socketo.on('accept invite', (id: string, mode:number) => {
+        setRflag(rFlag => rFlag + 1);
+      });
       
     }, []);
-    
+
   useEffect(() => {
     let z = 0;
     let flag = 0;
@@ -250,7 +254,7 @@ export default function Channels() {
   }
   let handleAcceptGame = (e:any) => {
     socket.emit('joinGame', {friendId: dataGR[parseInt(e.currentTarget.id)].id, mode: dataGR[parseInt(e.currentTarget.id)].mode});
-    dataGR[parseInt(e.currentTarget.id)].state = 1;
+    dataGR.splice(parseInt(e.currentTarget.id), 1);
     navigate('/game');
   }
   let handleSendInvite = (e:any) =>
@@ -462,6 +466,7 @@ export default function Channels() {
         i++;
       }
       // GAME REQUEST
+      rFlag++;
       i = 0;
       let index = 0;
       while (i < dataGR?.length)
@@ -469,13 +474,10 @@ export default function Channels() {
         let j = 0;
         while(j < datausers?.length)
         {
-          if (dataGR[i]?.id === datausers[i]?.id)
-            index = i;
+          if (dataGR[i]?.id === datausers[j]?.id)
+            index = j;
           j++;
         }
-
-        if (!dataGR[i]?.state)
-        {
           indents.push(<div className='friendsrequest-single' key={i + 112}>
             <div className='friendsrequest-single-img'>
               <img src={datausers[index].avatar_url} alt="friends requests"></img>
@@ -487,23 +489,12 @@ export default function Channels() {
               <button id={i.toString()} onClick={handleAcceptGame}>Play</button>
             </div>
           </div>);
-        }
         i++;
         index = 0;
       }
     }
 
     return indents;
-  }
-
-  function getUserIndex(id:string) {
-    let i = 0;
-    while(i < datausers?.length)
-    {
-      if (id === datausers[i]?.id)
-        return (i);
-      i++;
-    }
   }
 
   // SEND MESSAGE TO CHANNEL
