@@ -137,9 +137,10 @@ export class GameRelayService {
       @UseGuards(WsJwtAuthGuard)
       async changeTab(client: Socket)
       {
-          if (this.match)
+        console.log("allo change tab");
+          if (this.players_ready == 2)
           {
-            console.log("allo change tab");
+            console.log("oui c'est moi");
             if (client == this.player1.socket)
             {
                 //console.log("p1 has disconnected")
@@ -210,6 +211,7 @@ export class GameRelayService {
     {
         if (this.players_ready == 1)
         {
+            this.players_ready++;
             this.gateway.server.emit('ActivesMatches');
             this.loop_stop = setInterval(() => this.loop(), 1000 / 60);
             console.log("inter = " + this.loop_stop);

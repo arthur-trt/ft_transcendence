@@ -488,7 +488,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	  @SubscribeMessage('changement of tab')
 	  async changeTab(client : Socket)
 	  {
-		  console.log("change of tabbbbbbb")
+		  //console.log("change of tabbbbbbb")
 		  await this.gameRelayService.changeTab(client);
 	  }
 
