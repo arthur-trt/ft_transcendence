@@ -16,7 +16,8 @@ export default function Game() {
     height: number,
     color: string
   }
-  const location = useLocation();
+  let location = useLocation();
+  
   
   type ballT = {
     x: number,
@@ -250,6 +251,7 @@ export default function Game() {
   useEffect(() => {
     socketo.emit('changement of tab')
     console.log("change tab")
+    console.log(location);
   }, [location, socket]);
 
   useEffect(() => {
