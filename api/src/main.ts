@@ -10,7 +10,6 @@ import { ValidationPipe } from '@nestjs/common';
 import { urlencoded, json } from 'express';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import { HttpExceptionFilter } from './httpfilter.filter';
 
 
 async function bootstrap() {
@@ -19,7 +18,6 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 	app.use(cookieParser());
 	app.useGlobalPipes(new ValidationPipe());
-	app.useGlobalFilters(new HttpExceptionFilter())
   app.use('/user/avatar', json({ limit: '8mb' }));
   app.use(json({ limit: '100kb' }));
   app.use(urlencoded({ extended: true, limit: '8mb' }));
