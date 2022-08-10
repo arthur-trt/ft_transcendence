@@ -71,7 +71,8 @@ services:
     networks:
      - db_network
     volumes:
-     - ${DB_PATH}:/var/lib/postgresql/data
+    #  - ${DB_PATH}:
+     - /var/lib/postgresql/data
 
 ##
 # DEBUG CONTAINERS --profile debug

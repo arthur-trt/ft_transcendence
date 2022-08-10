@@ -1,5 +1,5 @@
 
-import { forwardRef, Inject, Injectable, UseGuards} from '@nestjs/common';
+import { ConsoleLogger, forwardRef, Inject, Injectable, UseGuards} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
@@ -122,17 +122,14 @@ export class GameRelayService {
      * @brief Quit the game when user changes tab
      * @param client
      */
-    @UseGuards(WsJwtAuthGuard)
-    async changeTab(client: Socket)
-    {
-        console.log(client.data.user.name, "changed tab")
-        if (client.data.user.name == this.names.p1_name)
-            return 1;
-        else if (client.data.user.name == this.names.p2_name)
-            return 2;
-    }
-        
-        
+      @UseGuards(WsJwtAuthGuard)
+      async changeTab(client: Socket)
+      {
+        if (client == this.player1.socket)
+            this.set_winner(2);
+        else if (client == this.player2.socket)
+            this.set_winner(1);
+      }
         
         /**
          * @brief Check if user is disconnected
@@ -155,7 +152,9 @@ export class GameRelayService {
         const [first] = players;
         const [, second] = players;
         this.player1.socket = first;
+        this.player2.active = true;
         this.player2.socket = second;
+        this.player2.active = true;
         this.player1_pad2.socket = first;
         this.player2_pad2.socket = second;
         this.names.p1_name = this.player1.socket.data.user.name;
@@ -166,7 +165,6 @@ export class GameRelayService {
         players.clear();
         console.log(this.players.size)
         const Match = await this.gameService.createMatch(first.data.user, second.data.user);
-        this.gateway.server.emit('ActivesMatches');
         first.join(Match.id);
         second.join(Match.id);
         this.MatchRooms.push(Match.id);
@@ -205,9 +203,7 @@ export class GameRelayService {
         this.player2.socket.leave(this.match.id);
         console.log("player2 left the room")
         this.players_ready = 0;
-        await this.gameService.endMatch({ id: this.match.id, scoreUser1: this.p1_score, scoreUser2: this.p2_score })
-        this.gateway.server.emit('ActivesMatches');
-        
+        await this.gameService.endMatch({ id: this.match.id, scoreUser1: this.p1_score, scoreUser2: this.p2_score })    
     }
     
     async set_winner(winner : number) {  
@@ -233,17 +229,19 @@ export class GameRelayService {
     @UseGuards(WsJwtAuthGuard)
     async loop() {
         if (this.ball && this.player1 && this.player2) {
-            // const quit = await this.handleDisconnect();
-            // if (quit == 1)
-            // {
-            //     this.set_winner(2);
-            //     return ;
-            // }
-            // else if (quit == 2)
-            // {
-            //     this.set_winner(1);
-            //     return;
-            // }
+            const quit = await this.handleDisconnect();
+            if (quit == 1 || this.player1.active == false)
+            {
+                console.log(this.player1.active)
+                this.set_winner(2);
+                return ;
+            }
+            else if (quit == 2 || this.player2.active == false)
+            {
+                console.log(this.player2.active)
+                this.set_winner(1);
+                return;
+            }
 
             // change the score of players, if the ball goes to the left "ball.x<0" p2 win, else if "ball.x > canvas.width" the p1 win
             if (this.ball.x - this.ball.radius < 0) {
