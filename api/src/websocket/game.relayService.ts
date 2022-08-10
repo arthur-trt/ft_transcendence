@@ -1,5 +1,5 @@
 
-import { ConsoleLogger, forwardRef, Inject, Injectable, UseGuards} from '@nestjs/common';
+import { forwardRef, Inject, Injectable, UseGuards} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
@@ -82,8 +82,8 @@ export class GameRelayService {
      */
     @UseGuards(WsJwtAuthGuard)
     async getInQueue(client: Socket, mode) {
-        const [first] = this.players;
-        const [, second] = this.players;
+        // const [first] = this.players;
+        // const [, second] = this.players;
         if (!this.players.has(client))
             this.players.add(client);
         if (this.players.size == 2) {
