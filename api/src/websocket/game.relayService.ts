@@ -87,19 +87,19 @@ export class GameRelayService {
         if (!this.players.has(client))
             this.players.add(client);
         if (this.players.size == 2) {
-            // const user1 = await this.chatservice.findUserbySocket(first.id);
-            // if (!this.gateway.activeUsers.has(user1))
-            // {
-            //     this.players.delete(first);
-            //     const user = client;
-            //     this.players.clear();
-            //     this.players.add(user);
-            //     return;
-            // }
             console.log("starting match/getInQueue");
             this.startMatch(this.players, mode);
-
+            
         }
+        // const user1 = await this.chatservice.findUserbySocket(first.id);
+        // if (!this.gateway.activeUsers.has(user1))
+        // {
+        //     this.players.delete(first);
+        //     const user = client;
+        //     this.players.clear();
+        //     this.players.add(user);
+        //     return;
+        // }
     }
     /**
      * @brief Matchmaking with a friend

@@ -131,7 +131,7 @@ export class GameService {
 		}
 		if (user.wonMatches == 1)
 		{
-			console.log("ICICICICI")
+			console.log("OUIIIII")
 			this.addAchievement(user, Achievements_types.FIRST);
 		}
 		if (user.wonMatches == 3 && user.lostMatches == 0)
@@ -147,7 +147,7 @@ export class GameService {
 	async addAchievement(user: User , achievement: Achievements_types)
 	{
 		console.log(await this.achievementsService.hasAchievements(achievement, user))
-		if (await this.achievementsService.hasAchievements(achievement, user))
+		if (await this.achievementsService.hasAchievements(achievement, user) == true)
 		{
 			console.log("it has achievement", achievement)
 			return;
