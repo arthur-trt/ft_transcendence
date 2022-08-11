@@ -111,8 +111,6 @@ export class MessageService {
 	 */
 	public async getPrivateMessage(user1: User, user2: User) : Promise<privateMessage[]>
 	{
-		if (user1.blocked && user1.blocked.includes(user2.id))
-			throw new HttpException('Cannot get messages with a blocked user', HttpStatus.OK)
 		const msgs = this.pmRepo.createQueryBuilder("PM")
 			.leftJoinAndMapOne("PM.sender", User, 'users', 'users.id = PM.sender')
 			.leftJoinAndMapOne("PM.target", User, 'usert', 'usert.id = PM.target')
