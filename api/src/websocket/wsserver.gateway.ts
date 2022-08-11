@@ -458,7 +458,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('pending invite')
 	async inviteToPlay(client: Socket, data : {friendId : string, mode : string} )
 	{
-		console.log("pending invite")
 		await this.gameRelayService.pendingInvite(client, data);
 	}
 

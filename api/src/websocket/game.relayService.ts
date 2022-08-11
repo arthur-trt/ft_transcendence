@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
 import { UserService } from "src/user/user.service";
-import { Ball, dataFront, Match, Names, Paddle } from "../game/game.interface";
+import { Ball, dataFront, Match, Names, Paddle, Scores } from "../game/game.interface";
 import { GameService } from '../game/game.service';
 import { WSServer } from "./wsserver.gateway";
 import { ChatService } from './chat.service';
@@ -26,7 +26,7 @@ function collision(b: Ball, p: Paddle) {
     return pad_left < ball_right && pad_top < ball_bottom && pad_right > ball_left && pad_bottom > ball_top;
 }
 
-const VICTORY = 2;
+const VICTORY = 3;
 @Injectable()
 export class GameRelayService {
     constructor(
@@ -50,8 +50,8 @@ export class GameRelayService {
     protected player1_pad2 = {} as Paddle;
     protected player2 = {} as Paddle;
     protected player2_pad2 = {} as Paddle;
-    protected p1_score = 0;
-    protected p2_score = 0;
+    // protected p1_score = 0;
+    // protected p2_score = 0;
     protected loop_stop: NodeJS.Timer;
     protected players_ready = 0;
 
@@ -66,6 +66,7 @@ export class GameRelayService {
     protected P2_MoveDOWN_pad2: boolean;
 
     protected names = {} as Names;
+    protected scores = {} as Scores;
     protected isBabyPong = false;
 
 
@@ -146,7 +147,7 @@ export class GameRelayService {
         async handleDisconnect(client : Socket)
 		{
 			if (client == this.player1.socket || client == this.player2.socket)
-				client == this.player1.socket ? this.set_winner(2) : this.set_winner(1);
+				client == this.player1.socket ? this.set_winner(client, 2) : this.set_winner(client, 1);
 			else if (this.players.has(client))
 					this.players.delete(client);
         }
@@ -166,7 +167,6 @@ export class GameRelayService {
         this.gateway.server.to(this.player2.socket.id).emit('set_names', this.names);
         console.log("starting match/startMatch");
         players.clear();
-        console.log(this.players.size)
         const Match = await this.gameService.createMatch(first.data.user, second.data.user);
         first.join(Match.id);
         second.join(Match.id);
@@ -176,7 +176,6 @@ export class GameRelayService {
             this.isBabyPong = true;
         else if (mode == 1)
             this.isBabyPong = false;
-        //this.gateway.server.emit('ActivesMatches');
         this.gateway.server.to(Match.id).emit('game_countdownStart', this.isBabyPong);
         this.match.id = Match.id;
     }
@@ -194,26 +193,19 @@ export class GameRelayService {
         	this.players_ready++;
     }
 
-    async end_game() //DON'T FORGET TO MAKE THE WATCHER LEAVE THE ROOM
+    async end_game(client : Socket)
     {
-        // const sockets = await this.gateway.server.in(this.match.id).allSockets;
-        // for (const i in sockets)
-        // {
-        //         sockets[i].leave(this.match.id)
-        //         console.log("clients are leaving the room")
-        //     }
         clearInterval(this.loop_stop);
         console.log("interval stopped : " + this.loop_stop);
         this.player1.socket.leave(this.match.id)
-        console.log("player left the room")
         this.player2.socket.leave(this.match.id);
-        console.log("player2 left the room")
         this.players_ready = 0;
-        await this.gameService.endMatch({ id: this.match.id, scoreUser1: this.p1_score, scoreUser2: this.p2_score })
+        await this.gameService.endMatch({ id: this.match.id, scoreUser1: this.scores.p1, scoreUser2: this.scores.p2 })
+		await this.getOngoingMatches(client)
+
     }
 
-    async set_winner(winner : number) {
-        //this.gateway.server.to(this.match.id).emit('game_end', true);
+    async set_winner(client :  Socket, winner : number) {
         if (winner == 2)
         {
             console.log("P2 WINS");
@@ -224,7 +216,7 @@ export class GameRelayService {
             console.log("P1 WINS");
             this.gateway.server.to(this.match.id).emit('game_end', true);
         }
-        await this.end_game();
+		await this.end_game(client);
     }
 
 
@@ -233,23 +225,23 @@ export class GameRelayService {
         if (this.ball && this.player1 && this.player2) {
             // change the score of players, if the ball goes to the left "ball.x<0" p2 win, else if "ball.x > canvas.width" the p1 win
             if (this.ball.x - this.ball.radius < 0) {
-                this.p2_score++;
+                this.scores.p2++;
                 this.gateway.server.to(this.match.id).emit('update_score', false);
-                if (this.p2_score >= VICTORY) /*|| await this.handleDisconnect() == 1)*/ {
-                    this.set_winner(2);
-                    return;
-                }
-                else
-                    this.resetBall();
+            if (this.scores.p2 >= VICTORY) /*|| await this.handleDisconnect() == 1)*/ {
+                this.set_winner(client, 2);
+                return;
+            }
+            else
+                this.resetBall();
             }
             else if (this.ball.x + this.ball.radius > 200) {
-                this.p1_score++;
+                this.scores.p1++;
                 this.gateway.server.to(this.match.id).emit('update_score', true);
-                if (this.p1_score >= VICTORY) /* || await this.handleDisconnect() == 2)*/ {
-                    this.set_winner(1);
-                    return;
-                }
-                else
+            if (this.scores.p1 >= VICTORY) /* || await this.handleDisconnect() == 2)*/ {
+                this.set_winner(client, 1);
+                return;
+            }
+            else
                 this.resetBall();
             }
 
@@ -351,8 +343,8 @@ export class GameRelayService {
         this.player2_pad2.height = 10;
         this.player2_pad2.width = 2;
 
-        this.p1_score = 0;
-        this.p2_score = 0;
+        this.scores.p1 = 0;
+        this.scores.p2 = 0;
     }
 
     @UseGuards(WsJwtAuthGuard)
@@ -511,6 +503,7 @@ export class GameRelayService {
         client.join(gameId);
         this.gateway.server.to(client.id).emit('set_names', this.names);
         this.gateway.server.to(client.id).emit('set_mode', this.isBabyPong);
+        this.gateway.server.to(client.id).emit('set_scores', this.scores);
     }
 
     /**

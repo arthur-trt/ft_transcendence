@@ -4,8 +4,6 @@ import React, { useState, useEffect} from 'react';
 import { useLocation } from "react-router-dom";
 
 import { socketo } from '..';
-let name1:string;
-let name2:string;
 
 export default function Game() {
   // DEFINE TYPE
@@ -52,6 +50,11 @@ export default function Game() {
     p2_name: string
   }
 
+  type scoresT = {
+    p1: number;
+    p2: number;
+  }
+
   const [socket, setSocket] = useState<any>([]);
 
   // GAME VARIABLE
@@ -74,6 +77,12 @@ export default function Game() {
 
   let [P1Name, setP1Name] = useState<string>("");
   let [P2Name, setP2Name] = useState<string>("");
+  //c'est bizarre mais touchez a rien svp
+  let name1:string;
+  let name2:string;
+
+  let p1_score = 0;
+  let p2_score = 0;
 
   const [userLeft, setUserLeft] = useState<userT>({
     x: 10,
@@ -154,6 +163,9 @@ export default function Game() {
         }
       }
 
+      /**
+     * WATCH MODE EVENTS
+     */
       socket.on('set_names', (n: nameT) => {
         setP1Name(n.p1_name);
         setP2Name(n.p2_name);
@@ -163,6 +175,13 @@ export default function Game() {
 
       socket.on('set_mode', (mode : boolean) => {
         setGameMode(mode);
+      });
+
+      socket.on('set_scores', (scores : scoresT) => {
+        p1_score = scores.p1;
+        p2_score = scores.p2;
+        setP1Score(p1_score);
+        setP2Score(p2_score);
       })
 
       socket.on('game_position', (pos: dataT) => {
@@ -180,13 +199,16 @@ export default function Game() {
       socket.on('update_score', (res : Boolean) => {
         if (res === true)
         {
-          setP1Score(P1score + 1);
-          P1score++;
+          p1_score++;
+          setP1Score(p1_score);
+          //P1score++;
         }
         else
         {
-          setP2Score(P2score + 1);
-          P2score++;
+          // setP2Score(P2score + 1);
+          // P2score++;
+          p2_score++;
+          setP2Score(p2_score);
         }
       })
 
@@ -423,7 +445,7 @@ export default function Game() {
       ctx.fillStyle = '#1dd1a1';
       let fontSize = (canvas.width / 20).toString();
       ctx.font = fontSize + "px serif";
-      ctx.fillText(P1score + " - " + P2score, canvas.width * 0.5, canvas.height * 0.25);
+      ctx.fillText(p1_score + " - " + p2_score, canvas.width * 0.5, canvas.height * 0.25);
 
       if(winner === true) //I won
         ctx.fillText(name1.toUpperCase() + " WON !", canvas.width * 0.5, canvas.height * 0.1);

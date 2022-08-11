@@ -68,3 +68,8 @@ export interface Names {
     p1_name : string;
     p2_name : string;
 }
+
+export interface Scores {
+    p1 : number;
+    p2 : number;
+}

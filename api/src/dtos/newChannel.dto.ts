@@ -5,7 +5,7 @@ export class newChannelDto {
 
 	/** Channel Name */
 	@IsNotEmpty()
-	@Length(3, 50)
+	@Length(3, 12)
 	@Transform(({ value }: TransformFnParams) => value?.trim())
 	readonly chanName: string;
 
