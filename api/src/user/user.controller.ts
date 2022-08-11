@@ -151,11 +151,16 @@ export class UserController {
 		},
 	})
 	public async uploadAvatar(@Req() req: Request, @UploadedFile() file: Express.Multer.File) : Promise<User> {
-		const user: User = await this.userService.getUserByRequest(req);
-		if (!user)
-			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
-		user.avatar_url = "/public/" + file.filename;
-		await user.save();
+		let user: User = await this.userService.getUserByRequest(req);
+		
+		if (file)
+		{
+			if (!user)
+				throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+			user.avatar_url = "/public/" + file.filename;
+			await user.save();
+		}
+		
 		return user;
 	}
 
