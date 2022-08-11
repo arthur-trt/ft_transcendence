@@ -35,7 +35,6 @@ export class ChatService {
 	}
 
 	async init() {
-		console.log("init bot")
 		try {
 
 			this.chatBot = await this.userService.getUserByIdentifier("chatBot")
@@ -238,6 +237,7 @@ export class ChatService {
 		await this.userService.block(client.data.user, toBlock);
 		this.gateway.server.to(client.id).emit('blocked', toBlock.name + " has been blocked");
 		await this.getFriends(client);
+
 	}
 
 	async unblock(client: Socket, toUnBlock: User)

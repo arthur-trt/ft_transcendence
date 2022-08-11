@@ -61,7 +61,6 @@ export class ConnectService {
 		client.data.user = user;
 		this.all_users = await this.userService.getUsers();
 		if (!this.gateway.activeUsers.has(user)) {
-			console.log("Add : " + user.name);
 			this.gateway.activeUsers.set(user, client);
 		}
 

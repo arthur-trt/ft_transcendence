@@ -83,23 +83,11 @@ export class GameRelayService {
      */
     @UseGuards(WsJwtAuthGuard)
     async getInQueue(client: Socket, mode) {
-        // const [first] = this.players;
-        // const [, second] = this.players;
         if (!this.players.has(client))
             this.players.add(client);
         if (this.players.size == 2) {
-            console.log("starting match/getInQueue");
             this.startMatch(this.players, mode);
         }
-        // const user1 = await this.chatservice.findUserbySocket(first.id);
-        // if (!this.gateway.activeUsers.has(user1))
-        // {
-        //     this.players.delete(first);
-        //     const user = client;
-        //     this.players.clear();
-        //     this.players.add(user);
-        //     return;
-        // }
     }
     /**
      * @brief Matchmaking with a friend
@@ -113,7 +101,6 @@ export class GameRelayService {
         const playerSocket = await this.chatservice.findSocketId(friend);
         this.players.add(client);
         this.players.add(playerSocket);
-        console.log("starting matchWithFriend");
         this.startMatch(this.players, data.mode);
     }
 
@@ -168,7 +155,6 @@ export class GameRelayService {
         this.names.p2_name = this.player2.socket.data.user.name;
         this.gateway.server.to(this.player1.socket.id).emit('set_names', this.names); //p1_name = left_name
         this.gateway.server.to(this.player2.socket.id).emit('set_names', this.names);
-        console.log("starting match/startMatch");
         players.clear();
         const Match = await this.gameService.createMatch(first.data.user, second.data.user);
         first.join(Match.id);
@@ -190,7 +176,6 @@ export class GameRelayService {
             this.players_ready++;
 			await this.getOngoingMatches(client)
             this.loop_stop = setInterval(() => this.loop(client), 1000 / 60);
-            console.log("inter = " + this.loop_stop);
         }
         else
         	this.players_ready++;
@@ -199,7 +184,6 @@ export class GameRelayService {
     async end_game(client : Socket)
     {
         clearInterval(this.loop_stop);
-        console.log("interval stopped : " + this.loop_stop);
         this.player1.socket.leave(this.match.id)
         this.player2.socket.leave(this.match.id);
         this.players_ready = 0;
@@ -211,12 +195,12 @@ export class GameRelayService {
     async set_winner(client :  Socket, winner : number) {
         if (winner == 2)
         {
-            console.log("P2 WINS");
+            this.scores.p2 = VICTORY;
             this.gateway.server.to(this.match.id).emit('game_end', false);
         }
         else if (winner == 1)
         {
-            console.log("P1 WINS");
+            this.scores.p1 = VICTORY;
             this.gateway.server.to(this.match.id).emit('game_end', true);
         }
 		await this.end_game(client);
@@ -312,8 +296,6 @@ export class GameRelayService {
     }
 
     async initPositions() {
-        console.log("initPos");
-
         //ball stats
         this.ball.radius = 1;
         this.ball.speed = 1;
@@ -524,6 +506,6 @@ export class GameRelayService {
     {
         const user = await this.chatservice.findUserbySocket(client.id);
         this.gateway.server.to(client.id).emit('Achievements', await this.achievementService.getAchievements(user));
-        console.log(await this.achievementService.getAchievements(user));
+        await this.achievementService.getAchievements(user);
     }
 }

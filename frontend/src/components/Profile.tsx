@@ -60,7 +60,6 @@ export default function Profile() {
         });
         socket.emit('get achievements');
         socket.on('Achievements', (tab: any) => {
-            console.log(tab);
             setAchievements(tab);
         });
 
