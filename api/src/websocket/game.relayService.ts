@@ -186,12 +186,12 @@ export class GameRelayService {
         if (this.players_ready == 1)
         {
             this.players_ready++;
-            this.gateway.server.emit('ActivesMatches');
+			await this.getOngoingMatches(client)
             this.loop_stop = setInterval(() => this.loop(client), 1000 / 60);
             console.log("inter = " + this.loop_stop);
         }
         else
-        this.players_ready++;
+        	this.players_ready++;
     }
 
     async end_game() //DON'T FORGET TO MAKE THE WATCHER LEAVE THE ROOM
@@ -231,17 +231,6 @@ export class GameRelayService {
     @UseGuards(WsJwtAuthGuard)
     async loop(client : Socket) {
         if (this.ball && this.player1 && this.player2) {
-            // if (quit == 1)
-            // {
-            //     this.set_winner(2);
-            //     return ;
-            // }
-            // else if (quit == 2)
-            // {
-            //     this.set_winner(1);
-            //     return;
-            // }
-
             // change the score of players, if the ball goes to the left "ball.x<0" p2 win, else if "ball.x > canvas.width" the p1 win
             if (this.ball.x - this.ball.radius < 0) {
                 this.p2_score++;
@@ -515,7 +504,7 @@ export class GameRelayService {
      */
 
     async getOngoingMatches(client: Socket) {
-        this.gateway.server.to(client.id).emit('ActivesMatches', await this.gameService.listGameOngoing());
+        this.gateway.server.emit('ActivesMatches', await this.gameService.listGameOngoing());
     }
 
     async watchGame(client, gameId) {
