@@ -195,10 +195,12 @@ export class GameRelayService {
     async set_winner(client :  Socket, winner : number) {
         if (winner == 2)
         {
+            this.scores.p2 = VICTORY;
             this.gateway.server.to(this.match.id).emit('game_end', false);
         }
         else if (winner == 1)
         {
+            this.scores.p1 = VICTORY;
             this.gateway.server.to(this.match.id).emit('game_end', true);
         }
 		await this.end_game(client);
