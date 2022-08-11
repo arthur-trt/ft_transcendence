@@ -23,7 +23,7 @@ export default function Profile() {
     const [datausers, setDatausers] = useState<any>([]);
     const [achievements, setAchievements] = useState<any>([]);
 
-
+    // FETCH
     useEffect(() => {
         const getData = async () => {
             const response = await fetch(
@@ -68,10 +68,11 @@ export default function Profile() {
 
     }, []);
 
-    let handleChangeName = (e: any) => {
-        e.preventDefault();
 
-        fetch('/api/user/userSettings', {
+    // FETCH
+    async function handleChangeName(e: any) {
+        e.preventDefault();
+        const response = await fetch('/api/user/userSettings', {
             method: 'PATCH',
             body: JSON.stringify({
                 name: name,
@@ -84,7 +85,10 @@ export default function Profile() {
                 'Content-type': 'application/json; charset=UTF-8',
             },
         })
-        window.location.reload();
+        if (!response.ok)
+            alert("Error : username");
+        else
+            window.location.reload();
         setName("");
     }
 
@@ -111,6 +115,7 @@ export default function Profile() {
             return ("");
     }
 
+    // FETCH
     async function handleSubmitAvatar(event: any) {
         event.preventDefault();
 
@@ -122,11 +127,12 @@ export default function Profile() {
             body: postFile,
         })
         if (!response.ok)
-            alert("error with avatar");
+            alert("Error : avatar");
         else
             window.location.reload();
     }
 
+    // FETCH
     async function handleTurnOnTwoFa(e: any) {
         e.preventDefault();
             let res = await fetch("/api/auth/2fa/turn-on", {
@@ -146,6 +152,8 @@ export default function Profile() {
                 window.location.reload();
     }
 
+
+    // FETCH
     async function handleDeactivateTwoFa() {
         let res = await fetch("/api/auth/2fa/deactivate", {
             method: "POST",
@@ -193,6 +201,8 @@ export default function Profile() {
             return ("");
     }
 
+
+    // FETCH
     async function handleLogout(e: any) {
         e.preventDefault();
         let res = await fetch("/api/auth/logout", {
