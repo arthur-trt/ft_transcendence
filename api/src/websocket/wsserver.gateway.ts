@@ -91,7 +91,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @param client Socket received from client
 	 */
 	async handleDisconnect(client: Socket) {
-		this.connectService.handleDisconnect(client)
+		this.connectService.handleDisconnect(client);
+		this.gameRelayService.handleDisconnect(client);
 	}
 
 	/**
@@ -429,9 +430,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	/**
 	 * @brief Matchmaking with a friend
-	 * @param client 
-	 * @param playerId 
-	 * @param mode 
+	 * @param client
+	 * @param playerId
+	 * @param mode
 	 */
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('joinGame')
@@ -441,18 +442,18 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('game_start')
-	async startMatch() {
-		await this.gameRelayService.start_gameloop();
+	async startMatch(client : Socket) {
+		await this.gameRelayService.start_gameloop(client);
 	}
 
-	
+
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('ActivesMatches')
 	async GameOngoing(client: Socket)
 	{
 		await this.gameRelayService.getOngoingMatches(client);
 	}
-	
+
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('WatchGame')
 	async watchGame(client: Socket, gameId)
@@ -460,7 +461,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.gameRelayService.watchGame(client, gameId);
 	}
 
-	
+
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('pending invite')
 	async inviteToPlay(client: Socket, data : {friendId : string, mode : string} )
@@ -472,7 +473,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	/**
 	 * @brief get match history of a user
-	 * @param client 
+	 * @param client
 	 */
 	 @UseGuards(WsJwtAuthGuard)
 	 @SubscribeMessage('get history')
@@ -482,7 +483,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 }
 	 /**
 	 * @brief get match history of a user
-	 * @param client 
+	 * @param client
 	 */
 	  @UseGuards(WsJwtAuthGuard)
 	  @SubscribeMessage('changement of tab')
@@ -494,7 +495,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	 /**
 	 * @brief get achievements list of client
-	 * @param client 
+	 * @param client
 	 */
 	  @UseGuards(WsJwtAuthGuard)
 	  @SubscribeMessage('get achievements')
@@ -510,7 +511,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		console.log("MoveUP2 " + client.id);
 		await this.gameRelayService.MoveUp2(client);
 	}
-	
+
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('MoveDOWN2')
 	async MoveDown_Pad2(client : Socket)
@@ -518,7 +519,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		console.log("MoveDOWN2 " + client.id);
 		await this.gameRelayService.MoveDown2(client);
 	}
-	
+
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('StopMove2')
 	async StopMove_Pad2(client : Socket)
@@ -534,7 +535,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		//console.log("MoveUP " + client.id);
 		await this.gameRelayService.MoveUp(client);
 	}
-	
+
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('MoveDown')
 	async MoveDown(client : Socket)
