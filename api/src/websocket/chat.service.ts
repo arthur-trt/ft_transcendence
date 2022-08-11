@@ -201,14 +201,14 @@ export class ChatService {
 		const friendSocket: Socket = await this.findSocketId(friend)
 		await this.friendService.sendFriendRequest(client.data.user, friend);
 		if (friendSocket)
-			this.gateway.server.to(friendSocket.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(friend))
+			this.gateway.server.to(friendSocket.id).emit('newFriendRequest', "newfriendrequest", await this.friendService.getFriendsRequests(friend))
 	}
 
 	async acceptFriendRquest(client: Socket, friend: User)
 	{
 		const friendSocket: Socket = await this.findSocketId(friend)
 		await this.friendService.acceptFriendRequest(client.data.user, friend);
-		this.gateway.server.to(client.id).emit('newFriendRequest', "You have a new friend request", await this.friendService.getFriendsRequests(client.data.user))
+		this.gateway.server.to(client.id).emit('newFriendRequest', "You just accepted a new friend request", await this.friendService.getFriendsRequests(client.data.user))
 		if (friendSocket)
 			this.gateway.server.to(friendSocket.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(friend));
 		this.gateway.server.to(client.id).emit('friendList', "Friend list", await this.friendService.getFriendsofUsers(client.data.user));
