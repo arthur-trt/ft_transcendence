@@ -446,14 +446,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.gameRelayService.start_gameloop(client);
 	}
 
-
-	@UseGuards(WsJwtAuthGuard)
-	@SubscribeMessage('ActivesMatches')
-	async GameOngoing(client: Socket)
-	{
-		await this.gameRelayService.getOngoingMatches(client);
-	}
-
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('WatchGame')
 	async watchGame(client: Socket, gameId)
