@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 export default function Ladder() {
 
 	const [ladder, setLadder] = useState<any>([]);
-    var indents : any = [];
+    const indents : any = [];
     let i = 0;
     let rank = 1;
 
@@ -12,7 +12,7 @@ export default function Ladder() {
 			const response = await fetch(
 				`/api/game/ladder`
 			);
-			let actualData = await response.json();
+			const actualData = await response.json();
 			setLadder(actualData);
 		}
 		 getData()

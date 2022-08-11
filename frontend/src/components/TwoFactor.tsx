@@ -4,12 +4,12 @@ import { useNavigate } from "react-router-dom";
 function TwoFactor() {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
-  let navigate = useNavigate(); //redirection
+  const navigate = useNavigate(); //redirection
 
-  let handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
-      let res = await fetch("/api/auth/2fa/validate", {
+      const res = await fetch("/api/auth/2fa/validate", {
         method: "POST",
         body: JSON.stringify({
           token: name,
