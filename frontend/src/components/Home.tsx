@@ -43,7 +43,7 @@ export default function Home() {
     }
 
     function displayFriends(mode: number) {
-        var indents:any = [];
+        const indents:any = [];
         let j = 0;
         let i = 0;
         let online_friends = 0;
@@ -79,7 +79,7 @@ export default function Home() {
         return indents;
 
     }
-    let sendingInvite = (e:any) =>
+    const sendingInvite = (e:any) =>
     {
         socket.emit(('pending invite'), {friendId: e.currentTarget.id, mode: mode})
         navigate('/game');

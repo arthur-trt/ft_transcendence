@@ -18,7 +18,7 @@ import Home from "./components/Home";
 import NotFound from "./components/NotFound";
 
 export const socketo = io();
-export let dataGR: any = [];
+export const dataGR: any = [];
 
       socketo.on('accept invite', (id: string, mode:number) => {
         function isInArray(id:string){
@@ -44,7 +44,7 @@ export let dataGR: any = [];
  */
 function RequireAuth({ children }: { children: JSX.Element }) {
   const [cookies, ] = useCookies();
-  let location = useLocation();
+  const location = useLocation();
 
   if (!cookies.Authentication) {
     return <Navigate to="/login" state={{ from: location }} replace />;
