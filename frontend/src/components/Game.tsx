@@ -218,7 +218,6 @@ export default function Game() {
 
     useEffect(function callback() {
       return function () {
-          console.log("i change everything");
           socketo.emit("changement of tab");
       };
   }, [location]);
@@ -252,7 +251,6 @@ export default function Game() {
     {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const fontSize = (canvas.width / 20).toString();
-      console.log("canvas width = " + canvas.width + " fontSize = " + fontSize);
       ctx.fillStyle = "RED";
       ctx.font = fontSize + "px serif";
       ctx.textAlign = "center"
@@ -263,7 +261,6 @@ export default function Game() {
 
   function count_function()
   {
-    //console.log("count");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillText("Le jeu va démarrer dans " + (3 - i) + " secondes !", canvas.width / 2, canvas.height / 2);
     if (i === 3)
@@ -277,7 +274,6 @@ export default function Game() {
   }
 
   useEffect(() => {
-    console.log("useEffect/game_start " + gameStart);
     if (gameStart === true)
       socket.emit('game_start');
   }, [gameStart]);
@@ -396,7 +392,6 @@ export default function Game() {
   }
 
   function drawText(text: string, x: number, y: number, color: string, font: string) {
-    //console.log("drawText " + ctx);
     if (ctx != null) {
       ctx.fillStyle = color;
       ctx.font = font;
