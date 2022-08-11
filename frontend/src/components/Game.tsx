@@ -185,14 +185,11 @@ export default function Game() {
       })
 
       socket.on('game_position', (pos: dataT) => {
-        //console.log(canvas);
-        //console.log("socket.on/game_position");
         setData(adaptToCanvas(pos, canvas));
       });
 
       socket.on('game_countdownStart', (mode: boolean) => {
         setGameMode(mode);
-        console.log("socket.on/game_countdown, mode = " + mode);
         setCountdown(true);
       })
 
@@ -201,12 +198,9 @@ export default function Game() {
         {
           p1_score++;
           setP1Score(p1_score);
-          //P1score++;
         }
         else
         {
-          // setP2Score(P2score + 1);
-          // P2score++;
           p2_score++;
           setP2Score(p2_score);
         }

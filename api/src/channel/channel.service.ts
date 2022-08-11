@@ -206,7 +206,6 @@ export class ChannelService {
 	 */
 	public async unban(chanName: string, toUnBan: User): Promise<void>
 	{
-		console.log("Un Ban")
 		const channel: Channel = await this.getChannelByIdentifier(chanName);
 		channel.banned = channel.banned.filter((banned) => {
 			return banned.id !== toUnBan.id
@@ -222,14 +221,11 @@ export class ChannelService {
 	 */
 	public async unmute(chanName: string, toUnMute: User): Promise<void>
 	{
-		console.log("Un Mute")
 		const channel: Channel = await this.getChannelByIdentifier(chanName);
 		channel.muted = channel.muted.filter((muted) => {
 			return muted.id !== toUnMute.id
 		})
 		await channel.save();
-		console.log("Muted" + channel.muted)
-		console.log( "Id " + channel.mutedId)
 	}
 
 	/**
@@ -245,7 +241,6 @@ export class ChannelService {
 			throw new HttpException("You must be admin to ban an user from chan.", HttpStatus.FORBIDDEN);
 		if (channel.bannedId.includes(toBan.id))
 			throw new HttpException("This user is already banned.", HttpStatus.FORBIDDEN);
-		console.log("Bannishement");
 		/** Step one : Deleting user from channel */
 		await this.deleteUserFromChannel(user, channel, toBan);
 		/** Step two : add it to ban list  */
@@ -254,7 +249,7 @@ export class ChannelService {
 		/** Step three : set timeout to remove from ban list */
 		setTimeout(() => {
 			this.unban(channel.name, toBan)
-			.catch(() => { console.log(':) c fix les nazes') })
+			.catch(() => { })
 		}, 30000);
 	}
 
@@ -272,14 +267,11 @@ export class ChannelService {
 			throw new HttpException("User " + toMute.name + " is not in channel", HttpStatus.FORBIDDEN);
 		if (!channel.adminsId.includes(user.id))
 			throw new HttpException("You must be admin to mute an user from chan.", HttpStatus.FORBIDDEN);
-		console.log("Mute");
 		channel.muted = [...channel.muted, toMute];
 		await channel.save();
-		console.log("Muted" + channel.muted)
-		console.log( "Id " + channel.mutedId)
 		setTimeout(() => {
 			this.unmute(channel.name, toMute)
-				.catch(() => { console.log(':) c fix les nazes') })
+				.catch(() => {})
 		}, 30000);
 	}
 }

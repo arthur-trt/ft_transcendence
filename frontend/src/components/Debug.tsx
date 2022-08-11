@@ -103,7 +103,6 @@ export default function Debug() {
 	}
 
 	let onDropdownSelected = (e: any) => {
-		console.log("THE VAL", e.target.value);
 		const cookies = new Cookies();
 		cookies.set("Authentication", localStorage.getItem(e.target.value), { path: '/' });
 	}
