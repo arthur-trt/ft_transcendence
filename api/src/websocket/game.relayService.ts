@@ -149,7 +149,10 @@ export class GameRelayService {
 			if (client == this.player1.socket || client == this.player2.socket)
 				client == this.player1.socket ? this.set_winner(client, 2) : this.set_winner(client, 1);
 			else if (this.players.has(client))
-					this.players.delete(client);
+            {
+                this.gateway.server.to(client.id).emit('leave_queue');
+                this.players.delete(client);
+            }
         }
 
     async startMatch(players, mode) {

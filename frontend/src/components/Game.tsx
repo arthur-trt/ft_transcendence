@@ -212,6 +212,10 @@ export default function Game() {
         }
       })
 
+      socket.on('leave_queue', () => {
+        kill_sockets(socket);
+      })
+
       socket.on('game_end', (res : boolean) => {
         kill_sockets(socket);
         render_game_end(res, canvas, P1Name, P2Name);
