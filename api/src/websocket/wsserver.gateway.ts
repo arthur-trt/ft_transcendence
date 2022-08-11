@@ -480,7 +480,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	  @SubscribeMessage('changement of tab')
 	  async changeTab(client : Socket)
 	  {
-		  //console.log("change of tabbbbbbb")
 		  await this.gameRelayService.changeTab(client);
 	  }
 
@@ -499,7 +498,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('MoveUP2')
 	async MoveUp_Pad2(client : Socket)
 	{
-		console.log("MoveUP2 " + client.id);
 		await this.gameRelayService.MoveUp2(client);
 	}
 
@@ -507,7 +505,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('MoveDOWN2')
 	async MoveDown_Pad2(client : Socket)
 	{
-		console.log("MoveDOWN2 " + client.id);
 		await this.gameRelayService.MoveDown2(client);
 	}
 
@@ -515,7 +512,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('StopMove2')
 	async StopMove_Pad2(client : Socket)
 	{
-		console.log("STOPMove2 " + client.id);
 		await this.gameRelayService.StopMove2(client);
 	}
 
@@ -523,7 +519,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('MoveUp')
 	async MoveUp(client : Socket)
 	{
-		//console.log("MoveUP " + client.id);
 		await this.gameRelayService.MoveUp(client);
 	}
 
@@ -531,7 +526,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('MoveDown')
 	async MoveDown(client : Socket)
 	{
-		//console.log("MoveDOWN " + client.id);
 		await this.gameRelayService.MoveDown(client);
 	}
 
@@ -539,7 +533,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('StopMove')
 	async StopMove(client : Socket)
 	{
-		//console.log("STOPMove " + client.id);
 		await this.gameRelayService.StopMove(client);
 	}
 

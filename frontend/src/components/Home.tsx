@@ -83,18 +83,15 @@ export default function Home() {
     {
         socket.emit(('pending invite'), {friendId: e.currentTarget.id, mode: mode})
         navigate('/game');
-        console.log('sending invite')
     }
     function handleLaunchMatchMaking(mode: number) {
         if (mode === 1)
         {
-            console.log("MODE SIMPLE");
             socket.emit('game_inQueue', mode);
             navigate('/game');
         }
         else if (mode === 2)
         {
-            console.log("MODESPECIAL");
             socket.emit('game_inQueue', mode);
             navigate('/game');
         }

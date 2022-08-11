@@ -60,7 +60,6 @@ export default function Profile() {
         });
         socket.emit('get achievements');
         socket.on('Achievements', (tab: any) => {
-            console.log(tab);
             setAchievements(tab);
         });
 
@@ -118,16 +117,19 @@ export default function Profile() {
         event.preventDefault();
 
         var postFile = new FormData();
-        postFile.append('file', event.target[0].files[0]);
-
-        const response = await fetch('/api/user/avatar', {
-            method: 'POST',
-            body: postFile,
-        })
-        if (!response.ok)
-            alert("Error : avatar");
-        else
-            window.location.reload();
+        if ( event.target[0].files[0])
+        {
+            postFile.append('file', event.target[0].files[0]);
+    
+            const response = await fetch('/api/user/avatar', {
+                method: 'POST',
+                body: postFile,
+            })
+            if (!response.ok)
+                alert("Error : avatar");
+            else
+                window.location.reload();
+        }
     }
 
     // FETCH
@@ -293,7 +295,7 @@ export default function Profile() {
             </div>
             <div className="profile-upload-img">
                 <form onSubmit={handleSubmitAvatar}>
-                    <input type="file"/>
+                    <input type="file" accept="image/*" required/>
                     <button type="submit">UPLOAD</button>
                 </form>
             </div>

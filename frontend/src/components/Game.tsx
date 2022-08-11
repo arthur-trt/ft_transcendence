@@ -14,7 +14,7 @@ export default function Game() {
     height: number,
     color: string
   }
-  let location = useLocation();
+  const location = useLocation();
 
 
   type ballT = {
@@ -68,15 +68,15 @@ export default function Game() {
   const [ctx, setCtx] = useState<any>();
   const [countdown, setCountdown] = useState<boolean>(false);
   const [gameStart, setGameStart] = useState<boolean>(false);
-  let [isBabyPong, setGameMode] = useState<boolean>(true);
+  const [isBabyPong, setGameMode] = useState<boolean>(true);
 
   // const location = useLocation();
 
-  let [P1score, setP1Score] = useState(0);
-  let [P2score, setP2Score] = useState(0);
+  const [P1score, setP1Score] = useState(0);
+  const [P2score, setP2Score] = useState(0);
 
-  let [P1Name, setP1Name] = useState<string>("");
-  let [P2Name, setP2Name] = useState<string>("");
+  const [P1Name, setP1Name] = useState<string>("");
+  const [P2Name, setP2Name] = useState<string>("");
   //c'est bizarre mais touchez a rien svp
   let name1:string;
   let name2:string;
@@ -196,7 +196,7 @@ export default function Game() {
         setCountdown(true);
       })
 
-      socket.on('update_score', (res : Boolean) => {
+      socket.on('update_score', (res : boolean) => {
         if (res === true)
         {
           p1_score++;
@@ -447,7 +447,7 @@ export default function Game() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(imgRef.current, canvas.width * 0.35, canvas.height * 0.3, canvas.width * 0.3, canvas.height * 0.6);
       ctx.fillStyle = '#1dd1a1';
-      let fontSize = (canvas.width / 20).toString();
+      const fontSize = (canvas.width / 20).toString();
       ctx.font = fontSize + "px serif";
       ctx.fillText(p1_score + " - " + p2_score, canvas.width * 0.5, canvas.height * 0.25);
 

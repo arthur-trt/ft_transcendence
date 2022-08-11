@@ -93,6 +93,8 @@ export class MessageService {
 		const user2 = await this.userService.getUserByIdentifier(target.name);
 		if (user2.blocked.includes(src.id))
 			throw new HttpException('This user blocked you.', HttpStatus.FORBIDDEN)
+		if (src.blocked.includes(target.id))
+			throw new HttpException('You blocked this user.', HttpStatus.FORBIDDEN)
 		await this.pmRepo.save({
 			sender: src.id,
 			target: user2.id,
@@ -109,8 +111,6 @@ export class MessageService {
 	 */
 	public async getPrivateMessage(user1: User, user2: User) : Promise<privateMessage[]>
 	{
-		if (user1.blocked && user1.blocked.includes(user2.id))
-			throw new HttpException('Cannot get messages with a blocked user', HttpStatus.OK)
 		const msgs = this.pmRepo.createQueryBuilder("PM")
 			.leftJoinAndMapOne("PM.sender", User, 'users', 'users.id = PM.sender')
 			.leftJoinAndMapOne("PM.target", User, 'usert', 'usert.id = PM.target')

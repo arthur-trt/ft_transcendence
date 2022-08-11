@@ -69,7 +69,6 @@ export class GameService {
 	 */
 	async endMatch(match: endMatchDto): Promise<any> // en vrai c'est MatchHistory[]
 	{
-		console.log("Match has ended");
 		const endedMatch: MatchHistory = await this.findMatchById(match.id);
 		if (!endedMatch)
 			throw new HttpException('Match not found', HttpStatus.NOT_FOUND);
