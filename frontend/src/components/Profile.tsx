@@ -11,8 +11,6 @@ export default function Profile() {
     const [name, setName] = useState("");
     const [inputState, setInputState] = useState(0);
 
-    const [errorMsg, setErrorMsg] = useState<string>("");
-
     // NEW TWO-FA
     const [enable_disable, setEnableDisable] = useState("");
     const [indexDisplayTwoFa, setIndexDisplayTwoFa] = useState(0);
@@ -207,7 +205,8 @@ export default function Profile() {
         let res = await fetch("/api/auth/logout", {
             method: "GET",
         });
-        window.location.reload();
+        if (res.status === 200)
+            window.location.reload();
     }
 
     function displayHistory() {
@@ -296,7 +295,6 @@ export default function Profile() {
                     <input type="file"/>
                     <button type="submit">UPLOAD</button>
                 </form>
-                {errorMsg && <h3 className="error"> {errorMsg} </h3>}
             </div>
 
                 <div className="profile-name">

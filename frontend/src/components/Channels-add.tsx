@@ -98,7 +98,7 @@ export default function Channels() {
 
     }
     getData()
-  }, [])
+  }, [navigate, removeCookie])
 
   // REACT HOOK TO SET UP SOCKET CONNECTION AND LISTENING
   useEffect(
@@ -165,7 +165,7 @@ export default function Channels() {
     }
     if (!flag)
       setDisplayChat(0);
-  }, [data]);
+  }, [data, chanName, datame?.id]);
 
 
   // FUNCTIONS TO HANDLE ACTIONS ON CHANNELS
@@ -468,7 +468,8 @@ export default function Channels() {
         i++;
       }
       // GAME REQUEST
-      rFlag++;
+      if (rFlag)
+        rFlag++;
       i = 0;
       let index = 0;
       while (i < dataGR?.length)

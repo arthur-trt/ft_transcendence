@@ -28,11 +28,11 @@ export const Header = () => {
                 // Debug function to remove
                 localStorage.setItem(responseJson.name, cookies.Authentication);
             }).catch((err) => {
-                const mute = err;
+                // const mute = err;
             })
         }
         getData()
-    }, [])
+    }, [cookies.Authentication, navigate, removeCookie])
 
     useEffect(
         () => {
