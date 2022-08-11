@@ -132,9 +132,9 @@ export default function Channels() {
         setPrivTarget(msg.split(' '));
         setMessagesPriv(tab);
       });
-      socket.on('error', (msg: any) => {
-			  alert(msg.event);
-      });
+      // socket.on('error', (msg: any) => {
+			//   alert(msg.event);
+      // });
       socketo.on('accept invite', (id: string, mode:number) => {
         setRflag(rFlag => rFlag + 1);
       });

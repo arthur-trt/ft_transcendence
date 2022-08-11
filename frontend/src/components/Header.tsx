@@ -3,7 +3,6 @@ import 'font-awesome/css/font-awesome.min.css';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCookies } from "react-cookie";
 import { socketo } from '../index';
-import { selectOptions } from "@testing-library/user-event/dist/types/setup/directApi";
 
 export const Header = () => {
 
@@ -38,8 +37,15 @@ export const Header = () => {
     useEffect(
         () => {
           socketo.on('accept invite', (id: string, mode:number) => {
-            setGameInvite("New game request !");
+            setGameInvite("Game : new request !");
           });
+          socketo.on('newFriendRequest', (msg: any, tab: any) => {
+            if (msg === "newfriendrequest")
+                setGameInvite("Friend : new request !")
+          });
+          socketo.on('error', (msg: any) => {
+            setGameInvite("Error : " + msg.event);
+            });
           
         }, []);
 
@@ -49,12 +55,12 @@ export const Header = () => {
               }, 8000);
             if (!gameInvite)
                 return("");
-            else
-            {
-                return (
-                    <h5>{gameInvite}</h5>
-                )
-            }
+            else if (gameInvite[0] === 'G')
+                return (<div className="notifbg" style={{backgroundColor: '#f0932b'}}><h5>{gameInvite}</h5></div>)
+            else if (gameInvite[0] === 'F')
+                return (<div className="notifbg" style={{backgroundColor: '#54a0ff'}}><h5>{gameInvite}</h5></div>)
+            else if (gameInvite[0] === 'E')
+                return (<div className="notifbg" style={{backgroundColor: '#eb4d4b'}}><h5>{gameInvite}</h5></div>)
         }
 
     return (

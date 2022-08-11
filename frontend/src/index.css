@@ -149,9 +149,8 @@ code {
 
 .notifications {
   position: absolute;
-  background-color: #30336b;
-  color: white;
   right: 0;
+  color: white;
   margin-top: 100px;
   margin-right: 20px;
   height: 40px;
@@ -166,6 +165,14 @@ code {
   margin: 0;
   margin-left: 10px;
   margin-right: 10px;
+}
+
+.notifbg {
+  height: 40px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ------------------------------------- */
