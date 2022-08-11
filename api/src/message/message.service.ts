@@ -93,6 +93,8 @@ export class MessageService {
 		const user2 = await this.userService.getUserByIdentifier(target.name);
 		if (user2.blocked.includes(src.id))
 			throw new HttpException('This user blocked you.', HttpStatus.FORBIDDEN)
+		if (src.blocked.includes(target.id))
+			throw new HttpException('You blocked this user.', HttpStatus.FORBIDDEN)
 		await this.pmRepo.save({
 			sender: src.id,
 			target: user2.id,
