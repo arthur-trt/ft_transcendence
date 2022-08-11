@@ -446,14 +446,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		await this.gameRelayService.start_gameloop(client);
 	}
 
-
-	@UseGuards(WsJwtAuthGuard)
-	@SubscribeMessage('ActivesMatches')
-	async GameOngoing(client: Socket)
-	{
-		await this.gameRelayService.getOngoingMatches(client);
-	}
-
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('WatchGame')
 	async watchGame(client: Socket, gameId)
@@ -466,7 +458,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('pending invite')
 	async inviteToPlay(client: Socket, data : {friendId : string, mode : string} )
 	{
-		console.log("pending invite")
 		await this.gameRelayService.pendingInvite(client, data);
 	}
 

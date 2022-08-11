@@ -118,7 +118,7 @@ export class GameService {
 	{
 		const list: MatchHistory[]  = await this.MatchRepo.find({
 			where :{
-				finished: false,		
+				finished: false,
 			},
 		})
 		return list;
@@ -126,8 +126,6 @@ export class GameService {
 
 	async checkForAchievements(user: User)
 	{
-		console.log(user.name,"lost == ", user.lostMatches, "times")
-		console.log(user.name, "win == ", user.wonMatches, "times")
 		if (user.wonMatches == user.lostMatches)
 		{
 			this.addAchievement(user, Achievements_types.HALFHALF);
@@ -148,7 +146,6 @@ export class GameService {
 
 	async addAchievement(user: User , achievement: Achievements_types)
 	{
-		console.log("CACA : ",await this.achievementsService.hasAchievements(achievement, user))
 		if (await this.achievementsService.hasAchievements(achievement, user) == false)
 		{
 			await this.achievementsService.createAchievements(user, achievement);
