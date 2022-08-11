@@ -159,11 +159,11 @@ export default function Channels() {
     z = 0;
     while (z < data?.length)
     {
-      if (chanName === data[z]?.name)
+      if (chanName === data[z]?.name && !ispriv)
         flag = 1;
       z++;
     }
-    if (!flag)
+    if (!flag && !ispriv)
       setDisplayChat(0);
   }, [data, chanName, datame?.id]);
 
