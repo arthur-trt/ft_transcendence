@@ -28,7 +28,6 @@ function TwoFactor() {
 
       }
     } catch (err) {
-      console.log(err);
     }
   };
 
