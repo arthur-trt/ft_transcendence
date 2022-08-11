@@ -35,7 +35,6 @@ export class ChatService {
 	}
 
 	async init() {
-		console.log("init bot")
 		try {
 
 			this.chatBot = await this.userService.getUserByIdentifier("chatBot")
