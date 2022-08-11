@@ -147,6 +147,27 @@ code {
   cursor: pointer;
 }
 
+.notifications {
+  position: absolute;
+  background-color: #30336b;
+  color: white;
+  right: 0;
+  margin-top: 100px;
+  margin-right: 20px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.notifications h5 {
+  margin: 0;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
 /* ------------------------------------- */
 /* --------------HOME------------------- */
 /* ------------------------------------- */
@@ -768,6 +789,9 @@ margin-left: 5px;
   width: fit-content;
   padding: 4px;
   border-radius: 5px;
+  max-width: 200px;
+
+  word-wrap: break-word;
 }
 
 .chat-message-info .ellipsis:hover {
@@ -1028,16 +1052,9 @@ textarea:focus, input:focus{
   margin-right: 10px;
 }
 
-.history-title h4 {
+.profile-history h4 {
   margin: 0;
 }
-
-.history-title {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 
 .history-line {
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
@@ -1084,6 +1101,39 @@ width: 10%;
 .history-line .oppname {
 width: 20%;
 text-align: right;
+}
+
+.profile-achievements {
+  text-align: center;
+  margin-left: 10px;
+  margin-right: 10px;
+  padding-bottom: 20px;
+}
+
+.profile-achievements h4 {
+  margin: 0;
+}
+
+.achievements-line {
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  height: 30px;
+  border-radius: 5px;
+}
+
+.achievements-line .trophy {
+  width: 20%;
+  color: gold;
+}
+
+.achievements-line .name {
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: bold;
+  width: 80%;
 }
 
 
