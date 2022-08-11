@@ -392,10 +392,10 @@ export default function Channels() {
     if (switching === 0) {
       while (i < datausers?.length) {
         profilelink = "/profile/" + datausers[i]?.id;
-        if (datausers[i]?.status === 'online')
+        if (isWatchable(datausers[i]?.id))
+          borderStatus = "orange";
+        else if (datausers[i]?.status === 'online')
           borderStatus = 'springgreen';
-        else if (datausers[i]?.status === 'ingame')
-          borderStatus = 'orange';
         else if (datausers[i]?.status === 'offline')
           borderStatus = 'red';
 
@@ -417,10 +417,10 @@ export default function Channels() {
     if (switching === 1) {
       while (i < datausers?.length) {
         profilelink = "/profile/" + datausers[i]?.id;
-        if (datausers[i]?.status === 'online')
+        if (isWatchable(datausers[i]?.id))
+          borderStatus = "orange";
+        else if (datausers[i]?.status === 'online')
           borderStatus = 'springgreen';
-        else if (datausers[i]?.status === 'ingame')
-          borderStatus = 'orange';
         else if (datausers[i]?.status === 'offline')
           borderStatus = 'red';
         
