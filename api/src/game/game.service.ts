@@ -123,6 +123,30 @@ export class GameService {
 		return list;
 	}
 
+	async isInGame(user : User)
+	{
+		let isIn: MatchHistory  = await this.MatchRepo.findOne({
+			where :  {
+				finished: false, 
+				user1: user.id
+			},
+		})
+		if (!isIn) 
+		{ 
+			isIn  = await this.MatchRepo.findOne({
+			where :{
+				finished: false, 
+				user2: user.id
+			}, 
+		})
+		}
+		console.log(isIn);
+		if (isIn != null)
+			return true;
+		console.log(' is not ')
+		return false;
+	}
+
 	async checkForAchievements(user: User)
 	{
 		if (user.wonMatches == user.lostMatches)
