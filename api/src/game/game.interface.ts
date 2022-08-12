@@ -44,7 +44,7 @@ export interface Match
     y: number;
     watcher : User;
     modeSpecial: boolean;
-   
+
 }
 export interface dataFront {
     player1_paddle_y: number;
@@ -72,4 +72,28 @@ export interface Names {
 export interface Scores {
     p1 : number;
     p2 : number;
+}
+
+export enum direction {
+    UP,
+    DOWN
+}
+
+export interface matchParameters {
+    dataFront: dataFront,
+    ball: Ball,
+    p1_socket: Socket,
+    p1_paddle: Paddle,
+    p1_paddle_spe: Paddle,
+    p2_socket: Socket,
+    p2_paddle: Paddle,
+    p2_paddle_spe: Paddle,
+    loop_stop: NodeJS.Timer,
+    p1_dir: direction,
+    p1_dir_spe: direction
+    p2_dir: direction,
+    p2_dir_spe: direction,
+    names: Names,
+    score: Scores,
+    isSpeMode: boolean
 }

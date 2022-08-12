@@ -12,6 +12,7 @@ import { newChannelDto } from 'src/dtos/newChannel.dto';
 import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto.dto';
 import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
 import { FriendshipsService } from 'src/friendships/friendships.service';
+import { GameRelayService2 } from 'src/game/game.logic';
 import { MessageService } from 'src/message/message.service';
 import { GameService } from '../game/game.service';
 import { User } from '../user/user.entity';
@@ -38,7 +39,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly friendService: FriendshipsService,
 		protected readonly gameService: GameService,
 		protected readonly gameRelayService: GameRelayService,
-
+		@Inject(forwardRef(() => GameRelayService2)) protected readonly gameRelayService2 : GameRelayService2,
 	  @Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
 	  @Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
 		) { }
@@ -432,7 +433,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('game_inQueue')
 	async getInQueue(client : Socket, mode) {
-		await this.gameRelayService.getInQueue(client, mode)
+		await this.gameRelayService2.getInQueue(client, mode)
 	}
 
 	/**

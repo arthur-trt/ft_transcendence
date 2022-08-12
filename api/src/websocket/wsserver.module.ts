@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ChannelModule } from 'src/channel/channel.module';
 import { FriendshipsModule } from 'src/friendships/friendships.module';
@@ -10,13 +10,14 @@ import { WSServer } from './wsserver.gateway';
 import { GameModule } from 'src/game/game.module';
 import { GameRelayService } from './game.relayService';
 import { AchievementsModule } from 'src/achievements/achievements.module';
+import { GameRelayService2 } from 'src/game/game.logic';
 
 
 @Module({
 
-	imports: [UserModule, MessageModule, JwtModule, ChannelModule, FriendshipsModule, GameModule, AchievementsModule],
+	imports: [UserModule, MessageModule, JwtModule, ChannelModule, FriendshipsModule,  forwardRef(() => GameModule), AchievementsModule],
 	exports: [ChatService],
-	providers: [WSServer, ChatService, ConnectService, GameRelayService]
+	providers: [WSServer, ChatService, ConnectService, GameRelayService, GameRelayService2]
 })
 
 export class WSServerModule {}
