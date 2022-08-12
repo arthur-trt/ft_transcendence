@@ -16,7 +16,7 @@ import { GameRelayService2 } from 'src/game/game.logic';
 @Module({
 
 	imports: [UserModule, MessageModule, JwtModule, ChannelModule, FriendshipsModule,  forwardRef(() => GameModule), AchievementsModule],
-	exports: [ChatService],
+	exports: [ChatService, WSServer],
 	providers: [WSServer, ChatService, ConnectService, GameRelayService, GameRelayService2]
 })
 
