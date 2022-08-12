@@ -88,7 +88,7 @@ export default function Profile() {
                 const response = await fetch(
                     `/api/user/me`
                 );
-                let actualData = await response.json();
+                const actualData = await response.json();
                 setData(actualData);
                 if (actualData.TwoFA_enable)
                     setEnableDisable("DISABLE 2FA");
@@ -143,7 +143,7 @@ export default function Profile() {
                 const response = await fetch(
                     `/api/user/me`
                 );
-                let actualData = await response.json();
+                const actualData = await response.json();
                 setData(actualData);
                 if (actualData.TwoFA_enable)
                     setEnableDisable("DISABLE 2FA");
@@ -238,55 +238,47 @@ export default function Profile() {
         const indents : any = [];
         let i = 0;
         let bgColor = '#ff7675';
-        let MyRes = 0;
-        let OppId = 0;
-        let OppRes = 0;
         let VorD = "DEFEAT";
-        let OppIndex = 0;
 
         while (i < history?.length)
         {
-            if (history[i]?.user1 === data.id)
+            if (history[i]?.user1.name === data.name)
             {
-                MyRes = history[i]?.scoreUser1;
-                OppId = history[i]?.user2;
-                OppRes = history[i]?.scoreUser2;
+                if (history[i]?.scoreUser1 > history[i]?.scoreUser2)
+                {
+                    VorD = "VICTORY"
+                    bgColor = '#74b9ff';
+                }
+                indents.push(
+                    <div style={{backgroundColor: bgColor}} className='history-line' key={i}>
+                        <div className="result">{VorD}</div>
+                        <div className="myavatar"><img src={data.avatar_url} alt="avatar"></img></div>
+                        <div className="myname">{data.name}</div>
+                        <div className="score">{history[i]?.scoreUser1} - {history[i]?.scoreUser2}</div>
+                        <div className="oppname">{history[i]?.user2.name}</div>
+                        <div className="oppavatar"><img src={history[i]?.user2.avatar_url} alt="avatar"></img></div>
+                    </div>);
             }
             else
             {
-                MyRes = history[i]?.scoreUser2;
-                OppId = history[i]?.user1;
-                OppRes = history[i]?.scoreUser1;
+                if (history[i]?.scoreUser2 > history[i]?.scoreUser1)
+                {
+                    VorD = "VICTORY"
+                    bgColor = '#74b9ff';
+                }
+                indents.push(
+                    <div style={{backgroundColor: bgColor}} className='history-line' key={i}>
+                        <div className="result">{VorD}</div>
+                        <div className="myavatar"><img src={data.avatar_url} alt="avatar"></img></div>
+                        <div className="myname">{data.name}</div>
+                        <div className="score">{history[i]?.scoreUser2} - {history[i]?.scoreUser1}</div>
+                        <div className="oppname">{history[i]?.user1.name}</div>
+                        <div className="oppavatar"><img src={history[i]?.user1.avatar_url} alt="avatar"></img></div>
+                    </div>);
             }
-            if (MyRes > OppRes)
-            {
-                VorD = "VICTORY"
-                bgColor = '#74b9ff';
-            }
-            let j = 0;
-            while (j < datausers?.length)
-            {
-                if (datausers[j]?.id === OppId)
-                    OppIndex = j;
-                j++;
-            }
-            indents.push(
-                <div style={{backgroundColor: bgColor}} className='history-line' key={i}>
-                    <div className="result">{VorD}</div>
-                    <div className="myavatar"><img src={data.avatar_url} alt="avatar"></img></div>
-                    <div className="myname">{data.name}</div>
-                    <div className="score">{MyRes} - {OppRes}</div>
-                    <div className="oppname">{datausers[OppIndex]?.name}</div>
-                    <div className="oppavatar"><img src={datausers[OppIndex]?.avatar_url} alt="avatar"></img></div>
-                </div>
-            );
             i++;
             VorD = "DEFEAT";
             bgColor = '#ff7675';
-            MyRes = 0;
-            OppId = 0;
-            OppRes = 0;
-            OppIndex = 0;
         }
         return (indents);
     }
