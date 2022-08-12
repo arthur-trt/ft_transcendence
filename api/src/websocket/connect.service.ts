@@ -157,5 +157,6 @@ export class ConnectService {
 		for (const [user, socket] of this.gateway.activeUsers) {
 			this.getUserList(socket);
 		}
+		this.gateway.server.to(client.id).emit('toUpdate');
 	}
 }
