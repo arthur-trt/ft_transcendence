@@ -123,7 +123,7 @@ export class ConnectService {
 		}
 		if (all_users)
 		{
-			for (const user of all_users)
+			for (let user of all_users)
 			{
 				if (!data.find(element => element.id == user.id) && client.data.user.id != user.id)
 				{
@@ -146,10 +146,13 @@ export class ConnectService {
 
 	async refreshUsers(client : Socket)
 	{
-		if (this.gateway.activeUsers.has(client.data.user.id))
-		{
-			this.gateway.activeUsers.delete(client.data.user);
-			this.gateway.activeUsers.set(await this.userService.getUserByIdentifier(client.data.user.id), client);
+		const u : User = await this.userService.getUserByIdentifier(client.data.user.id);
+		for (const entries of this.gateway.activeUsers.keys()) {
+			if (entries.id == client.data.user.id) {
+				this.gateway.activeUsers.delete(entries);
+				this.gateway.activeUsers.set(await this.userService.getUserByIdentifier(client.data.user.id), client);
+				break;
+			}
 		}
 		for (const [user, socket] of this.gateway.activeUsers) {
 			this.getUserList(socket);
