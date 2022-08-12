@@ -4,6 +4,7 @@ import { faPen } from '@fortawesome/free-solid-svg-icons'
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
 import { faTrophy } from '@fortawesome/free-solid-svg-icons'
 import { socketo } from '../index';
+import { getBlobFromDataTransferItem } from "@testing-library/user-event/dist/types/utils";
 
 export default function Profile() {
 
@@ -65,7 +66,6 @@ export default function Profile() {
 
     }, []);
 
-
     // FETCH
     async function handleChangeName(e: any) {
         e.preventDefault();
@@ -84,10 +84,23 @@ export default function Profile() {
         })
         if (!response.ok)
             alert("Error : username");
+        // else
+        //     window.location.reload();
         else
-            window.location.reload();
+        {
+                const response = await fetch(
+                    `/api/user/me`
+                );
+                let actualData = await response.json();
+                setData(actualData);
+                if (actualData.TwoFA_enable)
+                    setEnableDisable("DISABLE 2FA");
+                else if (!actualData.TwoFA_enable)
+                    setEnableDisable("ENABLE 2FA");
+        }
         setName("");
     }
+
 
     let handleInputName = () => {
         let i = inputState;
