@@ -103,8 +103,8 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 * @param withCurrentUser if true user who made the request will be included
 	 * @returns
 	 */
-	protected listConnectedUser(client: Socket, all_users: User[], active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
-		this.connectService.listConnectedUser(client, all_users, active_user, withCurrentUser);
+	protected listConnectedUser(client: Socket, all_users: User[], withCurrentUser: boolean = true) {
+		this.connectService.listConnectedUser(client, all_users, withCurrentUser);
 	}
 
 

@@ -67,7 +67,7 @@ export class ConnectService {
 		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
-				this.listConnectedUser(socket, this.all_users, this.gateway.activeUsers, false)
+				this.listConnectedUser(socket, this.all_users, false)
 			);
 		});
 
@@ -97,7 +97,7 @@ export class ConnectService {
 		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
-				this.listConnectedUser(socket, this.all_users, this.gateway.activeUsers, false)
+				this.listConnectedUser(socket, this.all_users, false)
 			);
 		});
 		client.emit('bye');
@@ -105,11 +105,11 @@ export class ConnectService {
 	}
 
 
-	public listConnectedUser(client: Socket, all_users: User[] ,active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
+	public listConnectedUser(client: Socket, all_users: User[], withCurrentUser: boolean = true) {
 		const data: User[] = [];
 		let i = 0;
 
-		for (const user of active_user.keys()) {
+		for (const user of this.gateway.activeUsers.keys()) {
 			user.status = "online";
 			if (client.data.user.id == user.id && withCurrentUser) {
 				data[i] = user;
@@ -139,7 +139,7 @@ export class ConnectService {
 
 		this.gateway.server.to(client.id).emit(
 			'listUsers',
-			this.listConnectedUser(client, this.all_users, this.gateway.activeUsers, false)
+			this.listConnectedUser(client, this.all_users, false)
 		);
 	}
 
