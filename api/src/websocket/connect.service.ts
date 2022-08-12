@@ -123,7 +123,7 @@ export class ConnectService {
 		}
 		if (all_users)
 		{
-			for (let user of all_users)
+			for (const user of all_users)
 			{
 				if (!data.find(element => element.id == user.id) && client.data.user.id != user.id)
 				{
@@ -157,5 +157,6 @@ export class ConnectService {
 		for (const [user, socket] of this.gateway.activeUsers) {
 			this.getUserList(socket);
 		}
+		this.gateway.server.to(client.id).emit('toUpdate');
 	}
 }
