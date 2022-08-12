@@ -27,9 +27,11 @@ function collision(b: Ball, p: Paddle) {
 }
 
 const VICTORY = 3;
+
+
 @Injectable()
 export class GameRelayService {
-    constructor(
+    constructor (
         protected readonly jwtService: JwtService,
         protected readonly userService: UserService,
         protected readonly gameService: GameService,
@@ -133,7 +135,6 @@ export class GameRelayService {
      * @param mode
      */
      @UseGuards(WsJwtAuthGuard)
-
      async pendingInvite(client: Socket, data : {friendId : string, mode : string} ) {
          const friend = await this.userService.getUserByIdentifier(data.friendId)
          const friendSocket = await this.chatservice.findSocketId(friend);
@@ -144,11 +145,10 @@ export class GameRelayService {
      * @brief Quit the game when user changes tab
      * @param client
      */
-      @UseGuards(WsJwtAuthGuard)
-      async changeTab(client: Socket)
-	  {
-		  this.handleDisconnect(client);
-      }
+    @UseGuards(WsJwtAuthGuard)
+    async changeTab(client: Socket) {
+		this.handleDisconnect(client);
+    }
 
         /**
          * @brief Check if user is disconnected

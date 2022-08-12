@@ -105,11 +105,12 @@ export class ConnectService {
 	}
 
 
-	public listConnectedUser(client: Socket, all_users: User[] ,active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
+	public async listConnectedUser(client: Socket, all_users: User[] ,active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
 		const data: User[] = [];
 		let i = 0;
 
-		for (const user of active_user.keys()) {
+		for (let [user] of active_user) {
+			user = await this.userService.getUserByIdentifier(user.id);
 			user.status = "online";
 			if (client.data.user.id == user.id && withCurrentUser) {
 				data[i] = user;
@@ -122,8 +123,9 @@ export class ConnectService {
 		}
 		if (all_users)
 		{
-			for (const user of all_users)
+			for (let user of all_users)
 			{
+				user = await this.userService.getUserByIdentifier(user.id);
 				if (!data.find(element => element.id == user.id) && client.data.user.id != user.id)
 				{
 					user.status = "offline";
@@ -141,5 +143,12 @@ export class ConnectService {
 			'listUsers',
 			this.listConnectedUser(client, this.all_users, this.gateway.activeUsers, false)
 		);
+	}
+
+	async refreshUsers()
+	{
+		for (const [user, socket] of this.gateway.activeUsers) {
+			this.getUserList(socket);
+		}
 	}
 }
