@@ -18,7 +18,6 @@ export default function Profile() {
     const [codeTwoFa, setCodeTwoFa] = useState<string>("");
 
     const [history, setHistory] = useState<any>([]);
-    const [datausers, setDatausers] = useState<any>([]);
     const [achievements, setAchievements] = useState<any>([]);
 
     // FETCH
@@ -51,12 +50,8 @@ export default function Profile() {
     () => {
         const socket = socketo;
         socket.emit('get history');
-        socket.emit('getUsers');
         socket.on('MatchHistory', (tab:any) => {
             setHistory(tab);
-        });
-        socket.on('listUsers', (tab: any) => {
-            setDatausers(tab);
         });
         socket.emit('get achievements');
         socket.on('Achievements', (tab: any) => {
@@ -171,7 +166,18 @@ export default function Profile() {
                 alert(resJson.message);
             }
             else
-                window.location.reload();
+            {
+                const response = await fetch(
+                    `/api/user/me`
+                );
+                const actualData = await response.json();
+                setData(actualData);
+                if (actualData.TwoFA_enable)
+                    setEnableDisable("DISABLE 2FA");
+                else if (!actualData.TwoFA_enable)
+                    setEnableDisable("ENABLE 2FA");
+                setIndexDisplayTwoFa(indexDisplayTwoFa => indexDisplayTwoFa + 1);
+            }
     }
 
 
@@ -185,7 +191,18 @@ export default function Profile() {
               alert(resJson.message);
           }
           else
-              window.location.reload();
+          {
+            const response = await fetch(
+                `/api/user/me`
+            );
+            const actualData = await response.json();
+            setData(actualData);
+            if (actualData.TwoFA_enable)
+                setEnableDisable("DISABLE 2FA");
+            else if (!actualData.TwoFA_enable)
+                setEnableDisable("ENABLE 2FA");
+                setIndexDisplayTwoFa(indexDisplayTwoFa => indexDisplayTwoFa + 1);
+          }
     }
 
 
