@@ -143,7 +143,7 @@ export class ConnectService {
 		);
 	}
 
-	async refreshUsers(client : Socket)
+	async refreshUsers()
 	{
 		for (const [user, socket] of this.gateway.activeUsers) {
 			this.getUserList(socket);
