@@ -18,7 +18,7 @@ export default function PublicProfile() {
             const response = await fetch(
                 `/api/user/` + uuid
             );
-            let actualData = await response.json();
+            const actualData = await response.json();
             if (response.ok)
                 setData(actualData);
             else

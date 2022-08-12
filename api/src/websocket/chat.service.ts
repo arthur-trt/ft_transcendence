@@ -67,6 +67,8 @@ export class ChatService {
 		}
 	}
 
+
+
 	async getRooms()
 	{
 		for (const [allUsers, socket] of this.gateway.activeUsers.entries())

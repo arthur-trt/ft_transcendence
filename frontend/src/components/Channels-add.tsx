@@ -28,7 +28,7 @@ import { dataGR } from '../index';
 
 // VARIABLE DECLARATIONS OUTSIDE THE CHANNELS FUNCTION
 let tmp: any[any];
-var indents: any = [];
+let indents: any = [];
 let ispriv = 2;
 
 export default function Channels() {
@@ -93,7 +93,7 @@ export default function Channels() {
         removeCookie('Authentication');
         navigate('/login');
       }
-      let actualData = await response.json();
+      const actualData = await response.json();
       setDatame(actualData);
 
     }
@@ -159,17 +159,17 @@ export default function Channels() {
     z = 0;
     while (z < data?.length)
     {
-      if (chanName === data[z]?.name)
+      if (chanName === data[z]?.name && !ispriv)
         flag = 1;
       z++;
     }
-    if (!flag)
+    if (!flag && !ispriv)
       setDisplayChat(0);
   }, [data, chanName, datame?.id]);
 
 
   // FUNCTIONS TO HANDLE ACTIONS ON CHANNELS
-  let handleCreate = (e: any) => {
+  const handleCreate = (e: any) => {
     e.preventDefault();
     if (publicChan === 1) {
       if (!password)
@@ -183,7 +183,7 @@ export default function Channels() {
     setPassword("");
     setPublicChan(2);
   }
-  let handleJoin = (e: any) => {
+  const handleJoin = (e: any) => {
     let i = 0;
 
     while (i < data?.length) {
@@ -196,21 +196,21 @@ export default function Channels() {
       i++;
     }
   }
-  let handleJoinProtected = (e: any) => {
+  const handleJoinProtected = (e: any) => {
     e.preventDefault();
     socket.emit('joinRoom', { chanName: chanToJoin, password: passToJoin });
     setChanToJoin("");
     setPassToJoin("");
   }
-  let handleDelete = (e: any) => {
+  const handleDelete = (e: any) => {
     socket.emit('deleteRoom', e.currentTarget.id);
   }
-  let handleLeave = (e: any) => {
+  const handleLeave = (e: any) => {
     socket.emit('leaveRoom', e.currentTarget.id);
     if (chanName === e.currentTarget.id)
       setDisplayChat(0);
   }
-  let handleOpen = (e: any) => {
+  const handleOpen = (e: any) => {
     if (isInChan(e.currentTarget.id) === 0)
       return (0);
     socket.emit('getChannelMessages', e.currentTarget.id);
@@ -218,10 +218,10 @@ export default function Channels() {
     setChanName(e.currentTarget.id);
     setprivMsgChat(0);
   }
-  let handleAddFriend = (e: any) => {
+  const handleAddFriend = (e: any) => {
     socket.emit('addFriend', datausers[parseInt(e.currentTarget.id)]);
   }
-  let handleAcceptFriend = (e: any) => {
+  const handleAcceptFriend = (e: any) => {
     let i = 0;
     while (i < datausers?.length) {
       if (datausers[i]?.id === friendsrequest[parseInt(e.currentTarget.id)].sender.id)
@@ -229,7 +229,7 @@ export default function Channels() {
       i++;
     }
   }
-  let handleRemoveFriend = (e: any) => {
+  const handleRemoveFriend = (e: any) => {
     let i = 0;
     while (i < datausers?.length) {
       if (datausers[i]?.id === friends.friends[parseInt(e.currentTarget.id)]?.id)
@@ -237,13 +237,13 @@ export default function Channels() {
       i++;
     }
   }
-  let handleBlockFriend = (e:any) => {
+  const handleBlockFriend = (e:any) => {
     socket.emit('block', friends.friends[parseInt(e.currentTarget.id)]);
   }
-  let handleUnBlockFriend = (e:any) => {
+  const handleUnBlockFriend = (e:any) => {
     socket.emit('unblock', friends.friends[parseInt(e.currentTarget.id)]);
   }
-  let handleOpenPrivate = (e:any) => {
+  const handleOpenPrivate = (e:any) => {
     let j = 0;
     while (j < datausers?.length) {
       if (e.currentTarget.id === datausers[j]?.name)
@@ -254,12 +254,12 @@ export default function Channels() {
     setChanName(e.currentTarget.id);
     setprivMsgChat(1);
   }
-  let handleAcceptGame = (e:any) => {
+  const handleAcceptGame = (e:any) => {
     socket.emit('joinGame', {friendId: dataGR[parseInt(e.currentTarget.id)].id, mode: dataGR[parseInt(e.currentTarget.id)].mode});
     dataGR.splice(parseInt(e.currentTarget.id), 1);
     navigate('/game');
   }
-  let handleSendInvite = (e:any) =>
+  const handleSendInvite = (e:any) =>
   {
       socket.emit(('pending invite'), {friendId: e.currentTarget.id, mode: 1})
       navigate('/game');
@@ -294,7 +294,7 @@ export default function Channels() {
 
   // DISPLAY CHANNELS
   function display_chan() {
-    var indents = [];
+    const indents = [];
     let i = 0;
 
     while (i < data?.length) {
@@ -337,7 +337,7 @@ export default function Channels() {
     return (0);
   }
 
-  let handleWatchMode = (e: any) => {
+  const handleWatchMode = (e: any) => {
     let i = 0;
     while (i < activesmatches?.length)
     {
@@ -384,7 +384,7 @@ export default function Channels() {
 
   // DISPLAY USERS
   function display_users() {
-    var indents = [];
+    const indents = [];
     let i = 0;
     let borderStatus = 'white';
     let profilelink;
@@ -501,7 +501,7 @@ export default function Channels() {
   }
 
   // SEND MESSAGE TO CHANNEL
-  let handleMessages = (e: any) => {
+  const handleMessages = (e: any) => {
     e.preventDefault();
     if (!privMsgChat) {
       if (isInChan(e.currentTarget.id) === 0)
@@ -660,7 +660,7 @@ export default function Channels() {
   }
 
   // IS MAIN USER IN THE TARGETED CHANNEL
-  let isInChan = (str: string) => {
+  const isInChan = (str: string) => {
     let i = 0;
     while (i < data?.length) {
       let j = 0;
@@ -675,19 +675,19 @@ export default function Channels() {
     return (0);
   }
 
-  let handleSetPass = (e: any) => {
+  const handleSetPass = (e: any) => {
     e.preventDefault();
     socket.emit('modifyChanSettings', { chanName: chanName, password: chanOpPass });
     setChanOpPass("");
   }
 
-  let handleUnsetPass = (e: any) => {
+  const handleUnsetPass = (e: any) => {
     e.preventDefault();
     socket.emit('modifyChanSettings', { chanName: chanName });
     setChanOpPass("");
   }
 
-  let handleAddMembersPrivate = (e: any) => {
+  const handleAddMembersPrivate = (e: any) => {
     e.preventDefault();
     let i = 0;
     while (i < friends?.friends?.length) {
@@ -764,7 +764,7 @@ export default function Channels() {
   }
 
   // DISPLAY CHAT
-  let display_chat = (e: any) => {
+  const display_chat = (e: any) => {
     if (!DisplayChat)
       return ("");
 

@@ -4,7 +4,6 @@ import { faPen } from '@fortawesome/free-solid-svg-icons'
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
 import { faTrophy } from '@fortawesome/free-solid-svg-icons'
 import { socketo } from '../index';
-import { getBlobFromDataTransferItem } from "@testing-library/user-event/dist/types/utils";
 
 export default function Profile() {
 
@@ -28,7 +27,7 @@ export default function Profile() {
             const response = await fetch(
                 `/api/user/me`
             );
-            let actualData = await response.json();
+            const actualData = await response.json();
             setData(actualData);
             if (actualData.TwoFA_enable)
                 setEnableDisable("DISABLE 2FA");
@@ -40,7 +39,7 @@ export default function Profile() {
             const response = await fetch(
                 `/api/auth/2fa/generate`
             );
-            let actualData = await response.json();
+            const actualData = await response.json();
             setTwoFaData(actualData);
         }
         
@@ -102,7 +101,7 @@ export default function Profile() {
     }
 
 
-    let handleInputName = () => {
+    const handleInputName = () => {
         let i = inputState;
         i++;
         setInputState(i);
@@ -129,23 +128,26 @@ export default function Profile() {
     async function handleSubmitAvatar(event: any) {
         event.preventDefault();
 
-        var postFile = new FormData();
-        postFile.append('file', event.target[0].files[0]);
-
-        const response = await fetch('/api/user/avatar', {
-            method: 'POST',
-            body: postFile,
-        })
-        if (!response.ok)
-            alert("Error : avatar");
-        else
-            window.location.reload();
+        const postFile = new FormData();
+        if ( event.target[0].files[0])
+        {
+            postFile.append('file', event.target[0].files[0]);
+    
+            const response = await fetch('/api/user/avatar', {
+                method: 'POST',
+                body: postFile,
+            })
+            if (!response.ok)
+                alert("Error : avatar");
+            else
+                window.location.reload();
+        }
     }
 
     // FETCH
     async function handleTurnOnTwoFa(e: any) {
         e.preventDefault();
-            let res = await fetch("/api/auth/2fa/turn-on", {
+            const res = await fetch("/api/auth/2fa/turn-on", {
               method: "POST",
               body: JSON.stringify({
                 token: codeTwoFa,
@@ -154,7 +156,7 @@ export default function Profile() {
                   "Content-Type": "application/json",
               },
             });
-            let resJson = await res.json();
+            const resJson = await res.json();
             if (res.status !== 201) {
                 alert(resJson.message);
             }
@@ -165,10 +167,10 @@ export default function Profile() {
 
     // FETCH
     async function handleDeactivateTwoFa() {
-        let res = await fetch("/api/auth/2fa/deactivate", {
+        const res = await fetch("/api/auth/2fa/deactivate", {
             method: "POST",
           });
-           let resJson = await res.json();
+           const resJson = await res.json();
           if (res.status !== 201) {
               alert(resJson.message);
           }
@@ -215,7 +217,7 @@ export default function Profile() {
     // FETCH
     async function handleLogout(e: any) {
         e.preventDefault();
-        let res = await fetch("/api/auth/logout", {
+        const res = await fetch("/api/auth/logout", {
             method: "GET",
         });
         if (res.status === 200)
@@ -223,7 +225,7 @@ export default function Profile() {
     }
 
     function displayHistory() {
-        var indents : any = [];
+        const indents : any = [];
         let i = 0;
         let bgColor = '#ff7675';
         let MyRes = 0;
@@ -280,9 +282,9 @@ export default function Profile() {
     }
 
     function displayAchievements() {
-        var indents : any = [];
+        const indents : any = [];
         let i = 0;
-        let bgColor = '#1dd1a1';
+        const bgColor = '#1dd1a1';
 
         while (i < achievements?.length)
         {
@@ -305,7 +307,7 @@ export default function Profile() {
             </div>
             <div className="profile-upload-img">
                 <form onSubmit={handleSubmitAvatar}>
-                    <input type="file"/>
+                    <input type="file" accept="image/*" required/>
                     <button type="submit">UPLOAD</button>
                 </form>
             </div>

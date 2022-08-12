@@ -142,4 +142,11 @@ export class ConnectService {
 			this.listConnectedUser(client, this.all_users, this.gateway.activeUsers, false)
 		);
 	}
+
+	async refreshUsers()
+	{
+		for (const [user, socket] of this.gateway.activeUsers) {
+			this.getUserList(socket);
+		}
+	}
 }
