@@ -123,7 +123,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('refreshUsers')
 	async refreshUsers(client : Socket)
 	{
-		this.connectService.refreshUsers();
+		this.connectService.refreshUsers(client);
 	}
 
 	/*

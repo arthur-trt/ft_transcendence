@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { JwtService, JwtVerifyOptions } from "@nestjs/jwt";
 import { Socket } from "socket.io";
+import { FortyTwoAuthStrategy } from "src/auth/fortyTwo/fortyTwo.strategy";
 import { jwtConstants } from "src/auth/jwt/jwt.constants";
 import { JwtPayload } from "src/auth/payload.type";
 import { Channel } from "src/channel/channel.entity";
@@ -143,8 +144,13 @@ export class ConnectService {
 		);
 	}
 
-	async refreshUsers()
+	async refreshUsers(client : Socket)
 	{
+		if (this.gateway.activeUsers.has(client.data.user.id))
+		{
+			this.gateway.activeUsers.delete(client.data.user);
+			this.gateway.activeUsers.set(await this.userService.getUserByIdentifier(client.data.user.id), client);
+		}
 		for (const [user, socket] of this.gateway.activeUsers) {
 			this.getUserList(socket);
 		}
