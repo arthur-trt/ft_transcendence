@@ -119,6 +119,13 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		this.connectService.getUserList(client);
 	}
 
+	@UseGuards(WsJwtAuthGuard)
+	@SubscribeMessage('refreshUsers')
+	async refreshUsers(client : Socket)
+	{
+		this.connectService.refreshUsers(client);
+	}
+
 	/*
 	** 		_____ _    _       _______    _____       _______ ________          __ __     __
 	** 	  / ____| |  | |   /\|__   __|  / ____|   /\|__   __|  ____\ \        / /\\ \   / /
