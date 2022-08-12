@@ -113,7 +113,6 @@ export class GameRelayService {
      * @param mode
      */
      @UseGuards(WsJwtAuthGuard)
-
      async pendingInvite(client: Socket, data : {friendId : string, mode : string} ) {
          const friend = await this.userService.getUserByIdentifier(data.friendId)
          const friendSocket = await this.chatservice.findSocketId(friend);

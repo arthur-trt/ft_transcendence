@@ -65,7 +65,6 @@ export default function Profile() {
 
     }, []);
 
-
     // FETCH
     async function handleChangeName(e: any) {
         e.preventDefault();
@@ -85,9 +84,21 @@ export default function Profile() {
         if (!response.ok)
             alert("Error : username");
         else
-            window.location.reload();
+        {
+                const response = await fetch(
+                    `/api/user/me`
+                );
+                let actualData = await response.json();
+                setData(actualData);
+                if (actualData.TwoFA_enable)
+                    setEnableDisable("DISABLE 2FA");
+                else if (!actualData.TwoFA_enable)
+                    setEnableDisable("ENABLE 2FA");
+                socketo.emit('refreshUsers');
+        }
         setName("");
     }
+
 
     const handleInputName = () => {
         let i = inputState;
@@ -128,7 +139,18 @@ export default function Profile() {
             if (!response.ok)
                 alert("Error : avatar");
             else
-                window.location.reload();
+            {
+                const response = await fetch(
+                    `/api/user/me`
+                );
+                let actualData = await response.json();
+                setData(actualData);
+                if (actualData.TwoFA_enable)
+                    setEnableDisable("DISABLE 2FA");
+                else if (!actualData.TwoFA_enable)
+                    setEnableDisable("ENABLE 2FA");
+                socketo.emit('refreshUsers');
+            }
         }
     }
 

@@ -123,8 +123,9 @@ export class ConnectService {
 		}
 		if (all_users)
 		{
-			for (const user of all_users)
+			for (let user of all_users)
 			{
+				user = await this.userService.getUserByIdentifier(user.id);
 				if (!data.find(element => element.id == user.id) && client.data.user.id != user.id)
 				{
 					user.status = "offline";
