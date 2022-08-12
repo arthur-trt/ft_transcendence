@@ -88,7 +88,7 @@ export default function Profile() {
                 const response = await fetch(
                     `/api/user/me`
                 );
-                let actualData = await response.json();
+                const actualData = await response.json();
                 setData(actualData);
                 if (actualData.TwoFA_enable)
                     setEnableDisable("DISABLE 2FA");
@@ -143,7 +143,7 @@ export default function Profile() {
                 const response = await fetch(
                     `/api/user/me`
                 );
-                let actualData = await response.json();
+                const actualData = await response.json();
                 setData(actualData);
                 if (actualData.TwoFA_enable)
                     setEnableDisable("DISABLE 2FA");
