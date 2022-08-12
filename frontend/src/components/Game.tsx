@@ -84,8 +84,8 @@ export default function Game() {
   let p1_score = 0;
   let p2_score = 0;
 
-  let [inter, setInter] = useState<any>();
-  let interval = useRef<NodeJS.Timer>();
+  const [inter, setInter] = useState<any>();
+  const interval = useRef<NodeJS.Timer>();
 
   const [userLeft, setUserLeft] = useState<userT>({
     x: 10,

@@ -445,7 +445,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('joinGame')
 	async joinGame(client: Socket, data : {friendId : string, mode : string} ) {
 		console.log("room joiner = " + data.friendId);
-		let isAvailable = await this.gameRelayService.InviteJoinGame(data.friendId);
+		const isAvailable = await this.gameRelayService.InviteJoinGame(data.friendId);
 		if (isAvailable == true)
 		{
 			await this.gameRelayService.go_to_game(client);
