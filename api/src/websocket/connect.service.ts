@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { JwtService, JwtVerifyOptions } from "@nestjs/jwt";
 import { Socket } from "socket.io";
+import { FortyTwoAuthStrategy } from "src/auth/fortyTwo/fortyTwo.strategy";
 import { jwtConstants } from "src/auth/jwt/jwt.constants";
 import { JwtPayload } from "src/auth/payload.type";
 import { Channel } from "src/channel/channel.entity";
@@ -67,7 +68,7 @@ export class ConnectService {
 		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
-				this.listConnectedUser(socket, this.all_users, this.gateway.activeUsers, false)
+				this.listConnectedUser(socket, this.all_users, false)
 			);
 		});
 
@@ -97,7 +98,7 @@ export class ConnectService {
 		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
-				this.listConnectedUser(socket, this.all_users, this.gateway.activeUsers, false)
+				this.listConnectedUser(socket, this.all_users, false)
 			);
 		});
 		client.emit('bye');
@@ -105,12 +106,11 @@ export class ConnectService {
 	}
 
 
-	public async listConnectedUser(client: Socket, all_users: User[] ,active_user: Map<User, Socket>, withCurrentUser: boolean = true) {
+	public listConnectedUser(client: Socket, all_users: User[], withCurrentUser: boolean = true) {
 		const data: User[] = [];
 		let i = 0;
 
-		for (let [user] of active_user) {
-			user = await this.userService.getUserByIdentifier(user.id);
+		for (const user of this.gateway.activeUsers.keys()) {
 			user.status = "online";
 			if (client.data.user.id == user.id && withCurrentUser) {
 				data[i] = user;
@@ -141,12 +141,17 @@ export class ConnectService {
 
 		this.gateway.server.to(client.id).emit(
 			'listUsers',
-			this.listConnectedUser(client, this.all_users, this.gateway.activeUsers, false)
+			this.listConnectedUser(client, this.all_users, false)
 		);
 	}
 
-	async refreshUsers()
+	async refreshUsers(client : Socket)
 	{
+		if (this.gateway.activeUsers.has(client.data.user.id))
+		{
+			this.gateway.activeUsers.delete(client.data.user);
+			this.gateway.activeUsers.set(await this.userService.getUserByIdentifier(client.data.user.id), client);
+		}
 		for (const [user, socket] of this.gateway.activeUsers) {
 			this.getUserList(socket);
 		}
