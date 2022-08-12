@@ -138,6 +138,13 @@ export default function Channels() {
       socketo.on('accept invite', (id: string, mode:number) => {
         setRflag(rFlag => rFlag + 1);
       });
+
+      socketo.on('enter_room', () => {
+        console.log("dis wallah");
+        console.log(location);
+        if (location.pathname != "/game")
+          navigate('/game');
+      })
       
     }, []);
 
@@ -257,12 +264,12 @@ export default function Channels() {
   let handleAcceptGame = (e:any) => {
     socket.emit('joinGame', {friendId: dataGR[parseInt(e.currentTarget.id)].id, mode: dataGR[parseInt(e.currentTarget.id)].mode});
     dataGR.splice(parseInt(e.currentTarget.id), 1);
-    navigate('/game');
+    //navigate('/game');
   }
   let handleSendInvite = (e:any) =>
   {
       socket.emit(('pending invite'), {friendId: e.currentTarget.id, mode: 1})
-      navigate('/game');
+      // navigate('/game');
   }
 
 

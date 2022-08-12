@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
 import { ChannelService } from 'src/channel/channel.service';
@@ -437,7 +437,15 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('joinGame')
 	async joinGame(client: Socket, data : {friendId : string, mode : string} ) {
-		await this.gameRelayService.joinGame(client, data)
+		console.log("room joiner = " + data.friendId);
+		let isAvailable = await this.gameRelayService.InviteJoinGame(data.friendId);
+		if (isAvailable == true)
+		{
+			await this.gameRelayService.go_to_game(client);
+			await this.gameRelayService.joinGame(client, data)
+		}
+		else
+			throw new WsException('Your friend is already playing. Fuck yourself ')
 	}
 
 	@UseGuards(WsJwtAuthGuard)
@@ -458,6 +466,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('pending invite')
 	async inviteToPlay(client: Socket, data : {friendId : string, mode : string} )
 	{
+		console.log("invite sender = " + client.id);
 		await this.gameRelayService.pendingInvite(client, data);
 	}
 
