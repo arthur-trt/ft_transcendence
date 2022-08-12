@@ -113,7 +113,7 @@ export class GameService {
 		return match;
 	}
 
-	async getAllUsersMatches(user: User) {
+	async getAllMatchesofUser(user: User) {
 		return this.MatchRepo.createQueryBuilder("Match")
 		.leftJoinAndMapOne("Match.user1", User, 'users', 'users.id = Match.user1')
 		.leftJoinAndMapOne("Match.user2", User, 'usert', 'usert.id = Match.user2')

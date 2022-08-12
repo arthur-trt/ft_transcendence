@@ -526,7 +526,9 @@ export class GameRelayService {
      */
     async getMatchHistory(client: Socket) {
         const user = await this.chatservice.findUserbySocket(client.id);
-        this.gateway.server.to(client.id).emit('MatchHistory', await this.gameService.findMatchByUser(user));
+       // this.gateway.server.to(client.id).emit('MatchHistory', await this.gameService.findMatchByUser(user));
+        this.gateway.server.to(client.id).emit('MatchHistory', await this.gameService.getAllMatchesofUser(user));
+
     }
 
     /**

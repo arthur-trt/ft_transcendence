@@ -51,7 +51,7 @@ export class GameController {
 	public async getMatchHistory(@Param() uuid: uuidDto)
 	{
 		const user: User = await this.userService.getUserByIdentifier(uuid.uuid);
-		return await this.gameService.getAllUsersMatches(user);
+		return await this.gameService.getAllMatchesofUser(user);
 	}
 
 
