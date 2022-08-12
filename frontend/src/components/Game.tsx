@@ -1,5 +1,5 @@
 //import { computeHeadingLevel } from '@testing-library/react';
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect, useRef} from 'react';
 
 import { useLocation } from "react-router-dom";
 
@@ -83,6 +83,9 @@ export default function Game() {
 
   let p1_score = 0;
   let p2_score = 0;
+
+  const [inter, setInter] = useState<any>();
+  const interval = useRef<NodeJS.Timer>();
 
   const [userLeft, setUserLeft] = useState<userT>({
     x: 10,
@@ -217,6 +220,12 @@ export default function Game() {
       })
 
       socket.on('game_end', (res : boolean) => {
+        console.log("ca recoit game end hein?");
+        // if (countdown === true)
+        // {
+        //   console.log("inter = " + inter);
+        //   clearInterval(inter);
+        // }
         kill_sockets(socket);
         render_game_end(res, canvas, P1Name, P2Name);
       })
@@ -231,6 +240,8 @@ export default function Game() {
 
     function kill_sockets(socketi : any)
     {
+      console.log("inter = " + interval.current);
+      clearInterval(interval.current);
       socketi.off('game_position');
       socketi.off('game_end');
       socketi.off('update_score');
@@ -251,10 +262,9 @@ export default function Game() {
   }, [ctx])
 
   let i = 0;
-  let inter : any;
 
   useEffect(() => {
-    if (canvas && ctx)
+    if (canvas && ctx && countdown)
     {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const fontSize = (canvas.width / 20).toString();
@@ -263,7 +273,8 @@ export default function Game() {
       ctx.font = fontSize + "px serif";
       ctx.textAlign = "center"
       ctx.fillText("Le jeu va démarrer dans 4 secondes !", canvas.width / 2, canvas.height / 2);
-      inter = setInterval(count_function, 1000);
+      interval.current = setInterval(count_function, 1000);
+      //setInter(interval);
     }
   }, [countdown])
 
@@ -276,6 +287,7 @@ export default function Game() {
     {
       clearInterval(inter);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      setCountdown(false);
       setGameStart(true);
     }
     else

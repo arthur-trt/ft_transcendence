@@ -71,6 +71,8 @@ export class GameRelayService {
     protected scores = {} as Scores;
     protected isBabyPong = false;
 
+    protected friendID : Socket;
+
 
     /*  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
         ██░▄▀▄░█░▄▄▀█▄▄░▄▄██░▄▄▀██░██░██░▄▀▄░█░▄▄▀██░█▀▄█▄░▄██░▀██░██░▄▄░
@@ -106,6 +108,26 @@ export class GameRelayService {
         this.startMatch(this.players, data.mode);
     }
 
+    @UseGuards(WsJwtAuthGuard)
+    async InviteJoinGame(friendId : string)
+    {
+        const friend = await this.userService.getUserByIdentifier(friendId)
+        const playerSocket = await this.chatservice.findSocketId(friend);
+        if (!this.players.has(playerSocket) && await this.gameService.isInGame(friend) == false)
+        {
+            console.log("enter_room");
+            this.gateway.server.to(playerSocket.id).emit('enter_room');
+            return (true);
+        }
+        return (false);
+    }
+
+    @UseGuards(WsJwtAuthGuard)
+    async go_to_game(client : Socket)
+    {
+        this.gateway.server.to(client.id).emit('enter_room');
+    }
+
     /**
      * @brief Send an event to a friend to play with
      * @param client
@@ -116,6 +138,7 @@ export class GameRelayService {
      async pendingInvite(client: Socket, data : {friendId : string, mode : string} ) {
          const friend = await this.userService.getUserByIdentifier(data.friendId)
          const friendSocket = await this.chatservice.findSocketId(friend);
+         this.friendID = friendSocket;
         this.gateway.server.to(friendSocket.id).emit('accept invite', client.data.user.id, data.mode)
     }
     /**
@@ -137,8 +160,15 @@ export class GameRelayService {
 				client == this.player1.socket ? this.set_winner(client, 2) : this.set_winner(client, 1);
 			else if (this.players.has(client))
             {
+                console.log("bonjour HD");
                 this.gateway.server.to(client.id).emit('leave_queue');
                 this.players.delete(client);
+                if (this.friendID)
+                {
+                    console.log("deco friend");
+                    this.gateway.server.to(this.friendID.id).emit('leave_queue');
+                    this.players.delete(this.friendID);
+                }
             }
         }
 
