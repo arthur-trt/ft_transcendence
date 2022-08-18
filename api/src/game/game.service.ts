@@ -117,8 +117,8 @@ export class GameService {
 		return this.MatchRepo.createQueryBuilder("Match")
 		.leftJoinAndMapOne("Match.user1", User, 'users', 'users.id = Match.user1')
 		.leftJoinAndMapOne("Match.user2", User, 'usert', 'usert.id = Match.user2')
-		.where({'users.id' : user.id})
-		.orWhere({ "usert.id": user.id})
+		.where({'user1' : user.id})
+		.orWhere({ "user2": user.id})
 		.select(['Match.id', 'Match.startTime', 'Match.stopTime', 'Match.scoreUser1', 'Match.scoreUser2', 'Match.finished'])
 		.addSelect([
 			"users.name",
