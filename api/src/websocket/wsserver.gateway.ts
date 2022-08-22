@@ -446,27 +446,27 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('joinGame')
 	async joinGame(client: Socket, data : {friendId : string, mode : string} ) {
 		console.log("room joiner = " + data.friendId);
-		const isAvailable = await this.gameRelayService.InviteJoinGame(data.friendId);
+		const isAvailable = await this.gameRelayService2.InviteJoinGame(data.friendId);
 		if (isAvailable == true)
 		{
-			await this.gameRelayService.go_to_game(client);
-			await this.gameRelayService.joinGame(client, data)
+			await this.gameRelayService2.go_to_game(client);
+			await this.gameRelayService2.joinGame(client, data)
 		}
 		else
-			throw new WsException('Your friend is already playing. Fuck yourself ')
+			throw new WsException('Your friend is already playing.');
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('game_start')
 	async startMatch(client : Socket) {
-		await this.gameRelayService.start_gameloop(client);
+		this.gameRelayService2.start_gameloop(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('WatchGame')
 	async watchGame(client: Socket, gameId)
 	{
-		await this.gameRelayService.watchGame(client, gameId);
+		await this.gameRelayService2.watchGame(client, gameId);
 	}
 
 
@@ -475,7 +475,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	async inviteToPlay(client: Socket, data : {friendId : string, mode : string} )
 	{
 		console.log("invite sender = " + client.id);
-		await this.gameRelayService.pendingInvite(client, data);
+		await this.gameRelayService2.pendingInvite(client, data);
 	}
 
 
@@ -487,7 +487,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 @SubscribeMessage('get history')
 	 async getHistory(client : Socket)
 	 {
-		 await this.gameRelayService.getMatchHistory(client);
+		 await this.gameRelayService2.getMatchHistory(client);
 	 }
 	 /**
 	 * @brief get match history of a user
@@ -497,7 +497,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	  @SubscribeMessage('changement of tab')
 	  async changeTab(client : Socket)
 	  {
-		  await this.gameRelayService.changeTab(client);
+		  await this.gameRelayService2.changeTab(client);
 	  }
 
 	 /**
@@ -508,49 +508,49 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	  @SubscribeMessage('get achievements')
 	  async getAchievements(client : Socket)
 	  {
-		  await this.gameRelayService.sendAchievements(client);
+		  await this.gameRelayService2.sendAchievements(client);
 	  }
 
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('MoveUP2')
 	async MoveUp_Pad2(client : Socket)
 	{
-		await this.gameRelayService.MoveUp2(client);
+		await this.gameRelayService2.MoveUp2(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('MoveDOWN2')
 	async MoveDown_Pad2(client : Socket)
 	{
-		await this.gameRelayService.MoveDown2(client);
+		await this.gameRelayService2.MoveDown2(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('StopMove2')
 	async StopMove_Pad2(client : Socket)
 	{
-		await this.gameRelayService.StopMove2(client);
+		await this.gameRelayService2.StopMove2(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('MoveUp')
 	async MoveUp(client : Socket)
 	{
-		await this.gameRelayService.MoveUp(client);
+		await this.gameRelayService2.MoveUp(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('MoveDown')
 	async MoveDown(client : Socket)
 	{
-		await this.gameRelayService.MoveDown(client);
+		await this.gameRelayService2.MoveDown(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('StopMove')
 	async StopMove(client : Socket)
 	{
-		await this.gameRelayService.StopMove(client);
+		await this.gameRelayService2.StopMove(client);
 	}
 
 }

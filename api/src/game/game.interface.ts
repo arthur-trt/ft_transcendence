@@ -1,8 +1,8 @@
 // import { Socket } from 'dgram';
 import { Socket } from 'socket.io';
 import { User } from 'src/user/user.entity';
-import { Paddle, Ball } from './game.type';
-export { Paddle, Ball} from './game.type'
+import type { Paddle, Ball } from './game.type';
+export type { Paddle, Ball} from './game.type'
 import { UserModule } from 'src/user/user.module';
 import { MatchHistory } from './game.entity';
 
@@ -76,31 +76,7 @@ export interface Scores {
     p2 : number;
 }
 
-export enum direction {
-    UP,
-    DOWN
-}
-
-interface matchParameters {
-    dataFront: dataFront,
-    ball: Ball,
-    p1_socket: Socket,
-    p1_paddle: Paddle,
-    p1_paddle_spe: Paddle,
-    p2_socket: Socket,
-    p2_paddle: Paddle,
-    p2_paddle_spe: Paddle,
-    loop_stop: NodeJS.Timer,
-    p1_dir: direction,
-    p1_dir_spe: direction
-    p2_dir: direction,
-    p2_dir_spe: direction,
-    names: Names,
-    score: Scores,
-    isSpeMode: boolean
-}
-
-//type matchParameters = {
+//export interface matchParameters {
 //    dataFront: dataFront,
 //    ball: Ball,
 //    p1_socket: Socket,
@@ -118,5 +94,30 @@ interface matchParameters {
 //    score: Scores,
 //    isSpeMode: boolean
 //}
+
+type matchParameters = {
+    id: string,
+    dataFront: dataFront,
+    ball: Ball,
+    p1_socket: Socket,
+    p1_paddle: Paddle,
+    p1_paddle_spe: Paddle,
+    p2_socket: Socket,
+    p2_paddle: Paddle,
+    p2_paddle_spe: Paddle,
+    loop_stop: NodeJS.Timer,
+    P1_MoveUP: boolean,
+    P1_MoveUP_pad2: boolean,
+    P1_MoveDOWN: boolean,
+    P1_MoveDOWN_pad2: boolean,
+    P2_MoveUP: boolean,
+    P2_MoveUP_pad2: boolean,
+    P2_MoveDOWN: boolean,
+    P2_MoveDOWN_pad2: boolean,
+    names: Names,
+    score: Scores,
+    isSpeMode: boolean,
+    players_ready: number
+}
 
 export type { matchParameters }
