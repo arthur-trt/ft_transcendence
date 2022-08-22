@@ -1,6 +1,8 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateMatchDto, endMatchDto } from 'src/dtos/match.dto';
+import { uuidDto } from 'src/dtos/uuid.dto';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { MatchHistory } from './game.entity';
@@ -43,6 +45,15 @@ export class GameController {
 	{
 		return await this.gameService.ladder();
 	}
+
+	@Get(':uuid')
+	@UseGuards(JwtAuthGuard)
+	public async getMatchHistory(@Param() uuid: uuidDto)
+	{
+		const user: User = await this.userService.getUserByIdentifier(uuid.uuid);
+		return await this.gameService.getAllMatchesofUser(user);
+	}
+
 
 
 

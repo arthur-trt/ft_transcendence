@@ -160,12 +160,10 @@ export class GameRelayService {
 				client == this.player1.socket ? this.set_winner(client, 2) : this.set_winner(client, 1);
 			else if (this.players.has(client))
             {
-                console.log("bonjour HD");
                 this.gateway.server.to(client.id).emit('leave_queue');
                 this.players.delete(client);
                 if (this.friendID)
                 {
-                    console.log("deco friend");
                     this.gateway.server.to(this.friendID.id).emit('leave_queue');
                     this.players.delete(this.friendID);
                 }
@@ -526,7 +524,9 @@ export class GameRelayService {
      */
     async getMatchHistory(client: Socket) {
         const user = await this.chatservice.findUserbySocket(client.id);
-        this.gateway.server.to(client.id).emit('MatchHistory', await this.gameService.findMatchByUser(user));
+       // this.gateway.server.to(client.id).emit('MatchHistory', await this.gameService.findMatchByUser(user));
+        this.gateway.server.to(client.id).emit('MatchHistory', await this.gameService.getAllMatchesofUser(user));
+
     }
 
     /**

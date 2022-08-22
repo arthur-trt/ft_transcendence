@@ -66,7 +66,7 @@ export default function Game() {
 
   const [canvas, setCanvas] = useState<any>();
   const [ctx, setCtx] = useState<any>();
-  const [countdown, setCountdown] = useState<boolean>(false);
+  const [countdown, setCountdown] = useState<boolean>();
   const [gameStart, setGameStart] = useState<boolean>(false);
   const [isBabyPong, setGameMode] = useState<boolean>(true);
 
@@ -84,7 +84,6 @@ export default function Game() {
   let p1_score = 0;
   let p2_score = 0;
 
-  const [inter, setInter] = useState<any>();
   const interval = useRef<NodeJS.Timer>();
 
   const [userLeft, setUserLeft] = useState<userT>({
@@ -134,10 +133,8 @@ export default function Game() {
       setSocket(socket);
       const canvas = canvasRef.current;
       if (canvas) {
-        //canvas.height = canvas.clientHeight;
-        canvas.width = window.innerWidth * 0.7;
-        //canvas.width = canvas.clientWidth;
-        canvas.height = canvas.width * 0.6;
+        canvas.height = canvas.clientHeight;
+        canvas.width = canvas.clientWidth;
         setCanvas(canvas);
       }
       if (canvas) {
@@ -188,14 +185,11 @@ export default function Game() {
       })
 
       socket.on('game_position', (pos: dataT) => {
-        //console.log(canvas);
-        //console.log("socket.on/game_position");
         setData(adaptToCanvas(pos, canvas));
       });
 
       socket.on('game_countdownStart', (mode: boolean) => {
         setGameMode(mode);
-        console.log("socket.on/game_countdown, mode = " + mode);
         setCountdown(true);
       })
 
@@ -204,12 +198,9 @@ export default function Game() {
         {
           p1_score++;
           setP1Score(p1_score);
-          //P1score++;
         }
         else
         {
-          // setP2Score(P2score + 1);
-          // P2score++;
           p2_score++;
           setP2Score(p2_score);
         }
@@ -220,12 +211,6 @@ export default function Game() {
       })
 
       socket.on('game_end', (res : boolean) => {
-        console.log("ca recoit game end hein?");
-        // if (countdown === true)
-        // {
-        //   console.log("inter = " + inter);
-        //   clearInterval(inter);
-        // }
         kill_sockets(socket);
         render_game_end(res, canvas, P1Name, P2Name);
       })
@@ -233,15 +218,17 @@ export default function Game() {
 
     useEffect(function callback() {
       return function () {
-          console.log("i change everything");
           socketo.emit("changement of tab");
       };
   }, [location]);
 
     function kill_sockets(socketi : any)
     {
-      console.log("inter = " + interval.current);
-      clearInterval(interval.current);
+      if (countdown === true || countdown === undefined)
+      {
+        clearInterval(interval.current);
+        setCountdown(false);
+      }
       socketi.off('game_position');
       socketi.off('game_end');
       socketi.off('update_score');
@@ -268,24 +255,21 @@ export default function Game() {
     {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const fontSize = (canvas.width / 20).toString();
-      console.log("canvas width = " + canvas.width + " fontSize = " + fontSize);
       ctx.fillStyle = "RED";
       ctx.font = fontSize + "px serif";
       ctx.textAlign = "center"
       ctx.fillText("Le jeu va démarrer dans 4 secondes !", canvas.width / 2, canvas.height / 2);
       interval.current = setInterval(count_function, 1000);
-      //setInter(interval);
     }
   }, [countdown])
 
   function count_function()
   {
-    //console.log("count");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillText("Le jeu va démarrer dans " + (3 - i) + " secondes !", canvas.width / 2, canvas.height / 2);
     if (i === 3)
     {
-      clearInterval(inter);
+      clearInterval(interval.current);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       setCountdown(false);
       setGameStart(true);
@@ -295,7 +279,6 @@ export default function Game() {
   }
 
   useEffect(() => {
-    console.log("useEffect/game_start " + gameStart);
     if (gameStart === true)
       socket.emit('game_start');
   }, [gameStart]);
@@ -414,7 +397,6 @@ export default function Game() {
   }
 
   function drawText(text: string, x: number, y: number, color: string, font: string) {
-    //console.log("drawText " + ctx);
     if (ctx != null) {
       ctx.fillStyle = color;
       ctx.font = font;

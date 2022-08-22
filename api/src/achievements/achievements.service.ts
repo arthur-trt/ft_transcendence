@@ -28,6 +28,7 @@ export class AchievementsService {
 			},
 			});
 	}
+	
 	public async hasAchievements(type: Achievements_types, user: User)
     {
         const exists = await this.successRepo.findOne({

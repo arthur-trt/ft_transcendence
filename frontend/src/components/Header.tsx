@@ -13,6 +13,9 @@ export const Header = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        socketo.on('toUpdate', (msg:any) => {
+            getData();
+        });
         const getData = () => {
             fetch(`/api/user/me`).then((response) => {
                 if (response.ok) {
