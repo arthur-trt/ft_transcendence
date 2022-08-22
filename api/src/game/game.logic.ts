@@ -201,7 +201,7 @@ export class GameRelayService2 {
 		this.gateway.server.to(match.id).emit('game_countdownStart', specialMode);
 	}
 
-	private collision(match: matchParameters, player: Paddle): Boolean {
+	private collision(match: matchParameters, player: Paddle): boolean {
 		const pad_top = player.y;
 		const pad_bottom = player.y + player.height;
 		const pad_left = player.x;
