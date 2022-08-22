@@ -26,8 +26,7 @@ function collision(b: Ball, p: Paddle) {
     return pad_left < ball_right && pad_top < ball_bottom && pad_right > ball_left && pad_bottom > ball_top;
 }
 
-const VICTORY = 3;
-
+const VICTORY = 20;
 
 @Injectable()
 export class GameRelayService {
@@ -101,7 +100,11 @@ export class GameRelayService {
      */
     @UseGuards(WsJwtAuthGuard)
     async joinGame(client: Socket, data : {friendId : string, mode : string} ) {
+        console.log("JoinGame");
+        console.log("client " + client.data.user.name);
+
         const friend = await this.userService.getUserByIdentifier(data.friendId)
+        console.log("friendId " + friend.name);
         const playerSocket = await this.chatservice.findSocketId(friend);
         this.players.add(client);
         this.players.add(playerSocket);
@@ -111,7 +114,10 @@ export class GameRelayService {
     @UseGuards(WsJwtAuthGuard)
     async InviteJoinGame(friendId : string)
     {
+        console.log("InviteJoinGame");
+        console.log(friendId);
         const friend = await this.userService.getUserByIdentifier(friendId)
+        //console.log(friend);
         const playerSocket = await this.chatservice.findSocketId(friend);
         if (!this.players.has(playerSocket) && await this.gameService.isInGame(friend) == false)
         {
@@ -125,6 +131,7 @@ export class GameRelayService {
     @UseGuards(WsJwtAuthGuard)
     async go_to_game(client : Socket)
     {
+        console.log("go_to_game")
         this.gateway.server.to(client.id).emit('enter_room');
     }
 
@@ -136,7 +143,9 @@ export class GameRelayService {
      */
      @UseGuards(WsJwtAuthGuard)
      async pendingInvite(client: Socket, data : {friendId : string, mode : string} ) {
-         const friend = await this.userService.getUserByIdentifier(data.friendId)
+        console.log("pendingInvite");
+        console.log(data.mode);
+        const friend = await this.userService.getUserByIdentifier(data.friendId)
          const friendSocket = await this.chatservice.findSocketId(friend);
          this.friendID = friendSocket;
         this.gateway.server.to(friendSocket.id).emit('accept invite', client.data.user.id, data.mode)
