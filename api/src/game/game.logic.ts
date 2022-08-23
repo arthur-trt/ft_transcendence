@@ -338,7 +338,7 @@ export class GameRelayService {
 		clearInterval(match.loop_stop);
 		match.p1_socket.leave(match.id);
 		match.p2_socket.leave(match.id);
-		this.gameService.endMatch({
+		await this.gameService.endMatch({
 			id: match.id,
 			scoreUser1: match.score.p1,
 			scoreUser2: match.score.p2
