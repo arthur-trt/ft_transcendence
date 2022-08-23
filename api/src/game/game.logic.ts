@@ -30,7 +30,7 @@ export class GameRelayService {
 	// Store current match, key is the match id
 	private currentMatch = new Map<string, matchParameters>();
 
-	private VICTORY: number = 15;
+	private VICTORY: number = 5;
 
 	/*  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 		██░▄▀▄░█░▄▄▀█▄▄░▄▄██░▄▄▀██░██░██░▄▀▄░█░▄▄▀██░█▀▄█▄░▄██░▀██░██░▄▄░
