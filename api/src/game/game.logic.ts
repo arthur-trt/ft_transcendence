@@ -114,7 +114,13 @@ export class GameRelayService2 {
 		const match: matchParameters = this.getClientMatch(client);
 
 		if (match) {
-			client === match.p1_socket ? this.set_winner(match, 2) : this.set_winner(match, 1);
+			//client === match.p1_socket ? this.set_winner(match, 2) : this.set_winner(match, 1);
+			if (client === match.p1_socket)
+				this.set_winner(match, 2);
+			else if (client === match.p2_socket)
+				this.set_winner(match, 1);
+			else
+				client.leave(match.id);
 		}
 		if (this.clientMatchmaking.indexOf(client) !== -1) {
 			this.clientMatchmaking.splice(this.clientMatchmaking.indexOf(client), 1);
