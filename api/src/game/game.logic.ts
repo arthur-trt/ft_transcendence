@@ -113,7 +113,16 @@ export class GameRelayService {
 		const match: matchParameters = this.getClientMatch(client);
 
 		if (match) {
-			client === match.p1_socket ? this.set_winner(match, 2) : this.set_winner(match, 1);
+			//client === match.p1_socket ? this.set_winner(match, 2) : this.set_winner(match, 1);
+			if (client === match.p1_socket)
+				this.set_winner(match, 2);
+			else if (client === match.p2_socket)
+				this.set_winner(match, 1);
+			else
+			{
+				this.gateway.server.to(client.id).emit('leave_queue');
+				client.leave(match.id);
+			}
 		}
 		if (this.clientMatchmaking.indexOf(client) !== -1) {
 			this.clientMatchmaking.splice(this.clientMatchmaking.indexOf(client), 1);
@@ -281,6 +290,7 @@ export class GameRelayService {
 		}
 
 		let player: Paddle = (param.ball.x + param.ball.radius < 200 / 2) ? param.p1_paddle : param.p2_paddle;
+
 		if (param.isSpeMode) {
 			if (player === param.p1_paddle) {
 				player = (param.ball.x + param.ball.radius < param.p1_paddle_spe.x) ? param.p1_paddle : param.p1_paddle_spe;
@@ -297,8 +307,8 @@ export class GameRelayService {
 			const angleRad = (Math.PI / 4) * collidePoint;
 			const direction = (param.ball.velocityX >= 0) ? -1 : 1;
 			param.ball.velocityX = direction * param.ball.speed * Math.cos(angleRad);
-			param.ball.velocityX = param.ball.speed * Math.sin(angleRad);
-
+			param.ball.velocityY = param.ball.speed * Math.sin(angleRad);
+			
 			param.ball.speed += 0.5;
 		}
 
