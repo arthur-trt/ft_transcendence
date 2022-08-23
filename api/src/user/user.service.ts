@@ -171,6 +171,9 @@ export class UserService {
 	{
 		const chan: Channel = await this.chanService.getChannelByIdentifier(channel);
 
+		if (await this.chanService.isInChan(chan, user) == false)
+			throw new HttpException('You are not in chan.', HttpStatus.FORBIDDEN)
+
 		await this.channelsRepo
 			.createQueryBuilder()
 			.relation(Channel, "users")
