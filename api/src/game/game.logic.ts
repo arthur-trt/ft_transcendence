@@ -120,7 +120,10 @@ export class GameRelayService2 {
 			else if (client === match.p2_socket)
 				this.set_winner(match, 1);
 			else
+			{
+				this.gateway.server.to(client.id).emit('leave_queue');
 				client.leave(match.id);
+			}
 		}
 		if (this.clientMatchmaking.indexOf(client) !== -1) {
 			this.clientMatchmaking.splice(this.clientMatchmaking.indexOf(client), 1);
