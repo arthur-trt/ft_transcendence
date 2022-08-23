@@ -257,6 +257,7 @@ export class GameRelayService {
 	}
 
 	private loop(param: matchParameters) {
+		this.getOngoingMatches();
 		if (param.ball.x - param.ball.radius < 0) {
 			param.score.p2++;
 			this.gateway.server.to(param.id).emit('update_score', false);
