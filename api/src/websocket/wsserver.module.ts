@@ -8,16 +8,15 @@ import { ChatService } from './chat.service';
 import { ConnectService } from './connect.service';
 import { WSServer } from './wsserver.gateway';
 import { GameModule } from 'src/game/game.module';
-import { GameRelayService } from './game.relayService';
 import { AchievementsModule } from 'src/achievements/achievements.module';
-import { GameRelayService2 } from 'src/game/game.logic';
+import { GameRelayService } from 'src/game/game.logic';
 
 
 @Module({
 
 	imports: [UserModule, MessageModule, JwtModule, ChannelModule, FriendshipsModule,  forwardRef(() => GameModule), AchievementsModule],
 	exports: [ChatService, WSServer],
-	providers: [WSServer, ChatService, ConnectService, GameRelayService, GameRelayService2]
+	providers: [WSServer, ChatService, ConnectService, GameRelayService]
 })
 
 export class WSServerModule {}

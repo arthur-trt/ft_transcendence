@@ -9,13 +9,13 @@ import { MatchHistory } from './game.entity';
 import { GameService } from './game.service';
 //import { AchievementsService } from 'src/achievements/achievements.service';
 import { AchievementsModule } from 'src/achievements/achievements.module';
-import { GameRelayService2 } from './game.logic';
+import { GameRelayService } from './game.logic';
 import { WSServerModule } from 'src/websocket/wsserver.module';
 
 @Module({
   	controllers: [GameController],
-	providers: [GameService, GameRelayService2],
+	providers: [GameService, GameRelayService],
 	imports: [UserModule, TypeOrmModule.forFeature([MatchHistory, User]), JwtModule, AchievementsModule, forwardRef(() => WSServerModule)],
-	exports:[GameService, GameRelayService2]
+	exports:[GameService, GameRelayService]
 })
 export class GameModule {}

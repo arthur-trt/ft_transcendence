@@ -145,23 +145,21 @@ export class GameService {
 	{
 		let isIn: MatchHistory  = await this.MatchRepo.findOne({
 			where :  {
-				finished: false, 
+				finished: false,
 				user1: user.id
 			},
 		})
-		if (!isIn) 
-		{ 
+		if (!isIn)
+		{
 			isIn  = await this.MatchRepo.findOne({
 			where :{
-				finished: false, 
+				finished: false,
 				user2: user.id
-			}, 
+			},
 		})
 		}
-		console.log(isIn);
 		if (isIn != null)
 			return true;
-		console.log(' is not ')
 		return false;
 	}
 
