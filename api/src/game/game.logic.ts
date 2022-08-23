@@ -309,7 +309,7 @@ export class GameRelayService {
 			const direction = (param.ball.velocityX >= 0) ? -1 : 1;
 			param.ball.velocityX = direction * param.ball.speed * Math.cos(angleRad);
 			param.ball.velocityY = param.ball.speed * Math.sin(angleRad);
-			
+
 			param.ball.speed += 0.5;
 		}
 
@@ -353,10 +353,10 @@ export class GameRelayService {
 	public	MoveUp (client: Socket) {
 		const match: matchParameters = this.getClientMatch(client);
 
-		if (client.id === match.p1_socket.id) {
+		if (match.p1_socket.id && client.id === match.p1_socket.id) {
 			match.P1_MoveUP = true;
 		}
-		else if (client.id === match.p2_socket.id) {
+		else if (match.p2_socket.id && client.id === match.p2_socket.id) {
 			if (match.isSpeMode) {
 				match.P2_MoveUP_pad2 = true;
 			}
@@ -369,10 +369,10 @@ export class GameRelayService {
 	public	MoveDown (client: Socket) {
 		const match: matchParameters = this.getClientMatch(client);
 
-		if (client.id === match.p1_socket.id) {
+		if (match.p1_socket.id && client.id === match.p1_socket.id) {
 			match.P1_MoveDOWN = true;
 		}
-		else if (client.id === match.p2_socket.id) {
+		else if (match.p2_socket.id && client.id === match.p2_socket.id) {
 			if (match.isSpeMode) {
 				match.P2_MoveDOWN_pad2 = true;
 			}
@@ -385,10 +385,10 @@ export class GameRelayService {
 	public	MoveUp2 (client: Socket) {
 		const match: matchParameters = this.getClientMatch(client);
 
-		if (client.id === match.p1_socket.id) {
+		if (match.p1_socket.id && client.id === match.p1_socket.id) {
 			match.P1_MoveUP_pad2 = true;
 		}
-		else if (client.id === match.p2_socket.id) {
+		else if (match.p2_socket.id && client.id === match.p2_socket.id) {
 			if (match.isSpeMode === true) {
 				match.P2_MoveUP = true;
 			}
@@ -401,7 +401,7 @@ export class GameRelayService {
 	public	MoveDown2 (client: Socket) {
 		const match: matchParameters = this.getClientMatch(client);
 
-		if (client.id === match.p1_socket.id) {
+		if (match.p1_socket.id && client.id === match.p1_socket.id) {
 			match.P1_MoveDOWN_pad2 = true;
 		}
 		else if (client.id === match.p2_socket.id) {
@@ -417,11 +417,11 @@ export class GameRelayService {
 	public	StopMove (client: Socket) {
 		const match: matchParameters = this.getClientMatch(client);
 
-		if (client.id === match.p1_socket.id) {
+		if (match.p1_socket.id && client.id === match.p1_socket.id) {
 			match.P1_MoveUP = false;
 			match.P1_MoveDOWN = false;
 		}
-		else if (client.id === match.p2_socket.id) {
+		else if (match.p2_socket.id && client.id === match.p2_socket.id) {
 			if (match.isSpeMode) {
 				match.P2_MoveDOWN_pad2 = false;
 				match.P2_MoveUP_pad2 = false;
@@ -436,11 +436,11 @@ export class GameRelayService {
 	public	StopMove2 (client: Socket) {
 		const match: matchParameters = this.getClientMatch(client);
 
-		if (client.id === match.p1_socket.id) {
+		if (match.p1_socket.id && client.id === match.p1_socket.id) {
 			match.P1_MoveUP_pad2 = false;
 			match.P1_MoveDOWN_pad2 = false;
 		}
-		else {
+		else if (match.p2_socket.id && client.id === match.p2_socket.id) {
 			if (match.isSpeMode) {
 				match.P2_MoveDOWN = false;
 				match.P2_MoveUP = false;
