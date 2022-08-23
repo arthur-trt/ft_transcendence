@@ -47,7 +47,7 @@ export default function Channels() {
   const [datausers, setDatausers] = useState<any>([]);
   let BgColor = 'white';
 
-  
+
   // TEST FOR CHAT
   const [chanName, setChanName] = useState("");
   const [message, setMessage] = useState("");
@@ -56,7 +56,7 @@ export default function Channels() {
   const [DisplayChat, setDisplayChat] = useState(0);
   const [privMsgChat, setprivMsgChat] = useState(0);
   const [privTarget, setPrivTarget] = useState<any>([]);
-  
+
   // DISPLAY FRIENDS LIST
   const [switching, setSwitching] = useState(0);
   const [friends, setFriends] = useState<any>([]);
@@ -64,19 +64,19 @@ export default function Channels() {
   const [UsersBtnColor, setUsersBtnColor] = useState('#1dd1a1');
   const [FriendsBtnColor, setFriendsBtnColor] = useState('white');
   const [RequestsBtnColor, setRequestsBtnColor] = useState('white');
-  
+
   // CHANNEL CREATION
   const [publicChan, setPublicChan] = useState(2);
   const [passToJoin, setPassToJoin] = useState("");
   const [chanToJoin, setChanToJoin] = useState("");
-  
+
   // CHANOP
   const [chanOpPass, setChanOpPass] = useState("");
-  
+
   // GAME
   const [activesmatches, setActivesMatches] = useState<any>([]);
   let [rFlag, setRflag] = useState(0);
-  
+
   // IF THE ROUTE CHANGE
   useEffect(() => {
     setDisplayChat(0);
@@ -140,12 +140,10 @@ export default function Channels() {
       });
 
       socketo.on('enter_room', () => {
-        console.log("dis wallah");
-        console.log(location);
         if (location.pathname != "/game")
           navigate('/game');
       })
-      
+
     }, []);
 
   useEffect(() => {
@@ -430,7 +428,7 @@ export default function Channels() {
           borderStatus = 'springgreen';
         else if (datausers[i]?.status === 'offline')
           borderStatus = 'red';
-        
+
         let j = 0;
         while (j < friends?.friends?.length) {
           if (datausers[i]?.id === friends?.friends[j]?.id) {

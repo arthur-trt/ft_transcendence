@@ -12,7 +12,7 @@ import { GameService } from "./game.service";
 
 
 @Injectable()
-export class GameRelayService2 {
+export class GameRelayService {
 
 	constructor(
 		protected readonly userService: UserService,
@@ -51,7 +51,6 @@ export class GameRelayService2 {
 			}
 			if (this.clientMatchmaking.length >= 2) {
 				const [p1, p2] = this.clientMatchmaking.splice(0, 2);
-				console.log(this.clientMatchmaking);
 				await this.startMatch(p1, p2, false);
 			}
 		}
