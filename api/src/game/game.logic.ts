@@ -328,7 +328,7 @@ export class GameRelayService {
 			this.gateway.server.to(match.id).emit('game_end', false);
 		}
 		else if (winner === 1) {
-			match.score.p2 = this.VICTORY;
+			match.score.p1 = this.VICTORY;
 			this.gateway.server.to(match.id).emit('game_end', true);
 		}
 		this.end_game(match);
