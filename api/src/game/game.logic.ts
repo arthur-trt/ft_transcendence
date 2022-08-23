@@ -282,6 +282,7 @@ export class GameRelayService2 {
 		}
 
 		let player: Paddle = (param.ball.x + param.ball.radius < 200 / 2) ? param.p1_paddle : param.p2_paddle;
+
 		if (param.isSpeMode) {
 			if (player === param.p1_paddle) {
 				player = (param.ball.x + param.ball.radius < param.p1_paddle_spe.x) ? param.p1_paddle : param.p1_paddle_spe;
@@ -298,8 +299,8 @@ export class GameRelayService2 {
 			const angleRad = (Math.PI / 4) * collidePoint;
 			const direction = (param.ball.velocityX >= 0) ? -1 : 1;
 			param.ball.velocityX = direction * param.ball.speed * Math.cos(angleRad);
-			param.ball.velocityX = param.ball.speed * Math.sin(angleRad);
-
+			param.ball.velocityY = param.ball.speed * Math.sin(angleRad);
+			
 			param.ball.speed += 0.5;
 		}
 
