@@ -150,7 +150,7 @@ export class ChatService {
 	{
 		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
 		await this.channelService.setNewAdmin(client.data.user, chan, data.toSetAdmin);
-		await this.messageService.sendMessageToChannel(chan.name, this.chatBot, client.data.user.name + " just joined the chan.");
+		await this.messageService.sendMessageToChannel(chan.name, this.chatBot, data.toSetAdmin.name + " is now admin.");
 		await this.getChannelMessages(client, data.channel);
 	}
 
