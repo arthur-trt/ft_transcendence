@@ -285,9 +285,15 @@ export class GameRelayService {
 		param.ball.x += param.ball.velocityX;
 		param.ball.y += param.ball.velocityY;
 
-		// When the ball collide with bootom and top wall we inverse Y velocity
-		if (param.ball.y - param.ball.radius < 0 || param.ball.y + param.ball.radius > 100) {
+		if (param.ball.y - param.ball.radius < 0)
+		{
 			param.ball.velocityY = -param.ball.velocityY;
+			param.ball.y = 0 + param.ball.radius;
+		}
+		else if (param.ball.y + param.ball.radius > 100)
+		{
+			param.ball.velocityY = -param.ball.velocityY;
+			param.ball.y = 100 - param.ball.radius;
 		}
 
 		let player: Paddle = (param.ball.x + param.ball.radius < 200 / 2) ? param.p1_paddle : param.p2_paddle;
