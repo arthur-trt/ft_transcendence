@@ -22,7 +22,7 @@ export class WebsocketExceptionsFilter extends BaseWsExceptionFilter {
 		else if (exception instanceof HttpException)
 			error = exception.getResponse();
 		else if (exception instanceof QueryFailedError)
-			error = "Query failed [" + exception.parameters + "] : " + exception.message;
+			error = "Query failed : " + exception.message;
 		client.emit("error", { event: error, data: data })
 	}
 }
