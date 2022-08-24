@@ -40,6 +40,7 @@ export class ChannelService {
 	public async createChannel(name: string, user: User, password: string = null, privacy : boolean = false)
 	{
 		const chan: Channel = new Channel();
+		name = name.toUpperCase();
 		chan.name = name;
 		chan.owner = user;
 		chan.admins = [];
