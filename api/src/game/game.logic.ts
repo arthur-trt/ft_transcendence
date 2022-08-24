@@ -342,36 +342,8 @@ export class GameRelayService {
 		this.gateway.server.to(param.id).emit('game_position', param.dataFront);
 	}
 
-	// private	set_winner (match: matchParameters, winner: number, isDisconnect: boolean) {
-	// 	if (isDisconnect === false)
-	// 	{
-	// 		if (winner === 2) {
-	// 			match.score.p2 = this.VICTORY;
-	// 			this.gateway.server.to(match.id).emit('game_end', false);
-	// 		}
-	// 		else if (winner === 1) {
-	// 			match.score.p1 = this.VICTORY;
-	// 			this.gateway.server.to(match.id).emit('game_end', true);
-	// 		}
-	// 	}
-	// 	else
-	// 	{
-	// 		if (winner === 2) {
-	// 			match.score.p2 = this.VICTORY;
-	// 			this.gateway.server.to(match.p2_socket.id).emit('game_end', false);
-	// 			this.gateway.server.to(match.p1_socket.id).emit('leave_queue');
-	// 		}
-	// 		else if (winner === 1) {
-	// 			match.score.p1 = this.VICTORY;
-	// 			this.gateway.server.to(match.p1_socket.id).emit('game_end', true);
-	// 			this.gateway.server.to(match.p2_socket.id).emit('leave_queue');
-	// 		}
-	// 	}
-
-	// 	this.end_game(match);
-	// }
-
 	private    set_winner (match: matchParameters, winner: number, client?: Socket, giveUp? : boolean) {
+		clearInterval(match.loop_stop);
         if (winner === 2) {
             match.score.p2 = this.VICTORY;
             if (giveUp)
@@ -397,7 +369,6 @@ export class GameRelayService {
     }
 
 	private async	end_game(match: matchParameters) {
-		clearInterval(match.loop_stop);
 		match.p1_socket.leave(match.id);
 		match.p2_socket.leave(match.id);
 		await this.gameService.endMatch({
