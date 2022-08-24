@@ -61,6 +61,7 @@ export class MessageService {
 				.where("chan.name = :chanName", { chanName: chanIdentifier })
 				.leftJoinAndSelect("chan.messages", "messages")
 				.leftJoinAndSelect("messages.sender", "sender")
+				.orderBy("messages.id", "ASC")
 				.andWhere("sender.id NOT IN (:...blocked)", { blocked: user.blocked }) // make the query null if no messages
 				.getOne()
 
@@ -72,6 +73,7 @@ export class MessageService {
 		 	msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
 		 		.leftJoinAndSelect("chan.messages", "messages")
 		 		.leftJoinAndSelect("messages.sender", "sender")
+				.orderBy("messages.id", "ASC")
 				.getOne()
 		}
 		return msgs;
