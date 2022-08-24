@@ -77,6 +77,7 @@ export class ChatService {
 
 	async createRoom(client: Socket, channel: newChannelDto)
 	{
+		channel.chanName = channel.chanName.toUpperCase();
 		await this.channelService.createChannel(channel.chanName, client.data.user, channel.password, channel.private)
 		client.join(channel.chanName)
 		await this.getRooms();
