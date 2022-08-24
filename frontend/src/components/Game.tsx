@@ -1,7 +1,7 @@
 //import { computeHeadingLevel } from '@testing-library/react';
 import React, { useState, useEffect, useRef} from 'react';
 
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import { socketo } from '..';
 
@@ -70,7 +70,6 @@ export default function Game() {
   const [gameStart, setGameStart] = useState<boolean>(false);
   const [isBabyPong, setGameMode] = useState<boolean>(true);
 
-  const navigate = useNavigate();
   const [rerender, setRerender] = useState(false);
 
   // const location = useLocation();
