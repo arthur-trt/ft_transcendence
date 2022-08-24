@@ -33,10 +33,6 @@ function TwoFactor() {
 
   return (
     <div>
-      <div className="auth-header">
-      <h1>BABY-PONG</h1>
-      </div>
-
       <div className="twofa-container">
         <h2>2FA AUTHENTICATION</h2>
         <p>You must send your 2fa code.</p>

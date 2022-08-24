@@ -122,21 +122,22 @@ export default function PublicProfile() {
         <div className="profile-container">
             <div className="profile-public">
                 <FontAwesomeIcon icon={faEye} className="eye" />
-                PUBLIC
+                <p>PUBLIC</p>
             </div>
 
             <div className="profile-img">
                 <img src={data.avatar_url} alt="avatar"></img>
             </div>
 
-            <div className="profile-name">
-                <h5>PSEUDO : <span>{data.name}</span></h5>
-            </div>
 
             <div className="profile-other">
                 <div><h5>FULL NAME</h5><p>{data.fullname}</p></div>
                 <div><h5>MAIL</h5><p>{data.mail}</p></div>
-                <div><h5>VICTORY</h5><p>{data.wonMatches}</p></div>
+                <div><h5>VICTORIES</h5><p>{data.wonMatches}</p></div>
+            </div>
+
+            <div className="profile-name">
+                <h4>PSEUDO : <span>{data.name}</span></h4>
             </div>
 
             <div className="profile-achievements">

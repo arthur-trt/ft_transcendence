@@ -61,9 +61,9 @@ export default function Channels() {
   const [switching, setSwitching] = useState(0);
   const [friends, setFriends] = useState<any>([]);
   const [friendsrequest, setFriendsRequest] = useState<any>([]);
-  const [UsersBtnColor, setUsersBtnColor] = useState('#1dd1a1');
-  const [FriendsBtnColor, setFriendsBtnColor] = useState('white');
-  const [RequestsBtnColor, setRequestsBtnColor] = useState('white');
+  const [UsersBtnColor, setUsersBtnColor] = useState('rgba(29, 209, 161, 0.5)');
+  const [FriendsBtnColor, setFriendsBtnColor] = useState('rgba(116, 185, 255, 0.3)');
+  const [RequestsBtnColor, setRequestsBtnColor] = useState('rgba(240, 147, 43, 0.3)');
   
   // CHANNEL CREATION
   const [publicChan, setPublicChan] = useState(2);
@@ -402,7 +402,7 @@ export default function Channels() {
         if (isWatchable(datausers[i]?.id))
           borderStatus = "orange";
         else if (datausers[i]?.status === 'online')
-          borderStatus = 'springgreen';
+          borderStatus = '#1dd1a1';
         else if (datausers[i]?.status === 'offline')
           borderStatus = 'red';
 
@@ -427,24 +427,23 @@ export default function Channels() {
         if (isWatchable(datausers[i]?.id))
           borderStatus = "orange";
         else if (datausers[i]?.status === 'online')
-          borderStatus = 'springgreen';
+          borderStatus = '#1dd1a1';
         else if (datausers[i]?.status === 'offline')
           borderStatus = 'red';
         
         let j = 0;
         while (j < friends?.friends?.length) {
           if (datausers[i]?.id === friends?.friends[j]?.id) {
-            indents.push(<div className="users-single" key={i}>
+            indents.push(<div className="users-single-friends" key={i}>
               <div className='users-single-img'>
                 <Link to={profilelink}><img style={{ 'borderColor': borderStatus }} src={datausers[i]?.avatar_url} alt="users"></img></Link>
               </div>
               <div className='users-single-info'>
                 <h5>{datausers[i]?.name}</h5>
-                {/* {displayButtonFriend(i)} */}
                 <div className='users-single-info-friends'>
                   <FontAwesomeIcon className='paperplane' icon={faPaperPlane} id={datausers[i]?.name} onClick={handleOpenPrivate} ></FontAwesomeIcon>
                   {datausers[i]?.status === 'online' && <FontAwesomeIcon className='gamepad' icon={faGamepad} id={datausers[i]?.id} onClick={handleSendInvite}></FontAwesomeIcon>}
-                  {isBlocked(datausers[i]?.id) === 0 && <FontAwesomeIcon style={{color: '#1dd1a1'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleBlockFriend}></FontAwesomeIcon>}
+                  {isBlocked(datausers[i]?.id) === 0 && <FontAwesomeIcon style={{color: '#74b9ff'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleBlockFriend}></FontAwesomeIcon>}
                   {isBlocked(datausers[i]?.id) === 1 && <FontAwesomeIcon style={{color: 'red'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleUnBlockFriend}></FontAwesomeIcon>}
                   <FontAwesomeIcon className='userxmark' icon={faUserXmark} id={j.toString()} onClick={handleRemoveFriend} ></FontAwesomeIcon>
                   {isWatchable(datausers[i]?.id) === 1 && <FontAwesomeIcon id={datausers[i]?.id} className='gameye' icon={faEye} onClick={handleWatchMode}></FontAwesomeIcon>}
@@ -797,27 +796,27 @@ export default function Channels() {
   function handleUsers() {
     if (switching !== 0)
     {
-      setUsersBtnColor('#1dd1a1');
-      setFriendsBtnColor('white');
-      setRequestsBtnColor('white');
+      setUsersBtnColor('rgba(29, 209, 161, 0.5)');
+      setFriendsBtnColor('rgba(116, 185, 255, 0.3)');
+      setRequestsBtnColor('rgba(240, 147, 43, 0.3)');
       setSwitching(0);
     }
   }
   function handleFriends() {
     if (switching !== 1)
     {
-      setUsersBtnColor('white');
-      setFriendsBtnColor('#1dd1a1');
-      setRequestsBtnColor('white');
+      setUsersBtnColor('rgba(29, 209, 161, 0.3)');
+      setFriendsBtnColor('rgba(116, 185, 255, 0.5)');
+      setRequestsBtnColor('rgba(240, 147, 43, 0.3)');
       setSwitching(1);
     }
   }
   function handleRequests() {
     if (switching !== 2)
     {
-      setUsersBtnColor('white');
-      setFriendsBtnColor('white');
-      setRequestsBtnColor('#1dd1a1');
+      setUsersBtnColor('rgba(29, 209, 161, 0.3)');
+      setFriendsBtnColor('rgba(116, 185, 255, 0.3)');
+      setRequestsBtnColor('rgba(240, 147, 43, 0.5)');
       setSwitching(2);
     }
   }
@@ -888,9 +887,9 @@ export default function Channels() {
 
       <div className='users-container'>
         <div className='users-tab'>
-          <button style={{ backgroundColor: UsersBtnColor }} onClick={handleUsers}>USERS</button>
-          <button style={{ backgroundColor: FriendsBtnColor }} onClick={handleFriends}>FRIENDS</button>
-          <button style={{ backgroundColor: RequestsBtnColor }} onClick={handleRequests}>REQUESTS</button>
+          <button style={{ backgroundColor: UsersBtnColor, borderColor: '#1dd1a1', color: '#1dd1a1' }} onClick={handleUsers}>USERS</button>
+          <button style={{ backgroundColor: FriendsBtnColor, borderColor: '#74b9ff', color: '#74b9ff' }} onClick={handleFriends}>FRIENDS</button>
+          <button style={{ backgroundColor: RequestsBtnColor, borderColor: '#f0932b', color: '#f0932b' }} onClick={handleRequests}>REQUESTS</button>
         </div>
         <div className='users-list'>
           {display_users()}

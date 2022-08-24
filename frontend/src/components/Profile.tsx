@@ -164,6 +164,7 @@ export default function Profile() {
             const resJson = await res.json();
             if (res.status !== 201) {
                 alert(resJson.message);
+                setCodeTwoFa("");
             }
             else
             {
@@ -212,6 +213,10 @@ export default function Profile() {
         setIndexDisplayTwoFa(i);
     }
 
+    function handlePropag(e:any) {
+        e.stopPropagation();
+    }
+
     function displayTwoFa() {
         if (indexDisplayTwoFa % 2 === 1)
         {
@@ -220,8 +225,8 @@ export default function Profile() {
             else if (!data.TwoFA_enable)
             {
                 return (
-                    <div className="profile-2fa-enable">
-                        <FontAwesomeIcon icon={faXmark} className="xmark" onClick={handleDisplayTwoFa} />
+                    <div className="twofa-bigdiv" onClick={handleDisplayTwoFa}>
+                    <div className="profile-2fa-enable" onClick={handlePropag}>
                         <img src={twoFadata.qrcode} alt="qrcode"/>
                         <p>{twoFadata.secret}</p>
                         <form onSubmit={handleTurnOnTwoFa}>
@@ -232,6 +237,7 @@ export default function Profile() {
                                 onChange={(e) => setCodeTwoFa(e.target.value)}
                             />
                         </form>
+                    </div>
                     </div>
                 )
             }
@@ -254,7 +260,7 @@ export default function Profile() {
     function displayHistory() {
         const indents : any = [];
         let i = 0;
-        let bgColor = '#ff7675';
+        let bgColor = '#ff4757';
         let VorD = "DEFEAT";
 
         while (i < history?.length)
@@ -295,7 +301,7 @@ export default function Profile() {
             }
             i++;
             VorD = "DEFEAT";
-            bgColor = '#ff7675';
+            bgColor = '#ff4757';
         }
         return (indents);
     }
@@ -331,16 +337,11 @@ export default function Profile() {
                 </form>
             </div>
 
-                <div className="profile-name">
-                    <h5>PSEUDO : <span>{data.name}</span></h5>
-                    <FontAwesomeIcon icon={faPen} className="pen" onClick={handleInputName} />
-                    {displayInputName()}
-                </div>
 
                 <div className="profile-other">
                     <div><h5>FULL NAME</h5><p>{data.fullname}</p></div>
                     <div><h5>MAIL</h5><p>{data.mail}</p></div>
-                    <div><h5>VICTORY</h5><p>{data.wonMatches}</p></div>
+                    <div><h5>VICTORIES</h5><p>{data.wonMatches}</p></div>
                 </div>
 
             <div className="profile-2fa-and-logout">
@@ -348,11 +349,16 @@ export default function Profile() {
                     <button onClick={handleDisplayTwoFa}>{enable_disable}</button>
                     {displayTwoFa()}
                 </div>
-
                 <div className="profile-logout">
                     <button onClick={handleLogout}>LOGOUT</button>
                 </div>
             </div>
+
+                <div className="profile-name">
+                    <h4>PSEUDO : <span>{data.name}</span></h4>
+                    <FontAwesomeIcon icon={faPen} className="pen" onClick={handleInputName} />
+                    {displayInputName()}
+                </div>
             
             <div className="profile-achievements">
                 <h4>ACHIEVEMENTS</h4>
