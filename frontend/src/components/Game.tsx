@@ -1,7 +1,7 @@
 //import { computeHeadingLevel } from '@testing-library/react';
 import React, { useState, useEffect, useRef} from 'react';
 
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
 import { socketo } from '..';
 
@@ -69,6 +69,9 @@ export default function Game() {
   const [countdown, setCountdown] = useState<boolean>();
   const [gameStart, setGameStart] = useState<boolean>(false);
   const [isBabyPong, setGameMode] = useState<boolean>(true);
+
+  const navigate = useNavigate();
+  const [rerender, setRerender] = useState(false);
 
   // const location = useLocation();
 
@@ -206,6 +209,11 @@ export default function Game() {
         }
       })
 
+      socket.on('enter_room', () => {
+        if (location.pathname === "/game")
+          setRerender(!rerender);
+      })
+
       socket.on('leave_queue', () => {
         kill_sockets(socket);
       })
@@ -214,7 +222,7 @@ export default function Game() {
         kill_sockets(socket);
         render_game_end(res, canvas, P1Name, P2Name);
       })
-    }, []);
+    }, [rerender]);
 
     useEffect(function callback() {
       return function () {
@@ -436,6 +444,7 @@ export default function Game() {
 
   function render_game_end(winner : boolean, canvas : any, p1 : string, p2 : string)
   {
+    setGameStart(false);
     const ctx = canvas.getContext("2d");
     if (ctx) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
