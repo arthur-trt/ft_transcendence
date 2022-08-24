@@ -260,8 +260,12 @@ export default function Channels() {
     setprivMsgChat(1);
   }
   const handleAcceptGame = (e:any) => {
+    let sp = 0;
+    if (isWatchable(dataGR[parseInt(e.currentTarget.id)].id))
+      sp = 1;
     socket.emit('joinGame', {friendId: dataGR[parseInt(e.currentTarget.id)].id, mode: dataGR[parseInt(e.currentTarget.id)].mode});
-    dataGR.splice(parseInt(e.currentTarget.id), 1);
+    if (!sp)
+      dataGR.splice(parseInt(e.currentTarget.id), 1);
     //navigate('/game');
   }
   const handleSendInvite = (e:any) =>
