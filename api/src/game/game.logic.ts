@@ -247,7 +247,7 @@ export class GameRelayService {
 				return (tmp);
 			}
 		}
-		for (let [id, match] of (this.currentMatch.entries()))
+		for (const [id, match] of (this.currentMatch.entries()))
 		{
 			if (match.p1_socket.id == client.id || match.p2_socket.id == client.id)
 				return match;
