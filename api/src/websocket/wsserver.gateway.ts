@@ -20,8 +20,6 @@ import { UserService } from '../user/user.service';
 import { ChatService } from './chat.service';
 import { ConnectService } from './connect.service';
 import { WebsocketExceptionsFilter } from './exception.filter';
-//import { GameRelayService } from './game.relayService';
-
 
 @Injectable()
 @UseFilters(new WebsocketExceptionsFilter())
@@ -39,9 +37,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly friendService: FriendshipsService,
 		protected readonly gameService: GameService,
 		@Inject(forwardRef(() => GameRelayService)) protected readonly gameRelayService : GameRelayService,
-	  @Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
-	  @Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
-		) { }
+		@Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
+		@Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
+	) { }
 
 
 	protected logger: Logger = new Logger('WebSocketServer');
@@ -431,7 +429,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('game_inQueue')
-	async getInQueue(client : Socket, mode) {
+	async getInQueue(client : Socket, mode: number) {
 		await this.gameRelayService.getInQueue(client, mode)
 	}
 
@@ -447,7 +445,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		const isAvailable = await this.gameRelayService.InviteJoinGame(data.friendId);
 		if (isAvailable == true)
 		{
-			await this.gameRelayService.go_to_game(client);
+			this.gameRelayService.go_to_game(client);
 			await this.gameRelayService.joinGame(client, data)
 		}
 		else
@@ -456,15 +454,15 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('game_start')
-	async startMatch(client : Socket) {
+	startMatch(client : Socket) {
 		this.gameRelayService.start_gameloop(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('WatchGame')
-	async watchGame(client: Socket, gameId)
+	watchGame(client: Socket, gameId: string)
 	{
-		await this.gameRelayService.watchGame(client, gameId);
+		this.gameRelayService.watchGame(client, gameId);
 	}
 
 
@@ -492,9 +490,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	  @UseGuards(WsJwtAuthGuard)
 	  @SubscribeMessage('changement of tab')
-	  async changeTab(client : Socket)
+	  changeTab(client : Socket)
 	  {
-		  await this.gameRelayService.changeTab(client);
+		  this.gameRelayService.changeTab(client);
 	  }
 
 	 /**
@@ -503,51 +501,51 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	  @UseGuards(WsJwtAuthGuard)
 	  @SubscribeMessage('get achievements')
-	  async getAchievements(client : Socket)
+	  getAchievements(client : Socket)
 	  {
-		  await this.gameRelayService.sendAchievements(client);
+		  this.gameRelayService.sendAchievements(client);
 	  }
 
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('MoveUP2')
-	async MoveUp_Pad2(client : Socket)
+	MoveUp_Pad2(client : Socket)
 	{
-		await this.gameRelayService.MoveUp2(client);
+		this.gameRelayService.MoveUp2(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('MoveDOWN2')
-	async MoveDown_Pad2(client : Socket)
+	MoveDown_Pad2(client : Socket)
 	{
-		await this.gameRelayService.MoveDown2(client);
+		this.gameRelayService.MoveDown2(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('StopMove2')
-	async StopMove_Pad2(client : Socket)
+	StopMove_Pad2(client : Socket)
 	{
-		await this.gameRelayService.StopMove2(client);
+		this.gameRelayService.StopMove2(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('MoveUp')
-	async MoveUp(client : Socket)
+	MoveUp(client : Socket)
 	{
-		await this.gameRelayService.MoveUp(client);
+		this.gameRelayService.MoveUp(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('MoveDown')
-	async MoveDown(client : Socket)
+	MoveDown(client : Socket)
 	{
-		await this.gameRelayService.MoveDown(client);
+		this.gameRelayService.MoveDown(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('StopMove')
-	async StopMove(client : Socket)
+	StopMove(client : Socket)
 	{
-		await this.gameRelayService.StopMove(client);
+		this.gameRelayService.StopMove(client);
 	}
 
 }
