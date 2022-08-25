@@ -65,6 +65,13 @@ export class ConnectService {
 			this.gateway.activeUsers.set(user, client);
 		}
 
+		for (const [u, sock] of this.gateway.activeUsers.entries()){
+			if (!this.gateway.server.sockets.sockets.has(sock.id))
+			{
+				this.gateway.activeUsers.delete(u);
+			}
+		}
+
 		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
@@ -83,7 +90,7 @@ export class ConnectService {
 	 * Remove client from map `active_user`
 	 * @param client client who disconnected
 	 */
-	async handleDisconnect(client: Socket) {
+	handleDisconnect(client: Socket) {
 		if (client.data.user)
 		{
 			for (const entries of this.gateway.activeUsers.keys())
@@ -95,6 +102,14 @@ export class ConnectService {
 				}
 			}
 		}
+
+		for (const [u, sock] of this.gateway.activeUsers.entries()){
+			if (!this.gateway.server.sockets.sockets.has(sock.id))
+			{
+				this.gateway.activeUsers.delete(u);
+			}
+		}
+
 		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
@@ -136,7 +151,7 @@ export class ConnectService {
 		return (data);
 	}
 
-	async getUserList(client: Socket) {
+	getUserList(client: Socket) {
 
 		this.gateway.server.to(client.id).emit(
 			'listUsers',
