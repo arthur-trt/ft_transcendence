@@ -35,6 +35,8 @@ function	build_fortytwo() {
 		# DOCKER CONFIG
 		DOCKER_SOCK=${DOCKER_HOST:7}
 
+		TZ="Europe/Paris"
+
 		# DB CONFIG
 		DB_PATH=${HOME}/goinfre/db
 		POSTGRES_USER=${USER}
@@ -66,6 +68,8 @@ function	build_other() {
 	read -r -d '' "ENV_VAR" <<- EOM
 		# DOCKER CONFIG
 		DOCKER_SOCK=/var/run/docker.sock
+
+		TZ="Europe/Paris"
 
 		# DB CONFIG
 		DB_PATH=./private/db
