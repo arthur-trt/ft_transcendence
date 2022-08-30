@@ -28,8 +28,6 @@ export const Header = () => {
                 }
             }).then((responseJson) => {
                 setData(responseJson);
-                // Debug function to remove
-                localStorage.setItem(responseJson.name, cookies.Authentication);
             }).catch((err) => {
                 // const mute = err;
             })
@@ -49,7 +47,7 @@ export const Header = () => {
           socketo.on('error', (msg: any) => {
             setGameInvite("Error : " + msg.event);
             });
-          
+
         }, []);
 
         function displayNot() {
