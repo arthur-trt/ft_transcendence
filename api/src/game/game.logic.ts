@@ -230,7 +230,6 @@ export class GameRelayService {
 		for (const room of client.rooms) {
 			const tmp: matchParameters = this.currentMatch.get(room);
 			if (tmp) {
-				console.log(tmp)
 				return (tmp);
 			}
 		}
