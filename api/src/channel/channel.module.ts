@@ -1,9 +1,9 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChannelController } from './channel.controller';
-import { ChannelService } from 'src/channel/channel.service';
+import { ChannelService } from '../channel/channel.service';
 import { Channel } from './channel.entity';
-import { UserModule } from 'src/user/user.module';
+import { UserModule } from '../user/user.module';
 
 
 @Module({

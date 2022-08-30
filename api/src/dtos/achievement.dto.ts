@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty } from "class-validator";
-import { Achievements_types } from "src/achievements/achievements.entity";
+import { Achievements_types } from "../achievements/achievements.entity";
 
 export class achievementDto {
 

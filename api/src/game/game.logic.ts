@@ -1,10 +1,10 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { Socket } from "socket.io";
-import { AchievementsService } from "src/achievements/achievements.service";
-import { User } from "src/user/user.entity";
-import { UserService } from "src/user/user.service";
-import { ChatService } from "src/websocket/chat.service";
-import { WSServer } from "src/websocket/wsserver.gateway";
+import { AchievementsService } from "../achievements/achievements.service";
+import { User } from "../user/user.entity";
+import { UserService } from "../user/user.service";
+import { ChatService } from "../websocket/chat.service";
+import { WSServer } from "../websocket/wsserver.gateway";
 import type { matchParameters } from "../game/game.interface";
 import type { Paddle } from "../game/game.interface";
 import { MatchHistory } from "./game.entity";

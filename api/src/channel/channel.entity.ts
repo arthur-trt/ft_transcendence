@@ -1,7 +1,7 @@
 
 
 
-import { channelMessage } from "src/message/channelMessage.entity";
+import { channelMessage } from "../message/channelMessage.entity";
 import { BaseEntity, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationId } from "typeorm";
 import { User } from "../user/user.entity";
 

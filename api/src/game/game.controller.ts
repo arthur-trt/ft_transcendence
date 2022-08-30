@@ -1,10 +1,10 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { CreateMatchDto, endMatchDto } from 'src/dtos/match.dto';
-import { uuidDto } from 'src/dtos/uuid.dto';
-import { User } from 'src/user/user.entity';
-import { UserService } from 'src/user/user.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CreateMatchDto, endMatchDto } from '../dtos/match.dto';
+import { uuidDto } from '../dtos/uuid.dto';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import { MatchHistory } from './game.entity';
 import { GameService } from './game.service';
 

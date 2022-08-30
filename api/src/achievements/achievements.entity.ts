@@ -1,4 +1,4 @@
-import { User } from "src/user/user.entity";
+import { User } from "../user/user.entity";
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
 
 export enum Achievements_types {

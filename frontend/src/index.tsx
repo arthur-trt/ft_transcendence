@@ -10,7 +10,6 @@ import Channels from './components/Channels-add';
 import Game from './components/Game';
 import { CookiesProvider, useCookies } from "react-cookie";
 import io from 'socket.io-client';
-import Debug from './components/Debug';
 import PublicProfile from './components/PublicProfile';
 import jwtDecode from 'jwt-decode';
 import Ladder from "./components/Ladder";
@@ -78,7 +77,6 @@ root.render(
         <Route path="/profile/:uuid" element={<><Header /><RequireAuth><PublicProfile /></RequireAuth></>} />
         <Route path="/community" element={<><Header /><RequireAuth><Channels /></RequireAuth></>} />
         <Route path="/ladder" element={<><Header /><RequireAuth><Ladder /></RequireAuth></>} />
-        <Route path="/debug" element={<><Header /><RequireAuth><Debug /></RequireAuth></>} />
         <Route path="/game" element={<><Header /><RequireAuth><Game /></RequireAuth></>} />
         <Route path="*" element={<NotFound />} />
       </Routes>

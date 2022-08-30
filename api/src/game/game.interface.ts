@@ -1,9 +1,9 @@
 // import { Socket } from 'dgram';
 import { Socket } from 'socket.io';
-import { User } from 'src/user/user.entity';
+import { User } from '../user/user.entity';
 import type { Paddle, Ball } from './game.type';
 export type { Paddle, Ball} from './game.type'
-import { UserModule } from 'src/user/user.module';
+import { UserModule } from '../user/user.module';
 import { MatchHistory } from './game.entity';
 
 

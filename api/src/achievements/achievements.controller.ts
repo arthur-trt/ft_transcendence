@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { achievementDto } from 'src/dtos/achievement.dto';
-import { uuidDto } from 'src/dtos/uuid.dto';
-import { User } from 'src/user/user.entity';
-import { UserService } from 'src/user/user.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { achievementDto } from '../dtos/achievement.dto';
+import { uuidDto } from '../dtos/uuid.dto';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import { AchievementsService } from './achievements.service';
 
 @Controller('achievements')
