@@ -1,9 +1,9 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Channel } from 'src/channel/channel.entity';
-import { ChannelService } from 'src/channel/channel.service';
-import { User } from 'src/user/user.entity';
-import { UserService } from 'src/user/user.service';
+import { Channel } from '../channel/channel.entity';
+import { ChannelService } from '../channel/channel.service';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import { Brackets, Repository } from 'typeorm';
 import { channelMessage } from './channelMessage.entity';
 import { privateMessage } from './privateMessage.entity';

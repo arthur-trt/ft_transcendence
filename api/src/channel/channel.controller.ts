@@ -3,12 +3,12 @@ import { Request } from 'express';
 import { Channel } from './channel.entity';
 import { ChannelService } from './channel.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { deleteFromChannelDto } from 'src/dtos/deleteFromChannelDto.dto';
-import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
-import { newChannelDto } from 'src/dtos/newChannel.dto';
-import { User } from 'src/user/user.entity';
-import { UserService } from 'src/user/user.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { deleteFromChannelDto } from '../dtos/deleteFromChannelDto.dto';
+import { ModifyChannelDto } from '../dtos/modifyChannel.dto';
+import { newChannelDto } from '../dtos/newChannel.dto';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 
 @ApiTags('Channel')
 @Controller('channel')

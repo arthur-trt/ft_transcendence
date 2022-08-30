@@ -1,15 +1,15 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { JwtService, JwtVerifyOptions } from "@nestjs/jwt";
 import { Socket } from "socket.io";
-import { FortyTwoAuthStrategy } from "src/auth/fortyTwo/fortyTwo.strategy";
-import { jwtConstants } from "src/auth/jwt/jwt.constants";
-import { JwtPayload } from "src/auth/payload.type";
-import { Channel } from "src/channel/channel.entity";
-import { ChannelService } from "src/channel/channel.service";
-import { FriendshipsService } from "src/friendships/friendships.service";
-import { MessageService } from "src/message/message.service";
-import { User } from "src/user/user.entity";
-import { UserService } from "src/user/user.service";
+import { FortyTwoAuthStrategy } from "../auth/fortyTwo/fortyTwo.strategy";
+import { jwtConstants } from "../auth/jwt/jwt.constants";
+import { JwtPayload } from "../auth/payload.type";
+import { Channel } from "../channel/channel.entity";
+import { ChannelService } from "../channel/channel.service";
+import { FriendshipsService } from "../friendships/friendships.service";
+import { MessageService } from "../message/message.service";
+import { User } from "../user/user.entity";
+import { UserService } from "../user/user.service";
 import { WSServer } from "./wsserver.gateway";
 
 

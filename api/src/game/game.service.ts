@@ -1,13 +1,13 @@
 import { ConsoleLogger, HttpCode, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateMatchDto, endMatchDto } from 'src/dtos/match.dto';
-import { User } from 'src/user/user.entity';
-import { UserService } from 'src/user/user.service';
+import { CreateMatchDto, endMatchDto } from '../dtos/match.dto';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import { Brackets, Repository } from 'typeorm';
 import { MatchHistory } from './game.entity';
 import { Socket, Server } from 'socket.io'
-import { Achievements_types } from 'src/achievements/achievements.entity';
-import { AchievementsService } from 'src/achievements/achievements.service';
+import { Achievements_types } from '../achievements/achievements.entity';
+import { AchievementsService } from '../achievements/achievements.service';
 import { compareSync } from 'bcrypt';
 import { identity } from 'rxjs';
 import { stringify } from 'querystring';

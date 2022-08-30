@@ -1,9 +1,9 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
-import { User } from 'src/user/user.entity';
-import { UserService } from 'src/user/user.service';
+import { ModifyChannelDto } from '../dtos/modifyChannel.dto';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import { Repository } from 'typeorm';
 import { validate as isValidUUID } from 'uuid';
 import { Channel } from './channel.entity';

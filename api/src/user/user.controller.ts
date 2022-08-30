@@ -4,10 +4,10 @@ import { ApiBody, ApiConsumes, ApiCookieAuth, ApiOperation, ApiResponse, ApiTags
 import { Request } from 'express';
 import { diskStorage } from 'multer';
 import { resolve } from 'path';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { joinChannelDto } from 'src/dtos/joinChannel.dto';
-import { ModifyUserDto } from 'src/dtos/user.dto';
-import { uuidDto } from 'src/dtos/uuid.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { joinChannelDto } from '../dtos/joinChannel.dto';
+import { ModifyUserDto } from '../dtos/user.dto';
+import { uuidDto } from '../dtos/uuid.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from './user.entity';
 import { UserService } from './user.service';
@@ -152,7 +152,7 @@ export class UserController {
 	})
 	public async uploadAvatar(@Req() req: Request, @UploadedFile() file: Express.Multer.File) : Promise<User> {
 		const user: User = await this.userService.getUserByRequest(req);
-		
+
 		if (file)
 		{
 			if (!user)
@@ -160,7 +160,7 @@ export class UserController {
 			user.avatar_url = "/public/" + file.filename;
 			await user.save();
 		}
-		
+
 		return user;
 	}
 

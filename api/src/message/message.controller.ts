@@ -1,13 +1,13 @@
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { Channel } from 'src/channel/channel.entity';
-import { getPrivateMessageDto } from 'src/dtos/getPrivateMessageDto.dto';
-import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto.dto';
-import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
-import { User } from 'src/user/user.entity';
-import { UserService } from 'src/user/user.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Channel } from '../channel/channel.entity';
+import { getPrivateMessageDto } from '../dtos/getPrivateMessageDto.dto';
+import { sendChannelMessageDto } from '../dtos/sendChannelMessageDto.dto';
+import { sendPrivateMessageDto } from '../dtos/sendPrivateMessageDto.dto';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import { MessageService } from './message.service';
 
 @Controller('message')
