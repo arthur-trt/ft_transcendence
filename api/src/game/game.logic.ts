@@ -121,6 +121,11 @@ export class GameRelayService {
 			{
 				this.set_winner(match, 1, client, true);
 			}
+			else
+			{
+				this.gateway.server.to(client.id).emit('leave_queue');
+				client.leave(match.id);
+			}
 		}
 		else if (this.clientMatchmaking.indexOf(client) !== -1) {
 			this.clientMatchmaking.splice(this.clientMatchmaking.indexOf(client), 1);
