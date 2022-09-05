@@ -115,7 +115,7 @@ export default function Game() {
     velocityX: 5,
     velocityY: 5,
     speed: 7,
-    color: "BLACK"
+    color: "WHITE"
   });
 
   const [net, setNet] = useState<netT>(
@@ -124,7 +124,7 @@ export default function Game() {
       y: 0,
       height: 30,
       width: 15,
-      color: "BLACK"
+      color: "WHITE"
     });
 
   const [data, setData] = useState<dataT>();
@@ -152,10 +152,10 @@ export default function Game() {
           velocityX:5,
           velocityY:5,
           speed:7,
-          color:"BLACK"
+          color:"WHITE"
         }
         setBall(tmp);
-        setNet({x : canvas.width/2, y : 0, height : 20, width : 5, color : "BLACK"});
+        setNet({x : canvas.width/2, y : 0, height : 20, width : 5, color : "WHITE"});
         setUserLeft({x : canvas.width * 0.01, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "DEEPSKYBLUE"});
         setUserRight({x : canvas.width * 0.98, y : 0, width: canvas.width * 0.01, height: canvas.height * 0.1, color: "FIREBRICK"});
         if (isBabyPong === true)
@@ -248,7 +248,7 @@ export default function Game() {
     if (canvas && ctx)
     {
       const fontSize = (canvas.width / 20).toString();
-        ctx.fillStyle = "BLACK";
+        ctx.fillStyle = "WHITE";
         ctx.font = fontSize + "px serif";
         ctx.textAlign = "center"
         ctx.fillText("En attente de l'adversaire !", canvas.width / 2, canvas.height / 2);
@@ -415,6 +415,7 @@ export default function Game() {
     if (ctx) {
       // Clear the canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawRect(0, 0, canvas.width, canvas.height, "BLACK");
 
       // Draw score for userLeft
       drawText(P1score.toString(), canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
@@ -447,6 +448,7 @@ export default function Game() {
     const ctx = canvas.getContext("2d");
     if (ctx) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawRect(0, 0, canvas.width, canvas.height, "BLACK");
       ctx.drawImage(imgRef.current, canvas.width * 0.35, canvas.height * 0.3, canvas.width * 0.3, canvas.height * 0.6);
       ctx.fillStyle = '#1dd1a1';
       const fontSize = (canvas.width / 20).toString();

@@ -1559,7 +1559,7 @@ text-align: right;
   margin-left: 2%;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   border-radius: 10px;
-  background-color: white;
+  background-color: black;
 }
 
 .game-players {
@@ -1575,7 +1575,7 @@ text-align: right;
   width: 80%;
   height: 50%;
   display: flex;
-  border: 7px solid black;
+  border: 7px solid white;
   margin: auto;
   max-width: 1200px;
   border-radius: 5px;
