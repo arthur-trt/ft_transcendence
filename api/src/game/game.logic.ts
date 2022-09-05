@@ -113,25 +113,22 @@ export class GameRelayService {
 		const match: matchParameters = this.getClientMatch(client);
 
 		if (match) {
-			//client === match.p1_socket ? this.set_winner(match, 2) : this.set_winner(match, 1);
 			if (client === match.p1_socket)
-				this.set_winner(match, 2);
-			else if (client === match.p2_socket)
-				this.set_winner(match, 1);
-			else
 			{
-				this.gateway.server.to(client.id).emit('leave_queue');
-				client.leave(match.id);
+				this.set_winner(match, 2, client, true);
+			}
+			else if (client === match.p2_socket)
+			{
+				this.set_winner(match, 1, client, true);
 			}
 		}
-		if (this.clientMatchmaking.indexOf(client) !== -1) {
+		else if (this.clientMatchmaking.indexOf(client) !== -1) {
 			this.clientMatchmaking.splice(this.clientMatchmaking.indexOf(client), 1);
-			this.gateway.server.to(client.id).emit('leave_queue');
 		}
-		if (this.clientMatchmakingSpecial.indexOf(client) !== -1) {
+		else if (this.clientMatchmakingSpecial.indexOf(client) !== -1) {
 			this.clientMatchmakingSpecial.splice(this.clientMatchmakingSpecial.indexOf(client), 1);
-			this.gateway.server.to(client.id).emit('leave_queue');
 		}
+		this.gateway.server.to(client.id).emit('leave_queue');
 	}
 
 	private init_match(p1: Socket, p2: Socket, id: string, specialMode: boolean): matchParameters {

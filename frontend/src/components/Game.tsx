@@ -249,7 +249,7 @@ export default function Game() {
     {
       const fontSize = (canvas.width / 20).toString();
         ctx.fillStyle = "WHITE";
-        ctx.font = fontSize + "px impact";
+        ctx.font = fontSize + "px serif";
         ctx.textAlign = "center"
         ctx.fillText("En attente de l'adversaire !", canvas.width / 2, canvas.height / 2);
     }
