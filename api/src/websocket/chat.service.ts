@@ -1,19 +1,19 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Socket } from "socket.io";
-import { Channel } from "src/channel/channel.entity";
-import { ChannelService } from "src/channel/channel.service";
-import { addToPrivateRoomDto } from "src/dtos/addToPrivateRoom.dto";
-import { banUserDto } from "src/dtos/banUser.dto";
-import { ModifyChannelDto } from "src/dtos/modifyChannel.dto";
-import { muteUserDto } from "src/dtos/muteUser.dto";
-import { newChannelDto } from "src/dtos/newChannel.dto";
-import { sendChannelMessageDto } from "src/dtos/sendChannelMessageDto.dto";
-import { sendPrivateMessageDto } from "src/dtos/sendPrivateMessageDto.dto";
-import { FriendshipsService } from "src/friendships/friendships.service";
-import { MessageService } from "src/message/message.service";
-import { User } from "src/user/user.entity";
-import { UserService } from "src/user/user.service";
+import { Channel } from "../channel/channel.entity";
+import { ChannelService } from "../channel/channel.service";
+import { addToPrivateRoomDto } from "../dtos/addToPrivateRoom.dto";
+import { banUserDto } from "../dtos/banUser.dto";
+import { ModifyChannelDto } from "../dtos/modifyChannel.dto";
+import { muteUserDto } from "../dtos/muteUser.dto";
+import { newChannelDto } from "../dtos/newChannel.dto";
+import { sendChannelMessageDto } from "../dtos/sendChannelMessageDto.dto";
+import { sendPrivateMessageDto } from "../dtos/sendPrivateMessageDto.dto";
+import { FriendshipsService } from "../friendships/friendships.service";
+import { MessageService } from "../message/message.service";
+import { User } from "../user/user.entity";
+import { UserService } from "../user/user.service";
 import { InitializedRelationError } from "typeorm";
 import { WSServer } from "./wsserver.gateway";
 
@@ -77,6 +77,7 @@ export class ChatService {
 
 	async createRoom(client: Socket, channel: newChannelDto)
 	{
+		channel.chanName = channel.chanName.toUpperCase();
 		await this.channelService.createChannel(channel.chanName, client.data.user, channel.password, channel.private)
 		client.join(channel.chanName)
 		await this.getRooms();
@@ -150,7 +151,7 @@ export class ChatService {
 	{
 		const chan: Channel = await this.channelService.getChannelByIdentifier(data.channel);
 		await this.channelService.setNewAdmin(client.data.user, chan, data.toSetAdmin);
-		await this.messageService.sendMessageToChannel(chan.name, this.chatBot, client.data.user.name + " just joined the chan.");
+		await this.messageService.sendMessageToChannel(chan.name, this.chatBot, data.toSetAdmin.name + " is now admin.");
 		await this.getChannelMessages(client, data.channel);
 	}
 

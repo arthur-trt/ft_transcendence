@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/user/user.entity';
+import { User } from '../user/user.entity';
 import { Repository } from 'typeorm';
 import { Achievements, Achievements_types } from './achievements.entity';
 
@@ -28,7 +28,7 @@ export class AchievementsService {
 			},
 			});
 	}
-	
+
 	public async hasAchievements(type: Achievements_types, user: User)
     {
         const exists = await this.successRepo.findOne({
@@ -37,8 +37,8 @@ export class AchievementsService {
                 achievement_list: type
             },
             });
-          if (!exists) 
+          if (!exists)
               return false;
-          return true; 
-    } 
+          return true;
+    }
 }

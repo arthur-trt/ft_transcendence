@@ -1,9 +1,9 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Channel } from 'src/channel/channel.entity';
-import { ChannelService } from 'src/channel/channel.service';
-import { User } from 'src/user/user.entity';
-import { UserService } from 'src/user/user.service';
+import { Channel } from '../channel/channel.entity';
+import { ChannelService } from '../channel/channel.service';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import { Brackets, Repository } from 'typeorm';
 import { channelMessage } from './channelMessage.entity';
 import { privateMessage } from './privateMessage.entity';
@@ -61,6 +61,7 @@ export class MessageService {
 				.where("chan.name = :chanName", { chanName: chanIdentifier })
 				.leftJoinAndSelect("chan.messages", "messages")
 				.leftJoinAndSelect("messages.sender", "sender")
+				.orderBy("messages.id", "ASC")
 				.andWhere("sender.id NOT IN (:...blocked)", { blocked: user.blocked }) // make the query null if no messages
 				.getOne()
 
@@ -72,6 +73,7 @@ export class MessageService {
 		 	msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
 		 		.leftJoinAndSelect("chan.messages", "messages")
 		 		.leftJoinAndSelect("messages.sender", "sender")
+				.orderBy("messages.id", "ASC")
 				.getOne()
 		}
 		return msgs;

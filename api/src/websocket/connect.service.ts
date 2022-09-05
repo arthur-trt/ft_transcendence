@@ -1,15 +1,15 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { JwtService, JwtVerifyOptions } from "@nestjs/jwt";
 import { Socket } from "socket.io";
-import { FortyTwoAuthStrategy } from "src/auth/fortyTwo/fortyTwo.strategy";
-import { jwtConstants } from "src/auth/jwt/jwt.constants";
-import { JwtPayload } from "src/auth/payload.type";
-import { Channel } from "src/channel/channel.entity";
-import { ChannelService } from "src/channel/channel.service";
-import { FriendshipsService } from "src/friendships/friendships.service";
-import { MessageService } from "src/message/message.service";
-import { User } from "src/user/user.entity";
-import { UserService } from "src/user/user.service";
+import { FortyTwoAuthStrategy } from "../auth/fortyTwo/fortyTwo.strategy";
+import { jwtConstants } from "../auth/jwt/jwt.constants";
+import { JwtPayload } from "../auth/payload.type";
+import { Channel } from "../channel/channel.entity";
+import { ChannelService } from "../channel/channel.service";
+import { FriendshipsService } from "../friendships/friendships.service";
+import { MessageService } from "../message/message.service";
+import { User } from "../user/user.entity";
+import { UserService } from "../user/user.service";
 import { WSServer } from "./wsserver.gateway";
 
 
@@ -65,6 +65,13 @@ export class ConnectService {
 			this.gateway.activeUsers.set(user, client);
 		}
 
+		for (const [u, sock] of this.gateway.activeUsers.entries()){
+			if (!this.gateway.server.sockets.sockets.has(sock.id))
+			{
+				this.gateway.activeUsers.delete(u);
+			}
+		}
+
 		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
@@ -83,7 +90,7 @@ export class ConnectService {
 	 * Remove client from map `active_user`
 	 * @param client client who disconnected
 	 */
-	async handleDisconnect(client: Socket) {
+	handleDisconnect(client: Socket) {
 		if (client.data.user)
 		{
 			for (const entries of this.gateway.activeUsers.keys())
@@ -95,6 +102,14 @@ export class ConnectService {
 				}
 			}
 		}
+
+		for (const [u, sock] of this.gateway.activeUsers.entries()){
+			if (!this.gateway.server.sockets.sockets.has(sock.id))
+			{
+				this.gateway.activeUsers.delete(u);
+			}
+		}
+
 		this.gateway.activeUsers.forEach((socket: Socket) => {
 			this.gateway.server.to(socket.id).emit(
 				'listUsers',
@@ -136,7 +151,7 @@ export class ConnectService {
 		return (data);
 	}
 
-	async getUserList(client: Socket) {
+	getUserList(client: Socket) {
 
 		this.gateway.server.to(client.id).emit(
 			'listUsers',

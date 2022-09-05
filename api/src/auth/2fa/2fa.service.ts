@@ -1,8 +1,8 @@
 import { Injectable, Res } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { authenticator } from 'otplib';
-import { User } from 'src/user/user.entity';
-import { UserService } from 'src/user/user.service';
+import { User } from '../../user/user.entity';
+import { UserService } from '../../user/user.service';
 import { Request, Response } from 'express';
 import { toDataURL } from 'qrcode';
 import { AuthService } from '../auth.service';

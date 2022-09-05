@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { CheatAuthController, AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
-import { UserModule } from 'src/user/user.module';
+import { UserModule } from '../user/user.module';
 import { FortyTwoAuthStrategy } from './fortyTwo/fortyTwo.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';

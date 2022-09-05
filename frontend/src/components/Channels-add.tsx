@@ -56,7 +56,7 @@ export default function Channels() {
   const [datausers, setDatausers] = useState<any>([]);
   let BgColor = 'rgba(29, 209, 161, 0.1)';
 
-  
+
   // TEST FOR CHAT
   const [chanName, setChanName] = useState("");
   const [message, setMessage] = useState("");
@@ -65,7 +65,7 @@ export default function Channels() {
   const [DisplayChat, setDisplayChat] = useState(0);
   const [privMsgChat, setprivMsgChat] = useState(0);
   const [privTarget, setPrivTarget] = useState<any>([]);
-  
+
   // DISPLAY FRIENDS LIST
   const [switching, setSwitching] = useState(0);
   const [friends, setFriends] = useState<any>([]);
@@ -78,14 +78,14 @@ export default function Channels() {
   const [publicChan, setPublicChan] = useState(3);
   const [passToJoin, setPassToJoin] = useState("");
   const [chanToJoin, setChanToJoin] = useState("");
-  
+
   // CHANOP
   const [chanOpPass, setChanOpPass] = useState("");
-  
+
   // GAME
   const [activesmatches, setActivesMatches] = useState<any>([]);
   let [rFlag, setRflag] = useState(0);
-  
+
   // IF THE ROUTE CHANGE
   useEffect(() => {
     setDisplayChat(0);
@@ -149,12 +149,10 @@ export default function Channels() {
       });
 
       socketo.on('enter_room', () => {
-        console.log("dis wallah");
-        console.log(location);
         if (location.pathname != "/game")
           navigate('/game');
       })
-      
+
     }, []);
 
   useEffect(() => {
@@ -271,8 +269,12 @@ export default function Channels() {
     setprivMsgChat(1);
   }
   const handleAcceptGame = (e:any) => {
+    let sp = 0;
+    if (isWatchable(dataGR[parseInt(e.currentTarget.id)].id))
+      sp = 1;
     socket.emit('joinGame', {friendId: dataGR[parseInt(e.currentTarget.id)].id, mode: dataGR[parseInt(e.currentTarget.id)].mode});
-    dataGR.splice(parseInt(e.currentTarget.id), 1);
+    if (!sp)
+      dataGR.splice(parseInt(e.currentTarget.id), 1);
     //navigate('/game');
   }
   const handleSendInvite = (e:any) =>
@@ -440,7 +442,7 @@ export default function Channels() {
           borderStatus = '#1dd1a1';
         else if (datausers[i]?.status === 'offline')
           borderStatus = 'red';
-        
+
         let j = 0;
         while (j < friends?.friends?.length) {
           if (datausers[i]?.id === friends?.friends[j]?.id) {

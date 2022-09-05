@@ -3,8 +3,8 @@ import { Socket } from 'socket.io';
 import { JwtService, JwtVerifyOptions } from '@nestjs/jwt';
 import { WsException } from '@nestjs/websockets';
 import { jwtConstants } from '../jwt/jwt.constants';
-import { UserService } from 'src/user/user.service';
-import { User } from 'src/user/user.entity';
+import { User } from '../../user/user.entity';
+import { UserService } from '../../user/user.service';
 import { JwtPayload } from '../payload.type';
 
 @Injectable()

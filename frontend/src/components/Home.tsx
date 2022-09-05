@@ -27,6 +27,11 @@ export default function Home() {
         socket.on('friendList', (msg:any, tab:any) => {
             setFriends(tab);
         });
+
+        socketo.on('enter_room', () => {
+            if (location.pathname != "/game")
+              navigate('/game');
+          })
       }, []);
 
     const [next, setNext] = useState(0);
@@ -87,7 +92,7 @@ export default function Home() {
     const sendingInvite = (e:any) =>
     {
         socket.emit(('pending invite'), {friendId: e.currentTarget.id, mode: mode})
-        navigate('/game');
+        //navigate('/game');
     }
     function handleLaunchMatchMaking(mode: number) {
         if (mode === 1)

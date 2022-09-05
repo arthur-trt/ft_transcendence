@@ -2,25 +2,24 @@ import { forwardRef, Inject, Injectable, Logger, UseFilters, UseGuards, UsePipes
 import { JwtService } from '@nestjs/jwt';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { WsJwtAuthGuard } from 'src/auth/guards/ws-auth.guard';
-import { ChannelService } from 'src/channel/channel.service';
-import { addToPrivateRoomDto } from 'src/dtos/addToPrivateRoom.dto';
-import { banUserDto } from 'src/dtos/banUser.dto';
-import { ModifyChannelDto } from 'src/dtos/modifyChannel.dto';
-import { muteUserDto } from 'src/dtos/muteUser.dto';
-import { newChannelDto } from 'src/dtos/newChannel.dto';
-import { sendChannelMessageDto } from 'src/dtos/sendChannelMessageDto.dto';
-import { sendPrivateMessageDto } from 'src/dtos/sendPrivateMessageDto.dto';
-import { FriendshipsService } from 'src/friendships/friendships.service';
-import { MessageService } from 'src/message/message.service';
+import { WsJwtAuthGuard } from '../auth/guards/ws-auth.guard';
+import { ChannelService } from '../channel/channel.service';
+import { addToPrivateRoomDto } from '../dtos/addToPrivateRoom.dto';
+import { banUserDto } from '../dtos/banUser.dto';
+import { ModifyChannelDto } from '../dtos/modifyChannel.dto';
+import { muteUserDto } from '../dtos/muteUser.dto';
+import { newChannelDto } from '../dtos/newChannel.dto';
+import { sendChannelMessageDto } from '../dtos/sendChannelMessageDto.dto';
+import { sendPrivateMessageDto } from '../dtos/sendPrivateMessageDto.dto';
+import { FriendshipsService } from '../friendships/friendships.service';
+import { GameRelayService } from '../game/game.logic';
+import { MessageService } from '../message/message.service';
 import { GameService } from '../game/game.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import { ChatService } from './chat.service';
 import { ConnectService } from './connect.service';
 import { WebsocketExceptionsFilter } from './exception.filter';
-import { GameRelayService } from './game.relayService';
-
 
 @Injectable()
 @UseFilters(new WebsocketExceptionsFilter())
@@ -37,11 +36,10 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 		protected readonly messageService: MessageService,
 		protected readonly friendService: FriendshipsService,
 		protected readonly gameService: GameService,
-		protected readonly gameRelayService: GameRelayService,
-
-	  @Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
-	  @Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
-		) { }
+		@Inject(forwardRef(() => GameRelayService)) protected readonly gameRelayService : GameRelayService,
+		@Inject(forwardRef(() => ChatService)) protected readonly chatService : ChatService,
+		@Inject(forwardRef(() => ConnectService)) protected readonly connectService : ConnectService
+	) { }
 
 
 	protected logger: Logger = new Logger('WebSocketServer');
@@ -431,7 +429,7 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('game_inQueue')
-	async getInQueue(client : Socket, mode) {
+	async getInQueue(client : Socket, mode: number) {
 		await this.gameRelayService.getInQueue(client, mode)
 	}
 
@@ -444,28 +442,27 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('joinGame')
 	async joinGame(client: Socket, data : {friendId : string, mode : string} ) {
-		console.log("room joiner = " + data.friendId);
 		const isAvailable = await this.gameRelayService.InviteJoinGame(data.friendId);
 		if (isAvailable == true)
 		{
-			await this.gameRelayService.go_to_game(client);
+			this.gameRelayService.go_to_game(client);
 			await this.gameRelayService.joinGame(client, data)
 		}
 		else
-			throw new WsException('Your friend is already playing. Fuck yourself ')
+			throw new WsException('Your friend is already playing.');
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('game_start')
-	async startMatch(client : Socket) {
-		await this.gameRelayService.start_gameloop(client);
+	startMatch(client : Socket) {
+		this.gameRelayService.start_gameloop(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('WatchGame')
-	async watchGame(client: Socket, gameId)
+	watchGame(client: Socket, gameId: string)
 	{
-		await this.gameRelayService.watchGame(client, gameId);
+		this.gameRelayService.watchGame(client, gameId);
 	}
 
 
@@ -473,7 +470,6 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	@SubscribeMessage('pending invite')
 	async inviteToPlay(client: Socket, data : {friendId : string, mode : string} )
 	{
-		console.log("invite sender = " + client.id);
 		await this.gameRelayService.pendingInvite(client, data);
 	}
 
@@ -494,9 +490,9 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	  @UseGuards(WsJwtAuthGuard)
 	  @SubscribeMessage('changement of tab')
-	  async changeTab(client : Socket)
+	  changeTab(client : Socket)
 	  {
-		  await this.gameRelayService.changeTab(client);
+		  this.gameRelayService.changeTab(client);
 	  }
 
 	 /**
@@ -505,51 +501,51 @@ export class WSServer implements OnGatewayInit, OnGatewayConnection, OnGatewayDi
 	 */
 	  @UseGuards(WsJwtAuthGuard)
 	  @SubscribeMessage('get achievements')
-	  async getAchievements(client : Socket)
+	  getAchievements(client : Socket)
 	  {
-		  await this.gameRelayService.sendAchievements(client);
+		  this.gameRelayService.sendAchievements(client);
 	  }
 
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('MoveUP2')
-	async MoveUp_Pad2(client : Socket)
+	MoveUp_Pad2(client : Socket)
 	{
-		await this.gameRelayService.MoveUp2(client);
+		this.gameRelayService.MoveUp2(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('MoveDOWN2')
-	async MoveDown_Pad2(client : Socket)
+	MoveDown_Pad2(client : Socket)
 	{
-		await this.gameRelayService.MoveDown2(client);
+		this.gameRelayService.MoveDown2(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('StopMove2')
-	async StopMove_Pad2(client : Socket)
+	StopMove_Pad2(client : Socket)
 	{
-		await this.gameRelayService.StopMove2(client);
+		this.gameRelayService.StopMove2(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('MoveUp')
-	async MoveUp(client : Socket)
+	MoveUp(client : Socket)
 	{
-		await this.gameRelayService.MoveUp(client);
+		this.gameRelayService.MoveUp(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('MoveDown')
-	async MoveDown(client : Socket)
+	MoveDown(client : Socket)
 	{
-		await this.gameRelayService.MoveDown(client);
+		this.gameRelayService.MoveDown(client);
 	}
 
 	@UseGuards(WsJwtAuthGuard)
 	@SubscribeMessage('StopMove')
-	async StopMove(client : Socket)
+	StopMove(client : Socket)
 	{
-		await this.gameRelayService.StopMove(client);
+		this.gameRelayService.StopMove(client);
 	}
 
 }

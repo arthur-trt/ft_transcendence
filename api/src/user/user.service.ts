@@ -3,10 +3,10 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Channel } from '../channel/channel.entity';
-import { ChannelService } from 'src/channel/channel.service';
+import { ChannelService } from '../channel/channel.service';
 import { Request } from 'express';
 import { validate as isValidUUID } from 'uuid';
-import { ModifyUserDto } from 'src/dtos/user.dto';
+import { ModifyUserDto } from '../dtos/user.dto';
 import * as bcrypt from 'bcrypt';
 
 
@@ -170,6 +170,9 @@ export class UserService {
 	public async leaveChannel(user: User, channel: string)
 	{
 		const chan: Channel = await this.chanService.getChannelByIdentifier(channel);
+
+		if (await this.chanService.isInChan(chan, user) == false)
+			throw new HttpException('You are not in chan.', HttpStatus.FORBIDDEN)
 
 		await this.channelsRepo
 			.createQueryBuilder()

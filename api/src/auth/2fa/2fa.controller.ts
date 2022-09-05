@@ -1,11 +1,11 @@
 import { Controller, UseGuards, HttpStatus, HttpException, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiCookieAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Get, Req, Res, Post, Body } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../../user/user.service';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { twoFaDto } from 'src/dtos/twofa_token.dto';
-import { User } from 'src/user/user.entity';
+import { twoFaDto } from '../../dtos/twofa_token.dto';
+import { User } from '../../user/user.entity';
 import { TwoFaService } from './2fa.service';
 
 @ApiTags('auth')

@@ -4,9 +4,9 @@ import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Channel } from '../channel/channel.entity';
-import { ChannelModule } from 'src/channel/channel.module';
-import { privateMessage } from 'src/message/privateMessage.entity';
-import { MessageModule } from 'src/message/message.module';
+import { ChannelModule } from '../channel/channel.module';
+import { privateMessage } from '../message/privateMessage.entity';
+import { MessageModule } from '../message/message.module';
 
 @Module({
 	imports: [TypeOrmModule.forFeature([User, Channel, privateMessage]), forwardRef(() => MessageModule), forwardRef(() => ChannelModule)],
