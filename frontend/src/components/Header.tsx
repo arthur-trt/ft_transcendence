@@ -3,6 +3,10 @@ import 'font-awesome/css/font-awesome.min.css';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCookies } from "react-cookie";
 import { socketo } from '../index';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCommentDots } from '@fortawesome/free-solid-svg-icons'
+import { faRankingStar } from '@fortawesome/free-solid-svg-icons'
+import { faUserGear } from '@fortawesome/free-solid-svg-icons'
 
 export const Header = () => {
 
@@ -57,11 +61,11 @@ export const Header = () => {
             if (!gameInvite)
                 return("");
             else if (gameInvite[0] === 'G')
-                return (<div className="notifbg" style={{backgroundColor: '#f0932b'}}><h5>{gameInvite}</h5></div>)
+                return (<div className="notifbg" style={{backgroundColor: 'rgba(240, 147, 43, 0.7)', border: '1px solid rgba(240, 147, 43, 1)'}}><h5>{gameInvite}</h5></div>)
             else if (gameInvite[0] === 'F')
-                return (<div className="notifbg" style={{backgroundColor: '#54a0ff'}}><h5>{gameInvite}</h5></div>)
+                return (<div className="notifbg" style={{backgroundColor: 'rgba(116, 185, 255, 0.7)', border: '1px solid rgba(116, 185, 255, 1)'}}><h5>{gameInvite}</h5></div>)
             else if (gameInvite[0] === 'E')
-                return (<div className="notifbg" style={{backgroundColor: '#eb4d4b'}}><h5>{gameInvite}</h5></div>)
+                return (<div className="notifbg" style={{backgroundColor: 'rgba(255, 71, 87, 0.7)', border: '1px solid rgba(255, 71, 87, 1)'}}><h5>{gameInvite}</h5></div>)
         }
 
     return (
@@ -70,16 +74,19 @@ export const Header = () => {
                     <Link to="/" style={{ textDecoration: 'none' }}><img src="bplogo.png" alt="bp logo"></img></Link>
                 </div>
                 <div className="onglets">
-                    <h3 style={{borderBottom: location==="/community" ? '3px solid #1dd1a1' : '', }}><Link to="/community" style={{ textDecoration: 'none', color: 'black' }}>COMMUNITY</Link></h3>
-                    {/* <h3 style={{borderBottom: location==="/game" ? '3px solid #1dd1a1' : '', }}><Link to="/game" style={{ textDecoration: 'none', color: 'black' }}>GAME</Link></h3> */}
-                    <h3 style={{borderBottom: location==="/ladder" ? '3px solid #1dd1a1' : '', }}><Link to="/ladder" style={{ textDecoration: 'none', color: 'black' }}>LADDER</Link></h3>
+                        <Link className="onglets-community" to="/community" style={{textDecoration: 'none'}}> 
+                            <FontAwesomeIcon icon={faCommentDots} style={{color: location==="/community" ? '#1dd1a1' : '#b6b6b6', transition: 'all 0.5s ease-out'}} />
+                        </Link>
+                        <Link className="onglets-ladder" to="/ladder" style={{textDecoration: 'none'}}> 
+                            <FontAwesomeIcon icon={faRankingStar} style={{color: location==="/ladder" ? '#1dd1a1' : '#b6b6b6', transition: 'all 0.5s ease-out'}} />
+                        </Link>
+                        <Link className="onglets-profile" to="/profile/me" style={{textDecoration: 'none'}}> 
+                            <FontAwesomeIcon icon={faUserGear} style={{color: location==="/profile/me" ? '#1dd1a1' : '#b6b6b6', transition: 'all 0.5s ease-out'}} />
+                        </Link>
                 </div>
                 <div className="info">
                     <img src={data.avatar_url} alt="user"></img>
-                    <h1 style={{borderBottom: location==="/profile/me" ? '3px solid #1dd1a1' : '', }}>{data.name}</h1>
-                    <Link to="/profile/me" style={{ textDecoration: 'none', color: 'black' }}>
-                        <i className="fa fa-solid fa-user"></i>
-                    </Link>
+                    <h1 style={{color: '#1dd1a1'}}>{data.name}</h1>
                 </div>
 
                 <div className="notifications">

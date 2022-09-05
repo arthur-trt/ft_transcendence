@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 
+import Particles from "react-particles";
+import { loadFull } from "tsparticles";
+const particlesInit = async (main:any) => {await loadFull(main);};
+import { cfg } from "./particles-cfg"
+
 export default function Ladder() {
 
 	const [ladder, setLadder] = useState<any>([]);
@@ -33,8 +38,11 @@ export default function Ladder() {
     }
 
     return (
-        <div className='ladder-container'>
-            {indents}
+        <div>
+            <Particles id="tsparticles" init={particlesInit} options={cfg}/>
+            <div className='ladder-container'>
+                {indents}
+            </div>
         </div>
     )
 }

@@ -5,6 +5,11 @@ import { faXmark } from '@fortawesome/free-solid-svg-icons'
 import { faTrophy } from '@fortawesome/free-solid-svg-icons'
 import { socketo } from '../index';
 
+import Particles from "react-particles";
+import { loadFull } from "tsparticles";
+const particlesInit = async (main:any) => {await loadFull(main);};
+import { cfg } from "./particles-cfg"
+
 export default function Profile() {
 
     const [data, setData] = useState<any>([]);
@@ -164,6 +169,7 @@ export default function Profile() {
             const resJson = await res.json();
             if (res.status !== 201) {
                 alert(resJson.message);
+                setCodeTwoFa("");
             }
             else
             {
@@ -212,6 +218,10 @@ export default function Profile() {
         setIndexDisplayTwoFa(i);
     }
 
+    function handlePropag(e:any) {
+        e.stopPropagation();
+    }
+
     function displayTwoFa() {
         if (indexDisplayTwoFa % 2 === 1)
         {
@@ -220,8 +230,8 @@ export default function Profile() {
             else if (!data.TwoFA_enable)
             {
                 return (
-                    <div className="profile-2fa-enable">
-                        <FontAwesomeIcon icon={faXmark} className="xmark" onClick={handleDisplayTwoFa} />
+                    <div className="twofa-bigdiv" onClick={handleDisplayTwoFa}>
+                    <div className="profile-2fa-enable" onClick={handlePropag}>
                         <img src={twoFadata.qrcode} alt="qrcode"/>
                         <p>{twoFadata.secret}</p>
                         <form onSubmit={handleTurnOnTwoFa}>
@@ -232,6 +242,7 @@ export default function Profile() {
                                 onChange={(e) => setCodeTwoFa(e.target.value)}
                             />
                         </form>
+                    </div>
                     </div>
                 )
             }
@@ -254,7 +265,7 @@ export default function Profile() {
     function displayHistory() {
         const indents : any = [];
         let i = 0;
-        let bgColor = '#ff7675';
+        let bgColor = 'rgba(255, 71, 87, 0.8)';
         let VorD = "DEFEAT";
 
         while (i < history?.length)
@@ -264,7 +275,7 @@ export default function Profile() {
                 if (history[i]?.scoreUser1 > history[i]?.scoreUser2)
                 {
                     VorD = "VICTORY"
-                    bgColor = '#74b9ff';
+                    bgColor = 'rgba(116, 185, 255, 0.8)';
                 }
                 indents.push(
                     <div style={{backgroundColor: bgColor}} className='history-line' key={i}>
@@ -281,7 +292,7 @@ export default function Profile() {
                 if (history[i]?.scoreUser2 > history[i]?.scoreUser1)
                 {
                     VorD = "VICTORY"
-                    bgColor = '#74b9ff';
+                    bgColor = 'rgba(116, 185, 255, 0.8)';
                 }
                 indents.push(
                     <div style={{backgroundColor: bgColor}} className='history-line' key={i}>
@@ -295,7 +306,7 @@ export default function Profile() {
             }
             i++;
             VorD = "DEFEAT";
-            bgColor = '#ff7675';
+            bgColor = 'rgba(255, 71, 87, 0.8)';
         }
         return (indents);
     }
@@ -303,7 +314,7 @@ export default function Profile() {
     function displayAchievements() {
         const indents : any = [];
         let i = 0;
-        const bgColor = '#1dd1a1';
+        const bgColor = 'rgba(29, 209, 161, 0.8)';
 
         while (i < achievements?.length)
         {
@@ -319,6 +330,8 @@ export default function Profile() {
     }
 
     return (
+        <div>
+            <Particles id="tsparticles" init={particlesInit} options={cfg}/>
         <div className="profile-container">
 
             <div className="profile-img">
@@ -331,16 +344,11 @@ export default function Profile() {
                 </form>
             </div>
 
-                <div className="profile-name">
-                    <h5>PSEUDO : <span>{data.name}</span></h5>
-                    <FontAwesomeIcon icon={faPen} className="pen" onClick={handleInputName} />
-                    {displayInputName()}
-                </div>
 
                 <div className="profile-other">
                     <div><h5>FULL NAME</h5><p>{data.fullname}</p></div>
                     <div><h5>MAIL</h5><p>{data.mail}</p></div>
-                    <div><h5>VICTORY</h5><p>{data.wonMatches}</p></div>
+                    <div><h5>VICTORIES</h5><p>{data.wonMatches}</p></div>
                 </div>
 
             <div className="profile-2fa-and-logout">
@@ -348,11 +356,16 @@ export default function Profile() {
                     <button onClick={handleDisplayTwoFa}>{enable_disable}</button>
                     {displayTwoFa()}
                 </div>
-
                 <div className="profile-logout">
                     <button onClick={handleLogout}>LOGOUT</button>
                 </div>
             </div>
+
+                <div className="profile-name">
+                    <h4>PSEUDO : <span>{data.name}</span></h4>
+                    <FontAwesomeIcon icon={faPen} className="pen" onClick={handleInputName} />
+                    {displayInputName()}
+                </div>
             
             <div className="profile-achievements">
                 <h4>ACHIEVEMENTS</h4>
@@ -365,6 +378,7 @@ export default function Profile() {
             </div>
 
         </div >
+        </div>
     )
 
 }

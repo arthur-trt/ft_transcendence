@@ -3,6 +3,11 @@ import {socketo} from '../index';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from "react-router-dom";
 
+import Particles from "react-particles";
+import { loadFull } from "tsparticles";
+const particlesInit = async (main:any) => {await loadFull(main);};
+import { cfg } from "./particles-cfg"
+
 export default function Home() {
 
     const [socket, setSocket] = useState<any>([]);
@@ -77,7 +82,7 @@ export default function Home() {
         {
             indents.push(
                 <div className='home-search-single-friend' key={i}>
-                    <h5 style={{textAlign: 'center'}}>No online friends</h5>
+                    <h5>NO ONLINE FRIENDS</h5>
                 </div>
             );
         }
@@ -107,7 +112,6 @@ export default function Home() {
         {
             return (
                 <div className='home-button'>
-                    <h2>WELCOME TO <span>BABY-PONG</span> !</h2>
                     <button onClick={() => setNext(1)}>START TO PLAY</button>
                 </div>
             );
@@ -116,27 +120,17 @@ export default function Home() {
         {
             return (
                 <div className='home-mode'>
-                    <h2>SELECT YOUR GAME MODE</h2>
-                    <div className='home-mode-button'><button onClick={handleSingleMode}>SINGLE PALLET</button></div>
-                    <div className='home-mode-button'><button onClick={handleDoubleMode}>DOUBLE PALLETS</button></div>
+                    <div className='home-mode-button-single'><button onClick={handleSingleMode}>NORMAL MODE</button></div>
+                    <div className='home-mode-button-double'><button onClick={handleDoubleMode}>SPECIAL MODE</button></div>
                 </div>
             );
         }
         else if (next === 2)
         {
-            let mode_selec = "";
-            if (mode === 1)
-                mode_selec = "SINGLE PALLET";
-            else if (mode === 2)
-                mode_selec = "DOUBLE PALLETS";
-
             return (
                 <div className='home-search'>
-                    <h2>FIND A GAME</h2>
-                    <h3>MODE : <span>{mode_selec}</span></h3>
-                    <div className='home-play-matchmaking'><button onClick={() => handleLaunchMatchMaking(mode)}>PLAY WITH MATCHMAKING</button></div>
+                    <div className='home-play-matchmaking'><button onClick={() => handleLaunchMatchMaking(mode)}>MATCHMAKING</button></div>
                     <div className='home-play-friends'>
-                        <h4>PLAY WITH ONLINE FRIENDS</h4>
                         {displayFriends(mode)}
                     </div>
                 </div>
@@ -145,8 +139,11 @@ export default function Home() {
     }
 
     return (
+        <div>
+            <Particles id="tsparticles" init={particlesInit} options={cfg}/>
         <div className="home-container">
             {displaySteps()}
+        </div>
         </div>
     );
 }

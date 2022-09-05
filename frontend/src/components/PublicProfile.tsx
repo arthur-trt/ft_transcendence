@@ -5,6 +5,11 @@ import { faTrophy } from '@fortawesome/free-solid-svg-icons'
 import { useParams } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 
+import Particles from "react-particles";
+import { loadFull } from "tsparticles";
+const particlesInit = async (main:any) => {await loadFull(main);};
+import { cfg } from "./particles-cfg"
+
 export default function PublicProfile() {
 
     const [data, setData] = useState<any>([]);
@@ -119,24 +124,27 @@ export default function PublicProfile() {
     }
 
     return (
+        <div>
+            <Particles id="tsparticles" init={particlesInit} options={cfg}/>
         <div className="profile-container">
             <div className="profile-public">
                 <FontAwesomeIcon icon={faEye} className="eye" />
-                PUBLIC
+                <p>PUBLIC</p>
             </div>
 
             <div className="profile-img">
                 <img src={data.avatar_url} alt="avatar"></img>
             </div>
 
-            <div className="profile-name">
-                <h5>PSEUDO : <span>{data.name}</span></h5>
-            </div>
 
             <div className="profile-other">
                 <div><h5>FULL NAME</h5><p>{data.fullname}</p></div>
                 <div><h5>MAIL</h5><p>{data.mail}</p></div>
-                <div><h5>VICTORY</h5><p>{data.wonMatches}</p></div>
+                <div><h5>VICTORIES</h5><p>{data.wonMatches}</p></div>
+            </div>
+
+            <div className="profile-name">
+                <h4>PSEUDO : <span>{data.name}</span></h4>
             </div>
 
             <div className="profile-achievements">
@@ -149,6 +157,7 @@ export default function PublicProfile() {
                 {displayHistory()}
             </div>
 
+        </div>
         </div>
     )
 
