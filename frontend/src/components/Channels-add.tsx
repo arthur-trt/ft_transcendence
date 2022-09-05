@@ -31,7 +31,16 @@ let tmp: any[any];
 let indents: any = [];
 let ispriv = 2;
 
+import Particles from "react-particles";
+import { loadFull } from "tsparticles";
+const particlesInit = async (main:any) => {await loadFull(main);};
+import { cfg } from "./particles-cfg"
+
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css'; // optional
+
 export default function Channels() {
+
 
   // TO DETECT ROUTE CHANGE
   const location = useLocation();
@@ -45,7 +54,7 @@ export default function Channels() {
   const [password, setPassword] = useState("");
   const [datame, setDatame] = useState<any>([]);
   const [datausers, setDatausers] = useState<any>([]);
-  let BgColor = 'white';
+  let BgColor = 'rgba(29, 209, 161, 0.1)';
 
   
   // TEST FOR CHAT
@@ -66,7 +75,7 @@ export default function Channels() {
   const [RequestsBtnColor, setRequestsBtnColor] = useState('rgba(240, 147, 43, 0.3)');
   
   // CHANNEL CREATION
-  const [publicChan, setPublicChan] = useState(2);
+  const [publicChan, setPublicChan] = useState(3);
   const [passToJoin, setPassToJoin] = useState("");
   const [chanToJoin, setChanToJoin] = useState("");
   
@@ -80,7 +89,7 @@ export default function Channels() {
   // IF THE ROUTE CHANGE
   useEffect(() => {
     setDisplayChat(0);
-    setPublicChan(2);
+    setPublicChan(3);
   }, [location]);
 
   // FETCH DATA FROM THE USER
@@ -188,7 +197,7 @@ export default function Channels() {
       socket.emit('createRoom', { chanName: name, private: true });
     setName("");
     setPassword("");
-    setPublicChan(2);
+    setPublicChan(3);
   }
   const handleJoin = (e: any) => {
     let i = 0;
@@ -308,27 +317,28 @@ export default function Channels() {
       // set color to green if the main user is in the channel
       let j = 0;
       while (j < data[i]?.users.length) {
-        if (datame.name === data[i].users[j]?.name) { BgColor = '#1dd1a1'; }
+        if (datame.name === data[i].users[j]?.name) { BgColor = 'rgba(29, 209, 161, 0.4)'; }
         j++;
       }
 
       // push every chan div in the array "indents"
       indents.push(
         <div className="channels-single" key={i}>
+          {/* <div style={{ 'backgroundColor': BgColor }} className='channels-single-actions'> */}
+          <div className='channels-single-actions'>
+            <Tippy content="Delete" theme="custom" arrow=""><FontAwesomeIcon icon={faTrashCan} className="trashcan" id={data[i]?.name} onClick={handleDelete} /></Tippy>
+            <Tippy content="Leave" theme="custom" arrow=""><FontAwesomeIcon icon={faCircleXmark} className="circlexmark" id={data[i]?.name} onClick={handleLeave} /></Tippy>
+            <Tippy content="Join" theme="custom" arrow=""><FontAwesomeIcon icon={faArrowAltCircleRight} className="arrow" id={data[i]?.name} onClick={handleJoin} /></Tippy>
+            {PopUp_PassToJoin(i)}
+          </div>
           <div style={{ 'backgroundColor': BgColor }} className='channels-single-clickable' id={data[i]?.name} onClick={handleOpen}>
             <h5>{data[i]?.name}</h5>
             {ChanStatus(i)}
           </div>
-          <div style={{ 'backgroundColor': BgColor }} className='channels-single-actions'>
-            <FontAwesomeIcon icon={faTrashCan} className="trashcan" id={data[i]?.name} onClick={handleDelete} />
-            <FontAwesomeIcon icon={faCircleXmark} className="circlexmark" id={data[i]?.name} onClick={handleLeave} />
-            <FontAwesomeIcon icon={faArrowAltCircleRight} className="arrow" id={data[i]?.name} onClick={handleJoin} />
-            {PopUp_PassToJoin(i)}
-          </div>
         </div>
       );
       i++;
-      BgColor = 'white';
+      BgColor = 'rgba(29, 209, 161, 0.1)';
     }
     return indents;
   }
@@ -373,19 +383,19 @@ export default function Channels() {
     while (j < friends?.friends?.length) {
       if (datausers[i]?.id === friends?.friends[j]?.id) {
         return (<div className='users-single-info-friends'>
-                  <FontAwesomeIcon className='paperplane' icon={faPaperPlane} id={datausers[i]?.name} onClick={handleOpenPrivate} ></FontAwesomeIcon>
-                  {datausers[i]?.status === 'online' && <FontAwesomeIcon className='gamepad' icon={faGamepad} id={datausers[i]?.id} onClick={handleSendInvite}></FontAwesomeIcon>}
-                  {isBlocked(datausers[i]?.id) === 0 && <FontAwesomeIcon style={{color: '#1dd1a1'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleBlockFriend}></FontAwesomeIcon>}
-                  {isBlocked(datausers[i]?.id) === 1 && <FontAwesomeIcon style={{color: 'red'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleUnBlockFriend}></FontAwesomeIcon>}
-                  <FontAwesomeIcon className='userxmark' icon={faUserXmark} id={j.toString()} onClick={handleRemoveFriend} ></FontAwesomeIcon>
-                  {isWatchable(datausers[i]?.id) === 1 && <FontAwesomeIcon id={datausers[i]?.id} className='gameye' icon={faEye} onClick={handleWatchMode}></FontAwesomeIcon>}
+                  <Tippy content="Private message" theme="custom" arrow=""><FontAwesomeIcon className='paperplane' icon={faPaperPlane} id={datausers[i]?.name} onClick={handleOpenPrivate} ></FontAwesomeIcon></Tippy>
+                  {datausers[i]?.status === 'online' && <Tippy content="Invite to game" theme="custom" arrow=""><FontAwesomeIcon className='gamepad' icon={faGamepad} id={datausers[i]?.id} onClick={handleSendInvite}></FontAwesomeIcon></Tippy>}
+                  {isBlocked(datausers[i]?.id) === 0 && <Tippy content="Block" theme="custom" arrow=""><FontAwesomeIcon style={{color: '#1dd1a1'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleBlockFriend}></FontAwesomeIcon></Tippy>}
+                  {isBlocked(datausers[i]?.id) === 1 && <Tippy content="Unblock" theme="custom" arrow=""><FontAwesomeIcon style={{color: 'red'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleUnBlockFriend}></FontAwesomeIcon></Tippy>}
+                  <Tippy content="Remove friend" theme="custom" arrow=""><FontAwesomeIcon className='userxmark' icon={faUserXmark} id={j.toString()} onClick={handleRemoveFriend} ></FontAwesomeIcon></Tippy>
+                  {isWatchable(datausers[i]?.id) === 1 && <Tippy content="Watch game" theme="custom" arrow=""><FontAwesomeIcon id={datausers[i]?.id} className='gameye' icon={faEye} onClick={handleWatchMode}></FontAwesomeIcon></Tippy>}
                 </div>
         );
       }
       j++;
     }
     return (
-      <FontAwesomeIcon className='userplus' icon={faUserPlus} id={i.toString()} onClick={handleAddFriend} ></FontAwesomeIcon>
+      <Tippy content="Add as friend" theme="custom" arrow=""><FontAwesomeIcon className='userplus' icon={faUserPlus} id={i.toString()} onClick={handleAddFriend} ></FontAwesomeIcon></Tippy>
     )
   }
 
@@ -441,12 +451,12 @@ export default function Channels() {
               <div className='users-single-info'>
                 <h5>{datausers[i]?.name}</h5>
                 <div className='users-single-info-friends'>
-                  <FontAwesomeIcon className='paperplane' icon={faPaperPlane} id={datausers[i]?.name} onClick={handleOpenPrivate} ></FontAwesomeIcon>
-                  {datausers[i]?.status === 'online' && <FontAwesomeIcon className='gamepad' icon={faGamepad} id={datausers[i]?.id} onClick={handleSendInvite}></FontAwesomeIcon>}
-                  {isBlocked(datausers[i]?.id) === 0 && <FontAwesomeIcon style={{color: '#74b9ff'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleBlockFriend}></FontAwesomeIcon>}
-                  {isBlocked(datausers[i]?.id) === 1 && <FontAwesomeIcon style={{color: 'red'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleUnBlockFriend}></FontAwesomeIcon>}
-                  <FontAwesomeIcon className='userxmark' icon={faUserXmark} id={j.toString()} onClick={handleRemoveFriend} ></FontAwesomeIcon>
-                  {isWatchable(datausers[i]?.id) === 1 && <FontAwesomeIcon id={datausers[i]?.id} className='gameye' icon={faEye} onClick={handleWatchMode}></FontAwesomeIcon>}
+                <Tippy content="Private message" theme="custom" arrow=""><FontAwesomeIcon className='paperplane' icon={faPaperPlane} id={datausers[i]?.name} onClick={handleOpenPrivate} ></FontAwesomeIcon></Tippy>
+                  {datausers[i]?.status === 'online' && <Tippy content="Invite to game" theme="custom" arrow=""><FontAwesomeIcon className='gamepad' icon={faGamepad} id={datausers[i]?.id} onClick={handleSendInvite}></FontAwesomeIcon></Tippy>}
+                  {isBlocked(datausers[i]?.id) === 0 && <Tippy content="Block" theme="custom" arrow=""><FontAwesomeIcon style={{color: '#74b9ff'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleBlockFriend}></FontAwesomeIcon></Tippy>}
+                  {isBlocked(datausers[i]?.id) === 1 && <Tippy content="Unblock" theme="custom" arrow=""><FontAwesomeIcon style={{color: 'red'}} className='userslash' icon={faUserSlash} id={j.toString()} onClick={handleUnBlockFriend}></FontAwesomeIcon></Tippy>}
+                  <Tippy content="Remove friend" theme="custom" arrow=""><FontAwesomeIcon className='userxmark' icon={faUserXmark} id={j.toString()} onClick={handleRemoveFriend} ></FontAwesomeIcon></Tippy>
+                  {isWatchable(datausers[i]?.id) === 1 && <Tippy content="Watch game" theme="custom" arrow=""><FontAwesomeIcon id={datausers[i]?.id} className='gameye' icon={faEye} onClick={handleWatchMode}></FontAwesomeIcon></Tippy>}
                 </div>
               </div>
             </div>);
@@ -572,7 +582,7 @@ export default function Channels() {
       {
         return (
           <div className='chat-chanOp'>
-            {isOnline(tmp.messages[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadchan" id={tmp.messages[i]?.sender.id} onClick={handleSendInvite}></FontAwesomeIcon>}
+            {isOnline(tmp.messages[i]?.sender.id) === 1 && <Tippy content="Invite to game" theme="custom" arrow=""><FontAwesomeIcon icon={faGamepad} className="gamepadchan" id={tmp.messages[i]?.sender.id} onClick={handleSendInvite}></FontAwesomeIcon></Tippy>}
           </div>
         );
       }
@@ -580,10 +590,10 @@ export default function Channels() {
       {
         return (
           <div className='chat-chanOp'>
-            {isOnline(tmp.messages[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadchan" id={tmp.messages[i]?.sender.id} onClick={handleSendInvite}></FontAwesomeIcon>}
-            <FontAwesomeIcon onClick={() => handleSetAdmin(tmp.name, tmp.messages[i]?.sender)} icon={faHandsHoldingCircle} className="handsholding"></FontAwesomeIcon>
-            <FontAwesomeIcon onClick={() => handleBanUser(tmp.name, tmp.messages[i]?.sender)} icon={faBan} className="ban"></FontAwesomeIcon>
-            <FontAwesomeIcon onClick={() => handleMuteUser(tmp.name, tmp.messages[i]?.sender)} icon={faCommentSlash} className="commentslash"></FontAwesomeIcon>
+            {isOnline(tmp.messages[i]?.sender.id) === 1 && <Tippy content="Invite to game" theme="custom" arrow=""><FontAwesomeIcon icon={faGamepad} className="gamepadchan" id={tmp.messages[i]?.sender.id} onClick={handleSendInvite}></FontAwesomeIcon></Tippy>}
+            <Tippy content="Set admin" theme="custom" arrow=""><FontAwesomeIcon onClick={() => handleSetAdmin(tmp.name, tmp.messages[i]?.sender)} icon={faHandsHoldingCircle} className="handsholding"></FontAwesomeIcon></Tippy>
+            <Tippy content="Ban" theme="custom" arrow=""><FontAwesomeIcon onClick={() => handleBanUser(tmp.name, tmp.messages[i]?.sender)} icon={faBan} className="ban"></FontAwesomeIcon></Tippy>
+            <Tippy content="Mute" theme="custom" arrow=""><FontAwesomeIcon onClick={() => handleMuteUser(tmp.name, tmp.messages[i]?.sender)} icon={faCommentSlash} className="commentslash"></FontAwesomeIcon></Tippy>
           </div>
         );
       }
@@ -591,7 +601,7 @@ export default function Channels() {
     else {
       return (
         <div className='chat-chanOp'>
-          {isOnline(tmp.messages[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadchan" id={tmp.messages[i]?.sender.id} onClick={handleSendInvite}></FontAwesomeIcon>}
+          {isOnline(tmp.messages[i]?.sender.id) === 1 && <Tippy content="Invite to game" theme="custom" arrow=""><FontAwesomeIcon icon={faGamepad} className="gamepadchan" id={tmp.messages[i]?.sender.id} onClick={handleSendInvite}></FontAwesomeIcon></Tippy>}
         </div>
       );
     }
@@ -624,9 +634,9 @@ export default function Channels() {
         profilelink = "/profile/" + tmp.messages[i]?.sender.id;
 
         if (datame.name === tmp.messages[i]?.sender.name)
-          msgColor = 'lightskyblue';
+          msgColor = 'rgba(116, 185, 255, 1)';
           if (tmp.messages[i]?.sender.name === "chatBot")
-            msgColor = '#ff7675';
+            msgColor = 'rgba(240, 147, 43)';
 
         indents.push(<div className='chat-message' key={i}>
           <div className='chat-message-info'>
@@ -635,7 +645,7 @@ export default function Channels() {
             <span>{tmp.messages[i]?.sent_at.substr(0, 8)}</span>
             {tmp.messages[i]?.sender.name !== "chatBot" && displayChanOp(i, tmp)}
           </div>
-          <p style={{ 'backgroundColor': msgColor }}>{tmp.messages[i]?.message}</p>
+          <p style={{ 'color': msgColor }}>{tmp.messages[i]?.message}</p>
         </div>);
         i--;
         msgColor = 'bisque';
@@ -647,15 +657,15 @@ export default function Channels() {
       while (i >= 0) {
         profilelink = "/profile/" + tmp[i]?.sender.id;
         if (datame.name === tmp[i]?.sender.name)
-          msgColor = 'lightskyblue';
+          msgColor = 'rgba(116, 185, 255, 1)';
 
         indents.push(<div className='chat-message' key={i}>
           <div className='chat-message-info'>
             <Link to={profilelink} style={{ textDecoration: 'none', color: 'black' }}><h5>{tmp[i]?.sender.name}</h5></Link>
             <span>{tmp[i]?.sent_at.substr(0, 8)}</span>
-            {isOnline(tmp[i]?.sender.id) === 1 && <FontAwesomeIcon icon={faGamepad} className="gamepadpriv" id={tmp[i]?.sender.id} onClick={handleSendInvite} ></FontAwesomeIcon>}
+            {isOnline(tmp[i]?.sender.id) === 1 && <Tippy content="Invite to game" theme="custom" arrow=""><FontAwesomeIcon icon={faGamepad} className="gamepadpriv" id={tmp[i]?.sender.id} onClick={handleSendInvite} ></FontAwesomeIcon></Tippy>}
           </div>
-          <p style={{ 'backgroundColor': msgColor }}>{tmp[i]?.message}</p>
+          <p style={{ 'color': msgColor }}>{tmp[i]?.message}</p>
         </div>);
         i--;
         msgColor = 'bisque';
@@ -776,8 +786,8 @@ export default function Channels() {
 
     return (
       <div className='chat-wrapper'>
-        {chanOwnerOp()}
         <div className='chat-title'>#{chanName.toUpperCase()}</div>
+        {chanOwnerOp()}
         <div className='chat-box'>
           {display_msg()}
         </div>
@@ -785,7 +795,7 @@ export default function Channels() {
           <input
             type="text"
             value={message}
-            placeholder="Send a message..."
+            placeholder="Aa"
             onChange={(e) => setMessage(e.target.value)}
           />
         </form>
@@ -823,7 +833,14 @@ export default function Channels() {
 
   function display_ChanCreation() {
 
-    if (publicChan === 2) {
+    if (publicChan === 3) {
+      return (
+        <div className='channels-creation-selection-plus'>
+          <button onClick={() => setPublicChan(2)}>+</button>
+        </div>
+      )
+    }
+    else if (publicChan === 2) {
       return (
         <div className='channels-creation-selection'>
           <button onClick={() => setPublicChan(1)}>PUBLIC</button>
@@ -847,7 +864,7 @@ export default function Channels() {
               placeholder="Password"
               onChange={(e) => setPassword(e.target.value)}
             />
-            <button type="submit">CREATE</button>
+            <button type="submit">ADD</button>
           </form>
         </div>
       )
@@ -862,7 +879,7 @@ export default function Channels() {
               placeholder="Name"
               onChange={(e) => setName(e.target.value)}
             />
-            <button type="submit">CREATE</button>
+            <button type="submit">ADD</button>
           </form>
         </div>
       )
@@ -873,6 +890,8 @@ export default function Channels() {
   return (
 
     <div className='community-container'>
+
+      <Particles id="tsparticles" init={particlesInit} options={cfg}/>
 
       <div className='channels-container'>
         {display_ChanCreation()}

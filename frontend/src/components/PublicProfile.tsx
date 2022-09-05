@@ -5,6 +5,11 @@ import { faTrophy } from '@fortawesome/free-solid-svg-icons'
 import { useParams } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 
+import Particles from "react-particles";
+import { loadFull } from "tsparticles";
+const particlesInit = async (main:any) => {await loadFull(main);};
+import { cfg } from "./particles-cfg"
+
 export default function PublicProfile() {
 
     const [data, setData] = useState<any>([]);
@@ -119,6 +124,8 @@ export default function PublicProfile() {
     }
 
     return (
+        <div>
+            <Particles id="tsparticles" init={particlesInit} options={cfg}/>
         <div className="profile-container">
             <div className="profile-public">
                 <FontAwesomeIcon icon={faEye} className="eye" />
@@ -150,6 +157,7 @@ export default function PublicProfile() {
                 {displayHistory()}
             </div>
 
+        </div>
         </div>
     )
 

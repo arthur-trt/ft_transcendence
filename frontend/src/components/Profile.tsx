@@ -5,6 +5,11 @@ import { faXmark } from '@fortawesome/free-solid-svg-icons'
 import { faTrophy } from '@fortawesome/free-solid-svg-icons'
 import { socketo } from '../index';
 
+import Particles from "react-particles";
+import { loadFull } from "tsparticles";
+const particlesInit = async (main:any) => {await loadFull(main);};
+import { cfg } from "./particles-cfg"
+
 export default function Profile() {
 
     const [data, setData] = useState<any>([]);
@@ -260,7 +265,7 @@ export default function Profile() {
     function displayHistory() {
         const indents : any = [];
         let i = 0;
-        let bgColor = '#ff4757';
+        let bgColor = 'rgba(255, 71, 87, 0.8)';
         let VorD = "DEFEAT";
 
         while (i < history?.length)
@@ -270,7 +275,7 @@ export default function Profile() {
                 if (history[i]?.scoreUser1 > history[i]?.scoreUser2)
                 {
                     VorD = "VICTORY"
-                    bgColor = '#74b9ff';
+                    bgColor = 'rgba(116, 185, 255, 0.8)';
                 }
                 indents.push(
                     <div style={{backgroundColor: bgColor}} className='history-line' key={i}>
@@ -287,7 +292,7 @@ export default function Profile() {
                 if (history[i]?.scoreUser2 > history[i]?.scoreUser1)
                 {
                     VorD = "VICTORY"
-                    bgColor = '#74b9ff';
+                    bgColor = 'rgba(116, 185, 255, 0.8)';
                 }
                 indents.push(
                     <div style={{backgroundColor: bgColor}} className='history-line' key={i}>
@@ -301,7 +306,7 @@ export default function Profile() {
             }
             i++;
             VorD = "DEFEAT";
-            bgColor = '#ff4757';
+            bgColor = 'rgba(255, 71, 87, 0.8)';
         }
         return (indents);
     }
@@ -309,7 +314,7 @@ export default function Profile() {
     function displayAchievements() {
         const indents : any = [];
         let i = 0;
-        const bgColor = '#1dd1a1';
+        const bgColor = 'rgba(29, 209, 161, 0.8)';
 
         while (i < achievements?.length)
         {
@@ -325,6 +330,8 @@ export default function Profile() {
     }
 
     return (
+        <div>
+            <Particles id="tsparticles" init={particlesInit} options={cfg}/>
         <div className="profile-container">
 
             <div className="profile-img">
@@ -371,6 +378,7 @@ export default function Profile() {
             </div>
 
         </div >
+        </div>
     )
 
 }

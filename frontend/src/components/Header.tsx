@@ -63,11 +63,11 @@ export const Header = () => {
             if (!gameInvite)
                 return("");
             else if (gameInvite[0] === 'G')
-                return (<div className="notifbg" style={{backgroundColor: '#f0932b'}}><h5>{gameInvite}</h5></div>)
+                return (<div className="notifbg" style={{backgroundColor: 'rgba(240, 147, 43, 0.7)', border: '1px solid rgba(240, 147, 43, 1)'}}><h5>{gameInvite}</h5></div>)
             else if (gameInvite[0] === 'F')
-                return (<div className="notifbg" style={{backgroundColor: '#54a0ff'}}><h5>{gameInvite}</h5></div>)
+                return (<div className="notifbg" style={{backgroundColor: 'rgba(116, 185, 255, 0.7)', border: '1px solid rgba(116, 185, 255, 1)'}}><h5>{gameInvite}</h5></div>)
             else if (gameInvite[0] === 'E')
-                return (<div className="notifbg" style={{backgroundColor: '#eb4d4b'}}><h5>{gameInvite}</h5></div>)
+                return (<div className="notifbg" style={{backgroundColor: 'rgba(255, 71, 87, 0.7)', border: '1px solid rgba(255, 71, 87, 1)'}}><h5>{gameInvite}</h5></div>)
         }
 
     return (

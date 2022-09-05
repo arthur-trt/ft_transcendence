@@ -3,6 +3,11 @@ import {socketo} from '../index';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from "react-router-dom";
 
+import Particles from "react-particles";
+import { loadFull } from "tsparticles";
+const particlesInit = async (main:any) => {await loadFull(main);};
+import { cfg } from "./particles-cfg"
+
 export default function Home() {
 
     const [socket, setSocket] = useState<any>([]);
@@ -129,8 +134,11 @@ export default function Home() {
     }
 
     return (
+        <div>
+            <Particles id="tsparticles" init={particlesInit} options={cfg}/>
         <div className="home-container">
             {displaySteps()}
+        </div>
         </div>
     );
 }
