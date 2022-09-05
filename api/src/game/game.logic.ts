@@ -115,11 +115,11 @@ export class GameRelayService {
 		if (match) {
 			if (client === match.p1_socket)
 			{
-				this.set_winner(match, 2);
+				this.set_winner(match, 2, client, true);
 			}
 			else if (client === match.p2_socket)
 			{
-				this.set_winner(match, 1);
+				this.set_winner(match, 1, client, true);
 			}
 		}
 		else if (this.clientMatchmaking.indexOf(client) !== -1) {
