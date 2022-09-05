@@ -1,4 +1,4 @@
-export let cfg:any = {
+export const cfg:any = {
 
 "fullScreen": {
     "enable": true,
