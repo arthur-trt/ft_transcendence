@@ -186,6 +186,15 @@ export class UserService {
 			})
 			await chan.save();
 		}
+		if (chan.ownerId == user.id)
+		{
+			await this.channelsRepo
+				.createQueryBuilder()
+				.relation(Channel, "owner")
+				.of(chan)
+				.set(null);
+			chan.ownerId = ""; // See how possible to not do it manually
+		}
 	}
 
 	public async getChannelsForUser(user: User) :  Promise<Channel[]>
