@@ -167,8 +167,7 @@ export class ChannelService {
  	 */
 	public async deleteChannel(user: User, channel: Channel): Promise<void>
 	{
-
-		if (!channel.adminsId.includes(user.id) && channel.ownerId != user.id)
+		if (!channel.adminsId.includes(user.id) || channel.ownerId != user.id)
 			throw new HttpException("You must be admin to delete chan.", HttpStatus.FORBIDDEN);
 		await this.channelsRepo
     		.createQueryBuilder()
