@@ -249,7 +249,7 @@ export default function Game() {
     {
       const fontSize = (canvas.width / 20).toString();
         ctx.fillStyle = "WHITE";
-        ctx.font = fontSize + "px serif";
+        ctx.font = fontSize + "px impact";
         ctx.textAlign = "center"
         ctx.fillText("En attente de l'adversaire !", canvas.width / 2, canvas.height / 2);
     }
@@ -263,7 +263,7 @@ export default function Game() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const fontSize = (canvas.width / 20).toString();
       ctx.fillStyle = "RED";
-      ctx.font = fontSize + "px serif";
+      ctx.font = fontSize + "px impact";
       ctx.textAlign = "center"
       ctx.fillText("Le jeu va démarrer dans 4 secondes !", canvas.width / 2, canvas.height / 2);
       interval.current = setInterval(count_function, 1000);
@@ -418,10 +418,10 @@ export default function Game() {
       drawRect(0, 0, canvas.width, canvas.height, "BLACK");
 
       // Draw score for userLeft
-      drawText(P1score.toString(), canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
+      drawText(P1score.toString(), canvas.width / 4, canvas.height / 5, '#FFFFFF80', "48px serif");
 
       // Draw score for userRight
-      drawText(P2score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#00000080', "48px serif");
+      drawText(P2score.toString(), 3 * canvas.width / 4, canvas.height / 5, '#FFFFFF80', "48px serif");
 
       // Draw net
       drawNet();
