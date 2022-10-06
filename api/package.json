@@ -32,7 +32,7 @@
     "@nestjs/platform-socket.io": "^9.1.2",
     "@nestjs/swagger": "^6.1.2",
     "@nestjs/typeorm": "^9.0.1",
-    "@nestjs/websockets": "^9.1.2",
+    "@nestjs/websockets": "^9.1.4",
     "@types/uuid": "^8.3.4",
     "bcrypt": "^5.0.1",
     "bcryptjs": "^2.4.3",
