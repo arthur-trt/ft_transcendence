@@ -20,7 +20,7 @@ export class FortyTwoAuthStrategy extends PassportStrategy(Strategy)
 				'username': 'login',
 				'displayName': 'displayname',
 				'email': 'email',
-				'image_url': 'image_url'
+				'image_url': 'image.link'
 			  },
 		});
 	}
